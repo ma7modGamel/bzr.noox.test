@@ -1,0 +1,144 @@
+/*
+ | نظام تصميم لوحة الإدارة — مشتق من 38-DESIGN-SYSTEM.
+ |
+ | القاعدة (38 §1): التركوازي للإجراء والحالة الإيجابية، الكهرماني للتنبيه والتقييم،
+ | الأحمر للإلغاء فقط. لا ألوان جديدة إلا لحالة غير موجودة.
+ |
+ | اللوحة أداة تشغيل لا تطبيق عميل: تأخذ هوية 38 (اللون، الخط، الاستدارة، الحدود)
+ | وتترك مقاسات الموبايل لتطبيقات العميل والفني.
+ */
+
+@import '../../../../vendor/filament/filament/resources/css/theme.css';
+
+@source '../../../../app/Filament/**/*';
+@source '../../../../resources/views/filament/**/*';
+
+@theme {
+    /* ── الأساسي (تركوازي) — 38 §1 ───────────────────────────────── */
+    --color-bzr-50: #e8f4f4;
+    --color-bzr-100: #e4f8f6;
+    --color-bzr-200: #dff7fb;
+    --color-bzr-400: #26b5aa;
+    --color-bzr-500: #00acb6;
+    --color-bzr-600: #149c94;
+    --color-bzr-700: #1e8c8c;
+
+    /* ── النصوص والأسطح — 38 §1 ──────────────────────────────────── */
+    --color-navy-900: #071c41;
+    --color-navy-800: #101d3c;
+    --color-slate-ink-500: #57617b;
+    --color-slate-ink-400: #6d7895;
+    --color-slate-ink-300: #8e929d;
+    --color-hairline: #e0e4e8;
+    --color-surface-alt: #f4f4f8;
+    --color-surface-alt-2: #f5f9ff;
+
+    /* ── الكهرماني (تنبيهات وتقييم) — 38 §1 ──────────────────────── */
+    --color-star: #f0ac2c;
+    --color-amber-bg: #fcf0dc;
+    --color-warning-bg: #fcf0d4;
+    --color-warning-ink: #6a4915;
+    --color-badge-bg: #fceccc;
+    --color-badge-ink: #a0793b;
+
+    /* ── الإلغاء — 38 §1 ─────────────────────────────────────────── */
+    --color-cancel: #c64f53;
+
+    /* الاستدارة: كروت 38 §5 */
+    --radius-card: 0.875rem;
+}
+
+@layer base {
+    :root {
+        /* الأرقام عربية غربية في كل اللقطات (38 §2) — نمنع الأرقام الهندية */
+        font-variant-numeric: lining-nums tabular-nums;
+    }
+
+    .fi-body {
+        color: var(--color-navy-800);
+    }
+
+    /* العناوين بلون العناوين لا الرمادي الافتراضي (38 §1) */
+    .fi-header-heading,
+    .fi-section-header-heading,
+    .fi-modal-heading {
+        color: var(--color-navy-900);
+    }
+
+    /* النص الثانوي: عناوين الحقول والوصف (38 §1 `slate-500`) */
+    .fi-fo-field-wrp-label,
+    .fi-section-header-description,
+    .fi-header-subheading {
+        color: var(--color-slate-ink-500);
+    }
+
+    .dark .fi-body,
+    .dark .fi-header-heading,
+    .dark .fi-section-header-heading {
+        color: inherit;
+    }
+}
+
+@layer components {
+    /* شريط معلوماتي — يقابل الشرائط التركوازية في 38 §6 */
+    .bzr-info-strip {
+        background-color: var(--color-bzr-100);
+        color: var(--color-bzr-700);
+        border-radius: var(--radius-card);
+        padding: 0.75rem 1rem;
+        font-weight: 500;
+    }
+
+    /* صندوق تنبيه كهرماني — "السعر تقديري…" في 38 §1 */
+    .bzr-warning-box {
+        background-color: var(--color-warning-bg);
+        color: var(--color-warning-ink);
+        border-radius: var(--radius-card);
+        padding: 0.75rem 1rem;
+    }
+
+    /* شارة الوضع الحالي في الشريط العلوي (39) */
+    .bzr-mode-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.375rem;
+        border-radius: 9999px;
+        padding: 0.25rem 0.75rem;
+        font-size: 0.75rem;
+        font-weight: 600;
+        background-color: var(--color-bzr-50);
+        color: var(--color-bzr-700);
+    }
+
+    .bzr-mode-badge[data-mode='MARKETPLACE'] {
+        background-color: var(--color-badge-bg);
+        color: var(--color-badge-ink);
+    }
+
+    /* المبالغ: وزن عريض ولون السعر (38 §2) */
+    .bzr-money {
+        color: var(--color-bzr-700);
+        font-weight: 700;
+        font-variant-numeric: lining-nums tabular-nums;
+    }
+
+    .dark .bzr-money {
+        color: var(--color-bzr-400);
+    }
+
+    /* معرّف الوثيقة (BR-007، CFG-090) — يبقى مرئيًا بجانب كل إعداد وقاعدة */
+    .bzr-doc-ref {
+        font-family: var(--font-mono);
+        font-size: 0.6875rem;
+        color: var(--color-slate-ink-400);
+        background-color: var(--color-surface-alt);
+        border-radius: 0.375rem;
+        padding: 0.0625rem 0.375rem;
+        direction: ltr;
+        display: inline-block;
+    }
+
+    .dark .bzr-doc-ref {
+        background-color: color-mix(in oklab, white 8%, transparent);
+    }
+}
