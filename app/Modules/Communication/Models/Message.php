@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace App\Modules\Communication\Models;
 
 use App\Modules\Identity\Models\User;
+use App\Modules\Orders\Models\OrderMedia;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 /** BR-100 — الحجب يستبدل المطابقات بـ ••• ويحفظ الأصل مشفرًا للإدارة عند النزاع فقط. */
 final class Message extends Model
@@ -32,5 +34,10 @@ final class Message extends Model
     public function sender(): BelongsTo
     {
         return $this->belongsTo(User::class, 'sender_user_id');
+    }
+
+    public function media(): BelongsToMany
+    {
+        return $this->belongsToMany(OrderMedia::class, 'message_media');
     }
 }

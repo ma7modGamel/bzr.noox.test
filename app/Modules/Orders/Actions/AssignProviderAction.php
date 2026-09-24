@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace App\Modules\Orders\Actions;
 
+use App\Modules\Communication\Enums\ConversationStatus;
+use App\Modules\Communication\Models\Conversation;
+use App\Modules\Communication\Services\ConversationService;
 use App\Modules\Identity\Models\Admin;
 use App\Modules\Offers\Enums\OfferSource;
 use App\Modules\Offers\Enums\OfferStatus;
@@ -28,6 +31,7 @@ final readonly class AssignProviderAction
         private OrderStateMachine $stateMachine,
         private FeatureGate $features,
         private ProviderEligibility $eligibility,
+        private ConversationService $conversations,
     ) {}
 
     public function execute(Order $order, ProviderProfile $provider, Admin $admin): Order
@@ -64,6 +68,8 @@ final readonly class AssignProviderAction
 
                 // BR-065 — الموظف بأجر: كامل المصنعية للمنصة، فالنسبة المثبتة 100%.
                 $fresh->commission_rate = '1.0000';
+
+                $this->conversations->ensureAssignedConversation($fresh, $provider->getKey());
             },
         );
     }
@@ -97,6 +103,10 @@ final readonly class AssignProviderAction
                 'reason' => $reason,
             ],
             mutate: function (Order $fresh) use ($provider, $admin): void {
+                Conversation::query()
+                    ->where('order_id', $fresh->getKey())
+                    ->update(['status' => ConversationStatus::ReadOnly->value]);
+
                 // العرض/التعيين السابق ← BACKED_OUT (نفس أثر اعتذار الفني، O-07)
                 Offer::query()
                     ->where('order_id', $fresh->getKey())
@@ -122,6 +132,8 @@ final readonly class AssignProviderAction
                 $fresh->assigned_at = now();
                 $fresh->trip_started_at = null; // يبدأ التحرك من جديد
                 $fresh->reopen_count = $fresh->reopen_count + 1;
+
+                $this->conversations->ensureAssignedConversation($fresh, $provider->getKey());
             },
         );
     }

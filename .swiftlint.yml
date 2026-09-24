@@ -1,0 +1,38 @@
+included:
+  - iosapp
+
+excluded:
+  - iosapp/Core/.build
+  - iosapp/Packages/DesignSystem/.build
+  - iosapp/Packages/DesignSystem/Tests/DesignSystemTests/__Snapshots__
+  - iosapp/Packages/DesignSystem/Tests/DesignSystemTests/__Exports__
+
+line_length:
+  warning: 180
+  error: 220
+  ignores_comments: true
+  ignores_urls: true
+
+file_length:
+  warning: 1800
+  error: 2200
+
+type_body_length:
+  warning: 1200
+  error: 1600
+
+function_body_length:
+  warning: 160
+  error: 220
+
+identifier_name:
+  min_length: 1
+  excluded:
+    - id
+    - s
+    - x
+    - y
+
+disabled_rules:
+  - todo
+  - trailing_comma

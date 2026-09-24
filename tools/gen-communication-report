@@ -1,0 +1,95 @@
+#!/usr/bin/env php
+<?php
+
+declare(strict_types=1);
+
+$root = dirname(__DIR__);
+$output = $root.'/reports/batch-4c/customer-communication';
+$androidOutput = $output.'/android';
+foreach ([$output, $androidOutput] as $directory) {
+    if (! is_dir($directory) && ! mkdir($directory, 0775, true) && ! is_dir($directory)) {
+        throw new RuntimeException("Cannot create {$directory}");
+    }
+}
+
+$screens = ['SCR-C01', 'SCR-C18', 'SCR-C19', 'SCR-C25', 'SCR-C26', 'SCR-C27', 'SCR-C28'];
+$rows = [];
+$snapshotCount = 0;
+$caseCounts = [];
+foreach ($screens as $screen) {
+    $fixturePath = 'design/fixtures/'.$screen.'/cases.json';
+    $fixture = json_decode((string) file_get_contents($root.'/'.$fixturePath), true, flags: JSON_THROW_ON_ERROR);
+    $caseCounts[$screen] = count($fixture['cases']);
+    foreach ($fixture['cases'] as $case) {
+        if (! $case['snapshot']) {
+            continue;
+        }
+        $snapshotCount++;
+        $id = $screen.'-'.$case['id'];
+        $matches = glob($root.'/androidapp/app/src/test/snapshots/images/*_'.strtolower($id).'.png') ?: [];
+        if (count($matches) !== 1) {
+            throw new RuntimeException("Missing Android snapshot for {$id}");
+        }
+        $target = 'android/'.$id.'.png';
+        copy($matches[0], $output.'/'.$target);
+        $spec = '../../../docs/screens/'.$screen.'.md';
+        $rows[] = '<section class="comparison" id="'.htmlspecialchars($id).'">'
+            .'<header><strong>'.htmlspecialchars($screen).' · '.htmlspecialchars($case['id']).'</strong><code>'.htmlspecialchars($id).'</code></header>'
+            .'<div class="columns">'
+            .'<article><h2>المواصفة الملزمة</h2><div class="pending"><a href="'.htmlspecialchars($spec).'">'.htmlspecialchars($screen.'.md').'</a><br>لا توجد لقطة أصلية؛ لقطة Android هي مرجع الاعتماد.</div></article>'
+            .'<article><h2>Android · Paparazzi</h2><a href="'.htmlspecialchars($target).'"><img src="'.htmlspecialchars($target).'" alt="'.htmlspecialchars($id).' Android" loading="lazy"></a></article>'
+            .'<article><h2>iOS</h2><div class="pending">Swift Core مبني ومختبر على Linux بنفس fixture، وكل ملفات iOS اجتازت swift-format وSwiftLint. بناء SwiftUI واللقطة مؤجلان لدفعة «تحقق iOS».</div></article>'
+            .'</div></section>';
+    }
+}
+
+$parityRows = implode('', array_map(
+    static fn (string $screen, int $count): string => '<tr><td>'.$screen.'</td><td>موجود</td><td>موجود</td><td>'.$count.'</td><td>'.$count.'</td></tr>',
+    array_keys($caseCounts),
+    array_values($caseCounts),
+));
+$body = implode("\n", $rows);
+$html = <<<HTML
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>الدفعة 4ج — التواصل والسجل</title>
+  <link rel="stylesheet" href="../../../design/generated/tokens.css">
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; padding: var(--space-xl); background: var(--color-surfacealt); color: var(--color-navy800); font-family: var(--font-family), sans-serif; }
+    main { max-width: 1320px; margin: auto; }
+    .intro, .comparison { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-card); padding: var(--space-l); margin-bottom: var(--space-l); }
+    h1, h2 { color: var(--color-navy900); }
+    .notice { background: var(--color-primary50info); border-radius: var(--radius-card); padding: var(--space-m); }
+    .warning { background: var(--color-warningbg); border-radius: var(--radius-card); padding: var(--space-m); }
+    header { display: flex; justify-content: space-between; gap: var(--space-m); align-items: center; }
+    .columns { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-m); }
+    img { width: 100%; max-width: 400px; aspect-ratio: 1 / 2; object-fit: contain; object-position: top; border: 1px solid var(--color-border); border-radius: var(--radius-card); }
+    .pending { min-height: 400px; display: grid; place-items: center; text-align: center; padding: var(--space-l); border: 1px dashed var(--color-border); border-radius: var(--radius-card); color: var(--color-slate500); }
+    table { border-collapse: collapse; width: 100%; } td, th { border: 1px solid var(--color-border); padding: var(--space-s); text-align: right; }
+    @media (max-width: 900px) { .columns { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body><main>
+  <section class="intro">
+    <h1>الدفعة 4ج — التواصل والسجل</h1>
+    <p>{$snapshotCount} لقطة Android بحجم 400×800: إعادة اعتماد C01 بعد إضافة تبويبي الرسائل والطلبات، وكل حالات C18 وC19 وC25 وC26 وC27 وC28.</p>
+    <p class="notice"><strong>المنجز:</strong> API الحقيقي، تحديث المحادثة كل 5 ثوانٍ، الصور من منتقي النظام، عقود الصفحات، تفاصيل الإيصال، وأسباب المشكلة والبلاغ المدارة من الداشبورد. كل القوائم تعرض تسميات الخادم وترسل أكواده فقط.</p>
+    <h2>جدول التطابق والحالات</h2>
+    <table><thead><tr><th>الشاشة</th><th>Android</th><th>iOS</th><th>حالات Android</th><th>حالات Swift Core</th></tr></thead><tbody>{$parityRows}</tbody></table>
+    <h2>الانتقالات</h2>
+    <p>C27 يغطي T-22 لفتح النزاع. C18 وC19 وC25 وC26 وC28 لا تنفذ انتقال حالة طلب جديدًا؛ وتظل كل الإجراءات مشروطة بـ <code>available_actions</code>.</p>
+    <h2>الجديد والأسئلة</h2>
+    <p>مكونات مستخدمة بلا مكوّن أو رمز جديد: ProviderHeader، ChatBubble، ChatInput، OrderCard، SortChips، SummaryCard، RadioCard، TextAreaField وAppBottomSheet. أضيفت مفاتيح نصوص الرسائل والمحادثة وطلباتي والإيصال والمشكلة والبلاغ؛ أما الأسباب وتسمياتها فمن <code>GET /config</code> وليست نصوصًا ثابتة في التطبيق.</p>
+    <p><strong>الأسئلة المفتوحة:</strong> لا يوجد.</p>
+    <p><strong>iOS غير المتحقق منه آليًا:</strong> Swift Core اجتاز البناء والاختبارات على Linux، وكل iosapp اجتاز swift-format وSwiftLint. SwiftUI لا يمكن بناؤه دون أطر Apple؛ بناؤه والرسم واللقطات مؤجلة لدفعة تحقق iOS.</p>
+  </section>
+  {$body}
+</main></body></html>
+HTML;
+
+file_put_contents($output.'/comparison.html', $html);
+fwrite(STDOUT, "Generated reports/batch-4c/customer-communication/comparison.html ({$snapshotCount} snapshots)\n");

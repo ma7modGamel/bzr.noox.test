@@ -8,6 +8,8 @@ use App\Modules\Orders\Enums\PricingMode;
 use App\Modules\Orders\Models\Order;
 use App\Modules\Pricing\Enums\ProposalStatus;
 use App\Modules\Pricing\Enums\ProposalType;
+use App\Modules\Pricing\Models\PriceProposal;
+use Illuminate\Support\Collection;
 
 /**
  * حساب المبالغ — BR-044. المصدر الوحيد لأي مبلغ على الطلب.
@@ -27,6 +29,26 @@ final readonly class OrderAmounts
         $approved = $order->proposals()
             ->where('status', ProposalStatus::Approved->value)
             ->get();
+
+        return self::fromProposals($order, $approved);
+    }
+
+    public static function projected(Order $order, PriceProposal $proposal): self
+    {
+        $approved = $order->proposals()
+            ->where('status', ProposalStatus::Approved->value)
+            ->get()
+            ->when(
+                $proposal->status === ProposalStatus::Pending,
+                fn (Collection $proposals): Collection => $proposals->push($proposal),
+            );
+
+        return self::fromProposals($order, $approved);
+    }
+
+    /** @param Collection<int, PriceProposal> $approved */
+    private static function fromProposals(Order $order, Collection $approved): self
+    {
 
         $extraWork = self::sum($approved->where('type', ProposalType::ExtraWork)->pluck('amount')->all());
         $materials = self::sum($approved->where('type', ProposalType::Materials)->pluck('amount')->all());

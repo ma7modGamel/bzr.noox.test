@@ -1,0 +1,796 @@
+#!/usr/bin/env php
+<?php
+
+declare(strict_types=1);
+
+$root = dirname(__DIR__);
+$checkOnly = in_array('--check', $argv, true);
+$errors = [];
+$outputs = [];
+
+/** @return array<string, mixed> */
+function readJson(string $path): array
+{
+    $decoded = json_decode((string) file_get_contents($path), true, flags: JSON_THROW_ON_ERROR);
+
+    if (! is_array($decoded)) {
+        throw new RuntimeException("Expected JSON object: {$path}");
+    }
+
+    return $decoded;
+}
+
+function androidName(string $key): string
+{
+    return trim((string) preg_replace('/[^a-z0-9]+/', '_', strtolower($key)), '_');
+}
+
+function codeName(string $key): string
+{
+    $parts = preg_split('/[^A-Za-z0-9]+/', $key) ?: [];
+    $first = array_shift($parts) ?? '';
+
+    return lcfirst($first.implode('', array_map(static fn (string $part): string => ucfirst($part), $parts)));
+}
+
+function xml(string $value): string
+{
+    return htmlspecialchars($value, ENT_XML1 | ENT_QUOTES, 'UTF-8');
+}
+
+/** Android string resources treat ' and " and a leading @ or ? specially. */
+function androidString(string $value): string
+{
+    $escaped = str_replace(['\\', "'", '"'], ['\\\\', "\\'", '\\"'], $value);
+
+    return xml($escaped);
+}
+
+function colorHex(mixed $token): string
+{
+    if (is_string($token)) {
+        return $token;
+    }
+
+    if (is_array($token) && isset($token['hex'])) {
+        $alpha = (int) round(((float) ($token['alpha'] ?? 1)) * 255);
+
+        return '#'.strtoupper(str_pad(dechex($alpha), 2, '0', STR_PAD_LEFT)).substr((string) $token['hex'], 1);
+    }
+
+    throw new RuntimeException('Invalid color token.');
+}
+
+function argb(string $hex): string
+{
+    $raw = strtoupper(ltrim($hex, '#'));
+
+    return strlen($raw) === 8 ? $raw : 'FF'.$raw;
+}
+
+function swiftColor(string $hex): string
+{
+    $raw = argb($hex);
+    $alpha = hexdec(substr($raw, 0, 2)) / 255;
+    $red = hexdec(substr($raw, 2, 2)) / 255;
+    $green = hexdec(substr($raw, 4, 2)) / 255;
+    $blue = hexdec(substr($raw, 6, 2)) / 255;
+
+    return sprintf('Color(red: %.4f, green: %.4f, blue: %.4f, opacity: %.4f)', $red, $green, $blue, $alpha);
+}
+
+/** Numbers are written without a trailing ".0" so dp/pt literals stay readable. */
+function num(int|float $value): string
+{
+    return is_float($value) && floor($value) !== $value ? rtrim(rtrim(sprintf('%.4f', $value), '0'), '.') : (string) (int) $value;
+}
+
+/**
+ * Rewrites SVG path data into a canonical, fully separated form.
+ * Arc flags may legally be packed ("a4 4 0 100-8"); Android's PathParser misreads that,
+ * so every platform receives the same unpacked path.
+ */
+function normalizePath(string $data): string
+{
+    $arity = ['M' => 2, 'L' => 2, 'H' => 1, 'V' => 1, 'C' => 6, 'S' => 4, 'Q' => 4, 'T' => 2, 'A' => 7, 'Z' => 0];
+    $length = strlen($data);
+    $position = 0;
+    $result = [];
+
+    $skip = static function () use (&$position, $data, $length): void {
+        while ($position < $length && (ctype_space($data[$position]) || $data[$position] === ',')) {
+            $position++;
+        }
+    };
+    $number = static function () use (&$position, $data): string {
+        if (! preg_match('/\G[-+]?(?:\d+\.?\d*|\.\d+)(?:[eE][-+]?\d+)?/', $data, $match, 0, $position)) {
+            throw new RuntimeException("Invalid path number at {$position}: {$data}");
+        }
+        $position += strlen($match[0]);
+
+        return $match[0];
+    };
+
+    $skip();
+    while ($position < $length) {
+        $command = $data[$position];
+        if (! isset($arity[strtoupper($command)])) {
+            throw new RuntimeException("Unsupported path command '{$command}' in: {$data}");
+        }
+        $position++;
+        $count = $arity[strtoupper($command)];
+        $result[] = $command;
+
+        if ($count === 0) {
+            $skip();
+
+            continue;
+        }
+
+        do {
+            $arguments = [];
+            for ($index = 0; $index < $count; $index++) {
+                $skip();
+                $isFlag = strtoupper($command) === 'A' && ($index === 3 || $index === 4);
+                if ($isFlag) {
+                    if (! in_array($data[$position] ?? '', ['0', '1'], true)) {
+                        throw new RuntimeException("Invalid arc flag at {$position}: {$data}");
+                    }
+                    $arguments[] = $data[$position++];
+                } else {
+                    $arguments[] = $number();
+                }
+            }
+            $result[] = implode(' ', $arguments);
+            $skip();
+        } while ($position < $length && preg_match('/[-+.\d]/', $data[$position]));
+    }
+
+    return implode(' ', $result);
+}
+
+/** @param array<string, string> $outputs */
+function syncText(string $root, string $relativePath, string $content, bool $checkOnly, array &$errors, array &$outputs): void
+{
+    $outputs[$relativePath] = hash('sha256', $content);
+    $path = $root.'/'.$relativePath;
+
+    if ($checkOnly) {
+        if (! is_file($path) || file_get_contents($path) !== $content) {
+            $errors[] = $relativePath;
+        }
+
+        return;
+    }
+
+    $directory = dirname($path);
+    if (! is_dir($directory) && ! mkdir($directory, 0775, true) && ! is_dir($directory)) {
+        throw new RuntimeException("Cannot create {$directory}");
+    }
+
+    file_put_contents($path, $content);
+}
+
+/** @param array<string, string> $outputs */
+function syncBinary(string $root, string $source, string $relativePath, bool $checkOnly, array &$errors, array &$outputs): void
+{
+    syncText($root, $relativePath, (string) file_get_contents($source), $checkOnly, $errors, $outputs);
+}
+
+$tokens = readJson($root.'/design/tokens.json');
+$strings = readJson($root.'/design/strings.ar.json');
+$galleryFixture = readJson($root.'/design/fixtures/gallery/components.json');
+$sourceHash = hash('sha256', (string) file_get_contents($root.'/design/tokens.json'));
+
+// ── Colors ───────────────────────────────────────────────────────────────
+$kotlinColors = [];
+$swiftColors = [];
+$cssColors = [];
+foreach ($tokens['color'] as $name => $value) {
+    $hex = colorHex($value);
+    $identifier = codeName((string) $name);
+    $kotlinColors[] = "    val {$identifier} = Color(0x".argb($hex).')';
+    $swiftColors[] = "    public static let {$identifier} = ".swiftColor($hex);
+    // CSS hex alpha is #RRGGBBAA; tokens carry Android's #AARRGGBB.
+    $cssHex = strlen($hex) === 9 ? '#'.substr($hex, 3).substr($hex, 1, 2) : $hex;
+    $cssColors[] = '  --color-'.androidName((string) $name).': '.$cssHex.';';
+}
+
+// ── Typography ───────────────────────────────────────────────────────────
+$fontFiles = $tokens['font']['files'];
+$kotlinTypes = [];
+$swiftTypes = [];
+$cssTypes = [];
+foreach ($tokens['type'] as $name => $value) {
+    $identifier = codeName((string) $name);
+    $color = codeName((string) $value['color']);
+    $weightKey = (string) $value['weight'];
+    if (! isset($fontFiles[$weightKey], $tokens['font']['weights'][$weightKey])) {
+        throw new RuntimeException("Type {$name} uses weight {$weightKey} with no font file.");
+    }
+    $kotlinWeight = match ($weightKey) {
+        'regular' => 'Normal',
+        'semibold' => 'SemiBold',
+        default => ucfirst($weightKey),
+    };
+    $kotlinTypes[] = "    val {$identifier} = BzrTextStyle({$value['size']}.sp, FontWeight.{$kotlinWeight}, DesignColors.{$color})";
+    $swiftTypes[] = "    public static let {$identifier} = BzrTextStyle(size: {$value['size']}, fontName: DesignFont.{$weightKey}, color: DesignColors.{$color})";
+    $cssTypes[] = '  --type-'.androidName((string) $name).'-size: '.$value['size'].'px;';
+    $cssTypes[] = '  --type-'.androidName((string) $name).'-weight: '.$tokens['font']['weights'][$weightKey].';';
+}
+
+// ── Dimensions ───────────────────────────────────────────────────────────
+$kotlinDimensions = [];
+$swiftDimensions = [];
+$cssDimensions = [];
+foreach (['space', 'radius'] as $group) {
+    foreach ($tokens[$group] as $name => $value) {
+        $identifier = codeName((string) $name);
+        $kotlinDimensions[$group][] = "    val {$identifier} = ".num($value).'.dp';
+        $swiftDimensions[$group][] = "    public static let {$identifier}: CGFloat = ".num($value);
+        $cssDimensions[] = '  --'.$group.'-'.androidName((string) $name).': '.num($value).'px;';
+    }
+}
+
+$kotlinSizes = [];
+$swiftSizes = [];
+$cssSizes = [];
+foreach ($tokens['size'] as $name => $value) {
+    $entries = is_array($value)
+        ? array_combine(
+            array_map(static fn (string $axis): string => $name.ucfirst($axis), array_keys($value)),
+            array_values($value),
+        )
+        : [$name => $value];
+    foreach ($entries as $entryName => $entryValue) {
+        if (str_ends_with((string) $entryName, 'Columns')) {
+            $identifier = codeName((string) $entryName);
+            $kotlinSizes[] = "    const val {$identifier}: Int = {$entryValue}";
+            $swiftSizes[] = "    public static let {$identifier}: Int = {$entryValue}";
+
+            continue;
+        }
+        $identifier = codeName((string) $entryName);
+        $kotlinSizes[] = "    val {$identifier} = ".num($entryValue).'.dp';
+        $swiftSizes[] = "    public static let {$identifier}: CGFloat = ".num($entryValue);
+        $cssSizes[] = '  --size-'.androidName((string) $entryName).': '.num($entryValue).'px;';
+    }
+}
+
+$kotlinRatios = [];
+$swiftRatios = [];
+foreach ($tokens['ratio'] as $name => $value) {
+    $kotlinRatios[] = '    const val '.codeName((string) $name).': Float = '.num($value).'f';
+    $swiftRatios[] = '    public static let '.codeName((string) $name).': CGFloat = '.num($value);
+}
+$kotlinThresholds = [];
+$swiftThresholds = [];
+foreach ($tokens['threshold'] as $name => $value) {
+    $kotlinThresholds[] = '    const val '.codeName((string) $name).': Int = '.$value;
+    $swiftThresholds[] = '    public static let '.codeName((string) $name).': Int = '.$value;
+}
+
+$iconColor = argb(colorHex($tokens['color'][$tokens['icon']['color']]));
+$iconStroke = num($tokens['icon']['stroke']);
+$iconViewport = num($tokens['icon']['viewport']);
+
+$kotlin = <<<KOTLIN
+// Generated by tools/gen-design. Do not edit.
+package noox.bzr.design.generated
+
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.TextUnit
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+
+data class BzrTextStyle(val size: TextUnit, val weight: FontWeight, val color: Color)
+
+object DesignColors {
+%s
+}
+
+object DesignType {
+%s
+}
+
+object DesignSpace {
+%s
+}
+
+object DesignRadius {
+%s
+}
+
+object DesignSize {
+%s
+}
+
+object DesignBorder {
+    val width: Dp = %s.dp
+    val selectedWidth: Dp = %s.dp
+    val selectedColor = DesignColors.%s
+    val selectedFill = DesignColors.%s
+}
+
+object DesignIcon {
+    val stroke: Dp = %s.dp
+    val color = DesignColors.%s
+}
+
+object DesignRatio {
+%s
+}
+
+object DesignThreshold {
+%s
+}
+
+object DesignOpacity { const val disabled: Float = %sf }
+object DesignMotion { const val screenTransitionMs: Int = %s; const val sheetMs: Int = %s }
+object DesignA11y { const val maxFontScale: Float = %sf }
+object DesignFont { const val family: String = "%s" }
+object DesignMeta { const val tokensSha256: String = "%s" }
+KOTLIN;
+
+$kotlin = sprintf(
+    $kotlin,
+    implode("\n", $kotlinColors),
+    implode("\n", $kotlinTypes),
+    implode("\n", $kotlinDimensions['space']),
+    implode("\n", $kotlinDimensions['radius']),
+    implode("\n", $kotlinSizes),
+    num($tokens['border']['width']),
+    num($tokens['border']['selectedWidth']),
+    codeName((string) $tokens['border']['selectedColor']),
+    codeName((string) $tokens['border']['selectedFill']),
+    $iconStroke,
+    codeName((string) $tokens['icon']['color']),
+    implode("\n", $kotlinRatios),
+    implode("\n", $kotlinThresholds),
+    num($tokens['opacity']['disabled']),
+    $tokens['motion']['screenTransitionMs'],
+    $tokens['motion']['sheetMs'],
+    num($tokens['a11y']['maxFontScale']),
+    $tokens['font']['family'],
+    $sourceHash,
+);
+
+$swiftFontNames = [];
+foreach ($fontFiles as $weightKey => $file) {
+    $swiftFontNames[] = "    public static let {$weightKey} = \"{$file}\"";
+}
+$swiftFontFiles = implode(', ', array_map(static fn (string $file): string => '"'.$file.'"', $fontFiles));
+
+$swift = <<<SWIFT
+// Generated by tools/gen-design. Do not edit.
+import SwiftUI
+
+public struct BzrTextStyle {
+    public let size: CGFloat
+    public let fontName: String
+    public let color: Color
+
+    public init(size: CGFloat, fontName: String, color: Color) {
+        self.size = size
+        self.fontName = fontName
+        self.color = color
+    }
+}
+
+public enum DesignColors {
+%s
+}
+
+public enum DesignType {
+%s
+}
+
+public enum DesignSpace {
+%s
+}
+
+public enum DesignRadius {
+%s
+}
+
+public enum DesignSize {
+%s
+}
+
+public enum DesignBorder {
+    public static let width: CGFloat = %s
+    public static let selectedWidth: CGFloat = %s
+    public static let selectedColor = DesignColors.%s
+    public static let selectedFill = DesignColors.%s
+}
+
+public enum DesignIcon {
+    public static let stroke: CGFloat = %s
+    public static let color = DesignColors.%s
+}
+
+public enum DesignRatio {
+%s
+}
+
+public enum DesignThreshold {
+%s
+}
+
+public enum DesignOpacity { public static let disabled: CGFloat = %s }
+public enum DesignMotion { public static let screenTransitionMs = %s; public static let sheetMs = %s }
+public enum DesignA11y { public static let maxFontScale: CGFloat = %s }
+public enum DesignFont {
+    public static let family = "%s"
+%s
+    public static let files = [%s]
+}
+public enum DesignMeta { public static let tokensSha256 = "%s" }
+SWIFT;
+
+$swift = sprintf(
+    $swift,
+    implode("\n", $swiftColors),
+    implode("\n", $swiftTypes),
+    implode("\n", $swiftDimensions['space']),
+    implode("\n", $swiftDimensions['radius']),
+    implode("\n", $swiftSizes),
+    num($tokens['border']['width']),
+    num($tokens['border']['selectedWidth']),
+    codeName((string) $tokens['border']['selectedColor']),
+    codeName((string) $tokens['border']['selectedFill']),
+    $iconStroke,
+    codeName((string) $tokens['icon']['color']),
+    implode("\n", $swiftRatios),
+    implode("\n", $swiftThresholds),
+    num($tokens['opacity']['disabled']),
+    $tokens['motion']['screenTransitionMs'],
+    $tokens['motion']['sheetMs'],
+    num($tokens['a11y']['maxFontScale']),
+    $tokens['font']['family'],
+    implode("\n", $swiftFontNames),
+    $swiftFontFiles,
+    $sourceHash,
+);
+
+// ── Strings ──────────────────────────────────────────────────────────────
+$androidStrings = ['<?xml version="1.0" encoding="utf-8"?>', '<resources>'];
+foreach ($strings as $key => $value) {
+    $androidStrings[] = '    <string name="'.androidName((string) $key).'">'.androidString((string) $value).'</string>';
+}
+$androidStrings[] = '</resources>';
+
+$androidColors = ['<?xml version="1.0" encoding="utf-8"?>', '<!-- Generated by tools/gen-design. Do not edit. -->', '<resources>'];
+foreach ($tokens['color'] as $name => $value) {
+    $androidColors[] = '    <color name="bremo_'.androidName((string) preg_replace('/(?<=[a-z0-9])([A-Z])/', '_$1', (string) $name)).'">'.colorHex($value).'</color>';
+}
+$androidColors[] = '</resources>';
+
+$xcstrings = ['sourceLanguage' => 'ar', 'strings' => [], 'version' => '1.0'];
+foreach ($strings as $key => $value) {
+    $xcstrings['strings'][$key] = ['localizations' => ['ar' => ['stringUnit' => ['state' => 'translated', 'value' => $value]]]];
+}
+
+// ── Web ──────────────────────────────────────────────────────────────────
+$css = '';
+foreach ($fontFiles as $weightKey => $file) {
+    $css .= "@font-face {\n".
+        "  font-family: '".$tokens['font']['family']."';\n".
+        "  src: url('../fonts/{$file}.ttf') format('truetype');\n".
+        "  font-style: normal;\n".
+        '  font-weight: '.$tokens['font']['weights'][$weightKey].";\n".
+        "  font-display: swap;\n".
+        "}\n\n";
+}
+$css .= ":root {\n".implode("\n", [...$cssColors, ...$cssTypes, ...$cssDimensions, ...$cssSizes]).
+    "\n  --border-width: ".num($tokens['border']['width'])."px;\n  --font-family: '".$tokens['font']['family']."';\n}\n";
+
+$publicCss = str_replace("../fonts/", "fonts/", $css);
+$shareVisitCss = <<<'CSS'
+* { box-sizing: border-box; }
+html { background: var(--color-surfacealt); }
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--color-surfacealt);
+  color: var(--color-navy800);
+  font-family: var(--font-family), sans-serif;
+  font-size: var(--type-body-size);
+  font-weight: var(--type-body-weight);
+}
+.share-shell {
+  width: 100%;
+  max-width: var(--size-mobilecontentwidth);
+  min-height: 100vh;
+  margin-inline: auto;
+  padding: var(--space-xl) var(--space-screenhorizontal) var(--space-xxl);
+  background: var(--color-surface);
+}
+.brand {
+  margin: 0 0 var(--space-sectiongap);
+  color: var(--color-primary700);
+  font-size: var(--type-screentitle-size);
+  font-weight: var(--type-screentitle-weight);
+  text-align: center;
+}
+.stack { display: grid; gap: var(--space-sectiongap); }
+.card {
+  padding: var(--space-cardpadding);
+  border: var(--border-width, 1px) solid var(--color-border);
+  border-radius: var(--radius-card);
+  background: var(--color-surface);
+}
+.provider { display: flex; align-items: center; gap: var(--space-m); }
+.avatar {
+  display: grid;
+  flex: 0 0 var(--size-avatarsmall);
+  width: var(--size-avatarsmall);
+  height: var(--size-avatarsmall);
+  place-items: center;
+  overflow: hidden;
+  border-radius: var(--radius-full);
+  background: var(--color-primary50);
+  color: var(--color-primary700);
+  font-size: var(--type-sectiontitle-size);
+  font-weight: var(--type-sectiontitle-weight);
+}
+.avatar img { width: 100%; height: 100%; object-fit: cover; }
+.provider-copy { min-width: 0; flex: 1; }
+.provider-name { margin: 0; color: var(--color-navy900); font-size: var(--type-cardtitle-size); font-weight: var(--type-cardtitle-weight); }
+.provider-meta { display: flex; align-items: center; gap: var(--space-xs); margin-top: var(--space-xs); color: var(--color-slate500); font-size: var(--type-secondary-size); font-weight: var(--type-secondary-weight); }
+.verified { width: var(--size-iconsmall); height: var(--size-iconsmall); }
+.status-card { background: var(--color-primary50); border-color: var(--color-primary400); }
+.eyebrow { margin: 0 0 var(--space-xs); color: var(--color-slate500); font-size: var(--type-caption-size); font-weight: var(--type-caption-weight); }
+.status-title { margin: 0; color: var(--color-navy900); font-size: var(--type-cardtitle-size); font-weight: var(--type-cardtitle-weight); }
+.eta { display: flex; align-items: baseline; gap: var(--space-s); margin-top: var(--space-m); }
+.eta-value { color: var(--color-primary700); font-size: var(--type-price-size); font-weight: var(--type-price-weight); }
+.approximate { color: var(--color-star); font-size: var(--type-caption-size); font-weight: var(--type-caption-weight); }
+.stepper { display: flex; width: 100%; }
+.step { min-width: 0; flex: 1; text-align: center; }
+.step-rail { position: relative; display: grid; height: var(--size-stepperdotactive); place-items: center; }
+.step-rail::before { position: absolute; inset-inline: 0; height: var(--size-stepperline); background: var(--color-border); content: ""; }
+.step:first-child .step-rail::before { inset-inline-start: 50%; }
+.step:last-child .step-rail::before { inset-inline-end: 50%; }
+.step.done .step-rail::before, .step.active .step-rail::before, .step.on_hold .step-rail::before { background: var(--color-primary600); }
+.step-dot { position: relative; width: var(--size-stepperdot); height: var(--size-stepperdot); border: var(--size-controlstroke) solid var(--color-border); border-radius: var(--radius-full); background: var(--color-surface); }
+.done .step-dot { border-color: var(--color-primary600); background: var(--color-primary600); }
+.active .step-dot, .on_hold .step-dot { width: var(--size-stepperdotactive); height: var(--size-stepperdotactive); border-color: var(--color-primary600); }
+.active .step-dot::after, .on_hold .step-dot::after { position: absolute; inset: 50% auto auto 50%; width: var(--size-radiodot); height: var(--size-radiodot); border-radius: var(--radius-full); background: var(--color-primary600); content: ""; transform: translate(-50%, -50%); }
+.on_hold .step-dot { border-color: var(--color-star); }
+.on_hold .step-dot::after { background: var(--color-star); }
+.step-label { display: block; margin-top: var(--space-s); color: var(--color-slate-500); font-size: var(--type-caption-size); font-weight: var(--type-caption-weight); }
+.done .step-label { color: var(--color-navy800); }
+.active .step-label { color: var(--color-navy900); font-weight: var(--type-cardtitle-weight); }
+.on_hold .step-label { color: var(--color-star); font-weight: var(--type-cardtitle-weight); }
+.warning { display: flex; align-items: center; gap: var(--space-s); margin-top: var(--space-m); padding: var(--space-m); border-radius: var(--radius-card); background: var(--color-warningbg); color: var(--color-warningtext); font-size: var(--type-secondary-size); font-weight: var(--type-secondary-weight); }
+.warning-mark { color: var(--color-star); font-weight: var(--type-screentitle-weight); }
+.details { display: grid; gap: var(--space-rowgap); }
+.detail-row { display: flex; justify-content: space-between; gap: var(--space-m); }
+.detail-label { color: var(--color-slate500); font-size: var(--type-secondary-size); font-weight: var(--type-secondary-weight); }
+.detail-value { color: var(--color-navy900); font-weight: var(--type-body-weight); }
+.expired { display: grid; min-height: var(--size-herocardheight); place-items: center; text-align: center; }
+.expired h1 { margin: 0; color: var(--color-navy900); font-size: var(--type-sectiontitle-size); font-weight: var(--type-sectiontitle-weight); }
+CSS;
+
+syncText($root, 'androidapp/core/design/src/main/kotlin/noox/bzr/design/generated/DesignTokens.kt', $kotlin."\n", $checkOnly, $errors, $outputs);
+syncText($root, 'androidapp/core/design/src/main/res/values/strings.xml', implode("\n", $androidStrings)."\n", $checkOnly, $errors, $outputs);
+syncText($root, 'androidapp/core/design/src/main/res/values/colors.xml', implode("\n", $androidColors)."\n", $checkOnly, $errors, $outputs);
+require __DIR__.'/gen-design-android-views.php';
+require __DIR__.'/gen-design-mail.php';
+syncText($root, 'iosapp/Packages/DesignSystem/Sources/DesignSystem/Generated/DesignTokens.swift', $swift."\n", $checkOnly, $errors, $outputs);
+syncText($root, 'iosapp/Packages/DesignSystem/Sources/DesignSystem/Resources/Localizable.xcstrings', (string) json_encode($xcstrings, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)."\n", $checkOnly, $errors, $outputs);
+syncText($root, 'design/generated/tokens.css', $css, $checkOnly, $errors, $outputs);
+syncText($root, 'public/design/tokens.css', $publicCss, $checkOnly, $errors, $outputs);
+syncText($root, 'public/design/share-visit.css', $shareVisitCss."\n", $checkOnly, $errors, $outputs);
+
+// ── Gallery fixture ──────────────────────────────────────────────────────
+$fixtureCases = $galleryFixture['snapshot_cases'];
+foreach ($fixtureCases as $case) {
+    if (! in_array($case['anchor'], ['top', 'bottom'], true)) {
+        throw new RuntimeException("Snapshot case {$case['id']} has an invalid anchor.");
+    }
+}
+$kotlinFixturePages = implode(', ', array_map(static fn (string $page): string => '"'.$page.'"', $galleryFixture['snapshot_pages']));
+$kotlinFixtureCases = implode(",\n        ", array_map(
+    static fn (array $case): string => 'GallerySnapshotCase("'.$case['id'].'", '.$case['page'].', anchorBottom = '.($case['anchor'] === 'bottom' ? 'true' : 'false').')',
+    $fixtureCases,
+));
+$kotlinBars = implode(', ', array_map(static fn (int|float $bar): string => num($bar), $galleryFixture['rating']['bars']));
+$kotlinFixtures = <<<KOTLIN
+// Generated by tools/gen-design. Do not edit.
+package noox.bzr.design.generated
+
+data class GallerySnapshotCase(val id: String, val page: Int, val anchorBottom: Boolean)
+
+object GalleryFixtures {
+    const val viewportWidth: Int = {$galleryFixture['viewport']['width']}
+    const val viewportHeight: Int = {$galleryFixture['viewport']['height']}
+    const val fontScale: Float = {$galleryFixture['viewport']['font_scale']}f
+    val snapshotPages: List<String> = listOf({$kotlinFixturePages})
+    val snapshotCases: List<GallerySnapshotCase> = listOf(
+        {$kotlinFixtureCases}
+    )
+    const val offerRating: Double = {$galleryFixture['offer']['rating']}
+    const val offerServices: Int = {$galleryFixture['offer']['services']}
+    const val offerPrice: Int = {$galleryFixture['offer']['price']}
+    const val offerEtaMinutes: Int = {$galleryFixture['offer']['eta_minutes']}
+    const val providerYears: Int = {$galleryFixture['provider']['years']}
+    const val ratingMaxStars: Int = {$galleryFixture['rating']['max_stars']}
+    val ratingBars: List<Double> = listOf({$kotlinBars})
+    const val stepCurrent: Int = {$galleryFixture['step']['current']}
+    const val stepTotal: Int = {$galleryFixture['step']['total']}
+    const val etaMinutes: Int = {$galleryFixture['eta']['minutes']}
+    const val countdownNormalSeconds: Int = {$galleryFixture['countdown']['normal_seconds']}
+    const val countdownUrgentSeconds: Int = {$galleryFixture['countdown']['urgent_seconds']}
+}
+KOTLIN;
+
+$swiftFixturePages = implode(', ', array_map(static fn (string $page): string => '"'.$page.'"', $galleryFixture['snapshot_pages']));
+$swiftFixtureCases = implode(",\n        ", array_map(
+    static fn (array $case): string => 'GallerySnapshotCase(id: "'.$case['id'].'", page: '.$case['page'].', anchorBottom: '.($case['anchor'] === 'bottom' ? 'true' : 'false').')',
+    $fixtureCases,
+)).',';
+$swiftFixtures = <<<SWIFT
+// Generated by tools/gen-design. Do not edit.
+import CoreGraphics
+
+public struct GallerySnapshotCase {
+    public let id: String
+    public let page: Int
+    public let anchorBottom: Bool
+}
+
+public enum GalleryFixtures {
+    public static let viewportWidth: CGFloat = {$galleryFixture['viewport']['width']}
+    public static let viewportHeight: CGFloat = {$galleryFixture['viewport']['height']}
+    public static let fontScale: CGFloat = {$galleryFixture['viewport']['font_scale']}
+    public static let snapshotPages = [{$swiftFixturePages}]
+    public static let snapshotCases = [
+        {$swiftFixtureCases}
+    ]
+    public static let offerRating: Double = {$galleryFixture['offer']['rating']}
+    public static let offerServices = {$galleryFixture['offer']['services']}
+    public static let offerPrice = {$galleryFixture['offer']['price']}
+    public static let offerEtaMinutes = {$galleryFixture['offer']['eta_minutes']}
+    public static let providerYears = {$galleryFixture['provider']['years']}
+    public static let ratingMaxStars = {$galleryFixture['rating']['max_stars']}
+    public static let ratingBars: [Double] = [{$kotlinBars}]
+    public static let stepCurrent = {$galleryFixture['step']['current']}
+    public static let stepTotal = {$galleryFixture['step']['total']}
+    public static let etaMinutes = {$galleryFixture['eta']['minutes']}
+    public static let countdownNormalSeconds = {$galleryFixture['countdown']['normal_seconds']}
+    public static let countdownUrgentSeconds = {$galleryFixture['countdown']['urgent_seconds']}
+}
+SWIFT;
+
+syncText($root, 'androidapp/core/design/src/main/kotlin/noox/bzr/design/generated/GalleryFixtures.kt', $kotlinFixtures."\n", $checkOnly, $errors, $outputs);
+syncText($root, 'iosapp/Packages/DesignSystem/Sources/DesignSystem/Generated/GalleryFixtures.swift', $swiftFixtures."\n", $checkOnly, $errors, $outputs);
+
+// ── Icons ────────────────────────────────────────────────────────────────
+$iconFiles = glob($root.'/design/icons/*.svg') ?: [];
+sort($iconFiles);
+$swiftIconCases = [];
+foreach ($iconFiles as $iconFile) {
+    $name = pathinfo($iconFile, PATHINFO_FILENAME);
+    $svg = (string) file_get_contents($iconFile);
+    if (preg_match_all('/<path\b/', $svg) !== 1 || ! preg_match('/<path d="([^"]+)"\/>/', $svg, $matches)) {
+        throw new RuntimeException("Icon {$name} must contain exactly one self-closing path.");
+    }
+    if (! str_contains($svg, 'viewBox="0 0 '.$iconViewport.' '.$iconViewport.'"')) {
+        throw new RuntimeException("Icon {$name} must use a {$iconViewport}x{$iconViewport} viewBox.");
+    }
+
+    $pathData = normalizePath($matches[1]);
+    $filled = str_contains($svg, 'fill="currentColor"');
+    $evenOdd = str_contains($svg, 'fill-rule="evenodd"');
+    // iOS receives a canonical SVG: explicit colours on the path, no currentColor, no inherited attributes.
+    $svgPaint = $filled
+        ? 'fill="#'.substr($iconColor, 2).'"'.($evenOdd ? ' fill-rule="evenodd"' : '')
+        : 'fill="none" stroke="#'.substr($iconColor, 2).'" stroke-width="'.$iconStroke.'" stroke-linecap="round" stroke-linejoin="round"';
+    $canonicalSvg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 '.$iconViewport.' '.$iconViewport.'" width="'.$iconViewport.'" height="'.$iconViewport.'">'."\n".
+        '  <path d="'.$pathData.'" '.$svgPaint.'/>'."\n</svg>\n";
+
+    $paint = $filled
+        ? 'android:fillColor="#'.$iconColor.'"'.($evenOdd ? ' android:fillType="evenOdd"' : '')
+        : 'android:fillColor="@android:color/transparent" android:strokeColor="#'.$iconColor.'" android:strokeWidth="'.$iconStroke.'" android:strokeLineCap="round" android:strokeLineJoin="round"';
+    $vector = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n".
+        "<vector xmlns:android=\"http://schemas.android.com/apk/res/android\" android:width=\"{$iconViewport}dp\" android:height=\"{$iconViewport}dp\" android:viewportWidth=\"{$iconViewport}\" android:viewportHeight=\"{$iconViewport}\">\n".
+        "    <path {$paint} android:pathData=\"".xml($pathData)."\"/>\n".
+        "</vector>\n";
+    $assetName = str_replace('-', '_', $name);
+    syncText($root, 'androidapp/core/design/src/main/res/drawable/ic_'.$assetName.'.xml', $vector, $checkOnly, $errors, $outputs);
+
+    $assetPath = 'iosapp/Packages/DesignSystem/Sources/DesignSystem/Resources/Assets.xcassets/'.$assetName.'.imageset';
+    $contents = [
+        'images' => [['filename' => $name.'.svg', 'idiom' => 'universal']],
+        'info' => ['author' => 'tools/gen-design', 'version' => 1],
+        'properties' => ['preserves-vector-representation' => true, 'template-rendering-intent' => 'template'],
+    ];
+    syncText($root, $assetPath.'/Contents.json', (string) json_encode($contents, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)."\n", $checkOnly, $errors, $outputs);
+    syncText($root, $assetPath.'/'.$name.'.svg', $canonicalSvg, $checkOnly, $errors, $outputs);
+    syncText($root, 'public/design/icons/'.$name.'.svg', $canonicalSvg, $checkOnly, $errors, $outputs);
+
+    $case = codeName($name);
+    $swiftIconCases[] = $case === $assetName ? "    case {$case}" : "    case {$case} = \"{$assetName}\"";
+}
+
+$swiftIcons = "// Generated by tools/gen-design. Do not edit.\n\npublic enum BzrIconKey: String, CaseIterable {\n".implode("\n", $swiftIconCases)."\n}\n";
+syncText($root, 'iosapp/Packages/DesignSystem/Sources/DesignSystem/Generated/BzrIconKey.swift', $swiftIcons, $checkOnly, $errors, $outputs);
+
+// iOS app display name comes from the shared strings too (no Arabic literal in project.yml).
+$infoPlistStrings = ['sourceLanguage' => 'ar', 'strings' => [
+    // DEC-048 — تحت الأيقونة «بريمو» فقط.
+    'CFBundleDisplayName' => ['localizations' => ['ar' => ['stringUnit' => ['state' => 'translated', 'value' => $strings['app.launcher_name']]]]],
+    'CFBundleName' => ['localizations' => ['ar' => ['stringUnit' => ['state' => 'translated', 'value' => $strings['app.launcher_name']]]]],
+], 'version' => '1.0'];
+syncText($root, 'iosapp/BzrApp/InfoPlist.xcstrings', (string) json_encode($infoPlistStrings, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)."\n", $checkOnly, $errors, $outputs);
+
+$assetCatalog = ['info' => ['author' => 'tools/gen-design', 'version' => 1]];
+syncText($root, 'iosapp/Packages/DesignSystem/Sources/DesignSystem/Resources/Assets.xcassets/Contents.json', (string) json_encode($assetCatalog, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)."\n", $checkOnly, $errors, $outputs);
+
+// ── Fonts: one static file per weight in both apps (43 §2) ──────────────
+foreach ($fontFiles as $file) {
+    $source = $root.'/design/fonts/'.$file.'.ttf';
+    if (! is_file($source)) {
+        throw new RuntimeException("Missing font file design/fonts/{$file}.ttf");
+    }
+    syncBinary($root, $source, 'androidapp/core/design/src/main/res/font/'.androidName($file).'.ttf', $checkOnly, $errors, $outputs);
+    syncBinary($root, $source, 'iosapp/Packages/DesignSystem/Sources/DesignSystem/Resources/Fonts/'.$file.'.ttf', $checkOnly, $errors, $outputs);
+    syncBinary($root, $source, 'public/design/fonts/'.$file.'.ttf', $checkOnly, $errors, $outputs);
+}
+syncBinary($root, $root.'/design/fonts/OFL.txt', 'iosapp/Packages/DesignSystem/Sources/DesignSystem/Resources/Fonts/OFL.txt', $checkOnly, $errors, $outputs);
+
+// ── Orphans: generated folders may only contain what this run produced ──
+$generatedGlobs = [
+    'androidapp/core/design/src/main/res/drawable/ic_*.xml',
+    'androidapp/core/design/src/main/res/drawable/bremo_*.xml',
+    'androidapp/core/design/src/main/res/color/bremo_*.xml',
+    'androidapp/core/design/src/main/res/font/*',
+    'public/design/fonts/*',
+    'public/design/icons/*',
+    'public/design/categories/*',
+    'iosapp/Packages/DesignSystem/Sources/DesignSystem/Resources/Fonts/*',
+    'iosapp/Packages/DesignSystem/Sources/DesignSystem/Resources/Assets.xcassets/*.imageset/*',
+    'iosapp/Packages/DesignSystem/Sources/DesignSystem/Generated/*',
+    'androidapp/core/design/src/main/kotlin/noox/bzr/design/generated/*',
+];
+foreach ($generatedGlobs as $pattern) {
+    foreach (glob($root.'/'.$pattern) ?: [] as $existing) {
+        $relative = substr($existing, strlen($root) + 1);
+        if (isset($outputs[$relative]) || ! is_file($existing)) {
+            continue;
+        }
+        if ($checkOnly) {
+            $errors[] = $relative.' (orphan)';
+        } else {
+            unlink($existing);
+            $directory = dirname($existing);
+            if (str_ends_with($directory, '.imageset') && (glob($directory.'/*') ?: []) === []) {
+                rmdir($directory);
+            }
+        }
+    }
+}
+
+$manifest = [
+    'generated_by' => 'tools/gen-design',
+    'sources' => [
+        'design/tokens.json' => $sourceHash,
+        'design/strings.ar.json' => hash('sha256', (string) file_get_contents($root.'/design/strings.ar.json')),
+        'design/fixtures/gallery/components.json' => hash('sha256', (string) file_get_contents($root.'/design/fixtures/gallery/components.json')),
+    ] + array_combine(
+        array_map(static fn (string $file): string => 'design/fonts/'.$file.'.ttf', array_values($fontFiles)),
+        array_map(static fn (string $file): string => (string) hash_file('sha256', $root.'/design/fonts/'.$file.'.ttf'), array_values($fontFiles)),
+    ),
+    'outputs' => $outputs,
+];
+syncText($root, 'design/generated/manifest.json', (string) json_encode($manifest, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)."\n", $checkOnly, $errors, $outputs);
+
+if ($errors !== []) {
+    fwrite(STDERR, "Generated design files are stale:\n - ".implode("\n - ", array_unique($errors))."\n");
+    exit(1);
+}
+
+fwrite(STDOUT, $checkOnly ? "Design outputs are current.\n" : 'Generated '.count($outputs)." design outputs.\n");

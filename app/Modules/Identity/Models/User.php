@@ -4,23 +4,26 @@ declare(strict_types=1);
 
 namespace App\Modules\Identity\Models;
 
-use Database\Factories\UserFactory;
 use App\Modules\Customers\Models\CustomerAddress;
 use App\Modules\Identity\Enums\UserStatus;
 use App\Modules\Orders\Models\Order;
 use App\Modules\Providers\Models\ProviderProfile;
+use Database\Factories\UserFactory;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Laravel\Sanctum\HasApiTokens;
 
 /**
  * هوية واحدة بوضعين (DEC-001): كل مستخدم عميل افتراضيًا، ويصبح فنيًا بملف معتمد.
  */
-final class User extends Authenticatable
+final class User extends Authenticatable implements MustVerifyEmail
 {
+    use HasApiTokens;
     use HasFactory;
     use Notifiable;
     use SoftDeletes;
@@ -33,6 +36,8 @@ final class User extends Authenticatable
     {
         return [
             'password' => 'hashed',
+            'accepted_terms_version' => 'integer',
+            'terms_accepted_at' => 'immutable_datetime',
             'email_verified_at' => 'immutable_datetime',
             'status' => UserStatus::class,
             'customer_rating_avg' => 'decimal:2',

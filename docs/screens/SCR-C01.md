@@ -1,0 +1,21 @@
+# SCR-C01 — الرئيسية
+
+- النمط: رئيسية العميل، عمود واحد + شبكة فئات + `OrderCard` + `BottomNav`.
+- المرجع البصري: `design/reference/C01-home.jpeg` بعد حذف بانر الطوارئ وتعديلات 27 §أ.
+- الطرف والوضع: العميل، في وضعي الموظفين والسوق.
+- الدخول من: نجاح الدخول/التفعيل أو تبويب الرئيسية · الخروج إلى: SCR-C02، SCR-C03، SCR-C25، SCR-C18، SCR-C33، أو تفاصيل الطلب المناسبة.
+- القواعد: BR-004، DEC-012، DEC-034، DEC-035، DEC-041.
+- الـ API: `GET /me`، `GET /config`، `GET /addresses`، `GET /catalog?city_id={id}`، `GET /orders?scope=current`.
+- التخطيط (من أعلى لأسفل):
+  1. رأس غير ثابت: المنطقة الافتراضية + زر القائمة + الإشعارات.
+  2. ترحيب بالاسم الأول ونص `home.question`.
+  3. كارت CTA: `home.request.title`؛ الوصف `home.request.market.body` أو `home.request.staff.body` من `/config`؛ يفتح SCR-C03.
+  4. عنوان `home.services.title` ثم شبكة 3 أعمدة من فئات `/catalog` وأيقوناتها المسطحة ثنائية اللون.
+  5. عنوان `home.current_orders.title` ثم كل الطلبات الحالية كـ `OrderCard` باستخدام `display_status` بلا حصرها في OPEN.
+  6. `BottomNav` بأربعة عناصر: الرئيسية، طلباتي، الرسائل، حسابي.
+- المتغيرات: وضع السوق/الموظفين؛ طلبات حالية/فارغ؛ عنوان افتراضي موجود/غير موجود.
+- الحالات: تحميل skeleton / خطأ مع إعادة المحاولة / عدم اتصال / لا طلبات حالية / بيانات محمّلة.
+- الإجراءات: التنقل وبدء نموذج جديد إجراءات واجهة ثابتة؛ أي زر داخل `OrderCard` يأتي من `available_actions` فقط.
+- الأخطاء: 401 ← SCR-C10؛ خطأ النقل ← `error.body`؛ بيانات فارغة ← `home.current_orders.empty`.
+- fixtures: `design/fixtures/SCR-C01/cases.json`.
+- أسئلة مفتوحة: لا يوجد.

@@ -1,0 +1,121 @@
+#!/usr/bin/env php
+<?php
+
+// 43 §9 item 3: no visual value and no user-facing text written directly in app code.
+// Generated files (tokens, fixtures, icons) are the only place such literals may appear.
+
+declare(strict_types=1);
+
+$root = dirname(__DIR__);
+
+$sources = [
+    'kotlin' => [$root.'/androidapp', '/\.kt$/', '#/(generated|build|test)/#'],
+    'swift' => [$root.'/iosapp', '/\.swift$/', '#/(Generated|\.build|Tests)/#'],
+];
+
+$rules = [
+    'hex colour' => '/#[0-9A-Fa-f]{6}(?:[0-9A-Fa-f]{2})?\b/',
+    'Compose colour literal' => '/\bColor\(0x/',
+    'Compose dp/sp literal' => '/\b\d+(?:\.\d+)?\.(?:dp|sp)\b/',
+    'SwiftUI colour literal' => '/\bColor\(\s*(?:red|white|hue):/',
+    'SwiftUI named colour' => '/\bColor\.(?:black|blue|brown|cyan|gray|green|indigo|mint|orange|pink|purple|red|teal|white|yellow)\b/',
+    'system font' => '/\.system\(size:|Font\.system\(|FontFamily\.(?:Default|SansSerif|Serif|Monospace)\b/',
+    'SwiftUI numeric size' => '/\b(?:cornerRadius|lineWidth|spacing|width|height|minWidth|maxWidth|minHeight|maxHeight|radius|size):\s*[1-9]\d*(?:\.\d+)?\b/',
+    'SwiftUI numeric padding' => '/\.padding\(\s*(?:\.[a-z]+\s*,\s*)?[1-9]\d*(?:\.\d+)?\s*\)/',
+    'numeric opacity' => '/\.(?:opacity|alpha)\(\s*0?\.\d+/',
+    'Arabic literal' => '/"[^"\n]*\p{Arabic}[^"\n]*"/u',
+    'Android colour literal' => '/\b(?:Color\.(?:parseColor|rgb|argb)\(|0x[0-9A-Fa-f]{8}\b)/',
+    'numeric padding/margin' => '/\bset(?:Padding|PaddingRelative|Margins|MarginStart|MarginEnd)\([^)]*\b[1-9]\d*(?:\.\d+)?f?\b/',
+    'numeric text size' => '/\btextSize\s*=\s*[1-9]/',
+    'left/right gravity (RTL)' => '/\bGravity\.(?:LEFT|RIGHT)\b/',
+];
+
+$violations = [];
+
+foreach ($sources as [$directory, $filePattern, $excluded]) {
+    $directoryIterator = new RecursiveDirectoryIterator($directory, FilesystemIterator::SKIP_DOTS);
+    $filter = new RecursiveCallbackFilterIterator(
+        $directoryIterator,
+        static fn (SplFileInfo $file): bool => ! ($file->isDir() && in_array($file->getFilename(), ['.build', 'build', 'Generated', 'Tests', 'test'], true)),
+    );
+    $iterator = new RecursiveIteratorIterator($filter);
+    foreach ($iterator as $file) {
+        $path = $file->getPathname();
+        if (! preg_match($filePattern, $path) || preg_match($excluded, $path)) {
+            continue;
+        }
+        foreach (file($path) ?: [] as $index => $line) {
+            $code = trim($line);
+            if ($code === '' || str_starts_with($code, '//') || str_starts_with($code, '*') || str_starts_with($code, '/*')) {
+                continue;
+            }
+            $code = preg_replace('#\s//\s.*$#', '', $code) ?? $code;
+            foreach ($rules as $name => $pattern) {
+                if (preg_match($pattern, $code)) {
+                    $violations[] = sprintf('%s:%d  %s  →  %s', substr($path, strlen($root) + 1), $index + 1, $name, $code);
+                }
+            }
+        }
+    }
+}
+
+// ── XML resources written by hand (DEC-047, 43 §13): layouts, menus, navigation graphs ──
+$xmlRules = [
+    'hex colour' => '/="#[0-9A-Fa-f]{3,8}"/',
+    'dp/sp literal' => '/="-?(?!0(?:\.0+)?(?:dp|dip|sp|px)")\d+(?:\.\d+)?(?:dp|dip|sp|px)"/',
+    'literal text' => '/\b(?:android:(?:text|hint|contentDescription|title|label)|app:(?:bremo(?:Text|Title|Body|Label|Placeholder|Value|Error|OptionalLabel|Currency)|action|secondaryAction|editText|unit|subtitle|status|name|rating|services|verifiedLabel|actionLabel))="(?![@?])[^"]+"/',
+    'left/right instead of start/end (RTL)' => '/\b(?:android:(?:layout_margin|padding)(?:Left|Right)|android:layout_(?:alignParentLeft|alignParentRight|toLeftOf|toRightOf|alignLeft|alignRight)|android:drawable(?:Left|Right)|android:(?:layout_)?gravity="[^"]*\b(?:left|right)\b)/',
+];
+$xmlFiles = array_merge(
+    glob($root.'/androidapp/*/src/main/res/{layout,menu,navigation}/*.xml', GLOB_BRACE) ?: [],
+    glob($root.'/androidapp/*/*/src/main/res/{layout,menu,navigation}/*.xml', GLOB_BRACE) ?: [],
+);
+foreach ($xmlFiles as $path) {
+    foreach (file($path) ?: [] as $index => $line) {
+        foreach ($xmlRules as $name => $pattern) {
+            if (preg_match($pattern, $line)) {
+                $violations[] = sprintf('%s:%d  %s  →  %s', substr($path, strlen($root) + 1), $index + 1, $name, trim($line));
+            }
+        }
+    }
+}
+
+// RTL is mandatory: every Android manifest that declares <application> must support it.
+foreach (glob($root.'/androidapp/{*,*/*}/src/main/AndroidManifest.xml', GLOB_BRACE) ?: [] as $manifestPath) {
+    $manifestSource = (string) file_get_contents($manifestPath);
+    if (str_contains($manifestSource, '<application') && ! str_contains($manifestSource, 'android:supportsRtl="true"')) {
+        $violations[] = substr($manifestPath, strlen($root) + 1).'  RTL  →  <application> without android:supportsRtl="true"';
+    }
+}
+
+// --no-compose: the end state of DEC-047 (no androidx.compose dependency or import anywhere).
+if (in_array('--no-compose', $argv, true)) {
+    $gradleAndKotlin = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($root.'/androidapp', FilesystemIterator::SKIP_DOTS));
+    foreach ($gradleAndKotlin as $file) {
+        $path = $file->getPathname();
+        if (str_contains($path, '/build/') || str_contains($path, '/.gradle/') || ! preg_match('/\.(?:kt|kts|toml)$/', $path)) {
+            continue;
+        }
+        foreach (file($path) ?: [] as $index => $line) {
+            if (preg_match('/androidx\.compose|plugin\.compose|compose\s*=\s*true/', $line)) {
+                $violations[] = sprintf('%s:%d  Compose (DEC-047)  →  %s', substr($path, strlen($root) + 1), $index + 1, trim($line));
+            }
+        }
+    }
+}
+
+// App metadata must take its display name from strings.ar.json too.
+foreach (['androidapp/app/src/main/AndroidManifest.xml', 'iosapp/project.yml'] as $metadata) {
+    foreach (file($root.'/'.$metadata) ?: [] as $index => $line) {
+        if (preg_match('/\p{Arabic}/u', $line)) {
+            $violations[] = sprintf('%s:%d  Arabic literal  →  %s', $metadata, $index + 1, trim($line));
+        }
+    }
+}
+
+if ($violations !== []) {
+    fwrite(STDERR, "Hard-coded design values or text found (43 §9.3):\n - ".implode("\n - ", $violations)."\n");
+    exit(1);
+}
+
+fwrite(STDOUT, "No hard-coded design values or text.\n");

@@ -44,7 +44,7 @@ final class TransitionTable
             new Transition('T-17', 'completeWork', [S::InProgress], S::AwaitingPayment, [$P], E::WorkCompleted, note: 'BR-045'),
             new Transition('T-18', 'reportUnableInProgress', [S::InProgress], S::Cancelled, [$P], E::UnableToPerform),
             new Transition('T-19', 'confirmCashReceived', [S::AwaitingPayment], S::AwaitingConfirmation, [$P, $A], E::CashReceived, note: 'المبلغ = final_amount'),
-            new Transition('T-20', 'settleElectronicPayment', [S::AwaitingPayment], S::Closed, [$Y], E::ElectronicPaymentSucceeded, note: 'توقيع صحيح ومبلغ مطابق'),
+            new Transition('T-20', 'settleElectronicPayment', [S::AwaitingPayment], S::Closed, [$Y, $A], E::ElectronicPaymentSucceeded, note: 'فوري: توقيع صحيح ومبلغ مطابق؛ إنستاباي: تأكيد المدير العام (BR-057)'),
             new Transition('T-21', 'confirmCompletion', [S::AwaitingConfirmation], S::Closed, [$C, $Y], E::CompletionConfirmed, note: 'أو مهلة CFG-051'),
             new Transition('T-22', 'openDispute', [S::Arrived, S::AwaitingQuoteApproval, S::InProgress, S::AwaitingPayment, S::AwaitingConfirmation], S::Disputed, [$C, $P], E::DisputeOpened, note: 'BR-120'),
             new Transition('T-23', 'resolveDisputeClose', [S::Disputed], S::Closed, [$A], E::DisputeResolved),

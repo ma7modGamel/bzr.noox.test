@@ -1,0 +1,35 @@
+{
+  "viewport": {"width": 400, "height": 800, "font_scale": 1.0, "layout_direction": "rtl"},
+  "snapshot_pages": ["buttons", "navigation", "selection", "fields", "cards", "provider", "tracking", "feedback", "chat", "media_sheet", "text_area"],
+  "snapshot_cases": [
+    {"id": "buttons", "page": 0, "anchor": "top"},
+    {"id": "navigation", "page": 1, "anchor": "top"},
+    {"id": "selection-top", "page": 2, "anchor": "top"},
+    {"id": "selection-bottom", "page": 2, "anchor": "bottom"},
+    {"id": "fields-top", "page": 3, "anchor": "top"},
+    {"id": "fields-bottom", "page": 3, "anchor": "bottom"},
+    {"id": "cards-top", "page": 4, "anchor": "top"},
+    {"id": "cards-bottom", "page": 4, "anchor": "bottom"},
+    {"id": "provider-top", "page": 5, "anchor": "top"},
+    {"id": "provider-bottom", "page": 5, "anchor": "bottom"},
+    {"id": "tracking", "page": 6, "anchor": "top"},
+    {"id": "feedback-top", "page": 7, "anchor": "top"},
+    {"id": "feedback-bottom", "page": 7, "anchor": "bottom"},
+    {"id": "chat", "page": 8, "anchor": "top"},
+    {"id": "media-sheet", "page": 9, "anchor": "top"},
+    {"id": "text-area", "page": 10, "anchor": "top"}
+  ],
+  "sections": [
+    {"id": "actions", "title_key": "gallery.section.actions", "components": ["AppTopBar", "PrimaryButton", "SecondaryButton", "LinkButton", "DangerTextButton", "IconSquareButton", "BottomNav", "DrawerMenu", "MenuRow"]},
+    {"id": "forms", "title_key": "gallery.section.forms", "components": ["StepIndicator", "SelectableTile", "SelectableChip", "RadioCard", "CheckRow", "AppTextField", "SecureTextField", "AmountField", "TextAreaField"]},
+    {"id": "cards", "title_key": "gallery.section.cards", "components": ["SummaryCard", "OfferCard", "SortChips", "Badge", "ProviderHeader", "StatRow", "RatingBars", "ReviewCard", "StickyActionBar"]},
+    {"id": "status", "title_key": "gallery.section.status", "components": ["InfoBanner", "WarningBox", "EtaCard", "MapCard", "StatusStepper", "OrderCard", "Countdown", "EmptyState", "LoadingSkeleton", "ErrorState", "OfflineBanner"]},
+    {"id": "content", "title_key": "gallery.section.content", "components": ["AppBottomSheet", "ChatBubble", "ChatInput", "MediaThumb"]}
+  ],
+  "offer": {"rating": 4.9, "services": 128, "price": 350, "eta_minutes": 25},
+  "provider": {"years": 6},
+  "rating": {"max_stars": 5, "bars": [4.9, 4.8, 4.9]},
+  "step": {"current": 2, "total": 3},
+  "eta": {"minutes": 18},
+  "countdown": {"normal_seconds": 760, "urgent_seconds": 260}
+}

@@ -1,0 +1,63 @@
+name: Final iOS validation
+
+# DEC-045: keep this job ready, but run it only in the final "iOS validation" batch.
+on:
+  workflow_dispatch:
+
+jobs:
+  ios-final-validation:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: "16.2"
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.3"
+          extensions: gd
+      - name: Verify generated files and parity contract
+        run: php tools/gen-design --check && php tools/check-parity
+      - name: Install XcodeGen
+        run: brew install xcodegen
+      - name: Generate iOS project
+        run: xcodegen generate --spec iosapp/project.yml
+      - name: Build iOS app and gallery
+        env:
+          BZR_API_BASE_URL: http://127.0.0.1/api/v1/
+        run: xcodebuild -project iosapp/BzrApp.xcodeproj -scheme BzrApp -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' CODE_SIGNING_ALLOWED=NO build
+      - name: Capture iOS gallery snapshots at 1× and 400×800
+        working-directory: iosapp/Packages/DesignSystem
+        env:
+          GALLERY_EXPORT_DIR: ${{ github.workspace }}/reports/batch-1/gallery/ios
+        run: xcodebuild -scheme DesignSystem -destination 'platform=iOS Simulator,name=iPhone 16,OS=latest' test
+      - name: Require every shared gallery fixture
+        run: |
+          expected=$(php -r '$f=json_decode(file_get_contents("design/fixtures/gallery/components.json"),true); echo count($f["snapshot_cases"]);')
+          actual=$(find reports/batch-1/gallery/ios -maxdepth 1 -name 'gallery-*.png' | wc -l | tr -d ' ')
+          echo "iOS snapshots: $actual / $expected"
+          test "$actual" -eq "$expected"
+      - name: Capture batch 3a iOS snapshots at 1× and 400×800
+        env:
+          AUTH_EXPORT_DIR: ${{ github.workspace }}/reports/batch-3a/auth/ios
+          BZR_API_BASE_URL: http://127.0.0.1/api/v1/
+        run: xcodebuild -project iosapp/BzrApp.xcodeproj -scheme BzrApp -destination 'platform=iOS Simulator,name=iPhone 16,OS=latest' test
+      - name: Require every batch 3a snapshot fixture
+        run: |
+          expected=$(php -r '$n=0; foreach (["SCR-C10","SCR-C11","SCR-C12","SCR-C13"] as $s) { $f=json_decode(file_get_contents("design/fixtures/$s/cases.json"),true); foreach ($f["cases"] as $c) { $n += $c["snapshot"] ? 1 : 0; } } echo $n;')
+          actual=$(find reports/batch-3a/auth/ios -maxdepth 1 -name 'SCR-C*.png' | wc -l | tr -d ' ')
+          echo "Batch 3a iOS snapshots: $actual / $expected"
+          test "$actual" -eq "$expected"
+      - name: Build final comparison page
+        run: php tools/gen-gallery-report && php tools/gen-auth-report
+      - name: Publish final iOS evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: final-ios-comparison
+          retention-days: 30
+          path: |
+            reports/batch-1/gallery
+            reports/batch-3a/auth
+            design/generated/tokens.css
+            design/fonts/Cairo-*.ttf

@@ -1,0 +1,346 @@
+#!/usr/bin/env php
+<?php
+
+declare(strict_types=1);
+
+$root = dirname(__DIR__);
+$manifest = json_decode((string) file_get_contents($root.'/design/parity.json'), true, flags: JSON_THROW_ON_ERROR);
+$strings = json_decode((string) file_get_contents($root.'/design/strings.ar.json'), true, flags: JSON_THROW_ON_ERROR);
+$errors = [];
+
+/** @return list<string> */
+function sourceFiles(string $directory, string $extension): array
+{
+    $directoryIterator = new RecursiveDirectoryIterator($directory, FilesystemIterator::SKIP_DOTS);
+    $filter = new RecursiveCallbackFilterIterator(
+        $directoryIterator,
+        static fn (SplFileInfo $file): bool => ! in_array($file->getFilename(), ['.build', 'build', 'Generated', 'Tests', 'test'], true),
+    );
+    $files = [];
+    foreach (new RecursiveIteratorIterator($filter) as $file) {
+        if ($file->isFile() && $file->getExtension() === $extension) {
+            $files[] = $file->getPathname();
+        }
+    }
+    return $files;
+}
+
+/** @return list<string> */
+function splitParameters(string $signature): array
+{
+    $parameters = [];
+    $current = '';
+    $depth = ['(' => 0, '[' => 0, '<' => 0, '{' => 0];
+    $previous = '';
+    foreach (str_split($signature) as $character) {
+        if (array_key_exists($character, $depth)) {
+            $depth[$character]++;
+        } elseif ($character === ')') {
+            $depth['(']--;
+        } elseif ($character === ']') {
+            $depth['[']--;
+        } elseif ($character === '}') {
+            $depth['{']--;
+        } elseif ($character === '>' && $previous !== '-') {
+            $depth['<']--;
+        }
+        if ($character === ',' && array_sum($depth) === 0) {
+            $parameters[] = trim($current);
+            $current = '';
+        } else {
+            $current .= $character;
+        }
+        $previous = $character;
+    }
+    if (trim($current) !== '') {
+        $parameters[] = trim($current);
+    }
+    return $parameters;
+}
+
+function balancedContents(string $source, int $opening): ?string
+{
+    $depth = 0;
+    $length = strlen($source);
+    for ($index = $opening; $index < $length; $index++) {
+        if ($source[$index] === '(') {
+            $depth++;
+        } elseif ($source[$index] === ')') {
+            $depth--;
+            if ($depth === 0) {
+                return substr($source, $opening + 1, $index - $opening - 1);
+            }
+        }
+    }
+    return null;
+}
+
+/** @return list<string>|null */
+function kotlinParameters(string $source, string $symbol): ?array
+{
+    if (preg_match('/\bfun\s+'.preg_quote($symbol, '/').'\s*\(/', $source, $match, PREG_OFFSET_CAPTURE) !== 1) {
+        return null;
+    }
+    $opening = strpos($source, '(', $match[0][1]);
+    $contents = $opening === false ? null : balancedContents($source, $opening);
+    if ($contents === null || trim($contents) === '') {
+        return [];
+    }
+    $names = [];
+    foreach (splitParameters($contents) as $parameter) {
+        $parameter = preg_replace('/@[A-Za-z0-9_.]+(?:\([^)]*\))?\s*/', '', $parameter) ?? $parameter;
+        if (preg_match('/\b([A-Za-z_][A-Za-z0-9_]*)\s*:/', $parameter, $match) === 1 && $match[1] !== 'modifier') {
+            $names[] = $match[1];
+        }
+    }
+    return $names;
+}
+
+/**
+ * XML View components (DEC-047): the inputs are the public `var` properties of the class,
+ * in declaration order (annotations such as @get:JvmName may precede them).
+ *
+ * @return list<string>|null
+ */
+function kotlinViewParameters(string $source, string $symbol): ?array
+{
+    if (preg_match('/\bclass\s+'.preg_quote($symbol, '/').'\b/', $source, $match, PREG_OFFSET_CAPTURE) !== 1) {
+        return null;
+    }
+    $body = substr($source, $match[0][1]);
+    $next = preg_match('/\n(?:class|object|internal fun|fun|private fun)\s/', $body, $end, PREG_OFFSET_CAPTURE, 1) === 1 ? $end[0][1] : null;
+    $body = $next === null ? $body : substr($body, 0, $next);
+    preg_match_all('/^    (?:@\S+\s+)*var\s+([A-Za-z_][A-Za-z0-9_]*)\s*:/m', $body, $matches);
+
+    return $matches[1];
+}
+
+/** @return list<string>|null */
+function swiftParameters(string $source, string $symbol): ?array
+{
+    $start = strpos($source, 'public struct '.$symbol);
+    if ($start === false) {
+        return null;
+    }
+    $end = strpos($source, 'public struct ', $start + 14);
+    $block = substr($source, $start, $end === false ? null : $end - $start);
+    $init = strpos($block, 'public init');
+    if ($init === false) {
+        return null;
+    }
+    $opening = strpos($block, '(', $init);
+    $contents = $opening === false ? null : balancedContents($block, $opening);
+    if ($contents === null || trim($contents) === '') {
+        return [];
+    }
+    $names = [];
+    foreach (splitParameters($contents) as $parameter) {
+        if (preg_match('/^(?:@[A-Za-z0-9_]+\s+)*(?:(?:_\s+)?)([A-Za-z_][A-Za-z0-9_]*)\s*:/s', trim($parameter), $match) === 1) {
+            $names[] = $match[1];
+        }
+    }
+    return $names;
+}
+
+function validatePair(array $entry, string $kind, string $root, array &$errors): void
+{
+    $id = $entry['id'] ?? '(missing id)';
+    $android = $entry['android'] ?? null;
+    $ios = $entry['ios'] ?? null;
+    if (($android === null) !== ($ios === null)) {
+        $errors[] = "{$kind} {$id} exists on one platform only";
+        return;
+    }
+    if (! is_file($root.'/'.($entry['spec'] ?? ''))) {
+        $errors[] = "{$kind} {$id} has no valid specification";
+    }
+    if ($android === null) {
+        return;
+    }
+    foreach (['android' => $android, 'ios' => $ios] as $platform => $side) {
+        $path = $root.'/'.$side['file'];
+        if (! is_file($path)) {
+            $errors[] = "{$kind} {$id} {$platform} file is missing: {$side['file']}";
+        } elseif (! str_contains((string) file_get_contents($path), $side['symbol'])) {
+            $errors[] = "{$kind} {$id} {$platform} symbol is missing: {$side['symbol']}";
+        }
+        foreach ($side['fixtures'] ?? [] as $fixture) {
+            if (! is_file($root.'/'.$fixture)) {
+                $errors[] = "{$kind} {$id} {$platform} fixture is missing: {$fixture}";
+            }
+        }
+    }
+    foreach (['parameters', 'text_keys', 'fixtures'] as $field) {
+        if (($android[$field] ?? []) !== ($ios[$field] ?? [])) {
+            $errors[] = "{$kind} {$id} has different {$field} between Android and iOS";
+        }
+    }
+    if ($kind === 'screen' && isset($android['case_count'], $ios['case_count'])) {
+        if ($android['case_count'] !== $ios['case_count']) {
+            $errors[] = "screen {$id} has different test case counts between Android and iOS";
+        }
+        foreach (['android' => $android, 'ios' => $ios] as $platform => $side) {
+            $logicPath = $root.'/'.($side['logic_file'] ?? '');
+            $testPath = $root.'/'.($side['test_file'] ?? '');
+            if (! is_file($logicPath) || ! str_contains((string) file_get_contents($logicPath), (string) ($side['logic_symbol'] ?? ''))) {
+                $errors[] = "screen {$id} {$platform} testable logic is missing";
+            }
+            if (! is_file($testPath)) {
+                $errors[] = "screen {$id} {$platform} shared-fixture test is missing";
+                continue;
+            }
+            $testSource = (string) file_get_contents($testPath);
+            foreach ($side['fixtures'] as $fixture) {
+                if (! str_contains($testSource, $fixture)) {
+                    $errors[] = "screen {$id} {$platform} test does not load {$fixture}";
+                }
+                $fixtureData = json_decode((string) file_get_contents($root.'/'.$fixture), true, flags: JSON_THROW_ON_ERROR);
+                if (count($fixtureData['cases'] ?? []) !== $side['case_count']) {
+                    $errors[] = "screen {$id} {$platform} case_count differs from {$fixture}";
+                }
+            }
+        }
+    }
+    if ($kind === 'component') {
+        $androidSource = (string) file_get_contents($root.'/'.$android['file']);
+        $iosSource = (string) file_get_contents($root.'/'.$ios['file']);
+        $actualAndroid = isset($android['layout'])
+            ? kotlinViewParameters($androidSource, $android['symbol'])
+            : kotlinParameters($androidSource, $android['symbol']);
+        if (isset($android['layout'])) {
+            $layoutName = pathinfo($android['layout'], PATHINFO_FILENAME);
+            $bindingName = str_replace(' ', '', ucwords(str_replace('_', ' ', $layoutName))).'Binding';
+            if (! is_file($root.'/'.$android['layout'])) {
+                $errors[] = "component {$id} Android layout is missing: {$android['layout']}";
+            } elseif (! str_contains($androidSource, $bindingName.'.inflate')) {
+                $errors[] = "component {$id} Android class does not inflate {$android['layout']}";
+            }
+        }
+        $actualIos = swiftParameters($iosSource, $ios['symbol']);
+        if ($actualAndroid !== $android['parameters']) {
+            $errors[] = "component {$id} Android parameters differ from parity.json: ".json_encode($actualAndroid);
+        }
+        if ($actualIos !== $ios['parameters']) {
+            $errors[] = "component {$id} iOS parameters differ from parity.json: ".json_encode($actualIos);
+        }
+    }
+}
+
+$componentIds = [];
+foreach ($manifest['components'] ?? [] as $component) {
+    $componentIds[] = $component['id'] ?? '';
+    validatePair($component, 'component', $root, $errors);
+}
+$gallery = json_decode((string) file_get_contents($root.'/design/fixtures/gallery/components.json'), true, flags: JSON_THROW_ON_ERROR);
+$expectedComponents = array_values(array_unique(array_merge(...array_column($gallery['sections'], 'components'))));
+sort($componentIds);
+sort($expectedComponents);
+if ($componentIds !== $expectedComponents) {
+    $errors[] = 'parity.json component inventory differs from the shared gallery fixture';
+}
+
+$screenIds = [];
+foreach ($manifest['screens'] ?? [] as $screen) {
+    $screenIds[] = $screen['id'] ?? '';
+    validatePair($screen, 'screen', $root, $errors);
+}
+$expectedScreens = ['SCR-GALLERY'];
+foreach (['C' => 36, 'P' => 21] as $prefix => $last) {
+    for ($number = 1; $number <= $last; $number++) {
+        $expectedScreens[] = sprintf('SCR-%s%02d', $prefix, $number);
+    }
+}
+sort($screenIds);
+sort($expectedScreens);
+if ($screenIds !== $expectedScreens) {
+    $errors[] = 'parity.json must list every C01–C36 and P01–P21 mobile screen exactly once';
+}
+
+$androidNames = [];
+foreach (array_keys($strings) as $key) {
+    $androidNames[preg_replace('/[^a-z0-9_]/', '_', strtolower((string) $key))] = $key;
+}
+$androidKeys = [];
+foreach (sourceFiles($root.'/androidapp', 'kt') as $file) {
+    preg_match_all('/R\.string\.([a-z0-9_]+)/', (string) file_get_contents($file), $matches);
+    foreach ($matches[1] as $name) {
+        if (isset($androidNames[$name])) {
+            $androidKeys[$androidNames[$name]] = true;
+        }
+    }
+}
+foreach (glob($root.'/androidapp/*/src/main/res/layout/*.xml') ?: [] as $file) {
+    preg_match_all('/@string\/([a-z0-9_]+)/', (string) file_get_contents($file), $matches);
+    foreach ($matches[1] as $name) {
+        if (isset($androidNames[$name])) {
+            $androidKeys[$androidNames[$name]] = true;
+        }
+    }
+}
+foreach (glob($root.'/androidapp/*/*/src/main/res/layout/*.xml') ?: [] as $file) {
+    preg_match_all('/@string\/([a-z0-9_]+)/', (string) file_get_contents($file), $matches);
+    foreach ($matches[1] as $name) {
+        if (isset($androidNames[$name])) {
+            $androidKeys[$androidNames[$name]] = true;
+        }
+    }
+}
+$iosKeys = [];
+foreach (sourceFiles($root.'/iosapp', 'swift') as $file) {
+    preg_match_all('/"([^"\\n]+)"/', (string) file_get_contents($file), $matches);
+    foreach ($matches[1] as $key) {
+        if (array_key_exists($key, $strings)) {
+            $iosKeys[$key] = true;
+        }
+    }
+}
+$androidOnly = array_diff_key($androidKeys, $iosKeys);
+$iosOnly = array_diff_key($iosKeys, $androidKeys);
+if ($androidOnly !== []) {
+    $errors[] = 'text keys used only by Android: '.implode(', ', array_keys($androidOnly));
+}
+if ($iosOnly !== []) {
+    $errors[] = 'text keys used only by iOS: '.implode(', ', array_keys($iosOnly));
+}
+
+/* Business option codes belong to the backend. Their appearance in mobile production
+ * source would recreate a code/label list that can drift from GET /config. */
+$optionCodeSources = [
+    $root.'/app/Modules/Orders/Enums/CancelReason.php',
+    $root.'/database/seeders/SupportReasonSeeder.php',
+];
+$backendOptionCodes = [];
+foreach ($optionCodeSources as $path) {
+    preg_match_all('/\b[A-Z][A-Z0-9_]{2,}\b/', (string) file_get_contents($path), $matches);
+    foreach ($matches[0] as $code) {
+        if (! in_array($code, ['DISPUTE', 'PROVIDER_REPORT', 'ACCOUNT_BLOCKED'], true)) {
+            $backendOptionCodes[$code] = true;
+        }
+    }
+}
+foreach (['androidapp' => 'kt', 'iosapp' => 'swift'] as $directory => $extension) {
+    foreach (sourceFiles($root.'/'.$directory, $extension) as $file) {
+        $source = (string) file_get_contents($file);
+        foreach (array_keys($backendOptionCodes) as $code) {
+            if (preg_match('/["\']'.preg_quote($code, '/').'["\']/', $source) === 1) {
+                $errors[] = sprintf(
+                    'backend business option %s is hard-coded in %s',
+                    $code,
+                    substr($file, strlen($root) + 1),
+                );
+            }
+        }
+    }
+}
+
+if ($errors !== []) {
+    fwrite(STDERR, "Parity check failed:\n - ".implode("\n - ", $errors)."\n");
+    exit(1);
+}
+
+fwrite(STDOUT, sprintf(
+    "Parity verified: %d components, %d mobile screens, %d shared text keys.\n",
+    count($componentIds),
+    count($screenIds),
+    count($androidKeys),
+));

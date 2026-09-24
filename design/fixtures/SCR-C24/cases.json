@@ -1,0 +1,12 @@
+{"screen":"SCR-C24","cases":[
+  {"id":"loading","snapshot":true,"input":{"event":"loading"},"expected":{"phase":"loading","can_continue":false}},
+  {"id":"error","snapshot":true,"input":{"event":"error"},"expected":{"phase":"error","can_continue":false,"message_key":"error.body"}},
+  {"id":"empty","snapshot":true,"input":{"event":"loaded","ratings":["0","0","0"],"available_actions":["rate"]},"expected":{"phase":"empty","can_continue":false,"field_errors":["rating.validation.required"]}},
+  {"id":"partial","snapshot":true,"input":{"event":"loaded","ratings":["5","4","0"],"available_actions":["rate"]},"expected":{"phase":"content","can_continue":false,"field_errors":["rating.validation.required"]}},
+  {"id":"valid","snapshot":true,"input":{"event":"loaded","ratings":["5","4","5"],"comment":"خدمة ممتازة","available_actions":["rate"]},"expected":{"phase":"content","can_continue":true,"field_errors":[]}},
+  {"id":"comment_too_long","snapshot":true,"input":{"event":"loaded","ratings":["5","4","5"],"comment_length":501,"available_actions":["rate"]},"expected":{"phase":"content","can_continue":false,"field_errors":["rating.validation.comment_max"]}},
+  {"id":"submitting","snapshot":true,"input":{"event":"submitting","ratings":["5","4","5"],"available_actions":["rate"]},"expected":{"phase":"content","can_continue":false,"is_busy":true}},
+  {"id":"window_closed","snapshot":true,"input":{"event":"window_closed","ratings":["0","0","0"],"available_actions":[]},"expected":{"phase":"content","can_continue":false,"message_key":"rating.window_closed"}},
+  {"id":"already_exists","snapshot":true,"input":{"event":"already_exists","ratings":["0","0","0"],"available_actions":[]},"expected":{"phase":"content","can_continue":false,"message_key":"rating.already_exists"}},
+  {"id":"success","snapshot":true,"input":{"event":"success","ratings":["5","5","5"],"available_actions":[]},"expected":{"phase":"content","can_continue":false,"message_key":"rating.success"}}
+]}

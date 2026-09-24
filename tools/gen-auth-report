@@ -1,0 +1,100 @@
+#!/usr/bin/env php
+<?php
+
+declare(strict_types=1);
+
+$root = dirname(__DIR__);
+$output = $root.'/reports/batch-3a/auth';
+$androidOutput = $output.'/android';
+if (! is_dir($androidOutput) && ! mkdir($androidOutput, 0775, true) && ! is_dir($androidOutput)) {
+    throw new RuntimeException('Cannot create auth report output.');
+}
+
+$labels = [
+    'empty' => 'فراغ / تحقق الحقول',
+    'loading' => 'تحميل',
+    'blocked' => 'حساب محظور',
+    'invalid_email' => 'بريد غير صالح',
+    'rate_limited' => 'تجاوز حد المحاولات',
+    'unverified' => 'نجاح — بريد غير مفعّل',
+    'verified' => 'نجاح — بريد مفعّل',
+    'email_used' => 'بريد مستخدم',
+    'invalid_phone' => 'هاتف غير صالح',
+    'registered' => 'نجاح التسجيل',
+    'waiting' => 'انتظار التفعيل',
+    'checking' => 'فحص التفعيل',
+    'not_verified' => 'لم يصل التفعيل بعد',
+    'resent' => 'تمت إعادة الإرسال',
+    'network_error' => 'خطأ شبكة',
+    'sent' => 'تم إرسال الاستعادة',
+];
+
+$rows = [];
+$snapshotCount = 0;
+$caseCount = 0;
+foreach (['SCR-C10', 'SCR-C11', 'SCR-C12', 'SCR-C13'] as $screen) {
+    $fixture = json_decode((string) file_get_contents($root.'/design/fixtures/'.$screen.'/cases.json'), true, flags: JSON_THROW_ON_ERROR);
+    $caseCount += count($fixture['cases']);
+    foreach ($fixture['cases'] as $case) {
+        if (! $case['snapshot']) {
+            continue;
+        }
+        $snapshotCount++;
+        $id = $screen.'-'.$case['id'];
+        $matches = glob($root.'/androidapp/app/src/test/snapshots/images/*_'.strtolower($id).'.png') ?: [];
+        if (count($matches) !== 1) {
+            throw new RuntimeException("Missing Android snapshot for {$id}");
+        }
+        $target = 'android/'.$id.'.png';
+        copy($matches[0], $output.'/'.$target);
+        $iosTarget = 'ios/'.$id.'.png';
+        $iosPath = $output.'/'.$iosTarget;
+        $iosEvidence = is_file($iosPath)
+            ? '<a href="'.htmlspecialchars($iosTarget).'"><img src="'.htmlspecialchars($iosTarget).'" alt="'.htmlspecialchars($id).' on iOS" loading="lazy"></a>'
+            : '<div class="pending">مؤجلة إلى دفعة «تحقق iOS» النهائية (DEC-045)</div>';
+        $label = $labels[$case['id']] ?? $case['id'];
+        $rows[] = '<section class="comparison" id="'.htmlspecialchars($id).'">'
+            .'<header><strong>'.htmlspecialchars($screen).' · '.htmlspecialchars($label).'</strong><code>'.htmlspecialchars($case['id']).'</code></header>'
+            .'<div class="columns">'
+            .'<article><h2>المرجع المعتمد</h2><div class="pending">بانتظار اعتماد المالك للقطة Android</div></article>'
+            .'<article><h2>Android · Paparazzi</h2><a href="'.htmlspecialchars($target).'"><img src="'.htmlspecialchars($target).'" alt="'.htmlspecialchars($id).'" loading="lazy"></a></article>'
+            .'<article><h2>iOS · SnapshotTesting</h2>'.$iosEvidence.'</article>'
+            .'</div></section>';
+    }
+}
+
+$body = implode("\n", $rows);
+$html = <<<HTML
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>الدفعة 3أ — شاشات المصادقة</title>
+  <link rel="stylesheet" href="../../../design/generated/tokens.css">
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; padding: var(--space-xl); background: var(--color-surfacealt); color: var(--color-navy800); font-family: var(--font-family), sans-serif; }
+    main { max-width: 1320px; margin: auto; }
+    .intro, .comparison { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-card); padding: var(--space-l); margin-bottom: var(--space-l); }
+    h1, h2 { color: var(--color-navy900); }
+    .notice { background: var(--color-primary50info); border-radius: var(--radius-card); padding: var(--space-m); }
+    header { display: flex; justify-content: space-between; gap: var(--space-m); align-items: center; }
+    .columns { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-m); }
+    img { width: 100%; max-width: 400px; aspect-ratio: 1 / 2; object-fit: contain; object-position: top; border: 1px solid var(--color-border); border-radius: var(--radius-card); }
+    .pending { min-height: 320px; display: grid; place-items: center; text-align: center; padding: var(--space-l); border: 1px dashed var(--color-border); border-radius: var(--radius-card); color: var(--color-slate500); }
+    @media (max-width: 900px) { .columns { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body><main>
+  <section class="intro">
+    <h1>الدفعة 3أ — C10 إلى C13</h1>
+    <p>{$snapshotCount} لقطة Android بحجم 400×800، من {$caseCount} حالة منطق مشتركة بين Android وSwift Core.</p>
+    <p class="notice"><strong>بوابة الاعتماد:</strong> راجع عمود Android. لا تبدأ 3ب قبل اعتماد هذه الدفعة. لقطات iOS والمقارنة البكسلية مؤجلتان للدفعة النهائية بقرار DEC-045.</p>
+  </section>
+  {$body}
+</main></body></html>
+HTML;
+
+file_put_contents($output.'/comparison.html', $html);
+fwrite(STDOUT, "Generated reports/batch-3a/auth/comparison.html ({$snapshotCount} snapshots, {$caseCount} shared cases)\n");

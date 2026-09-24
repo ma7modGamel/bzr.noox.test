@@ -1,0 +1,13 @@
+{
+  "screen": "SCR-C10",
+  "cases": [
+    {"id":"empty","snapshot":true,"input":{"event":"validate","email":"","password":""},"expected":{"phase":"editing","can_submit":false,"email_error":"auth.validation.email_required","password_error":"auth.validation.password_required","message_key":null,"route":null}},
+    {"id":"loading","snapshot":true,"input":{"event":"submit","email":"customer@example.test","password":"password123"},"expected":{"phase":"loading","can_submit":false,"email_error":null,"password_error":null,"message_key":null,"route":null}},
+    {"id":"invalid_email","snapshot":true,"input":{"event":"validate","email":"invalid","password":"password123"},"expected":{"phase":"editing","can_submit":false,"email_error":"auth.validation.email_invalid","password_error":null,"message_key":null,"route":null}},
+    {"id":"blocked","snapshot":true,"input":{"event":"api_error","email":"customer@example.test","password":"password123","error_code":"ACCOUNT_BLOCKED"},"expected":{"phase":"error","can_submit":true,"email_error":null,"password_error":null,"message_key":"auth.error.blocked","route":null}},
+    {"id":"network_error","snapshot":true,"input":{"event":"network_error","email":"customer@example.test","password":"password123"},"expected":{"phase":"error","can_submit":true,"email_error":null,"password_error":null,"message_key":"error.body","route":null}},
+    {"id":"rate_limited","snapshot":true,"input":{"event":"api_error","email":"customer@example.test","password":"password123","error_code":"RATE_LIMITED"},"expected":{"phase":"error","can_submit":true,"email_error":null,"password_error":null,"message_key":"auth.error.rate_limited","route":null}},
+    {"id":"unverified","snapshot":true,"input":{"event":"login_succeeded","email":"customer@example.test","password":"password123","is_verified":false},"expected":{"phase":"success","can_submit":false,"email_error":null,"password_error":null,"message_key":null,"route":"SCR-C12"}},
+    {"id":"verified","snapshot":true,"input":{"event":"login_succeeded","email":"customer@example.test","password":"password123","is_verified":true},"expected":{"phase":"success","can_submit":false,"email_error":null,"password_error":null,"message_key":null,"route":"SCR-C01"}}
+  ]
+}

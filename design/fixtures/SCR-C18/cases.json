@@ -1,0 +1,8 @@
+{"screen":"SCR-C18","cases":[
+  {"id":"loading","snapshot":true,"input":{"event":"loading"},"expected":{"phase":"loading","can_continue":false}},
+  {"id":"error","snapshot":true,"input":{"event":"error"},"expected":{"phase":"error","can_continue":false,"message_key":"error.body"}},
+  {"id":"empty","snapshot":true,"input":{"event":"loaded","provider_names":[],"order_summaries":[],"conversation_statuses":[],"last_messages":[],"last_message_times":[]},"expected":{"phase":"empty","can_continue":false,"item_count":0}},
+  {"id":"no_messages","snapshot":true,"input":{"event":"loaded","provider_names":["محمد السيد"],"order_summaries":["طلب سباكة #1042"],"conversation_statuses":["OPEN"],"last_messages":[""],"last_message_times":[""],"provider_verified":["verified"]},"expected":{"phase":"content","can_continue":true,"item_count":1}},
+  {"id":"single","snapshot":true,"input":{"event":"loaded","provider_names":["محمد السيد"],"order_summaries":["طلب سباكة #1042 · في الطريق"],"conversation_statuses":["OPEN"],"last_messages":["سأصل خلال عشر دقائق"],"last_message_times":["5:20 م"],"provider_verified":["verified"]},"expected":{"phase":"content","can_continue":true,"item_count":1}},
+  {"id":"multiple","snapshot":true,"input":{"event":"loaded","provider_names":["محمد السيد","أحمد علي"],"order_summaries":["طلب سباكة #1042 · في الطريق","طلب كهرباء #1031 · مكتمل"],"conversation_statuses":["OPEN","READ_ONLY"],"last_messages":["سأصل خلال عشر دقائق","شكرًا لك"],"last_message_times":["5:20 م","أمس"],"provider_verified":["verified","verified"]},"expected":{"phase":"content","can_continue":true,"item_count":2}}
+]}

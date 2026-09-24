@@ -1,0 +1,6 @@
+{"screen":"SCR-C02","cases":[
+  {"id":"loading","snapshot":true,"input":{"event":"loading"},"expected":{"phase":"loading","can_continue":false}},
+  {"id":"error","snapshot":true,"input":{"event":"error"},"expected":{"phase":"error","message_key":"error.body","can_continue":false}},
+  {"id":"verified","snapshot":true,"input":{"event":"loaded","is_verified":true},"expected":{"phase":"content","can_continue":true,"message_key":"account.verified"}},
+  {"id":"unverified","snapshot":true,"input":{"event":"loaded","is_verified":false},"expected":{"phase":"content","can_continue":true,"message_key":"account.unverified"}}
+]}

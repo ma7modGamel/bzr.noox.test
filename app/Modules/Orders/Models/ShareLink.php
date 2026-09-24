@@ -25,7 +25,7 @@ final class ShareLink extends Model
     public function isUsable(): bool
     {
         return $this->revoked_at === null
-            && $this->expires_at->isFuture()
+            && ($this->expires_at === null || $this->expires_at->isFuture())
             && ! $this->order->status->isFinal();
     }
 }

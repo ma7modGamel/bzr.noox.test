@@ -1,0 +1,9 @@
+{"screen":"SCR-C25","cases":[
+  {"id":"loading","snapshot":true,"input":{"event":"loading"},"expected":{"phase":"loading","can_continue":false}},
+  {"id":"error","snapshot":true,"input":{"event":"error"},"expected":{"phase":"error","can_continue":false,"message_key":"error.body"}},
+  {"id":"current_empty","snapshot":true,"input":{"event":"loaded","tab":"current","order_titles":[],"order_subtitles":[],"order_statuses":[]},"expected":{"phase":"empty","can_continue":false,"item_count":0,"selected_option_index":0,"message_key":"orders.current.empty.title"}},
+  {"id":"past_empty","snapshot":true,"input":{"event":"loaded","tab":"past","order_titles":[],"order_subtitles":[],"order_statuses":[]},"expected":{"phase":"empty","can_continue":false,"item_count":0,"selected_option_index":1,"message_key":"orders.past.empty.title"}},
+  {"id":"current","snapshot":true,"input":{"event":"loaded","tab":"current","order_titles":["سباكة — تسريب مياه"],"order_subtitles":["#1042 · مدينة نصر · اليوم"],"order_statuses":["الفني في الطريق"]},"expected":{"phase":"content","can_continue":true,"item_count":1,"selected_option_index":0}},
+  {"id":"past","snapshot":true,"input":{"event":"loaded","tab":"past","order_titles":["كهرباء — عطل بالمفتاح","سباكة — انسداد حوض"],"order_subtitles":["#1031 · المعادي · 20 سبتمبر","#1027 · مدينة نصر · 15 سبتمبر"],"order_statuses":["مكتمل","ملغي"]},"expected":{"phase":"content","can_continue":true,"item_count":2,"selected_option_index":1}},
+  {"id":"next_page","snapshot":true,"input":{"event":"loading_more","tab":"past","order_titles":["كهرباء — عطل بالمفتاح","سباكة — انسداد حوض"],"order_subtitles":["#1031 · المعادي · 20 سبتمبر","#1027 · مدينة نصر · 15 سبتمبر"],"order_statuses":["مكتمل","ملغي"]},"expected":{"phase":"content","can_continue":false,"item_count":2,"selected_option_index":1,"is_busy":true}}
+]}

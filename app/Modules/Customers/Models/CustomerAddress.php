@@ -7,6 +7,7 @@ namespace App\Modules\Customers\Models;
 use App\Modules\Geography\Models\Area;
 use App\Modules\Geography\Models\City;
 use App\Modules\Identity\Models\User;
+use Database\Factories\CustomerAddressFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -41,5 +42,10 @@ final class CustomerAddress extends Model
     public function area(): BelongsTo
     {
         return $this->belongsTo(Area::class);
+    }
+
+    protected static function newFactory(): CustomerAddressFactory
+    {
+        return CustomerAddressFactory::new();
     }
 }

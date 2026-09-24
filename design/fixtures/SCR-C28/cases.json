@@ -1,0 +1,9 @@
+{"screen":"SCR-C28","cases":[
+  {"id":"loading","snapshot":true,"input":{"event":"loading"},"expected":{"phase":"loading","can_continue":false}},
+  {"id":"error","snapshot":true,"input":{"event":"error"},"expected":{"phase":"error","can_continue":false,"message_key":"error.body"}},
+  {"id":"empty","snapshot":true,"input":{"event":"loaded","reason_labels":["سلوك غير لائق","اشتباه احتيال","سبب آخر"],"selected_reason_index":-1,"description":"","available_actions":["report_provider"]},"expected":{"phase":"content","can_continue":false,"selected_option_index":-1}},
+  {"id":"selected","snapshot":true,"input":{"event":"loaded","reason_labels":["سلوك غير لائق","اشتباه احتيال","سبب آخر"],"selected_reason_index":0,"description":"","available_actions":["report_provider"]},"expected":{"phase":"content","can_continue":true,"selected_option_index":0}},
+  {"id":"with_details","snapshot":true,"input":{"event":"loaded","reason_labels":["طلب تواصل أو دفع خارج التطبيق","معلومات مهنية مضللة","سبب آخر"],"selected_reason_index":0,"description":"طلب تحويل المبلغ خارج التطبيق.","available_actions":["report_provider"]},"expected":{"phase":"content","can_continue":true}},
+  {"id":"submitting","snapshot":true,"input":{"event":"submitting","reason_labels":["سلوك غير لائق","اشتباه احتيال","سبب آخر"],"selected_reason_index":1,"description":"تفاصيل البلاغ.","available_actions":["report_provider"]},"expected":{"phase":"content","can_continue":false,"is_busy":true}},
+  {"id":"success","snapshot":true,"input":{"event":"success","reason_labels":["سلوك غير لائق"],"selected_reason_index":0,"description":"","available_actions":[]},"expected":{"phase":"content","can_continue":false,"message_key":"provider.report.success"}}
+]}

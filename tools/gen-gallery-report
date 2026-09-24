@@ -1,0 +1,209 @@
+#!/usr/bin/env php
+<?php
+
+// Builds reports/batch-1/gallery/comparison.html (43 §8):
+// approved reference | Android | iOS side by side, with a measured difference ratio and a diff image.
+//
+// Inputs
+//   Android: androidapp/core/design/src/test/snapshots/images/*_gallery-<id>.png   (Paparazzi)
+//   iOS:     reports/batch-1/gallery/ios/gallery-<id>.png                          (exported by the iOS test, CI)
+//   Approved reference: design/reference/gallery/gallery-<id>.png                  (after owner approval)
+//   Original screenshots: design/reference/C01..C09
+//
+// A pixel counts as different when any channel differs by more than TOLERANCE (anti-aliasing, 43 §8).
+
+declare(strict_types=1);
+
+const TOLERANCE = 24;
+
+$root = dirname(__DIR__);
+$fixture = json_decode((string) file_get_contents($root.'/design/fixtures/gallery/components.json'), true, flags: JSON_THROW_ON_ERROR);
+$output = $root.'/reports/batch-1/gallery';
+
+// Which original screenshots each gallery page is checked against (43 §3 "المرجع").
+$originals = [
+    'buttons' => ['C03', 'C08'],
+    'navigation' => ['C01', 'C02'],
+    'selection' => ['C03', 'C04'],
+    'fields' => ['C04'],
+    'cards' => ['C05', 'C06'],
+    'provider' => ['C06', 'C07'],
+    'tracking' => ['C09', 'C01'],
+    'feedback' => ['C05', 'C08', 'C09'],
+    'chat' => [],
+    'media_sheet' => ['C05'],
+    'text_area' => ['C03'],
+];
+
+foreach (['android', 'diff', 'original', 'reference'] as $directory) {
+    if (! is_dir($output.'/'.$directory) && ! mkdir($output.'/'.$directory, 0775, true) && ! is_dir($output.'/'.$directory)) {
+        throw new RuntimeException("Cannot create {$directory}");
+    }
+}
+
+/** @return array{ratio: float, width: int, height: int}|string */
+function compare(string $first, string $second, string $diffPath): array|string
+{
+    $a = imagecreatefrompng($first);
+    $b = imagecreatefrompng($second);
+    if ($a === false || $b === false) {
+        return 'تعذّر قراءة الصورة';
+    }
+    [$width, $height] = [imagesx($a), imagesy($a)];
+    if ($width !== imagesx($b) || $height !== imagesy($b)) {
+        return sprintf('المقاس مختلف: %d×%d مقابل %d×%d', $width, $height, imagesx($b), imagesy($b));
+    }
+
+    $diff = imagecreatetruecolor($width, $height);
+    $faded = imagecolorallocate($diff, 235, 235, 235);
+    $marked = imagecolorallocate($diff, 198, 79, 83);
+    $different = 0;
+    for ($y = 0; $y < $height; $y++) {
+        for ($x = 0; $x < $width; $x++) {
+            $p = imagecolorat($a, $x, $y);
+            $q = imagecolorat($b, $x, $y);
+            $delta = max(
+                abs((($p >> 16) & 0xFF) - (($q >> 16) & 0xFF)),
+                abs((($p >> 8) & 0xFF) - (($q >> 8) & 0xFF)),
+                abs(($p & 0xFF) - ($q & 0xFF)),
+            );
+            if ($delta > TOLERANCE) {
+                $different++;
+                imagesetpixel($diff, $x, $y, $marked);
+            } else {
+                imagesetpixel($diff, $x, $y, $faded);
+            }
+        }
+    }
+    imagepng($diff, $diffPath);
+
+    return ['ratio' => $different / ($width * $height), 'width' => $width, 'height' => $height];
+}
+
+function image(?string $path, string $pending): string
+{
+    if ($path === null) {
+        return '<div class="pending">'.htmlspecialchars($pending).'</div>';
+    }
+    $escaped = htmlspecialchars($path, ENT_QUOTES);
+
+    return '<a href="'.$escaped.'"><img src="'.$escaped.'" alt="" loading="lazy"></a>';
+}
+
+$pageNames = $fixture['snapshot_pages'];
+$rows = [];
+$summary = [];
+foreach ($fixture['snapshot_cases'] as $index => $case) {
+    $id = $case['id'];
+    $page = $pageNames[$case['page']];
+
+    $android = null;
+    $matches = glob($root.'/androidapp/core/design/src/test/snapshots/images/*_gallery-'.$id.'.png') ?: [];
+    if (count($matches) === 1) {
+        $android = 'android/gallery-'.$id.'.png';
+        copy($matches[0], $output.'/'.$android);
+    }
+
+    $reference = null;
+    if (is_file($root.'/design/reference/gallery/gallery-'.$id.'.png')) {
+        $reference = 'reference/gallery-'.$id.'.png';
+        copy($root.'/design/reference/gallery/gallery-'.$id.'.png', $output.'/'.$reference);
+    }
+
+    $ios = is_file($output.'/ios/gallery-'.$id.'.png') ? 'ios/gallery-'.$id.'.png' : null;
+
+    // iOS is compared with the approved reference; before approval, with the Android snapshot.
+    $baseline = $reference ?? $android;
+    $difference = 'مؤجلة — لقطة iOS تُلتقط في دفعة «تحقق iOS» النهائية (DEC-045)';
+    $diffImage = null;
+    if ($baseline !== null && $ios !== null) {
+        $result = compare($output.'/'.$baseline, $output.'/'.$ios, $output.'/diff/gallery-'.$id.'.png');
+        if (is_array($result)) {
+            $diffImage = 'diff/gallery-'.$id.'.png';
+            $difference = sprintf('%.2f%% من البكسلات (iOS مقابل %s، سماحية %d)', $result['ratio'] * 100, $reference !== null ? 'المرجع المعتمد' : 'Android', TOLERANCE);
+            $summary[] = [$id, $result['ratio']];
+        } else {
+            $difference = $result;
+        }
+    }
+
+    $originalLinks = '';
+    foreach ($originals[$page] ?? [] as $code) {
+        $files = glob($root.'/design/reference/'.$code.'-*.jpeg') ?: [];
+        if ($files !== []) {
+            $name = basename($files[0]);
+            copy($files[0], $output.'/original/'.$name);
+            $originalLinks .= '<a class="original" href="original/'.htmlspecialchars($name).'"><img src="original/'.htmlspecialchars($name).'" alt="'.$code.'" loading="lazy"><span>'.$code.'</span></a>';
+        }
+    }
+
+    $rows[] = '<section class="comparison" id="'.htmlspecialchars($id).'">'.
+        '<header><strong>'.sprintf('%02d', $index + 1).' · '.htmlspecialchars($id).'</strong><span>الفرق: '.htmlspecialchars($difference).'</span></header>'.
+        '<div class="columns">'.
+        '<article><h2>المرجع المعتمد</h2>'.image($reference, 'بانتظار اعتماد المالك للقطة Android (تُحفظ في design/reference/gallery/)').'</article>'.
+        '<article><h2>Android · Paparazzi</h2>'.image($android, 'لم تُسجّل اللقطة').'</article>'.
+        '<article><h2>iOS · SnapshotTesting</h2>'.image($ios, 'مؤجلة إلى دفعة «تحقق iOS» النهائية').'</article>'.
+        '<article><h2>الفرق</h2>'.image($diffImage, 'يظهر في صفحة المقارنة النهائية').'</article>'.
+        '</div>'.
+        ($originalLinks !== '' ? '<div class="originals"><h3>اللقطات الأصلية المرجعية</h3>'.$originalLinks.'</div>' : '').
+        '</section>';
+}
+
+$summaryHtml = $summary === []
+    ? '<p class="notice"><strong>لقطات Android معتمدة.</strong> نسب iOS مؤجلة بقرار DEC-045 إلى الدفعة الأخيرة «تحقق iOS»؛ المهمة اليدوية الجاهزة اسمها <code>Final iOS validation</code>.</p>'
+    : '<table><thead><tr><th>اللقطة</th><th>نسبة الفرق</th></tr></thead><tbody>'.implode('', array_map(
+        static fn (array $item): string => '<tr><td><a href="#'.htmlspecialchars($item[0]).'">'.htmlspecialchars($item[0]).'</a></td><td>'.sprintf('%.2f%%', $item[1] * 100).'</td></tr>',
+        $summary,
+    )).'</tbody></table>';
+
+$tolerance = TOLERANCE;
+$cases = count($fixture['snapshot_cases']);
+$viewport = $fixture['viewport']['width'].'×'.$fixture['viewport']['height'];
+$body = implode("\n", $rows);
+
+$html = <<<HTML
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>الدفعة 1 — مقارنة معرض المكونات</title>
+  <link rel="stylesheet" href="../../../design/generated/tokens.css">
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; padding: var(--space-xl); background: var(--color-surfacealt); color: var(--color-navy800); font-family: var(--font-family), sans-serif; }
+    main { max-width: 1680px; margin: auto; }
+    .intro, .comparison { background: var(--color-surface); border: var(--size-controlstroke) solid var(--color-border); border-radius: var(--radius-card); padding: var(--space-l); margin-bottom: var(--space-l); }
+    h1 { color: var(--color-navy900); }
+    .notice { background: var(--color-primary50info); border-radius: var(--radius-card); padding: var(--space-m); }
+    header { display: flex; justify-content: space-between; gap: var(--space-m); margin-bottom: var(--space-m); flex-wrap: wrap; }
+    .columns { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--space-m); }
+    article { min-width: 0; }
+    h2 { font-size: var(--type-sectiontitle-size); color: var(--color-navy900); }
+    img { width: 100%; max-width: 400px; aspect-ratio: 1 / 2; object-fit: contain; object-position: top; border: var(--border-width, 1px) solid var(--color-border); border-radius: var(--radius-card); background: var(--color-surface); }
+    .pending { min-height: 320px; display: grid; place-items: center; text-align: center; padding: var(--space-l); border: 1px dashed var(--color-border); border-radius: var(--radius-card); color: var(--color-slate500); }
+    .originals { display: flex; gap: var(--space-m); align-items: flex-start; flex-wrap: wrap; margin-top: var(--space-m); }
+    .originals h3 { width: 100%; margin: 0; font-size: var(--type-body-size); }
+    .original { display: grid; gap: var(--space-xs); width: 160px; text-decoration: none; color: var(--color-slate500); }
+    table { border-collapse: collapse; } td, th { border: 1px solid var(--color-border); padding: var(--space-xs) var(--space-m); }
+    @media (max-width: 1100px) { .columns { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+    @media (max-width: 600px) { .columns { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+<main>
+  <section class="intro">
+    <h1>الدفعة 1 — صفحة مقارنة معرض المكونات</h1>
+    <p>{$cases} لقطة · المقاس {$viewport} بكسل في المنصتين (1×) · RTL · Cairo بأربع أوزان ثابتة · فاتح فقط.</p>
+    <p><strong>اعتماد المالك:</strong> لقطات Android الست عشرة معتمدة ومحفوظة في <code>design/reference/gallery</code>.</p>
+    <p>الفرق يُحسب لـ iOS مقابل المرجع المعتمد، وقبل الاعتماد مقابل لقطة Android. البكسل يُحسب مختلفًا إذا زاد فرق أي قناة عن {$tolerance}؛ صورة الفرق تُعلّم البكسلات المختلفة بالأحمر.</p>
+    {$summaryHtml}
+  </section>
+  {$body}
+</main>
+</body>
+</html>
+HTML;
+
+file_put_contents($output.'/comparison.html', $html);
+fwrite(STDOUT, "Generated reports/batch-1/gallery/comparison.html ({$cases} cases, ".count($summary)." with iOS difference)\n");

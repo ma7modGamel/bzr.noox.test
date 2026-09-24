@@ -1,0 +1,9 @@
+{
+  "screen": "SCR-C34",
+  "cases": [
+    {"id":"loading","input":{"event":"loading"},"expected":{"phase":"loading","can_continue":false}},
+    {"id":"error","input":{"event":"error"},"expected":{"phase":"error","can_continue":false,"message_key":"error.body"}},
+    {"id":"empty","input":{"event":"loaded","body":"","version":"","effective_at":""},"expected":{"phase":"content","can_continue":false,"item_count":1}},
+    {"id":"current","input":{"event":"loaded","body":"الشروط والأحكام المعتمدة من الخادم.","version":"1.0","effective_at":"24 سبتمبر 2026"},"expected":{"phase":"content","can_continue":true,"item_count":1}}
+  ]
+}

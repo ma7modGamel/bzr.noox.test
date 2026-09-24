@@ -1,0 +1,8 @@
+{"screen":"SCR-C30","cases":[
+  {"id":"loading","snapshot":true,"input":{"event":"loading"},"expected":{"phase":"loading","can_continue":false}},
+  {"id":"error","snapshot":true,"input":{"event":"error"},"expected":{"phase":"error","can_continue":false,"message_key":"error.body"}},
+  {"id":"quote","snapshot":true,"input":{"event":"loaded","type_label":"عرض تنفيذ","amount":"450 جنيه","reason":"إصلاح التسريب وتغيير الوصلة","total":"450 جنيه","countdown_seconds":2700,"has_photo":false,"available_actions":["approve_proposal","reject_proposal"]},"expected":{"phase":"content","can_continue":true,"item_count":4,"visible_actions":["approve_proposal","reject_proposal"],"is_busy":false}},
+  {"id":"with_photo","snapshot":true,"input":{"event":"loaded","type_label":"عرض تنفيذ","amount":"650 جنيه","reason":"تغيير الجزء التالف بالكامل","total":"650 جنيه","countdown_seconds":900,"has_photo":true,"available_actions":["approve_proposal","reject_proposal"]},"expected":{"phase":"content","can_continue":true,"item_count":4,"visible_actions":["approve_proposal","reject_proposal"]}},
+  {"id":"expired","snapshot":true,"input":{"event":"loaded","type_label":"عرض تنفيذ","amount":"450 جنيه","reason":"إصلاح التسريب","total":"450 جنيه","countdown_seconds":0,"expired":true,"available_actions":[]},"expected":{"phase":"content","can_continue":false,"message_key":"proposal.expired","visible_actions":[]}},
+  {"id":"submitting","snapshot":true,"input":{"event":"submitting","type_label":"عرض تنفيذ","amount":"450 جنيه","reason":"إصلاح التسريب","total":"450 جنيه","countdown_seconds":1200,"available_actions":["approve_proposal","reject_proposal"]},"expected":{"phase":"content","can_continue":false,"message_key":"proposal.deciding","is_busy":true}}
+]}

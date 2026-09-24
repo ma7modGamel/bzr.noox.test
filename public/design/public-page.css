@@ -1,0 +1,22 @@
+/* W02 and legal pages (DEC-051): RTL, Cairo, values only from tokens.css. */
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--color-surfacealt); color: var(--color-navy800); font-family: 'Cairo', sans-serif; font-size: var(--type-body-size); }
+.page-shell { max-width: calc(var(--size-mobilecontentwidth) * 2); margin: 0 auto; padding: var(--space-xl) var(--space-screenhorizontal); min-height: 100vh; display: flex; flex-direction: column; gap: var(--space-sectiongap); }
+.brand-bar a { color: var(--color-primary700); font-size: var(--type-screentitle-size); font-weight: var(--type-screentitle-weight); text-decoration: none; }
+.card { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-card); padding: var(--space-cardpadding); display: flex; flex-direction: column; gap: var(--space-m); }
+h1 { margin: 0; color: var(--color-navy900); font-size: var(--type-screentitle-size); font-weight: var(--type-screentitle-weight); }
+h2 { color: var(--color-navy900); font-size: var(--type-sectiontitle-size); font-weight: var(--type-sectiontitle-weight); margin: var(--space-l) 0 var(--space-s); }
+.meta { color: var(--color-slate500); font-size: var(--type-secondary-size); }
+.state-icon { width: var(--size-avatarsmall); height: var(--size-avatarsmall); border-radius: 50%; display: grid; place-items: center; background: var(--color-primary50); margin-inline: auto; }
+.state-icon.error { background: var(--color-surfacealt); }
+.center { text-align: center; }
+label { display: block; color: var(--color-slate500); font-size: var(--type-secondary-size); margin-bottom: var(--space-xs); }
+input { width: 100%; height: var(--size-fieldheight); border: 1px solid var(--color-border); border-radius: var(--radius-field); padding: 0 var(--space-m); font: inherit; background: var(--color-surface); }
+input:focus { outline: none; border: 1.5px solid var(--color-primary600); }
+.error-text { color: var(--color-danger); font-size: var(--type-caption-size); }
+button, .button { height: var(--size-primarybuttonheight); border: 0; border-radius: var(--radius-button); background: var(--color-primary600); color: var(--color-onprimary); font: inherit; font-weight: var(--type-button-weight); font-size: var(--type-button-size); cursor: pointer; width: 100%; }
+.legal-body { line-height: 1.9; }
+.legal-body p, .legal-body li { font-size: var(--type-body-size); }
+.draft { background: var(--color-warningbg); color: var(--color-warningtext); border-radius: var(--radius-card); padding: var(--space-m) var(--space-l); }
+.page-footer { margin-top: auto; display: flex; flex-wrap: wrap; gap: var(--space-l); color: var(--color-slate500); font-size: var(--type-caption-size); }
+.page-footer a { color: var(--color-primary700); }

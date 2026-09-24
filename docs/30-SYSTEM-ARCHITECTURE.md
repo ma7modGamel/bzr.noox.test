@@ -12,7 +12,7 @@ flowchart LR
   B --> DB[(MariaDB)]
   B --> S[(تخزين الملفات<br/>خاص + روابط موقّعة)]
   B -->|FCM HTTP v1| G[Firebase Cloud Messaging]
-  B -->|SMTP/API| M[مزود البريد OD-03]
+  B -->|API/SMTP| M[ZeptoMail — DEC-049]
   B <-->|إنشاء دفع + Webhook| FW[فوري FawryPay]
   C -->|Maps SDK| GM[Google Maps]
   B -->|Routes API: وقت الوصول| GM
@@ -94,8 +94,22 @@ app/
 - بيئتان: `staging` و`production`. خادم تطبيق (Nginx + PHP-FPM) + MariaDB + Redis + مشغل طوابير (Supervisor) + cron للمجدول.
 - phpMyAdmin في بيئة التطوير فقط، أو خلف VPN/IP مسموح في الإنتاج (32).
 - نسخ احتياطي يومي لقاعدة البيانات والملفات، واحتفاظ 14 يومًا.
+- **خصوصية روابط المشاركة:** يجب تعطيل access log لمسار `/v/*` في خادم الويب وموازن الحمل حتى لا يظهر رمز المشاركة في السجلات. إعداد Nginx الملزم:
+  ```nginx
+  location ^~ /v/ {
+      access_log off;
+      try_files $uri /index.php?$query_string;
+  }
+  ```
+  يتحقق بند `DEP-PRIV-01` في قائمة النشر 44، ويفحصه `tools/check-deployment-docs` داخل CI.
 
 ## التطبيقات الأصلية
-- Android: Kotlin + Jetpack Compose. iOS: Swift + SwiftUI. (اقتراح؛ ASM-09)
+- Android: Kotlin + **XML Views** (Activity واحدة + Fragments + Navigation Component + ViewBinding + Material Components) — DEC-047 يلغي Compose. iOS: Swift + SwiftUI. (ASM-09)
 - تطبيق واحد لكل منصة بوضعين. RTL أولًا. الخطوط والألوان والمقاسات من 38.
 - Google Maps SDK للخرائط، FCM للإشعارات، SDK فوري للدفع (أو WebView لصفحة الدفع).
+- تكامل الدفع خلف `PaymentGateway`: المحاكي هو تنفيذ staging الحالي، وتنفيذ فوري الحقيقي يُبدّل من الإعدادات بعد OD-10 دون تغيير تطبيقات الهاتف. التطبيقات تتصل بالخادم فقط.
+
+## الأساس المشترك للواجهات
+- مجلد `design/` هو المصدر التنفيذي الواحد للرموز والنصوص والأيقونات والخطوط والـ fixtures واللقطات المرجعية وفق 43 §2.
+- السكربت الوحيد `tools/gen-design` يولّد مخرجات Android وiOS من هذا المصدر، والملفات المولّدة لا تُعدَّل يدويًا.
+- يفحص CI أن إعادة تشغيل `tools/gen-design` لا تغيّر الملفات المولّدة؛ أي انحراف يفشل البناء.

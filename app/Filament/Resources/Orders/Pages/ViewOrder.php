@@ -6,7 +6,11 @@ namespace App\Filament\Resources\Orders\Pages;
 
 use App\Filament\Resources\Orders\OrderResource;
 use App\Modules\Identity\Models\Admin;
+use App\Modules\Orders\Actions\AdminCloseWithoutPaymentAction;
 use App\Modules\Orders\Actions\AssignProviderAction;
+use App\Modules\Orders\Actions\CancelOrderAction;
+use App\Modules\Orders\Enums\ActorType;
+use App\Modules\Orders\Enums\CancelReason;
 use App\Modules\Orders\Enums\OrderStatus;
 use App\Modules\Orders\Models\Order;
 use App\Modules\Orders\Services\ProviderEligibility;
@@ -49,7 +53,87 @@ final class ViewOrder extends ViewRecord
         return [
             $this->assignAction(),
             $this->reassignAction(),
+            $this->closeWithoutPaymentAction(),
+            $this->cancelAction(),
         ];
+    }
+
+    /** T-25 — إغلاق بدون دفع؛ العمولة صفر (BR-055). */
+    private function closeWithoutPaymentAction(): Action
+    {
+        return Action::make('closeWithoutPayment')
+            ->label('إغلاق بدون دفع')
+            ->icon(Heroicon::OutlinedBanknotes)
+            ->color('gray')
+            ->requiresConfirmation()
+            ->modalDescription('يُغلق الطلب بلا مبلغ وبعمولة صفر. يُسجَّل باسمك مع السبب.')
+            ->visible(fn (): bool => $this->record instanceof Order
+                && $this->record->status === OrderStatus::AwaitingPayment)
+            ->schema([
+                Textarea::make('reason')->label('السبب')->required()->minLength(5)->maxLength(500),
+            ])
+            ->action(function (array $data): void {
+                $this->runIntervention(
+                    fn (Admin $admin) => app(AdminCloseWithoutPaymentAction::class)
+                        ->execute($this->record, $admin, (string) $data['reason']),
+                    'تم إغلاق الطلب بدون دفع.',
+                );
+            });
+    }
+
+    /** T-26 — إلغاء إداري بسبب إلزامي (16). */
+    private function cancelAction(): Action
+    {
+        return Action::make('adminCancel')
+            ->label('إلغاء الطلب')
+            ->icon(Heroicon::OutlinedXCircle)
+            ->color('danger')
+            ->requiresConfirmation()
+            ->visible(fn (): bool => $this->record instanceof Order
+                && in_array($this->record->status, [
+                    OrderStatus::Open, OrderStatus::Confirmed, OrderStatus::OnTheWay,
+                    OrderStatus::Arrived, OrderStatus::AwaitingQuoteApproval, OrderStatus::InProgress,
+                ], true))
+            ->schema([
+                Select::make('reason_code')
+                    ->label('سبب الإلغاء')
+                    ->options(fn (): array => collect(CancelReason::forActor(ActorType::Admin))
+                        ->mapWithKeys(fn (CancelReason $r) => [$r->value => $r->getLabel()])
+                        ->all())
+                    ->required(),
+                Textarea::make('note')->label('ملاحظة')->maxLength(500),
+            ])
+            ->action(function (array $data): void {
+                $this->runIntervention(
+                    fn (Admin $admin) => app(CancelOrderAction::class)->execute(
+                        $this->record,
+                        ActorType::Admin,
+                        $admin->getKey(),
+                        CancelReason::from((string) $data['reason_code']),
+                        $data['note'] ?? null,
+                    ),
+                    'تم إلغاء الطلب.',
+                );
+            });
+    }
+
+    /** كل تدخل إداري يمر من هنا: يُسجَّل باسم المسؤول ويعرض أخطاء المجال كما هي (AC-ADM-03). */
+    private function runIntervention(callable $callback, string $successMessage): void
+    {
+        /** @var Admin $admin */
+        $admin = auth('admin')->user();
+
+        try {
+            $callback($admin);
+        } catch (DomainException $e) {
+            Notification::make()->danger()->title($e->errorCode())->body($e->getMessage())->send();
+
+            return;
+        }
+
+        $this->refreshFormData([]);
+
+        Notification::make()->success()->title($successMessage)->send();
     }
 
     /** T-27 — تعيين مقدم خدمة لطلب بانتظار التعيين. */

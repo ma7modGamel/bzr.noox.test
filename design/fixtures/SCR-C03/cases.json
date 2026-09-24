@@ -1,0 +1,7 @@
+{"screen":"SCR-C03","cases":[
+  {"id":"loading","snapshot":true,"input":{"event":"loading"},"expected":{"phase":"loading","can_continue":false}},
+  {"id":"error","snapshot":true,"input":{"event":"error"},"expected":{"phase":"error","message_key":"error.body","can_continue":false}},
+  {"id":"empty","snapshot":true,"input":{"event":"validate","problem_type_id":"","description":""},"expected":{"phase":"empty","can_continue":false,"description_error":"request.problem.required"}},
+  {"id":"other_short","snapshot":true,"input":{"event":"validate","problem_type_id":"other","description":"قصير"},"expected":{"phase":"content","can_continue":false,"description_error":"request.description.other_min"}},
+  {"id":"with_media","snapshot":true,"input":{"event":"validate","problem_type_id":"leak","description":"يوجد تسريب مياه أسفل الحوض","media_count":3},"expected":{"phase":"content","can_continue":true}}
+]}

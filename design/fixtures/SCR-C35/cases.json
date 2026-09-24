@@ -1,0 +1,11 @@
+{
+  "screen": "SCR-C35",
+  "cases": [
+    {"id":"loading","input":{"event":"loading"},"expected":{"phase":"loading","can_continue":false}},
+    {"id":"error","input":{"event":"error"},"expected":{"phase":"error","can_continue":false,"message_key":"error.body"}},
+    {"id":"edit_only","input":{"event":"loaded","available_actions":["edit_request"]},"expected":{"phase":"empty","can_continue":true,"visible_actions":["edit_request"]}},
+    {"id":"republish_only","input":{"event":"loaded","available_actions":["republish"]},"expected":{"phase":"empty","can_continue":true,"visible_actions":["republish"]}},
+    {"id":"edit_and_republish","input":{"event":"loaded","available_actions":["edit_request","republish"]},"expected":{"phase":"empty","can_continue":true,"visible_actions":["edit_request","republish"]}},
+    {"id":"submitting","input":{"event":"submitting","available_actions":["republish"]},"expected":{"phase":"empty","can_continue":false,"is_busy":true,"visible_actions":["republish"]}}
+  ]
+}

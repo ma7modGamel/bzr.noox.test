@@ -25,3 +25,12 @@ yarn-error.log
 /.nova
 /.vscode
 /.zed
+androidapp/core/design/build/
+androidapp/app/build/
+androidapp/.gradle/
+androidapp/local.properties
+iosapp/.build/
+iosapp/Core/.build/
+iosapp/Packages/DesignSystem/.build/
+iosapp/BzrApp.xcodeproj/
+iosapp/Packages/DesignSystem/Tests/DesignSystemTests/__Exports__/

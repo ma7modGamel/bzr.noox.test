@@ -36,7 +36,7 @@ final class AdminPanelProvider extends PanelProvider
             ->path('admin')
             ->authGuard('admin')          // حسابات منفصلة عن المستخدمين (03)
             ->login()
-            ->brandName('بازار — لوحة التشغيل')
+            ->brandName(config('app.name').' — لوحة التشغيل')
             ->colors([
                 'primary' => Color::hex('#149C94'), // primary-600 (38 §1)
                 'info' => Color::hex('#00ACB6'),    // primary-500

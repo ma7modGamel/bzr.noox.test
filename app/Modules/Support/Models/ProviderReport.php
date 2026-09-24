@@ -6,6 +6,7 @@ namespace App\Modules\Support\Models;
 
 use App\Modules\Identity\Models\Admin;
 use App\Modules\Identity\Models\User;
+use App\Modules\Orders\Models\Order;
 use App\Modules\Providers\Models\ProviderProfile;
 use App\Modules\Support\Enums\ReportStatus;
 use Illuminate\Database\Eloquent\Model;
@@ -24,6 +25,11 @@ final class ProviderReport extends Model
     public function reporter(): BelongsTo
     {
         return $this->belongsTo(User::class, 'reporter_user_id');
+    }
+
+    public function order(): BelongsTo
+    {
+        return $this->belongsTo(Order::class);
     }
 
     public function providerProfile(): BelongsTo

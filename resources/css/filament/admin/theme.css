@@ -13,39 +13,33 @@
 @source '../../../../app/Filament/**/*';
 @source '../../../../resources/views/filament/**/*';
 
+@import '../../../../design/tokens/generated/tokens.css';
+
+/* أسماء مختصرة تُستخدم داخل مكونات اللوحة — كلها تشير للتوكنات المولَّدة (DEC-043) */
 @theme {
-    /* ── الأساسي (تركوازي) — 38 §1 ───────────────────────────────── */
-    --color-bzr-50: #e8f4f4;
-    --color-bzr-100: #e4f8f6;
-    --color-bzr-200: #dff7fb;
-    --color-bzr-400: #26b5aa;
-    --color-bzr-500: #00acb6;
-    --color-bzr-600: #149c94;
-    --color-bzr-700: #1e8c8c;
-
-    /* ── النصوص والأسطح — 38 §1 ──────────────────────────────────── */
-    --color-navy-900: #071c41;
-    --color-navy-800: #101d3c;
-    --color-slate-ink-500: #57617b;
-    --color-slate-ink-400: #6d7895;
-    --color-slate-ink-300: #8e929d;
-    --color-hairline: #e0e4e8;
-    --color-surface-alt: #f4f4f8;
-    --color-surface-alt-2: #f5f9ff;
-
-    /* ── الكهرماني (تنبيهات وتقييم) — 38 §1 ──────────────────────── */
-    --color-star: #f0ac2c;
-    --color-amber-bg: #fcf0dc;
-    --color-warning-bg: #fcf0d4;
-    --color-warning-ink: #6a4915;
-    --color-badge-bg: #fceccc;
-    --color-badge-ink: #a0793b;
-
-    /* ── الإلغاء — 38 §1 ─────────────────────────────────────────── */
-    --color-cancel: #c64f53;
-
-    /* الاستدارة: كروت 38 §5 */
-    --radius-card: 0.875rem;
+    --color-bzr-50: var(--bzr-primary-50);
+    --color-bzr-100: var(--bzr-primary-100);
+    --color-bzr-200: var(--bzr-primary-200);
+    --color-bzr-400: var(--bzr-primary-400);
+    --color-bzr-500: var(--bzr-primary-500);
+    --color-bzr-600: var(--bzr-primary-600);
+    --color-bzr-700: var(--bzr-primary-700);
+    --color-navy-900: var(--bzr-ink-navy-900);
+    --color-navy-800: var(--bzr-ink-navy-800);
+    --color-slate-ink-500: var(--bzr-ink-slate-500);
+    --color-slate-ink-400: var(--bzr-ink-slate-400);
+    --color-slate-ink-300: var(--bzr-ink-slate-300);
+    --color-hairline: var(--bzr-surface-border);
+    --color-surface-alt: var(--bzr-surface-alt);
+    --color-surface-alt-2: var(--bzr-surface-alt2);
+    --color-star: var(--bzr-amber-star);
+    --color-amber-bg: var(--bzr-amber-bg);
+    --color-warning-bg: var(--bzr-amber-warning-bg);
+    --color-warning-ink: var(--bzr-amber-warning-ink);
+    --color-badge-bg: var(--bzr-amber-badge-bg);
+    --color-badge-ink: var(--bzr-amber-badge-ink);
+    --color-cancel: var(--bzr-danger-500);
+    --radius-card: var(--bzr-radius-card);
 }
 
 @layer base {

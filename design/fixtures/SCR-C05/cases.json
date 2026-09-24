@@ -1,0 +1,7 @@
+{"screen":"SCR-C05","cases":[
+  {"id":"loading","snapshot":true,"input":{"event":"loading"},"expected":{"phase":"loading","can_continue":false}},
+  {"id":"error","snapshot":true,"input":{"event":"error"},"expected":{"phase":"error","message_key":"error.body","can_continue":false}},
+  {"id":"terms_missing","snapshot":true,"input":{"event":"validate","operating_mode":"marketplace","terms_accepted":false},"expected":{"phase":"content","can_continue":false,"show_pricing":true,"terms_error":"request.terms.required"}},
+  {"id":"marketplace","snapshot":true,"input":{"event":"validate","operating_mode":"marketplace","terms_accepted":true},"expected":{"phase":"content","can_continue":true,"show_pricing":true}},
+  {"id":"staff","snapshot":true,"input":{"event":"validate","operating_mode":"staff","terms_accepted":true},"expected":{"phase":"content","can_continue":true,"show_pricing":false}}
+]}

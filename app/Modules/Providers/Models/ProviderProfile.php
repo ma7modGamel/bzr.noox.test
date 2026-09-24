@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Modules\Providers\Models;
 
-use Database\Factories\ProviderProfileFactory;
 use App\Modules\Catalog\Models\Category;
 use App\Modules\Catalog\Models\ProblemType;
 use App\Modules\Geography\Models\Area;
@@ -14,6 +13,8 @@ use App\Modules\Orders\Enums\OrderStatus;
 use App\Modules\Orders\Models\Order;
 use App\Modules\Providers\Enums\EmploymentType;
 use App\Modules\Providers\Enums\ProviderStatus;
+use App\Modules\Reviews\Models\Review;
+use Database\Factories\ProviderProfileFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -87,6 +88,11 @@ final class ProviderProfile extends Model
     public function offers(): HasMany
     {
         return $this->hasMany(Offer::class);
+    }
+
+    public function reviews(): HasMany
+    {
+        return $this->hasMany(Review::class);
     }
 
     public function orders(): HasMany

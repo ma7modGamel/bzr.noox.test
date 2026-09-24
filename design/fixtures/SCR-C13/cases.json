@@ -1,0 +1,11 @@
+{
+  "screen": "SCR-C13",
+  "cases": [
+    {"id":"empty","snapshot":true,"input":{"event":"validate","email":""},"expected":{"phase":"editing","can_submit":false,"email_error":"auth.validation.email_required","message_key":null,"route":null}},
+    {"id":"loading","snapshot":true,"input":{"event":"submit","email":"customer@example.test"},"expected":{"phase":"loading","can_submit":false,"email_error":null,"message_key":null,"route":null}},
+    {"id":"invalid_email","snapshot":true,"input":{"event":"validate","email":"invalid"},"expected":{"phase":"editing","can_submit":false,"email_error":"auth.validation.email_invalid","message_key":null,"route":null}},
+    {"id":"network_error","snapshot":true,"input":{"event":"network_error","email":"customer@example.test"},"expected":{"phase":"error","can_submit":true,"email_error":null,"message_key":"error.body","route":null}},
+    {"id":"rate_limited","snapshot":true,"input":{"event":"api_error","email":"customer@example.test","error_code":"RATE_LIMITED"},"expected":{"phase":"error","can_submit":true,"email_error":null,"message_key":"auth.error.rate_limited","route":null}},
+    {"id":"sent","snapshot":true,"input":{"event":"forgot_succeeded","email":"customer@example.test"},"expected":{"phase":"success","can_submit":true,"email_error":null,"message_key":"auth.password.forgot.sent","route":null}}
+  ]
+}

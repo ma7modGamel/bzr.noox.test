@@ -1,0 +1,128 @@
+#!/usr/bin/env php
+<?php
+
+declare(strict_types=1);
+
+$root = dirname(__DIR__);
+$output = $root.'/reports/batch-3c/customer-support';
+$androidOutput = $output.'/android';
+foreach ([$output, $androidOutput] as $directory) {
+    if (! is_dir($directory) && ! mkdir($directory, 0775, true) && ! is_dir($directory)) {
+        throw new RuntimeException("Cannot create {$directory}");
+    }
+}
+
+$labels = [
+    'loading' => 'تحميل', 'error' => 'خطأ شبكة', 'empty' => 'فارغ', 'list' => 'قائمة عناوين',
+    'confirm_delete' => 'تأكيد حذف العنوان', 'deleting' => 'حذف جارٍ', 'unserved_area' => 'منطقة غير مخدومة',
+    'location_missing' => 'موقع غير محدد', 'valid' => 'نموذج صالح', 'saving' => 'حفظ جارٍ',
+    'day_selected' => 'يوم مختار', 'slot_selected' => 'فترة مختارة', 'changing_day' => 'تغيير اليوم',
+    'uploading' => 'رفع جارٍ', 'uploaded' => 'وسائط مرفوعة', 'failed' => 'فشل الرفع',
+    'limit_reached' => 'بلوغ الحد', 'recording' => 'تسجيل صوتي جارٍ',
+];
+
+$rows = [];
+$snapshotCount = 0;
+$caseCount = 0;
+foreach (['SCR-C14', 'SCR-C15', 'SCR-C16', 'SCR-C17'] as $screen) {
+    $fixturePath = 'design/fixtures/'.$screen.'/cases.json';
+    $fixture = json_decode((string) file_get_contents($root.'/'.$fixturePath), true, flags: JSON_THROW_ON_ERROR);
+    $caseCount += count($fixture['cases']);
+    foreach ($fixture['cases'] as $case) {
+        if (! $case['snapshot']) {
+            continue;
+        }
+        $snapshotCount++;
+        $id = $screen.'-'.$case['id'];
+        $matches = glob($root.'/androidapp/app/src/test/snapshots/images/*_'.strtolower($id).'.png') ?: [];
+        if (count($matches) !== 1) {
+            throw new RuntimeException("Missing Android snapshot for {$id}");
+        }
+        $target = 'android/'.$id.'.png';
+        copy($matches[0], $output.'/'.$target);
+        $label = $labels[$case['id']] ?? $case['id'];
+        $spec = '../../../docs/screens/'.$screen.'.md';
+        $rows[] = '<section class="comparison" id="'.htmlspecialchars($id).'">'
+            .'<header><strong>'.htmlspecialchars($screen).' · '.htmlspecialchars($label).'</strong><code>'.htmlspecialchars($case['id']).'</code></header>'
+            .'<div class="columns">'
+            .'<article><h2>المواصفة الملزمة</h2><div class="pending"><a href="'.htmlspecialchars($spec).'">'.htmlspecialchars($screen.'.md').'</a><br>لا توجد لقطة أصلية لهذه الشاشة؛ الاعتماد الحالي يصنع مرجع Android.</div></article>'
+            .'<article><h2>Android · Paparazzi</h2><a href="'.htmlspecialchars($target).'"><img src="'.htmlspecialchars($target).'" alt="'.htmlspecialchars($id).' Android" loading="lazy"></a></article>'
+            .'<article><h2>iOS</h2><div class="pending">الكود موجود ومختبر على Linux؛ الرسم واللقطة مؤجلان إلى دفعة «تحقق iOS» النهائية وفق DEC-045.</div></article>'
+            .'</div></section>';
+    }
+}
+
+// C14's final-address outcome is enforced where C04 selects the request address.
+$screen = 'SCR-C04';
+$caseId = 'address_missing';
+$id = $screen.'-'.$caseId;
+$matches = glob($root.'/androidapp/app/src/test/snapshots/images/*_'.strtolower($id).'.png') ?: [];
+if (count($matches) !== 1) {
+    throw new RuntimeException("Missing Android snapshot for {$id}");
+}
+$snapshotCount++;
+$target = 'android/'.$id.'.png';
+copy($matches[0], $output.'/'.$target);
+$rows[] = '<section class="comparison" id="'.htmlspecialchars($id).'">'
+    .'<header><strong>SCR-C04 · لا يوجد عنوان بعد حذف الأخير</strong><code>'.htmlspecialchars($caseId).'</code></header>'
+    .'<div class="columns">'
+    .'<article><h2>المواصفة الملزمة</h2><div class="pending"><a href="../../../docs/screens/SCR-C04.md">SCR-C04.md</a><br>الخطوة 2 تطلب إضافة عنوان قبل الاستمرار.</div></article>'
+    .'<article><h2>Android · Paparazzi</h2><a href="'.htmlspecialchars($target).'"><img src="'.htmlspecialchars($target).'" alt="'.htmlspecialchars($id).' Android" loading="lazy"></a></article>'
+    .'<article><h2>iOS</h2><div class="pending">الحالة مختبرة في Swift Core؛ اللقطة مؤجلة لدفعة «تحقق iOS».</div></article>'
+    .'</div></section>';
+
+// C17 adds its visible entry point to the previously approved C03; expose every affected content variant.
+foreach (['empty', 'other_short', 'with_media'] as $caseId) {
+    $screen = 'SCR-C03';
+    $id = $screen.'-'.$caseId;
+    $matches = glob($root.'/androidapp/app/src/test/snapshots/images/*_'.strtolower($id).'.png') ?: [];
+    if (count($matches) !== 1) {
+        throw new RuntimeException("Missing Android snapshot for {$id}");
+    }
+    $snapshotCount++;
+    $target = 'android/'.$id.'.png';
+    copy($matches[0], $output.'/'.$target);
+    $rows[] = '<section class="comparison" id="'.htmlspecialchars($id).'">'
+        .'<header><strong>SCR-C03 · نقطة دخول C17 · '.htmlspecialchars($caseId).'</strong><code>'.htmlspecialchars($caseId).'</code></header>'
+        .'<div class="columns">'
+        .'<article><h2>المواصفة الملزمة</h2><div class="pending"><a href="../../../docs/screens/SCR-C03.md">SCR-C03.md</a><br>لقطة إعادة اعتماد لأن زر «إضافة وسائط» أُضيف لربط C17.</div></article>'
+        .'<article><h2>Android · Paparazzi</h2><a href="'.htmlspecialchars($target).'"><img src="'.htmlspecialchars($target).'" alt="'.htmlspecialchars($id).' Android" loading="lazy"></a></article>'
+        .'<article><h2>iOS</h2><div class="pending">نقطة الدخول نفسها مكتوبة في SwiftUI ومفحوصة على Linux؛ اللقطة مؤجلة إلى دفعة «تحقق iOS».</div></article>'
+        .'</div></section>';
+}
+
+$body = implode("\n", $rows);
+$html = <<<HTML
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>الدفعة 3ج — C14–C17</title>
+  <link rel="stylesheet" href="../../../design/generated/tokens.css">
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; padding: var(--space-xl); background: var(--color-surfacealt); color: var(--color-navy800); font-family: var(--font-family), sans-serif; }
+    main { max-width: 1320px; margin: auto; }
+    .intro, .comparison { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-card); padding: var(--space-l); margin-bottom: var(--space-l); }
+    h1, h2 { color: var(--color-navy900); }
+    .notice { background: var(--color-primary50info); border-radius: var(--radius-card); padding: var(--space-m); }
+    header { display: flex; justify-content: space-between; gap: var(--space-m); align-items: center; }
+    .columns { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-m); }
+    img { width: 100%; max-width: 400px; aspect-ratio: 1 / 2; object-fit: contain; object-position: top; border: 1px solid var(--color-border); border-radius: var(--radius-card); }
+    .pending { min-height: 400px; display: grid; place-items: center; text-align: center; padding: var(--space-l); border: 1px dashed var(--color-border); border-radius: var(--radius-card); color: var(--color-slate500); }
+    @media (max-width: 900px) { .columns { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body><main>
+  <section class="intro">
+    <h1>الدفعة 3ج — C14 إلى C17</h1>
+    <p>{$snapshotCount} لقطة Android بحجم 400×800: {$caseCount} حالة C14–C17 متطابقة، وحالة C04 بعد حذف آخر عنوان، و3 لقطات لنقطة دخول C17 في C03.</p>
+    <p class="notice"><strong>بوابة الاعتماد:</strong> راجع عمود Android واعتمده ليصبح المرجع المرحلي. لا تبدأ الدفعة 4 قبل الاعتماد. لقطات iOS والمقارنة البكسلية مؤجلتان للدفعة النهائية بقرار DEC-045.</p>
+  </section>
+  {$body}
+</main></body></html>
+HTML;
+
+file_put_contents($output.'/comparison.html', $html);
+fwrite(STDOUT, "Generated reports/batch-3c/customer-support/comparison.html ({$snapshotCount} snapshots, {$caseCount} shared cases)\n");

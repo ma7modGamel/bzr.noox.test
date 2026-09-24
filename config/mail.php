@@ -70,6 +70,11 @@ return [
             'path' => env('MAIL_SENDMAIL_PATH', '/usr/sbin/sendmail -bs -i'),
         ],
 
+        // DEC-049 — ZeptoMail (Zoho) عبر API. البديل: mailer `smtp` بـ smtp.zeptomail.com (44).
+        'zeptomail' => [
+            'transport' => 'zeptomail',
+        ],
+
         'log' => [
             'transport' => 'log',
             'channel' => env('MAIL_LOG_CHANNEL'),
@@ -111,8 +116,18 @@ return [
     */
 
     'from' => [
-        'address' => env('MAIL_FROM_ADDRESS', 'hello@example.com'),
-        'name' => env('MAIL_FROM_NAME', env('APP_NAME', 'Laravel')),
+        // DEC-048 — no-reply@{APP_DOMAIN} للإرسال.
+        'address' => env('MAIL_FROM_ADDRESS', 'no-reply@'.env('APP_DOMAIN', 'localhost')),
+        'name' => env('MAIL_FROM_NAME', env('APP_NAME', 'بريمو - Bremo')),
     ],
+
+    // DEC-049 — قوالب البريد عربية RTL بألوان tokens.json (السمة مولّدة من tools/gen-design).
+    'markdown' => [
+        'theme' => 'bremo',
+        'paths' => [resource_path('views/vendor/mail')],
+    ],
+
+    // DEC-048 / DEC-049 — support@{APP_DOMAIN} صندوق Zoho Mail يستقبل رسائل C29.
+    'support_address' => env('MAIL_SUPPORT_ADDRESS', 'support@'.env('APP_DOMAIN', 'localhost')),
 
 ];

@@ -1,0 +1,11 @@
+{
+  "screen": "SCR-C29",
+  "cases": [
+    {"id":"loading","input":{"event":"loading"},"expected":{"phase":"loading","can_continue":false}},
+    {"id":"error","input":{"event":"error"},"expected":{"phase":"error","can_continue":false,"message_key":"error.body"}},
+    {"id":"empty","input":{"event":"loaded","faq_questions":["كيف أتابع طلبي؟"],"faq_answers":["من شاشة الطلب الحالي."],"subject":"","message":"","expanded_index":-1},"expected":{"phase":"content","can_continue":false,"item_count":1,"selected_index":-1}},
+    {"id":"invalid","input":{"event":"loaded","faq_questions":["كيف أدفع؟"],"faq_answers":["من شاشة الدفع."],"subject":"طلب","message":"قصيرة","expanded_index":0},"expected":{"phase":"content","can_continue":false,"item_count":1,"selected_index":0,"field_errors":["help.validation.subject","help.validation.message"]}},
+    {"id":"submitting","input":{"event":"submitting","faq_questions":["كيف أدفع؟"],"faq_answers":["من شاشة الدفع."],"subject":"مساعدة في الطلب","message":"أحتاج مساعدة في متابعة الطلب الحالي","expanded_index":-1},"expected":{"phase":"content","can_continue":false,"is_busy":true}},
+    {"id":"success","input":{"event":"success","faq_questions":["كيف أدفع؟"],"faq_answers":["من شاشة الدفع."],"subject":"مساعدة في الطلب","message":"أحتاج مساعدة في متابعة الطلب الحالي","expanded_index":-1},"expected":{"phase":"content","can_continue":true,"message_key":"help.success"}}
+  ]
+}

@@ -1,0 +1,8 @@
+{"screen":"SCR-C06","cases":[
+  {"id":"loading","snapshot":true,"input":{"event":"loading"},"expected":{"phase":"loading","can_continue":false}},
+  {"id":"error","snapshot":true,"input":{"event":"error"},"expected":{"phase":"error","message_key":"error.body","can_continue":false}},
+  {"id":"empty","snapshot":true,"input":{"event":"loaded","offer_count":0,"available_actions":["edit_request","republish"]},"expected":{"phase":"empty","can_continue":true,"visible_actions":["edit_request","republish"]}},
+  {"id":"execution_now","snapshot":true,"input":{"event":"loaded","offer_count":2,"pricing_mode":"execution","timing_type":"now","available_actions":["accept_offer","edit_request","cancel"]},"expected":{"phase":"content","can_continue":true,"show_pricing":true,"visible_actions":["accept_offer","edit_request","cancel"]}},
+  {"id":"inspection","snapshot":true,"input":{"event":"loaded","offer_count":2,"pricing_mode":"inspection","timing_type":"now","available_actions":["accept_offer","cancel"]},"expected":{"phase":"content","can_continue":true,"show_pricing":true,"visible_actions":["accept_offer","cancel"]}},
+  {"id":"scheduled","snapshot":true,"input":{"event":"loaded","offer_count":2,"pricing_mode":"execution","timing_type":"scheduled","available_actions":["accept_offer","cancel"]},"expected":{"phase":"content","can_continue":true,"show_eta":false,"visible_actions":["accept_offer","cancel"]}}
+]}

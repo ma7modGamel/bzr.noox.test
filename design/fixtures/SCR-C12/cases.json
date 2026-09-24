@@ -1,0 +1,13 @@
+{
+  "screen": "SCR-C12",
+  "cases": [
+    {"id":"waiting","snapshot":true,"input":{"event":"show","email":"customer@example.test"},"expected":{"phase":"waiting","can_submit":true,"message_key":null,"route":null}},
+    {"id":"checking","snapshot":true,"input":{"event":"check","email":"customer@example.test"},"expected":{"phase":"loading","can_submit":false,"message_key":null,"route":null}},
+    {"id":"not_verified","snapshot":true,"input":{"event":"verification_checked","email":"customer@example.test","is_verified":false},"expected":{"phase":"waiting","can_submit":true,"message_key":"auth.verify.not_yet","route":null}},
+    {"id":"resent","snapshot":true,"input":{"event":"resend_succeeded","email":"customer@example.test"},"expected":{"phase":"success","can_submit":true,"message_key":"auth.verify.resent","route":null}},
+    {"id":"network_error","snapshot":true,"input":{"event":"network_error","email":"customer@example.test"},"expected":{"phase":"error","can_submit":true,"message_key":"error.body","route":null}},
+    {"id":"rate_limited","snapshot":true,"input":{"event":"api_error","email":"customer@example.test","error_code":"RATE_LIMITED"},"expected":{"phase":"error","can_submit":true,"message_key":"auth.error.rate_limited","route":null}},
+    {"id":"verified","snapshot":true,"input":{"event":"verification_checked","email":"customer@example.test","is_verified":true},"expected":{"phase":"success","can_submit":false,"message_key":null,"route":"SCR-C01"}},
+    {"id":"session_expired","snapshot":false,"input":{"event":"session_expired","email":"customer@example.test"},"expected":{"phase":"success","can_submit":false,"message_key":null,"route":"SCR-C10"}}
+  ]
+}

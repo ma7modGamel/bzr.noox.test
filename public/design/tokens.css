@@ -1,0 +1,157 @@
+@font-face {
+  font-family: 'Cairo';
+  src: url('fonts/Cairo-Regular.ttf') format('truetype');
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Cairo';
+  src: url('fonts/Cairo-Medium.ttf') format('truetype');
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Cairo';
+  src: url('fonts/Cairo-SemiBold.ttf') format('truetype');
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Cairo';
+  src: url('fonts/Cairo-Bold.ttf') format('truetype');
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+}
+
+:root {
+  --color-primary600: #149C94;
+  --color-primary500: #00ACB6;
+  --color-primary400: #26B5AA;
+  --color-primary700: #1E8C8C;
+  --color-primary50: #E8F4F4;
+  --color-primary50info: #E4F8F6;
+  --color-primary50available: #DFF7FB;
+  --color-navy900: #071C41;
+  --color-navy800: #101D3C;
+  --color-slate500: #57617B;
+  --color-slate400: #6D7895;
+  --color-slate300: #8E929D;
+  --color-border: #E0E4E8;
+  --color-surface: #FFFFFF;
+  --color-surfacealt: #F4F4F8;
+  --color-surfacealt2: #F5F9FF;
+  --color-scrim: #0B1220B3;
+  --color-onprimary: #FFFFFF;
+  --color-star: #F0AC2C;
+  --color-amber500: #FCBC40;
+  --color-amber50: #FCF0DC;
+  --color-warningbg: #FCF0D4;
+  --color-warningtext: #6A4915;
+  --color-badgebg: #FCECCC;
+  --color-badgetext: #A0793B;
+  --color-danger: #C64F53;
+  --type-screentitle-size: 22px;
+  --type-screentitle-weight: 700;
+  --type-displaynumber-size: 32px;
+  --type-displaynumber-weight: 700;
+  --type-price-size: 25px;
+  --type-price-weight: 700;
+  --type-sectiontitle-size: 18px;
+  --type-sectiontitle-weight: 700;
+  --type-cardtitle-size: 18px;
+  --type-cardtitle-weight: 700;
+  --type-body-size: 16px;
+  --type-body-weight: 500;
+  --type-button-size: 17px;
+  --type-button-weight: 700;
+  --type-secondary-size: 14px;
+  --type-secondary-weight: 400;
+  --type-caption-size: 13px;
+  --type-caption-weight: 500;
+  --type-badge-size: 12px;
+  --type-badge-weight: 500;
+  --type-placeholder-size: 16px;
+  --type-placeholder-weight: 400;
+  --space-screenhorizontal: 18px;
+  --space-cardgap: 8px;
+  --space-sectiongap: 24px;
+  --space-sectiongaplarge: 28px;
+  --space-cardpadding: 16px;
+  --space-rowgap: 12px;
+  --space-xs: 4px;
+  --space-s: 8px;
+  --space-m: 12px;
+  --space-l: 16px;
+  --space-xl: 24px;
+  --space-xxl: 32px;
+  --radius-button: 10px;
+  --radius-card: 12px;
+  --radius-field: 10px;
+  --radius-chip: 10px;
+  --radius-badge: 8px;
+  --radius-checkbox: 4px;
+  --radius-herocard: 16px;
+  --radius-sheettop: 16px;
+  --radius-menuiconbox: 12px;
+  --radius-full: 999px;
+  --size-mobilecontentwidth: 400px;
+  --size-topbarheight: 56px;
+  --size-primarybuttonheight: 52px;
+  --size-secondarybuttonheight: 44px;
+  --size-compactbuttonheight: 36px;
+  --size-chatsquarebuttonw: 62px;
+  --size-chatsquarebuttonh: 36px;
+  --size-categorytilew: 118px;
+  --size-categorytileh: 104px;
+  --size-homeservicetilew: 118px;
+  --size-homeservicetileh: 86px;
+  --size-tileicon: 40px;
+  --size-chipheight: 40px;
+  --size-sortchipheight: 36px;
+  --size-fieldheight: 48px;
+  --size-currencyboxwidth: 50px;
+  --size-textareaheight: 90px;
+  --size-checkbox: 20px;
+  --size-radio: 20px;
+  --size-radiodot: 10px;
+  --size-controlstroke: 2px;
+  --size-mediabuttonheight: 48px;
+  --size-paymentcardheight: 70px;
+  --size-herocardheight: 90px;
+  --size-stepcircle: 26px;
+  --size-stepindicatorwidth: 232px;
+  --size-stepperdot: 16px;
+  --size-stepperdotactive: 20px;
+  --size-stepperline: 2px;
+  --size-avatarxs: 32px;
+  --size-avatarsmall: 64px;
+  --size-avatarmedium: 72px;
+  --size-avatarlarge: 88px;
+  --size-verifiedshield: 28px;
+  --size-statusdot: 8px;
+  --size-statdivider: 48px;
+  --size-ratingbarheight: 8px;
+  --size-ratinglabelwidth: 110px;
+  --size-mapcardheight: 185px;
+  --size-mylocationbutton: 40px;
+  --size-etaiconcircle: 52px;
+  --size-chatbubblemaxwidth: 280px;
+  --size-sheethandlew: 32px;
+  --size-sheethandleh: 4px;
+  --size-skeletonline: 12px;
+  --size-progressstroke: 2px;
+  --size-bottomnavheight: 72px;
+  --size-icon: 24px;
+  --size-iconsmall: 16px;
+  --size-iconxs: 12px;
+  --size-menuiconbox: 44px;
+  --border-width: 1px;
+  --font-family: 'Cairo';
+}

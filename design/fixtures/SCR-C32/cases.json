@@ -1,0 +1,10 @@
+{
+  "screen": "SCR-C32",
+  "cases": [
+    {"id":"loading","input":{"event":"loading"},"expected":{"phase":"loading","can_continue":false}},
+    {"id":"error","input":{"event":"error"},"expected":{"phase":"error","can_continue":false,"message_key":"error.body"}},
+    {"id":"empty","input":{"event":"loaded","notification_titles":[],"notification_bodies":[],"notification_states":[],"deep_links":[],"notification_times":[]},"expected":{"phase":"empty","can_continue":false,"item_count":0}},
+    {"id":"mixed","input":{"event":"loaded","notification_titles":["تم قبول العرض","موعدك قريب"],"notification_bodies":["يمكنك متابعة الفني الآن","متبقي ساعتان"],"notification_states":["unread","read"],"deep_links":["bzr://orders/19","bzr://orders/20"],"notification_times":["منذ دقيقة","أمس"]},"expected":{"phase":"content","can_continue":true,"item_count":2}},
+    {"id":"marking_read","input":{"event":"marking_read","notification_titles":["تم قبول العرض"],"notification_bodies":["يمكنك متابعة الفني الآن"],"notification_states":["unread"],"deep_links":["bzr://orders/19"],"notification_times":["منذ دقيقة"]},"expected":{"phase":"content","can_continue":true,"item_count":1,"is_busy":true}}
+  ]
+}

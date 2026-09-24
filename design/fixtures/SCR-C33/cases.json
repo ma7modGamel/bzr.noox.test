@@ -1,0 +1,14 @@
+{
+  "screen": "SCR-C33",
+  "cases": [
+    {"id":"loading","input":{"event":"loading"},"expected":{"phase":"loading","can_continue":false}},
+    {"id":"error","input":{"event":"error"},"expected":{"phase":"error","can_continue":false,"message_key":"error.body"}},
+    {"id":"overview","input":{"event":"loaded","mode":"overview","field_values":["أحمد محمد","ahmed@example.com","01000000000"],"available_actions":["update_account","change_password","delete_account","logout"]},"expected":{"phase":"content","can_continue":true,"is_editing":false,"visible_actions":["update_account","change_password","delete_account","logout"]}},
+    {"id":"invalid_edit","input":{"event":"loaded","mode":"edit","field_values":["أ","ahmed@example.com","01000000000"],"available_actions":["update_account"]},"expected":{"phase":"content","can_continue":false,"is_editing":true,"field_errors":["account.validation.name"]}},
+    {"id":"invalid_password","input":{"event":"loaded","mode":"password","field_values":["","123","456"],"available_actions":["change_password"]},"expected":{"phase":"content","can_continue":false,"is_editing":true,"field_errors":["account.validation.current_password","account.validation.new_password","account.validation.password_confirmation"]}},
+    {"id":"confirm_delete","input":{"event":"confirm_delete","mode":"delete","field_values":[],"available_actions":["delete_account"]},"expected":{"phase":"content","can_continue":true,"is_editing":true,"show_confirmation":true}},
+    {"id":"active_order","input":{"event":"active_order","mode":"overview","field_values":["أحمد محمد","ahmed@example.com","01000000000"],"available_actions":["delete_account"]},"expected":{"phase":"content","can_continue":true,"message_key":"account.delete.active_order"}},
+    {"id":"deleting","input":{"event":"submitting","mode":"delete","field_values":[],"available_actions":["delete_account"]},"expected":{"phase":"content","can_continue":false,"is_editing":true,"is_busy":true,"show_confirmation":true}},
+    {"id":"success","input":{"event":"success","mode":"overview","field_values":["أحمد محمد","ahmed@example.com","01000000000"],"available_actions":["update_account","change_password","delete_account","logout"]},"expected":{"phase":"content","can_continue":true,"message_key":"account.settings.success","is_editing":false}}
+  ]
+}

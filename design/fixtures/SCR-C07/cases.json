@@ -1,0 +1,6 @@
+{"screen":"SCR-C07","cases":[
+  {"id":"loading","snapshot":true,"input":{"event":"loading"},"expected":{"phase":"loading","can_continue":false}},
+  {"id":"error","snapshot":true,"input":{"event":"error"},"expected":{"phase":"error","message_key":"error.body","can_continue":false}},
+  {"id":"available","snapshot":true,"input":{"event":"loaded","provider_available":true,"available_actions":["accept_offer","report_provider"]},"expected":{"phase":"content","can_continue":true,"visible_actions":["accept_offer","report_provider"]}},
+  {"id":"unavailable","snapshot":true,"input":{"event":"loaded","provider_available":false,"available_actions":["report_provider"]},"expected":{"phase":"empty","can_continue":false,"visible_actions":["report_provider"]}}
+]}

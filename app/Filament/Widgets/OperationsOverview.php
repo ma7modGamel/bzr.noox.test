@@ -5,9 +5,12 @@ declare(strict_types=1);
 namespace App\Filament\Widgets;
 
 use App\Filament\Resources\Orders\OrderResource;
+use App\Filament\Resources\PendingTransfers\PendingTransferResource;
 use App\Filament\Resources\Providers\ProviderProfileResource;
 use App\Modules\Orders\Enums\OrderStatus;
 use App\Modules\Orders\Models\Order;
+use App\Modules\Payments\Enums\PaymentStatus;
+use App\Modules\Payments\Models\Payment;
 use App\Modules\Providers\Enums\ProviderStatus;
 use App\Modules\Providers\Models\ProviderProfile;
 use App\Modules\Settings\Enums\Cfg;
@@ -37,6 +40,7 @@ final class OperationsOverview extends StatsOverviewWidget
             $this->disputesStat(),
             $this->pendingProvidersStat(),
             $this->latePaymentsStat($settings),
+            ...$this->pendingTransfersStat($settings),
         ];
     }
 
@@ -92,6 +96,31 @@ final class OperationsOverview extends StatsOverviewWidget
             ->description('مستندات + اتصال لتوثيق الهاتف (DEC-033)')
             ->color($count > 0 ? 'warning' : 'gray')
             ->url(ProviderProfileResource::getUrl('index'));
+    }
+
+    /**
+     * BR-057 — تحويلات إنستاباي بانتظار التأكيد، ومنها المتأخر بعد CFG-050 (بلا إغلاق تلقائي).
+     *
+     * @return list<Stat>
+     */
+    private function pendingTransfersStat(SettingsRepository $settings): array
+    {
+        if (! PendingTransferResource::canAccess()) {
+            return [];
+        }
+
+        $hours = $settings->int(Cfg::PaymentDelayAlertHours);
+        $pending = Payment::query()->where('status', PaymentStatus::PendingVerification->value);
+        $count = (clone $pending)->count();
+        $late = (clone $pending)->where('submitted_at', '<=', now()->subHours($hours))->count();
+
+        return [
+            Stat::make('تحويلات بانتظار التأكيد', (string) $count)
+                ->description($late > 0 ? "منها {$late} متأخرة > {$hours} ساعة" : 'ضمن المهلة')
+                ->descriptionColor($late > 0 ? 'danger' : 'success')
+                ->color($count > 0 ? 'warning' : 'gray')
+                ->url(PendingTransferResource::getUrl('index')),
+        ];
     }
 
     private function latePaymentsStat(SettingsRepository $settings): Stat

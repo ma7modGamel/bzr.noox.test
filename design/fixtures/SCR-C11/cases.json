@@ -1,0 +1,12 @@
+{
+  "screen": "SCR-C11",
+  "cases": [
+    {"id":"empty","snapshot":true,"input":{"event":"validate","name":"","email":"","phone":"","password":""},"expected":{"phase":"editing","can_submit":false,"name_error":"auth.validation.name_required","email_error":"auth.validation.email_required","phone_error":"auth.validation.phone_invalid","password_error":"auth.validation.password_short","message_key":null,"route":null}},
+    {"id":"loading","snapshot":true,"input":{"event":"submit","name":"أحمد علي","email":"ahmed@example.test","phone":"01012345678","password":"password123"},"expected":{"phase":"loading","can_submit":false,"name_error":null,"email_error":null,"phone_error":null,"password_error":null,"message_key":null,"route":null}},
+    {"id":"invalid_phone","snapshot":true,"input":{"event":"validate","name":"أحمد علي","email":"ahmed@example.test","phone":"123","password":"password123"},"expected":{"phase":"editing","can_submit":false,"name_error":null,"email_error":null,"phone_error":"auth.validation.phone_invalid","password_error":null,"message_key":null,"route":null}},
+    {"id":"email_used","snapshot":true,"input":{"event":"api_error","name":"أحمد علي","email":"ahmed@example.test","phone":"01012345678","password":"password123","field":"email"},"expected":{"phase":"error","can_submit":true,"name_error":null,"email_error":"auth.validation.email_used","phone_error":null,"password_error":null,"message_key":null,"route":null}},
+    {"id":"network_error","snapshot":true,"input":{"event":"network_error","name":"أحمد علي","email":"ahmed@example.test","phone":"01012345678","password":"password123"},"expected":{"phase":"error","can_submit":true,"name_error":null,"email_error":null,"phone_error":null,"password_error":null,"message_key":"error.body","route":null}},
+    {"id":"rate_limited","snapshot":true,"input":{"event":"api_error","name":"أحمد علي","email":"ahmed@example.test","phone":"01012345678","password":"password123","error_code":"RATE_LIMITED"},"expected":{"phase":"error","can_submit":true,"name_error":null,"email_error":null,"phone_error":null,"password_error":null,"message_key":"auth.error.rate_limited","route":null}},
+    {"id":"registered","snapshot":true,"input":{"event":"register_succeeded","name":"أحمد علي","email":"ahmed@example.test","phone":"01012345678","password":"password123"},"expected":{"phase":"success","can_submit":false,"name_error":null,"email_error":null,"phone_error":null,"password_error":null,"message_key":null,"route":"SCR-C12"}}
+  ]
+}

@@ -1,0 +1,8 @@
+{"screen":"SCR-C16","cases":[
+  {"id":"loading","snapshot":true,"input":{"event":"loading"},"expected":{"phase":"loading","can_continue":false,"item_count":0,"selected_index":-1,"is_busy":false}},
+  {"id":"error","snapshot":true,"input":{"event":"error"},"expected":{"phase":"error","message_key":"error.body","can_continue":false,"item_count":0,"selected_index":-1,"is_busy":false}},
+  {"id":"empty","snapshot":true,"input":{"event":"loaded","day_labels":["اليوم","غدًا","السبت","الأحد","الاثنين","الثلاثاء","الأربعاء"],"slot_labels":[],"selected_day_index":0,"selected_slot_index":-1},"expected":{"phase":"empty","can_continue":false,"item_count":0,"selected_index":-1,"is_busy":false}},
+  {"id":"day_selected","snapshot":true,"input":{"event":"loaded","day_labels":["اليوم","غدًا","السبت","الأحد","الاثنين","الثلاثاء","الأربعاء"],"slot_labels":["1:00–3:00 م","3:00–5:00 م","5:00–7:00 م"],"selected_day_index":0,"selected_slot_index":-1},"expected":{"phase":"content","can_continue":false,"item_count":3,"selected_index":-1,"is_busy":false}},
+  {"id":"slot_selected","snapshot":true,"input":{"event":"loaded","day_labels":["اليوم","غدًا","السبت","الأحد","الاثنين","الثلاثاء","الأربعاء"],"slot_labels":["1:00–3:00 م","3:00–5:00 م","5:00–7:00 م"],"selected_day_index":0,"selected_slot_index":2},"expected":{"phase":"content","can_continue":true,"item_count":3,"selected_index":2,"is_busy":false}},
+  {"id":"changing_day","snapshot":true,"input":{"event":"changing_day","day_labels":["اليوم","غدًا","السبت","الأحد","الاثنين","الثلاثاء","الأربعاء"],"slot_labels":[],"selected_day_index":1,"selected_slot_index":-1},"expected":{"phase":"loading","can_continue":false,"item_count":0,"selected_index":-1,"is_busy":true}}
+]}

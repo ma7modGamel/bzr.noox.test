@@ -1,0 +1,7 @@
+{"screen":"SCR-C23","cases":[
+  {"id":"loading","snapshot":true,"input":{"event":"loading"},"expected":{"phase":"loading","can_continue":false}},
+  {"id":"error","snapshot":true,"input":{"event":"error"},"expected":{"phase":"error","can_continue":false,"message_key":"error.body"}},
+  {"id":"ready","snapshot":true,"input":{"event":"loaded","summary":["محمد السيد","500 جنيه","200 جنيه","700 جنيه","نقدي"],"available_actions":["confirm_completion","open_dispute"]},"expected":{"phase":"content","can_continue":true,"item_count":5,"is_busy":false,"visible_actions":["confirm_completion","open_dispute"]}},
+  {"id":"submitting","snapshot":true,"input":{"event":"submitting","summary":["محمد السيد","500 جنيه","200 جنيه","700 جنيه","نقدي"],"available_actions":["confirm_completion","open_dispute"]},"expected":{"phase":"content","can_continue":false,"is_busy":true}},
+  {"id":"unavailable","snapshot":true,"input":{"event":"loaded","summary":["محمد السيد","500 جنيه","200 جنيه","700 جنيه","نقدي"],"available_actions":[]},"expected":{"phase":"content","can_continue":false,"visible_actions":[]}}
+]}

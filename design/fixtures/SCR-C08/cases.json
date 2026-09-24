@@ -1,0 +1,7 @@
+{"screen":"SCR-C08","cases":[
+  {"id":"loading","snapshot":true,"input":{"event":"loading"},"expected":{"phase":"loading","can_continue":false}},
+  {"id":"error","snapshot":true,"input":{"event":"error"},"expected":{"phase":"error","message_key":"error.body","can_continue":false}},
+  {"id":"execution","snapshot":true,"input":{"event":"loaded","pricing_mode":"execution","timing_type":"now","available_actions":["accept_offer"]},"expected":{"phase":"content","can_continue":true,"show_pricing":true,"show_eta":true,"visible_actions":["accept_offer"]}},
+  {"id":"inspection","snapshot":true,"input":{"event":"loaded","pricing_mode":"inspection","timing_type":"now","available_actions":["accept_offer"]},"expected":{"phase":"content","can_continue":true,"show_pricing":true,"show_eta":true,"visible_actions":["accept_offer"]}},
+  {"id":"scheduled","snapshot":true,"input":{"event":"loaded","pricing_mode":"execution","timing_type":"scheduled","available_actions":["accept_offer"]},"expected":{"phase":"content","can_continue":true,"show_pricing":true,"show_eta":false,"visible_actions":["accept_offer"]}}
+]}

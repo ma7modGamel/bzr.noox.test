@@ -1,0 +1,67 @@
+{
+  "orders": [
+    {
+      "case_id": "open_employee_waiting_assignment",
+      "payload": {
+        "id": 101,
+        "number": "BZR-101",
+        "status": "OPEN",
+        "display_status": "order.status.customer.OPEN",
+        "available_actions": ["edit_request", "cancel"],
+        "deadlines": {
+          "offers_close_at": null,
+          "selection_deadline_at": null,
+          "proposal_expires_at": null,
+          "no_show_allowed_at": null,
+          "auto_close_at": null
+        },
+        "stepper": null
+      },
+      "expected_action_text_keys": ["action.edit_request", "action.cancel"],
+      "expected_stepper_state": null
+    },
+    {
+      "case_id": "disputed_from_in_progress",
+      "payload": {
+        "id": 202,
+        "number": "BZR-202",
+        "status": "DISPUTED",
+        "display_status": "order.status.provider.DISPUTED",
+        "available_actions": ["chat", "call"],
+        "deadlines": {
+          "offers_close_at": null,
+          "selection_deadline_at": null,
+          "proposal_expires_at": "2026-09-24T12:00:00Z",
+          "no_show_allowed_at": null,
+          "auto_close_at": null
+        },
+        "stepper": [
+          {"key": "confirmed", "state": "done"},
+          {"key": "on_the_way", "state": "done"},
+          {"key": "arrived", "state": "done"},
+          {"key": "in_progress", "state": "on_hold"},
+          {"key": "payment", "state": "pending"},
+          {"key": "closed", "state": "pending"}
+        ]
+      },
+      "expected_action_text_keys": ["action.chat", "action.call"],
+      "expected_stepper_state": "on_hold"
+    }
+  ],
+  "formatting": {
+    "number": {"input": 4.9, "expected": "4.9"},
+    "amount": {"input": 350, "currency": "جنيه", "expected": "350 جنيه"},
+    "countdown": {"input_seconds": 760, "expected": "12:40"},
+    "time": {
+      "iso8601": "2026-09-24T17:00:00Z",
+      "timezone": "UTC",
+      "morning": "صباحًا",
+      "evening": "مساءً",
+      "expected": "5:00 مساءً"
+    },
+    "dates": [
+      {"iso8601": "2026-09-24T10:00:00Z", "reference": "2026-09-24T01:00:00Z", "timezone": "UTC", "expected": "اليوم"},
+      {"iso8601": "2026-09-25T10:00:00Z", "reference": "2026-09-24T01:00:00Z", "timezone": "UTC", "expected": "غدًا"}
+    ]
+  }
+}

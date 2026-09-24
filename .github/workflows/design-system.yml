@@ -1,0 +1,52 @@
+name: Design system parity
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  generated-and-android:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.3"
+          extensions: gd
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - uses: gradle/actions/setup-gradle@v4
+      - uses: swift-actions/setup-swift@v2
+        with:
+          swift-version: "6.0.3"
+      - name: Verify generated design outputs
+        run: php tools/gen-design --check
+      - name: Verify Android/iOS parity manifest
+        run: php tools/check-parity
+      - name: Verify deployment privacy checklist
+        run: php tools/check-deployment-docs
+      - name: Reject hard-coded visual values and text (43 §9.3)
+        run: php tools/lint-design
+      - name: Build and test UI-independent iOS core on Linux
+        run: swift build --package-path iosapp/Core && swift test --package-path iosapp/Core
+      - name: Check Swift formatting across iosapp
+        run: find iosapp -type f -name '*.swift' -not -path '*/.build/*' -print0 | xargs -0 swift-format lint --strict --parallel
+      - name: Run SwiftLint across iosapp
+        run: docker run --rm -v "$GITHUB_WORKSPACE:/workspace" -w /workspace ghcr.io/realm/swiftlint:0.65.0 lint --strict --config .swiftlint.yml
+      - name: Build gallery and verify Android snapshots
+        env:
+          ANDROID_HOME: /usr/local/lib/android/sdk
+        run: androidapp/gradlew -p androidapp :app:assembleDebug :app:verifyPaparazziDebug :core:design:verifyPaparazziDebug
+      - name: Compare XML Views with the approved Compose targets (DEC-047)
+        run: php tools/compare-android-xml gallery --strict
+      - name: Keep Paparazzi failure diffs
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-paparazzi-failures
+          path: |
+            androidapp/app/build/paparazzi/failures
+            androidapp/core/design/build/paparazzi/failures

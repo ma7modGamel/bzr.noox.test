@@ -1,0 +1,20 @@
+# SCR-C17 — إضافة وسائط
+- النمط: E + منتقي النظام
+- المرجع البصري: C03 (`MediaThumb`)، `AppBottomSheet`
+- الطرف والوضع: العميل — السوق والموظفين
+- الدخول من: SCR-C03 زر "إضافة وسائط"   ·   الخروج إلى: SCR-C03 مع `media_ids` المرفوعة
+- القواعد: BR-014، 07 §الخطوة 1
+- الـ API: `POST /media` multipart بالحقل `file`، `DELETE /media/{media}`
+- التخطيط (من أعلى لأسفل):
+  1. ورقة بنمط `AppBottomSheet` وعنوان `media.sheet.title`
+  2. `InfoBanner`  text=`media.limits`
+  3. زران متجاوران `SecondaryButton`: `media.pick.photo` و`media.pick.video`
+  4. `SecondaryButton`  text=`media.record.audio` لبدء/إيقاف تسجيل AAC داخل m4a، قناة واحدة، 64kbps
+  5. لكل ملف `MediaThumb` بالنوع وحالة الرفع والحذف
+  6. `PrimaryButton`  text=`media.done`
+- المتغيرات: فارغ / صور / فيديو / صوت / رفع جارٍ / فشل. منتقي الصور والكاميرا والملفات ونافذة الصلاحية اختلاف نظام مسموح في 43 §7؛ النتيجة الموحدة هي ملف للرفع.
+- التحقق: حتى 5 صور (10MB للصورة)، فيديو واحد MP4/MOV/WebM (60 ثانية، 50MB)، وصوت واحد AAC/m4a (120 ثانية، 5MB، mono، 64kbps). المنطق المشترك يمنع تجاوز العدد/الحجم/المدة قبل الرفع، والخادم يتحقق من المحتوى الفعلي بـ`ffprobe`.
+- الحالات: تحميل / خطأ شبكة / فراغ / رفع جارٍ / مرفوع / فشل / بلوغ الحد / تسجيل صوتي جارٍ.
+- الأخطاء: `BUSINESS_RULE_VIOLATION`/`BR-014` ← `media.validation.rejected`؛ `404` عند حذف رفع غير مملوك ← إعادة القائمة المحلية مع `error.body`؛ خطأ شبكة ← `media.failed`.
+- fixtures: `design/fixtures/SCR-C17/cases.json`
+- أسئلة مفتوحة: لا يوجد؛ الرفع مؤقت وينتهي بعد 24 ساعة إذا لم يُربط بطلب.

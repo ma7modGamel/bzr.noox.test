@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Modules\Orders\Models;
 
-use Database\Factories\OrderFactory;
 use App\Modules\Catalog\Models\Category;
 use App\Modules\Catalog\Models\ProblemType;
 use App\Modules\Communication\Models\Conversation;
@@ -25,8 +24,11 @@ use App\Modules\Payments\Models\Payment;
 use App\Modules\Pricing\Enums\ProposalStatus;
 use App\Modules\Pricing\Models\PriceProposal;
 use App\Modules\Providers\Models\ProviderProfile;
+use App\Modules\Reviews\Models\CustomerRating;
+use App\Modules\Reviews\Models\Review;
 use App\Modules\Settings\Enums\OperatingMode;
 use App\Modules\Support\Models\Dispute;
+use Database\Factories\OrderFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -50,6 +52,7 @@ final class Order extends Model
         return [
             'operating_mode' => OperatingMode::class,
             'status' => OrderStatus::class,
+            'disputed_from_status' => OrderStatus::class,
             'timing_type' => TimingType::class,
             'pricing_mode' => PricingMode::class,
             'materials_responsibility' => MaterialsResponsibility::class,
@@ -75,6 +78,10 @@ final class Order extends Model
             'lng' => 'decimal:7',
             'arrived_lat' => 'decimal:7',
             'arrived_lng' => 'decimal:7',
+            'eta_approximate' => 'bool',
+            'eta_calculated_at' => 'immutable_datetime',
+            'eta_origin_lat' => 'decimal:7',
+            'eta_origin_lng' => 'decimal:7',
             'budget_amount' => 'decimal:2',
             'commission_rate' => 'decimal:4',
             'labor_total' => 'decimal:2',
@@ -177,6 +184,40 @@ final class Order extends Model
     public function shareLink(): HasOne
     {
         return $this->hasOne(ShareLink::class)->latestOfMany();
+    }
+
+    public function pendingProposalRecord(): HasOne
+    {
+        return $this->hasOne(PriceProposal::class)
+            ->where('status', ProposalStatus::Pending->value)
+            ->latestOfMany();
+    }
+
+    public function latestSuccessfulPayment(): HasOne
+    {
+        return $this->hasOne(Payment::class)
+            ->where('status', 'SUCCEEDED')
+            ->latestOfMany('paid_at');
+    }
+
+    public function latestPaymentAttempt(): HasOne
+    {
+        return $this->hasOne(Payment::class)->latestOfMany();
+    }
+
+    public function latestTrackingPoint(): HasOne
+    {
+        return $this->hasOne(TrackingPoint::class)->latestOfMany('recorded_at');
+    }
+
+    public function review(): HasOne
+    {
+        return $this->hasOne(Review::class);
+    }
+
+    public function customerRating(): HasOne
+    {
+        return $this->hasOne(CustomerRating::class);
     }
 
     // ── أسئلة الحالة ─────────────────────────────────────────────────

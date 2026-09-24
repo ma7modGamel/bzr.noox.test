@@ -14,7 +14,8 @@ final class DatabaseSeeder extends Seeder
             SettingsSeeder::class,
             AdminSeeder::class,
             CatalogSeeder::class,
-            TermsSeeder::class,
+            LegalPagesSeeder::class, // DEC-051 — مسودات حتى ينشرها المدير العام
+            SupportReasonSeeder::class,
         ]);
     }
 }

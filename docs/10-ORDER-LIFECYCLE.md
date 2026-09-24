@@ -60,7 +60,7 @@ stateDiagram-v2
 | T-17 | IN_PROGRESS | `completeWork` | الفني | لا مقترح معلّق (BR-045) | AWAITING_PAYMENT | EVT-050 |
 | T-18 | IN_PROGRESS | `reportUnableToPerform` | الفني | سبب | CANCELLED | EVT-091 |
 | T-19 | AWAITING_PAYMENT | `confirmCashReceived` / `adminRecordCash` | الفني / الإدارة | المبلغ = `final_amount` | AWAITING_CONFIRMATION | EVT-061 |
-| T-20 | AWAITING_PAYMENT | (إشعار فوري ناجح) | النظام | توقيع صحيح، المبلغ مطابق | CLOSED | EVT-062، EVT-070 |
+| T-20 | AWAITING_PAYMENT | (إشعار فوري ناجح) / `confirmInstapayTransfer` | النظام / المدير العام | فوري: توقيع صحيح والمبلغ مطابق. إنستاباي: محاولة `PENDING_VERIFICATION` والمبلغ ظاهر في حساب المنصة (BR-057) | CLOSED | EVT-062، EVT-070 |
 | T-21 | AWAITING_CONFIRMATION | `confirmCompletion` / مهلة CFG-051 | العميل / النظام | — | CLOSED | EVT-070/071 |
 | T-22 | ARRIVED … AWAITING_CONFIRMATION | `openDispute` | العميل / الفني | سبب إلزامي | DISPUTED | EVT-080 |
 | T-23 | DISPUTED | `resolveDispute(close)` | الإدارة | تحديد المبالغ النهائية والدفع | CLOSED | EVT-081 |

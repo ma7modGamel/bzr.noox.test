@@ -1,0 +1,2578 @@
+{
+  "version": 1,
+  "contract": "docs/43-UI-BUILD-CONTRACT.md",
+  "components": [
+    {
+      "id": "AppTopBar",
+      "spec": "docs/43-UI-BUILD-CONTRACT.md",
+      "android": {
+        "file": "androidapp/core/design/src/main/kotlin/noox/bzr/design/views/AppTopBarView.kt",
+        "layout": "androidapp/core/design/src/main/res/layout/view_app_top_bar.xml",
+        "symbol": "AppTopBarView",
+        "parameters": [
+          "title",
+          "actionIcon",
+          "actionLabel",
+          "onBack",
+          "onAction"
+        ],
+        "text_keys": [],
+        "fixtures": [
+          "design/fixtures/gallery/components.json"
+        ]
+      },
+      "ios": {
+        "file": "iosapp/Packages/DesignSystem/Sources/DesignSystem/BzrComponents.swift",
+        "symbol": "AppTopBar",
+        "parameters": [
+          "title",
+          "actionIcon",
+          "actionLabel",
+          "onBack",
+          "onAction"
+        ],
+        "text_keys": [],
+        "fixtures": [
+          "design/fixtures/gallery/components.json"
+        ]
+      }
+    },
+    {
+      "id": "PrimaryButton",
+      "spec": "docs/43-UI-BUILD-CONTRACT.md",
+      "android": {
+        "file": "androidapp/core/design/src/main/kotlin/noox/bzr/design/views/PrimaryButtonView.kt",
+        "layout": "androidapp/core/design/src/main/res/layout/view_primary_button.xml",
+        "symbol": "PrimaryButtonView",
+        "parameters": [
+          "text",
+          "state",
+          "height",
+          "onClick"
+        ],
+        "text_keys": [
+          "a11y.loading"
+        ],
+        "fixtures": [
+          "design/fixtures/gallery/components.json"
+        ]
+      },
+      "ios": {
+        "file": "iosapp/Packages/DesignSystem/Sources/DesignSystem/BzrComponents.swift",
+        "symbol": "PrimaryButton",
+        "parameters": [
+          "text",
+          "state",
+          "height",
+          "onClick"
+        ],
+        "text_keys": [
+          "a11y.loading"
+        ],
+        "fixtures": [
+          "design/fixtures/gallery/components.json"
+        ]
+      }
+    },
+    {
+      "id": "SecondaryButton",
+      "spec": "docs/43-UI-BUILD-CONTRACT.md",
+      "android": {
+        "file": "androidapp/core/design/src/main/kotlin/noox/bzr/design/views/SecondaryButtonView.kt",
+        "layout": "androidapp/core/design/src/main/res/layout/view_secondary_button.xml",
+        "symbol": "SecondaryButtonView",
+        "parameters": [
+          "text",
+          "enabled",
+          "onClick"
+        ],
+        "text_keys": [],
+        "fixtures": [
+          "design/fixtures/gallery/components.json"
+        ]
+      },
+      "ios": {
+        "file": "iosapp/Packages/DesignSystem/Sources/DesignSystem/BzrComponents.swift",
+        "symbol": "SecondaryButton",
+        "parameters": [
+          "text",
+          "enabled",
+          "onClick"
+        ],
+        "text_keys": [],
+        "fixtures": [
+          "design/fixtures/gallery/components.json"
+        ]
+      }
+    },
+    {
+      "id": "LinkButton",
+      "spec": "docs/43-UI-BUILD-CONTRACT.md",
+      "android": {
+        "file": "androidapp/core/design/src/main/kotlin/noox/bzr/design/views/LinkButtonView.kt",
+        "layout": "androidapp/core/design/src/main/res/layout/view_link_button.xml",
+        "symbol": "LinkButtonView",
+        "parameters": [
+          "text",
+          "onClick"
+        ],
+        "text_keys": [],
+        "fixtures": [
+          "design/fixtures/gallery/components.json"
+        ]
+      },
+      "ios": {
+        "file": "iosapp/Packages/DesignSystem/Sources/DesignSystem/BzrComponents.swift",
+        "symbol": "LinkButton",
+        "parameters": [
+          "text",
+          "onClick"
+        ],
+        "text_keys": [],
+        "fixtures": [
+          "design/fixtures/gallery/components.json"
+        ]
+      }
+    },
+    {
+      "id": "DangerTextButton",
+      "spec": "docs/43-UI-BUILD-CONTRACT.md",
+      "android": {
+        "file": "androidapp/core/design/src/main/kotlin/noox/bzr/design/views/DangerTextButtonView.kt",
+        "layout": "androidapp/core/design/src/main/res/layout/view_danger_text_button.xml",
+        "symbol": "DangerTextButtonView",
+        "parameters": [
+          "text",
+          "onClick"
+        ],
+        "text_keys": [],
+        "fixtures": [
+          "design/fixtures/gallery/components.json"
+        ]
+      },
+      "ios": {
+        "file": "iosapp/Packages/DesignSystem/Sources/DesignSystem/BzrComponents.swift",
+        "symbol": "DangerTextButton",
+        "parameters": [
+          "text",
+          "onClick"
+        ],
+        "text_keys": [],
+        "fixtures": [
+          "design/fixtures/gallery/components.json"
+        ]
+      }
+    },
+    {
+      "id": "IconSquareButton",
+      "spec": "docs/43-UI-BUILD-CONTRACT.md",
+      "android": {
+        "file": "androidapp/core/design/src/main/kotlin/noox/bzr/design/views/IconSquareButtonView.kt",
+        "layout": "androidapp/core/design/src/main/res/layout/view_icon_square_button.xml",
+        "symbol": "IconSquareButtonView",
+        "parameters": [
+          "label",
+          "icon",
+          "onClick"
+        ],
+        "text_keys": [],
+        "fixtures": [
+          "design/fixtures/gallery/components.json"
+        ]
+      },
+      "ios": {
+        "file": "iosapp/Packages/DesignSystem/Sources/DesignSystem/BzrComponents.swift",
+        "symbol": "IconSquareButton",
+        "parameters": [
+          "label",
+          "icon",
+          "onClick"
+        ],
+        "text_keys": [],
+        "fixtures": [
+          "design/fixtures/gallery/components.json"
+        ]
+      }
+    },
+    {
+      "id": "BottomNav",
+      "spec": "docs/43-UI-BUILD-CONTRACT.md",
+      "android": {
+        "file": "androidapp/core/design/src/main/kotlin/noox/bzr/design/views/BottomNavView.kt",
+        "layout": "androidapp/core/design/src/main/res/layout/view_bottom_nav.xml",
+        "symbol": "BottomNavView",
+        "parameters": [
+          "items",
+          "selectedIndex",
+          "onSelect"
+        ],
+        "text_keys": [],
+        "fixtures": [
+          "design/fixtures/gallery/components.json"
+        ]
+      },
+      "ios": {
+        "file": "iosapp/Packages/DesignSystem/Sources/DesignSystem/BzrComponents.swift",
+        "symbol": "BottomNav",
+        "parameters": [
+          "items",
+          "selectedIndex",
+          "onSelect"
+        ],
+        "text_keys": [],
+        "fixtures": [
+          "design/fixtures/gallery/components.json"
+        ]
+      }
+    },
+    {
+      "id": "MenuRow",
+      "spec": "docs/43-UI-BUILD-CONTRACT.md",
+      "android": {
+        "file": "androidapp/core/design/src/main/kotlin/noox/bzr/design/views/MenuRowView.kt",
+        "layout": "androidapp/core/design/src/main/res/layout/view_menu_row.xml",
+        "symbol": "MenuRowView",
+        "parameters": [
+          "icon",
+          "text",
+          "onClick"
+        ],
+        "text_keys": [],
+        "fixtures": [
+          "design/fixtures/gallery/components.json"
+        ]
+      },
+      "ios": {
+        "file": "iosapp/Packages/DesignSystem/Sources/DesignSystem/BzrComponents.swift",
+        "symbol": "MenuRow",
+        "parameters": [
+          "icon",
+          "text",
+          "onClick"
+        ],
+        "text_keys": [],
+        "fixtures": [
+          "design/fixtures/gallery/components.json"
+        ]
+      }
+    },
+    {
+      "id": "DrawerMenu",
+      "spec": "docs/43-UI-BUILD-CONTRACT.md",
+      "android": {
+        "file": "androidapp/core/design/src/main/kotlin/noox/bzr/design/views/DrawerMenuView.kt",
+        "layout": "androidapp/core/design/src/main/res/layout/view_drawer_menu.xml",
+        "symbol": "DrawerMenuView",
+        "parameters": [
+          "name",
+          "rating",
+          "verifiedLabel",
+          "rows",
+          "action",
+          "onAction"
+        ],
+        "text_keys": [],
+        "fixtures": [
+          "design/fixtures/gallery/components.json"
+        ]
+      },
+      "ios": {
+        "file": "iosapp/Packages/DesignSystem/Sources/DesignSystem/BzrComponents.swift",
+        "symbol": "DrawerMenu",
+        "parameters": [
+          "name",
+          "rating",
+          "verifiedLabel",
+          "rows",
+          "action",
+          "onAction"
+        ],
+        "text_keys": [],
+        "fixtures": [
+          "design/fixtures/gallery/components.json"
+        ]
+      }
+    },
+    {
+      "id": "StepIndicator",
+      "spec": "docs/43-UI-BUILD-CONTRACT.md",
+      "android": {
+        "file": "androidapp/core/design/src/main/kotlin/noox/bzr/design/views/StepIndicatorView.kt",
+        "layout": "androidapp/core/design/src/main/res/layout/view_step_indicator.xml",
+        "symbol": "StepIndicatorView",
+        "parameters": [
+          "current",
+          "total",
+          "label"
+        ],
+        "text_keys": [],
+        "fixtures": [
+          "design/fixtures/gallery/components.json"
+        ]
+      },
+      "ios": {
+        "file": "iosapp/Packages/DesignSystem/Sources/DesignSystem/BzrComponents.swift",
+        "symbol": "StepIndicator",
+        "parameters": [
+          "current",
+          "total",
+          "label"
+        ],
+        "text_keys": [],
+        "fixtures": [
+          "design/fixtures/gallery/components.json"
+        ]
+      }
+    },
+    {
+      "id": "SelectableTile",
+      "spec": "docs/43-UI-BUILD-CONTRACT.md",
+      "android": {
+        "file": "androidapp/core/design/src/main/kotlin/noox/bzr/design/views/SelectableTileView.kt",
+        "layout": "androidapp/core/design/src/main/res/layout/view_selectable_tile.xml",
+        "symbol": "SelectableTileView",
+        "parameters": [
+          "text",
+          "icon",
+          "state"
+        ],
+        "text_keys": [],
+        "fixtures": [
+          "design/fixtures/gallery/components.json"
+        ]
+      },
+      "ios": {
+        "file": "iosapp/Packages/DesignSystem/Sources/DesignSystem/BzrComponents.swift",
+        "symbol": "SelectableTile",
+        "parameters": [
+          "text",
+          "icon",
+          "state"
+        ],
+        "text_keys": [],
+        "fixtures": [
+          "design/fixtures/gallery/components.json"
+        ]
+      }
+    },
+    {
+      "id": "SelectableChip",
+      "spec": "docs/43-UI-BUILD-CONTRACT.md",
+      "android": {
+        "file": "androidapp/core/design/src/main/kotlin/noox/bzr/design/views/SelectableChipView.kt",
+        "layout": "androidapp/core/design/src/main/res/layout/view_selectable_chip.xml",
+        "symbol": "SelectableChipView",
+        "parameters": [
+          "text",
+          "state",
+          "height"
+        ],
+        "text_keys": [],
+        "fixtures": [
+          "design/fixtures/gallery/components.json"
+        ]
+      },
+      "ios": {
+        "file": "iosapp/Packages/DesignSystem/Sources/DesignSystem/BzrComponents.swift",
+        "symbol": "SelectableChip",
+        "parameters": [
+          "text",
+          "state",
+          "height"
+        ],
+        "text_keys": [],
+        "fixtures": [
+          "design/fixtures/gallery/components.json"
+        ]
+      }
+    },
+    {
+      "id": "RadioCard",
+      "spec": "docs/43-UI-BUILD-CONTRACT.md",
+      "android": {
+        "file": "androidapp/core/design/src/main/kotlin/noox/bzr/design/views/RadioCardView.kt",
+        "layout": "androidapp/core/design/src/main/res/layout/view_radio_card.xml",
+        "symbol": "RadioCardView",
+        "parameters": [
+          "title",
+          "body",
+          "selected"
+        ],
+        "text_keys": [],
+        "fixtures": [
+          "design/fixtures/gallery/components.json"
+        ]
+      },
+      "ios": {
+        "file": "iosapp/Packages/DesignSystem/Sources/DesignSystem/BzrComponents.swift",
+        "symbol": "RadioCard",
+        "parameters": [
+          "title",
+          "body",
+          "selected"
+        ],
+        "text_keys": [],
+        "fixtures": [
+          "design/fixtures/gallery/components.json"
+        ]
+      }
+    },
+    {
+      "id": "CheckRow",
+      "spec": "docs/43-UI-BUILD-CONTRACT.md",
+      "android": {
+        "file": "androidapp/core/design/src/main/kotlin/noox/bzr/design/views/CheckRowView.kt",
+        "layout": "androidapp/core/design/src/main/res/layout/view_check_row.xml",
+        "symbol": "CheckRowView",
+        "parameters": [
+          "text",
+          "checked"
+        ],
+        "text_keys": [],
+        "fixtures": [
+          "design/fixtures/gallery/components.json"
+        ]
+      },
+      "ios": {
+        "file": "iosapp/Packages/DesignSystem/Sources/DesignSystem/BzrComponents.swift",
+        "symbol": "CheckRow",
+        "parameters": [
+          "text",
+          "checked"
+        ],
+        "text_keys": [],
+        "fixtures": [
+          "design/fixtures/gallery/components.json"
+        ]
+      }
+    },
+    {
+      "id": "AppTextField",
+      "spec": "docs/43-UI-BUILD-CONTRACT.md",
+      "android": {
+        "file": "androidapp/core/design/src/main/kotlin/noox/bzr/design/views/AppTextFieldView.kt",
+        "layout": "androidapp/core/design/src/main/res/layout/view_app_text_field.xml",
+        "symbol": "AppTextFieldView",
+        "parameters": [
+          "label",
+          "placeholder",
+          "value",
+          "state",
+          "error",
+          "optionalLabel",
+          "onValueChange"
+        ],
+        "text_keys": [],
+        "fixtures": [
+          "design/fixtures/gallery/components.json"
+        ]
+      },
+      "ios": {
+        "file": "iosapp/Packages/DesignSystem/Sources/DesignSystem/BzrComponents.swift",
+        "symbol": "AppTextField",
+        "parameters": [
+          "label",
+          "placeholder",
+          "value",
+          "state",
+          "error",
+          "optionalLabel",
+          "onValueChange"
+        ],
+        "text_keys": [],
+        "fixtures": [
+          "design/fixtures/gallery/components.json"
+        ]
+      }
+    },
+    {
+      "id": "SecureTextField",
+      "spec": "docs/43-UI-BUILD-CONTRACT.md",
+      "android": {
+        "file": "androidapp/core/design/src/main/kotlin/noox/bzr/design/views/SecureTextFieldView.kt",
+        "layout": "androidapp/core/design/src/main/res/layout/view_secure_text_field.xml",
+        "symbol": "SecureTextFieldView",
+        "parameters": [
+          "label",
+          "placeholder",
+          "value",
+          "state",
+          "error",
+          "optionalLabel",
+          "onValueChange"
+        ],
+        "text_keys": [],
+        "fixtures": [
+          "design/fixtures/gallery/components.json"
+        ]
+      },
+      "ios": {
+        "file": "iosapp/Packages/DesignSystem/Sources/DesignSystem/BzrComponents.swift",
+        "symbol": "SecureTextField",
+        "parameters": [
+          "label",
+          "placeholder",
+          "value",
+          "state",
+          "error",
+          "optionalLabel",
+          "onValueChange"
+        ],
+        "text_keys": [],
+        "fixtures": [
+          "design/fixtures/gallery/components.json"
+        ]
+      }
+    },
+    {
+      "id": "AmountField",
+      "spec": "docs/43-UI-BUILD-CONTRACT.md",
+      "android": {
+        "file": "androidapp/core/design/src/main/kotlin/noox/bzr/design/views/AmountFieldView.kt",
+        "layout": "androidapp/core/design/src/main/res/layout/view_amount_field.xml",
+        "symbol": "AmountFieldView",
+        "parameters": [
+          "label",
+          "placeholder",
+          "value",
+          "currency",
+          "state",
+          "error",
+          "optionalLabel",
+          "onValueChange"
+        ],
+        "text_keys": [],
+        "fixtures": [
+          "design/fixtures/gallery/components.json"
+        ]
+      },
+      "ios": {
+        "file": "iosapp/Packages/DesignSystem/Sources/DesignSystem/BzrComponents.swift",
+        "symbol": "AmountField",
+        "parameters": [
+          "label",
+          "placeholder",
+          "value",
+          "currency",
+          "state",
+          "error",
+          "optionalLabel",
+          "onValueChange"
+        ],
+        "text_keys": [],
+        "fixtures": [
+          "design/fixtures/gallery/components.json"
+        ]
+      }
+    },
+    {
+      "id": "TextAreaField",
+      "spec": "docs/43-UI-BUILD-CONTRACT.md",
+      "android": {
+        "file": "androidapp/core/design/src/main/kotlin/noox/bzr/design/views/TextAreaFieldView.kt",
+        "layout": "androidapp/core/design/src/main/res/layout/view_text_area_field.xml",
+        "symbol": "TextAreaFieldView",
+        "parameters": [
+          "label",
+          "placeholder",
+          "value",
+          "state",
+          "error",
+          "optionalLabel",
+          "onValueChange"
+        ],
+        "text_keys": [],
+        "fixtures": [
+          "design/fixtures/gallery/components.json"
+        ]
+      },
+      "ios": {
+        "file": "iosapp/Packages/DesignSystem/Sources/DesignSystem/BzrComponents.swift",
+        "symbol": "TextAreaField",
+        "parameters": [
+          "label",
+          "placeholder",
+          "value",
+          "state",
+          "error",
+          "optionalLabel",
+          "onValueChange"
+        ],
+        "text_keys": [],
+        "fixtures": [
+          "design/fixtures/gallery/components.json"
+        ]
+      }
+    },
+    {
+      "id": "SummaryCard",
+      "spec": "docs/43-UI-BUILD-CONTRACT.md",
+      "android": {
+        "file": "androidapp/core/design/src/main/kotlin/noox/bzr/design/views/SummaryCardView.kt",
+        "layout": "androidapp/core/design/src/main/res/layout/view_summary_card.xml",
+        "symbol": "SummaryCardView",
+        "parameters": [
+          "title",
+          "rows",
+          "editText",
+          "onEdit"
+        ],
+        "text_keys": [],
+        "fixtures": [
+          "design/fixtures/gallery/components.json"
+        ]
+      },
+      "ios": {
+        "file": "iosapp/Packages/DesignSystem/Sources/DesignSystem/BzrComponents.swift",
+        "symbol": "SummaryCard",
+        "parameters": [
+          "title",
+          "rows",
+          "editText",
+          "onEdit"
+        ],
+        "text_keys": [],
+        "fixtures": [
+          "design/fixtures/gallery/components.json"
+        ]
+      }
+    },
+    {
+      "id": "Badge",
+      "spec": "docs/43-UI-BUILD-CONTRACT.md",
+      "android": {
+        "file": "androidapp/core/design/src/main/kotlin/noox/bzr/design/views/BadgeView.kt",
+        "layout": "androidapp/core/design/src/main/res/layout/view_badge.xml",
+        "symbol": "BadgeView",
+        "parameters": [
+          "text",
+          "kind",
+          "icon"
+        ],
+        "text_keys": [],
+        "fixtures": [
+          "design/fixtures/gallery/components.json"
+        ]
+      },
+      "ios": {
+        "file": "iosapp/Packages/DesignSystem/Sources/DesignSystem/BzrComponents.swift",
+        "symbol": "Badge",
+        "parameters": [
+          "text",
+          "kind",
+          "icon"
+        ],
+        "text_keys": [],
+        "fixtures": [
+          "design/fixtures/gallery/components.json"
+        ]
+      }
+    },
+    {
+      "id": "ProviderHeader",
+      "spec": "docs/43-UI-BUILD-CONTRACT.md",
+      "android": {
+        "file": "androidapp/core/design/src/main/kotlin/noox/bzr/design/views/ProviderHeaderView.kt",
+        "layout": "androidapp/core/design/src/main/res/layout/view_provider_header.xml",
+        "symbol": "ProviderHeaderView",
+        "parameters": [
+          "name",
+          "rating",
+          "services",
+          "size",
+          "verifiedLabel"
+        ],
+        "text_keys": [
+          "a11y.avatar",
+          "a11y.verified"
+        ],
+        "fixtures": [
+          "design/fixtures/gallery/components.json"
+        ]
+      },
+      "ios": {
+        "file": "iosapp/Packages/DesignSystem/Sources/DesignSystem/BzrComponents.swift",
+        "symbol": "ProviderHeader",
+        "parameters": [
+          "name",
+          "rating",
+          "services",
+          "size",
+          "verifiedLabel"
+        ],
+        "text_keys": [
+          "a11y.avatar",
+          "a11y.verified"
+        ],
+        "fixtures": [
+          "design/fixtures/gallery/components.json"
+        ]
+      }
+    },
+    {
+      "id": "OfferCard",
+      "spec": "docs/43-UI-BUILD-CONTRACT.md",
+      "android": {
+        "file": "androidapp/core/design/src/main/kotlin/noox/bzr/design/views/OfferCardView.kt",
+        "layout": "androidapp/core/design/src/main/res/layout/view_offer_card.xml",
+        "symbol": "OfferCardView",
+        "parameters": [
+          "provider",
+          "rating",
+          "services",
+          "price",
+          "detail",
+          "badge",
+          "button",
+          "chatLabel",
+          "variant",
+          "priceCaption",
+          "onSelect",
+          "onChat"
+        ],
+        "text_keys": [],
+        "fixtures": [
+          "design/fixtures/gallery/components.json"
+        ]
+      },
+      "ios": {
+        "file": "iosapp/Packages/DesignSystem/Sources/DesignSystem/BzrComponents.swift",
+        "symbol": "OfferCard",
+        "parameters": [
+          "provider",
+          "rating",
+          "services",
+          "price",
+          "detail",
+          "badge",
+          "button",
+          "chatLabel",
+          "variant",
+          "priceCaption",
+          "onSelect",
+          "onChat"
+        ],
+        "text_keys": [],
+        "fixtures": [
+          "design/fixtures/gallery/components.json"
+        ]
+      }
+    },
+    {
+      "id": "SortChips",
+      "spec": "docs/43-UI-BUILD-CONTRACT.md",
+      "android": {
+        "file": "androidapp/core/design/src/main/kotlin/noox/bzr/design/views/SortChipsView.kt",
+        "layout": "androidapp/core/design/src/main/res/layout/view_sort_chips.xml",
+        "symbol": "SortChipsView",
+        "parameters": [
+          "title",
+          "labels",
+          "selectedIndex",
+          "onSelect"
+        ],
+        "text_keys": [],
+        "fixtures": [
+          "design/fixtures/gallery/components.json"
+        ]
+      },
+      "ios": {
+        "file": "iosapp/Packages/DesignSystem/Sources/DesignSystem/BzrComponents.swift",
+        "symbol": "SortChips",
+        "parameters": [
+          "title",
+          "labels",
+          "selectedIndex",
+          "onSelect"
+        ],
+        "text_keys": [],
+        "fixtures": [
+          "design/fixtures/gallery/components.json"
+        ]
+      }
+    },
+    {
+      "id": "StatRow",
+      "spec": "docs/43-UI-BUILD-CONTRACT.md",
+      "android": {
+        "file": "androidapp/core/design/src/main/kotlin/noox/bzr/design/views/StatRowView.kt",
+        "layout": "androidapp/core/design/src/main/res/layout/view_stat_row.xml",
+        "symbol": "StatRowView",
+        "parameters": [
+          "items"
+        ],
+        "text_keys": [],
+        "fixtures": [
+          "design/fixtures/gallery/components.json"
+        ]
+      },
+      "ios": {
+        "file": "iosapp/Packages/DesignSystem/Sources/DesignSystem/BzrComponents.swift",
+        "symbol": "StatRow",
+        "parameters": [
+          "items"
+        ],
+        "text_keys": [],
+        "fixtures": [
+          "design/fixtures/gallery/components.json"
+        ]
+      }
+    },
+    {
+      "id": "RatingBars",
+      "spec": "docs/43-UI-BUILD-CONTRACT.md",
+      "android": {
+        "file": "androidapp/core/design/src/main/kotlin/noox/bzr/design/views/RatingBarsView.kt",
+        "layout": "androidapp/core/design/src/main/res/layout/view_rating_bar_row.xml",
+        "symbol": "RatingBarsView",
+        "parameters": [
+          "items",
+          "max"
+        ],
+        "text_keys": [],
+        "fixtures": [
+          "design/fixtures/gallery/components.json"
+        ]
+      },
+      "ios": {
+        "file": "iosapp/Packages/DesignSystem/Sources/DesignSystem/BzrComponents.swift",
+        "symbol": "RatingBars",
+        "parameters": [
+          "items",
+          "max"
+        ],
+        "text_keys": [],
+        "fixtures": [
+          "design/fixtures/gallery/components.json"
+        ]
+      }
+    },
+    {
+      "id": "ReviewCard",
+      "spec": "docs/43-UI-BUILD-CONTRACT.md",
+      "android": {
+        "file": "androidapp/core/design/src/main/kotlin/noox/bzr/design/views/ReviewCardView.kt",
+        "layout": "androidapp/core/design/src/main/res/layout/view_review_card.xml",
+        "symbol": "ReviewCardView",
+        "parameters": [
+          "name",
+          "body",
+          "verified",
+          "time",
+          "tag",
+          "rating"
+        ],
+        "text_keys": [],
+        "fixtures": [
+          "design/fixtures/gallery/components.json"
+        ]
+      },
+      "ios": {
+        "file": "iosapp/Packages/DesignSystem/Sources/DesignSystem/BzrComponents.swift",
+        "symbol": "ReviewCard",
+        "parameters": [
+          "name",
+          "body",
+          "verified",
+          "time",
+          "tag",
+          "rating"
+        ],
+        "text_keys": [],
+        "fixtures": [
+          "design/fixtures/gallery/components.json"
+        ]
+      }
+    },
+    {
+      "id": "StickyActionBar",
+      "spec": "docs/43-UI-BUILD-CONTRACT.md",
+      "android": {
+        "file": "androidapp/core/design/src/main/kotlin/noox/bzr/design/views/StickyActionBarView.kt",
+        "layout": "androidapp/core/design/src/main/res/layout/view_sticky_action_bar.xml",
+        "symbol": "StickyActionBarView",
+        "parameters": [
+          "priceLabel",
+          "price",
+          "action",
+          "chatLabel",
+          "onAction",
+          "onChat"
+        ],
+        "text_keys": [],
+        "fixtures": [
+          "design/fixtures/gallery/components.json"
+        ]
+      },
+      "ios": {
+        "file": "iosapp/Packages/DesignSystem/Sources/DesignSystem/BzrComponents.swift",
+        "symbol": "StickyActionBar",
+        "parameters": [
+          "priceLabel",
+          "price",
+          "action",
+          "chatLabel",
+          "onAction",
+          "onChat"
+        ],
+        "text_keys": [],
+        "fixtures": [
+          "design/fixtures/gallery/components.json"
+        ]
+      }
+    },
+    {
+      "id": "InfoBanner",
+      "spec": "docs/43-UI-BUILD-CONTRACT.md",
+      "android": {
+        "file": "androidapp/core/design/src/main/kotlin/noox/bzr/design/views/InfoBannerView.kt",
+        "layout": "androidapp/core/design/src/main/res/layout/view_info_banner.xml",
+        "symbol": "InfoBannerView",
+        "parameters": [
+          "text"
+        ],
+        "text_keys": [],
+        "fixtures": [
+          "design/fixtures/gallery/components.json"
+        ]
+      },
+      "ios": {
+        "file": "iosapp/Packages/DesignSystem/Sources/DesignSystem/BzrComponents.swift",
+        "symbol": "InfoBanner",
+        "parameters": [
+          "text"
+        ],
+        "text_keys": [],
+        "fixtures": [
+          "design/fixtures/gallery/components.json"
+        ]
+      }
+    },
+    {
+      "id": "WarningBox",
+      "spec": "docs/43-UI-BUILD-CONTRACT.md",
+      "android": {
+        "file": "androidapp/core/design/src/main/kotlin/noox/bzr/design/views/WarningBoxView.kt",
+        "layout": "androidapp/core/design/src/main/res/layout/view_warning_box.xml",
+        "symbol": "WarningBoxView",
+        "parameters": [
+          "text"
+        ],
+        "text_keys": [],
+        "fixtures": [
+          "design/fixtures/gallery/components.json"
+        ]
+      },
+      "ios": {
+        "file": "iosapp/Packages/DesignSystem/Sources/DesignSystem/BzrComponents.swift",
+        "symbol": "WarningBox",
+        "parameters": [
+          "text"
+        ],
+        "text_keys": [],
+        "fixtures": [
+          "design/fixtures/gallery/components.json"
+        ]
+      }
+    },
+    {
+      "id": "OfflineBanner",
+      "spec": "docs/43-UI-BUILD-CONTRACT.md",
+      "android": {
+        "file": "androidapp/core/design/src/main/kotlin/noox/bzr/design/views/OfflineBannerView.kt",
+        "layout": "androidapp/core/design/src/main/res/layout/view_offline_banner.xml",
+        "symbol": "OfflineBannerView",
+        "parameters": [
+          "text"
+        ],
+        "text_keys": [],
+        "fixtures": [
+          "design/fixtures/gallery/components.json"
+        ]
+      },
+      "ios": {
+        "file": "iosapp/Packages/DesignSystem/Sources/DesignSystem/BzrComponents.swift",
+        "symbol": "OfflineBanner",
+        "parameters": [
+          "text"
+        ],
+        "text_keys": [],
+        "fixtures": [
+          "design/fixtures/gallery/components.json"
+        ]
+      }
+    },
+    {
+      "id": "EtaCard",
+      "spec": "docs/43-UI-BUILD-CONTRACT.md",
+      "android": {
+        "file": "androidapp/core/design/src/main/kotlin/noox/bzr/design/views/EtaCardView.kt",
+        "layout": "androidapp/core/design/src/main/res/layout/view_eta_card.xml",
+        "symbol": "EtaCardView",
+        "parameters": [
+          "value",
+          "unit",
+          "title",
+          "subtitle"
+        ],
+        "text_keys": [],
+        "fixtures": [
+          "design/fixtures/gallery/components.json"
+        ]
+      },
+      "ios": {
+        "file": "iosapp/Packages/DesignSystem/Sources/DesignSystem/BzrComponents.swift",
+        "symbol": "EtaCard",
+        "parameters": [
+          "value",
+          "unit",
+          "title",
+          "subtitle"
+        ],
+        "text_keys": [],
+        "fixtures": [
+          "design/fixtures/gallery/components.json"
+        ]
+      }
+    },
+    {
+      "id": "MapCard",
+      "spec": "docs/43-UI-BUILD-CONTRACT.md",
+      "android": {
+        "file": "androidapp/core/design/src/main/kotlin/noox/bzr/design/views/MapCardView.kt",
+        "layout": "androidapp/core/design/src/main/res/layout/view_map_card.xml",
+        "symbol": "MapCardView",
+        "parameters": [
+          "title"
+        ],
+        "text_keys": [
+          "a11y.my_location"
+        ],
+        "fixtures": [
+          "design/fixtures/gallery/components.json"
+        ]
+      },
+      "ios": {
+        "file": "iosapp/Packages/DesignSystem/Sources/DesignSystem/BzrComponents.swift",
+        "symbol": "MapCard",
+        "parameters": [
+          "title"
+        ],
+        "text_keys": [
+          "a11y.my_location"
+        ],
+        "fixtures": [
+          "design/fixtures/gallery/components.json"
+        ]
+      }
+    },
+    {
+      "id": "StatusStepper",
+      "spec": "docs/43-UI-BUILD-CONTRACT.md",
+      "android": {
+        "file": "androidapp/core/design/src/main/kotlin/noox/bzr/design/views/StatusStepperView.kt",
+        "layout": "androidapp/core/design/src/main/res/layout/view_status_step.xml",
+        "symbol": "StatusStepperView",
+        "parameters": [
+          "steps"
+        ],
+        "text_keys": [],
+        "fixtures": [
+          "design/fixtures/gallery/components.json"
+        ]
+      },
+      "ios": {
+        "file": "iosapp/Packages/DesignSystem/Sources/DesignSystem/BzrComponents.swift",
+        "symbol": "StatusStepper",
+        "parameters": [
+          "steps"
+        ],
+        "text_keys": [],
+        "fixtures": [
+          "design/fixtures/gallery/components.json"
+        ]
+      }
+    },
+    {
+      "id": "OrderCard",
+      "spec": "docs/43-UI-BUILD-CONTRACT.md",
+      "android": {
+        "file": "androidapp/core/design/src/main/kotlin/noox/bzr/design/views/OrderCardView.kt",
+        "layout": "androidapp/core/design/src/main/res/layout/view_order_card.xml",
+        "symbol": "OrderCardView",
+        "parameters": [
+          "title",
+          "subtitle",
+          "status",
+          "onClick"
+        ],
+        "text_keys": [],
+        "fixtures": [
+          "design/fixtures/gallery/components.json"
+        ]
+      },
+      "ios": {
+        "file": "iosapp/Packages/DesignSystem/Sources/DesignSystem/BzrComponents.swift",
+        "symbol": "OrderCard",
+        "parameters": [
+          "title",
+          "subtitle",
+          "status",
+          "onClick"
+        ],
+        "text_keys": [],
+        "fixtures": [
+          "design/fixtures/gallery/components.json"
+        ]
+      }
+    },
+    {
+      "id": "AppBottomSheet",
+      "spec": "docs/43-UI-BUILD-CONTRACT.md",
+      "android": {
+        "file": "androidapp/core/design/src/main/kotlin/noox/bzr/design/views/AppBottomSheetView.kt",
+        "layout": "androidapp/core/design/src/main/res/layout/view_app_bottom_sheet.xml",
+        "symbol": "AppBottomSheetView",
+        "parameters": [
+          "title",
+          "body",
+          "action",
+          "actionState",
+          "secondaryAction",
+          "onAction",
+          "onSecondary"
+        ],
+        "text_keys": [],
+        "fixtures": [
+          "design/fixtures/gallery/components.json"
+        ]
+      },
+      "ios": {
+        "file": "iosapp/Packages/DesignSystem/Sources/DesignSystem/BzrComponents.swift",
+        "symbol": "AppBottomSheet",
+        "parameters": [
+          "title",
+          "body",
+          "action",
+          "actionState",
+          "secondaryAction",
+          "onAction",
+          "onSecondary"
+        ],
+        "text_keys": [],
+        "fixtures": [
+          "design/fixtures/gallery/components.json"
+        ]
+      }
+    },
+    {
+      "id": "EmptyState",
+      "spec": "docs/43-UI-BUILD-CONTRACT.md",
+      "android": {
+        "file": "androidapp/core/design/src/main/kotlin/noox/bzr/design/views/EmptyStateView.kt",
+        "layout": "androidapp/core/design/src/main/res/layout/view_empty_state.xml",
+        "symbol": "EmptyStateView",
+        "parameters": [
+          "title",
+          "body",
+          "action",
+          "onAction"
+        ],
+        "text_keys": [],
+        "fixtures": [
+          "design/fixtures/gallery/components.json"
+        ]
+      },
+      "ios": {
+        "file": "iosapp/Packages/DesignSystem/Sources/DesignSystem/BzrComponents.swift",
+        "symbol": "EmptyState",
+        "parameters": [
+          "title",
+          "body",
+          "action",
+          "onAction"
+        ],
+        "text_keys": [],
+        "fixtures": [
+          "design/fixtures/gallery/components.json"
+        ]
+      }
+    },
+    {
+      "id": "ErrorState",
+      "spec": "docs/43-UI-BUILD-CONTRACT.md",
+      "android": {
+        "file": "androidapp/core/design/src/main/kotlin/noox/bzr/design/views/ErrorStateView.kt",
+        "layout": "androidapp/core/design/src/main/res/layout/view_error_state.xml",
+        "symbol": "ErrorStateView",
+        "parameters": [
+          "title",
+          "body",
+          "retry",
+          "onRetry"
+        ],
+        "text_keys": [],
+        "fixtures": [
+          "design/fixtures/gallery/components.json"
+        ]
+      },
+      "ios": {
+        "file": "iosapp/Packages/DesignSystem/Sources/DesignSystem/BzrComponents.swift",
+        "symbol": "ErrorState",
+        "parameters": [
+          "title",
+          "body",
+          "retry",
+          "onRetry"
+        ],
+        "text_keys": [],
+        "fixtures": [
+          "design/fixtures/gallery/components.json"
+        ]
+      }
+    },
+    {
+      "id": "LoadingSkeleton",
+      "spec": "docs/43-UI-BUILD-CONTRACT.md",
+      "android": {
+        "file": "androidapp/core/design/src/main/kotlin/noox/bzr/design/views/LoadingSkeletonView.kt",
+        "layout": "androidapp/core/design/src/main/res/layout/view_loading_skeleton.xml",
+        "symbol": "LoadingSkeletonView",
+        "parameters": [],
+        "text_keys": [
+          "a11y.loading"
+        ],
+        "fixtures": [
+          "design/fixtures/gallery/components.json"
+        ]
+      },
+      "ios": {
+        "file": "iosapp/Packages/DesignSystem/Sources/DesignSystem/BzrComponents.swift",
+        "symbol": "LoadingSkeleton",
+        "parameters": [],
+        "text_keys": [
+          "a11y.loading"
+        ],
+        "fixtures": [
+          "design/fixtures/gallery/components.json"
+        ]
+      }
+    },
+    {
+      "id": "Countdown",
+      "spec": "docs/43-UI-BUILD-CONTRACT.md",
+      "android": {
+        "file": "androidapp/core/design/src/main/kotlin/noox/bzr/design/views/CountdownView.kt",
+        "layout": "androidapp/core/design/src/main/res/layout/view_countdown.xml",
+        "symbol": "CountdownView",
+        "parameters": [
+          "seconds",
+          "label"
+        ],
+        "text_keys": [],
+        "fixtures": [
+          "design/fixtures/gallery/components.json"
+        ]
+      },
+      "ios": {
+        "file": "iosapp/Packages/DesignSystem/Sources/DesignSystem/BzrComponents.swift",
+        "symbol": "Countdown",
+        "parameters": [
+          "seconds",
+          "label"
+        ],
+        "text_keys": [],
+        "fixtures": [
+          "design/fixtures/gallery/components.json"
+        ]
+      }
+    },
+    {
+      "id": "ChatBubble",
+      "spec": "docs/43-UI-BUILD-CONTRACT.md",
+      "android": {
+        "file": "androidapp/core/design/src/main/kotlin/noox/bzr/design/views/ChatBubbleView.kt",
+        "layout": "androidapp/core/design/src/main/res/layout/view_chat_bubble.xml",
+        "symbol": "ChatBubbleView",
+        "parameters": [
+          "text",
+          "sent",
+          "kind"
+        ],
+        "text_keys": [],
+        "fixtures": [
+          "design/fixtures/gallery/components.json"
+        ]
+      },
+      "ios": {
+        "file": "iosapp/Packages/DesignSystem/Sources/DesignSystem/BzrComponents.swift",
+        "symbol": "ChatBubble",
+        "parameters": [
+          "text",
+          "sent",
+          "kind"
+        ],
+        "text_keys": [],
+        "fixtures": [
+          "design/fixtures/gallery/components.json"
+        ]
+      }
+    },
+    {
+      "id": "ChatInput",
+      "spec": "docs/43-UI-BUILD-CONTRACT.md",
+      "android": {
+        "file": "androidapp/core/design/src/main/kotlin/noox/bzr/design/views/ChatInputView.kt",
+        "layout": "androidapp/core/design/src/main/res/layout/view_chat_input.xml",
+        "symbol": "ChatInputView",
+        "parameters": [
+          "placeholder",
+          "value",
+          "onValueChange",
+          "onSend"
+        ],
+        "text_keys": [
+          "a11y.send"
+        ],
+        "fixtures": [
+          "design/fixtures/gallery/components.json"
+        ]
+      },
+      "ios": {
+        "file": "iosapp/Packages/DesignSystem/Sources/DesignSystem/BzrComponents.swift",
+        "symbol": "ChatInput",
+        "parameters": [
+          "placeholder",
+          "value",
+          "onValueChange",
+          "onSend"
+        ],
+        "text_keys": [
+          "a11y.send"
+        ],
+        "fixtures": [
+          "design/fixtures/gallery/components.json"
+        ]
+      }
+    },
+    {
+      "id": "MediaThumb",
+      "spec": "docs/43-UI-BUILD-CONTRACT.md",
+      "android": {
+        "file": "androidapp/core/design/src/main/kotlin/noox/bzr/design/views/MediaThumbView.kt",
+        "layout": "androidapp/core/design/src/main/res/layout/view_media_thumb.xml",
+        "symbol": "MediaThumbView",
+        "parameters": [
+          "title",
+          "stateLabel",
+          "kind",
+          "state",
+          "onDelete"
+        ],
+        "text_keys": [
+          "a11y.delete"
+        ],
+        "fixtures": [
+          "design/fixtures/gallery/components.json"
+        ]
+      },
+      "ios": {
+        "file": "iosapp/Packages/DesignSystem/Sources/DesignSystem/BzrComponents.swift",
+        "symbol": "MediaThumb",
+        "parameters": [
+          "title",
+          "stateLabel",
+          "kind",
+          "state",
+          "onDelete"
+        ],
+        "text_keys": [
+          "a11y.delete"
+        ],
+        "fixtures": [
+          "design/fixtures/gallery/components.json"
+        ]
+      }
+    }
+  ],
+  "screens": [
+    {
+      "id": "SCR-GALLERY",
+      "spec": "docs/43-UI-BUILD-CONTRACT.md",
+      "android": {
+        "file": "androidapp/core/design/src/main/kotlin/noox/bzr/design/views/gallery/GalleryViews.kt",
+        "symbol": "ComponentGalleryViews",
+        "text_keys": "source-scan",
+        "fixtures": [
+          "design/fixtures/gallery/components.json"
+        ]
+      },
+      "ios": {
+        "file": "iosapp/Packages/DesignSystem/Sources/DesignSystem/ComponentGallery.swift",
+        "symbol": "GalleryPage",
+        "text_keys": "source-scan",
+        "fixtures": [
+          "design/fixtures/gallery/components.json"
+        ]
+      }
+    },
+    {
+      "id": "SCR-C01",
+      "spec": "docs/screens/SCR-C01.md",
+      "android": {
+        "file": "androidapp/app/src/main/kotlin/noox/bzr/customer/C01HomeScreen.kt",
+        "symbol": "C01HomeScreen",
+        "logic_file": "androidapp/app/src/main/kotlin/noox/bzr/customer/CustomerLogic.kt",
+        "logic_symbol": "CustomerLogic",
+        "test_file": "androidapp/app/src/test/kotlin/noox/bzr/customer/CustomerSharedFixtureTest.kt",
+        "case_count": 5,
+        "text_keys": "source-scan",
+        "fixtures": [
+          "design/fixtures/SCR-C01/cases.json"
+        ]
+      },
+      "ios": {
+        "file": "iosapp/BzrApp/Customer/C01HomeView.swift",
+        "symbol": "C01HomeView",
+        "logic_file": "iosapp/Core/Sources/BzrCore/CustomerJourney.swift",
+        "logic_symbol": "CustomerLogic",
+        "test_file": "iosapp/Core/Tests/BzrCoreTests/CustomerSharedFixtureTests.swift",
+        "case_count": 5,
+        "text_keys": "source-scan",
+        "fixtures": [
+          "design/fixtures/SCR-C01/cases.json"
+        ]
+      }
+    },
+    {
+      "id": "SCR-C02",
+      "spec": "docs/screens/SCR-C02.md",
+      "android": {
+        "file": "androidapp/app/src/main/kotlin/noox/bzr/customer/C02AccountScreen.kt",
+        "symbol": "C02AccountScreen",
+        "logic_file": "androidapp/app/src/main/kotlin/noox/bzr/customer/CustomerLogic.kt",
+        "logic_symbol": "CustomerLogic",
+        "test_file": "androidapp/app/src/test/kotlin/noox/bzr/customer/CustomerSharedFixtureTest.kt",
+        "case_count": 4,
+        "text_keys": "source-scan",
+        "fixtures": [
+          "design/fixtures/SCR-C02/cases.json"
+        ]
+      },
+      "ios": {
+        "file": "iosapp/BzrApp/Customer/C02AccountView.swift",
+        "symbol": "C02AccountView",
+        "logic_file": "iosapp/Core/Sources/BzrCore/CustomerJourney.swift",
+        "logic_symbol": "CustomerLogic",
+        "test_file": "iosapp/Core/Tests/BzrCoreTests/CustomerSharedFixtureTests.swift",
+        "case_count": 4,
+        "text_keys": "source-scan",
+        "fixtures": [
+          "design/fixtures/SCR-C02/cases.json"
+        ]
+      }
+    },
+    {
+      "id": "SCR-C03",
+      "spec": "docs/screens/SCR-C03.md",
+      "android": {
+        "file": "androidapp/app/src/main/kotlin/noox/bzr/customer/C03ProblemScreen.kt",
+        "symbol": "C03ProblemScreen",
+        "logic_file": "androidapp/app/src/main/kotlin/noox/bzr/customer/CustomerLogic.kt",
+        "logic_symbol": "CustomerLogic",
+        "test_file": "androidapp/app/src/test/kotlin/noox/bzr/customer/CustomerSharedFixtureTest.kt",
+        "case_count": 5,
+        "text_keys": "source-scan",
+        "fixtures": [
+          "design/fixtures/SCR-C03/cases.json"
+        ]
+      },
+      "ios": {
+        "file": "iosapp/BzrApp/Customer/C03ProblemView.swift",
+        "symbol": "C03ProblemView",
+        "logic_file": "iosapp/Core/Sources/BzrCore/CustomerJourney.swift",
+        "logic_symbol": "CustomerLogic",
+        "test_file": "iosapp/Core/Tests/BzrCoreTests/CustomerSharedFixtureTests.swift",
+        "case_count": 5,
+        "text_keys": "source-scan",
+        "fixtures": [
+          "design/fixtures/SCR-C03/cases.json"
+        ]
+      }
+    },
+    {
+      "id": "SCR-C04",
+      "spec": "docs/screens/SCR-C04.md",
+      "android": {
+        "file": "androidapp/app/src/main/kotlin/noox/bzr/customer/C04TimingScreen.kt",
+        "symbol": "C04TimingScreen",
+        "logic_file": "androidapp/app/src/main/kotlin/noox/bzr/customer/CustomerLogic.kt",
+        "logic_symbol": "CustomerLogic",
+        "test_file": "androidapp/app/src/test/kotlin/noox/bzr/customer/CustomerSharedFixtureTest.kt",
+        "case_count": 7,
+        "text_keys": "source-scan",
+        "fixtures": [
+          "design/fixtures/SCR-C04/cases.json"
+        ]
+      },
+      "ios": {
+        "file": "iosapp/BzrApp/Customer/C04TimingView.swift",
+        "symbol": "C04TimingView",
+        "logic_file": "iosapp/Core/Sources/BzrCore/CustomerJourney.swift",
+        "logic_symbol": "CustomerLogic",
+        "test_file": "iosapp/Core/Tests/BzrCoreTests/CustomerSharedFixtureTests.swift",
+        "case_count": 7,
+        "text_keys": "source-scan",
+        "fixtures": [
+          "design/fixtures/SCR-C04/cases.json"
+        ]
+      }
+    },
+    {
+      "id": "SCR-C05",
+      "spec": "docs/screens/SCR-C05.md",
+      "android": {
+        "file": "androidapp/app/src/main/kotlin/noox/bzr/customer/C05ReviewScreen.kt",
+        "symbol": "C05ReviewScreen",
+        "logic_file": "androidapp/app/src/main/kotlin/noox/bzr/customer/CustomerLogic.kt",
+        "logic_symbol": "CustomerLogic",
+        "test_file": "androidapp/app/src/test/kotlin/noox/bzr/customer/CustomerSharedFixtureTest.kt",
+        "case_count": 5,
+        "text_keys": "source-scan",
+        "fixtures": [
+          "design/fixtures/SCR-C05/cases.json"
+        ]
+      },
+      "ios": {
+        "file": "iosapp/BzrApp/Customer/C05ReviewView.swift",
+        "symbol": "C05ReviewView",
+        "logic_file": "iosapp/Core/Sources/BzrCore/CustomerJourney.swift",
+        "logic_symbol": "CustomerLogic",
+        "test_file": "iosapp/Core/Tests/BzrCoreTests/CustomerSharedFixtureTests.swift",
+        "case_count": 5,
+        "text_keys": "source-scan",
+        "fixtures": [
+          "design/fixtures/SCR-C05/cases.json"
+        ]
+      }
+    },
+    {
+      "id": "SCR-C06",
+      "spec": "docs/screens/SCR-C06.md",
+      "android": {
+        "file": "androidapp/app/src/main/kotlin/noox/bzr/customer/C06OffersScreen.kt",
+        "symbol": "C06OffersScreen",
+        "logic_file": "androidapp/app/src/main/kotlin/noox/bzr/customer/CustomerLogic.kt",
+        "logic_symbol": "CustomerLogic",
+        "test_file": "androidapp/app/src/test/kotlin/noox/bzr/customer/CustomerSharedFixtureTest.kt",
+        "case_count": 6,
+        "text_keys": "source-scan",
+        "fixtures": [
+          "design/fixtures/SCR-C06/cases.json"
+        ]
+      },
+      "ios": {
+        "file": "iosapp/BzrApp/Customer/C06OffersView.swift",
+        "symbol": "C06OffersView",
+        "logic_file": "iosapp/Core/Sources/BzrCore/CustomerJourney.swift",
+        "logic_symbol": "CustomerLogic",
+        "test_file": "iosapp/Core/Tests/BzrCoreTests/CustomerSharedFixtureTests.swift",
+        "case_count": 6,
+        "text_keys": "source-scan",
+        "fixtures": [
+          "design/fixtures/SCR-C06/cases.json"
+        ]
+      }
+    },
+    {
+      "id": "SCR-C07",
+      "spec": "docs/screens/SCR-C07.md",
+      "android": {
+        "file": "androidapp/app/src/main/kotlin/noox/bzr/customer/C07ProviderScreen.kt",
+        "symbol": "C07ProviderScreen",
+        "logic_file": "androidapp/app/src/main/kotlin/noox/bzr/customer/CustomerLogic.kt",
+        "logic_symbol": "CustomerLogic",
+        "test_file": "androidapp/app/src/test/kotlin/noox/bzr/customer/CustomerSharedFixtureTest.kt",
+        "case_count": 4,
+        "text_keys": "source-scan",
+        "fixtures": [
+          "design/fixtures/SCR-C07/cases.json"
+        ]
+      },
+      "ios": {
+        "file": "iosapp/BzrApp/Customer/C07ProviderView.swift",
+        "symbol": "C07ProviderView",
+        "logic_file": "iosapp/Core/Sources/BzrCore/CustomerJourney.swift",
+        "logic_symbol": "CustomerLogic",
+        "test_file": "iosapp/Core/Tests/BzrCoreTests/CustomerSharedFixtureTests.swift",
+        "case_count": 4,
+        "text_keys": "source-scan",
+        "fixtures": [
+          "design/fixtures/SCR-C07/cases.json"
+        ]
+      }
+    },
+    {
+      "id": "SCR-C08",
+      "spec": "docs/screens/SCR-C08.md",
+      "android": {
+        "file": "androidapp/app/src/main/kotlin/noox/bzr/customer/C08OfferDetailsScreen.kt",
+        "symbol": "C08OfferDetailsScreen",
+        "logic_file": "androidapp/app/src/main/kotlin/noox/bzr/customer/CustomerLogic.kt",
+        "logic_symbol": "CustomerLogic",
+        "test_file": "androidapp/app/src/test/kotlin/noox/bzr/customer/CustomerSharedFixtureTest.kt",
+        "case_count": 5,
+        "text_keys": "source-scan",
+        "fixtures": [
+          "design/fixtures/SCR-C08/cases.json"
+        ]
+      },
+      "ios": {
+        "file": "iosapp/BzrApp/Customer/C08OfferDetailsView.swift",
+        "symbol": "C08OfferDetailsView",
+        "logic_file": "iosapp/Core/Sources/BzrCore/CustomerJourney.swift",
+        "logic_symbol": "CustomerLogic",
+        "test_file": "iosapp/Core/Tests/BzrCoreTests/CustomerSharedFixtureTests.swift",
+        "case_count": 5,
+        "text_keys": "source-scan",
+        "fixtures": [
+          "design/fixtures/SCR-C08/cases.json"
+        ]
+      }
+    },
+    {
+      "id": "SCR-C09",
+      "spec": "docs/screens/SCR-C09.md",
+      "android": {
+        "file": "androidapp/app/src/main/kotlin/noox/bzr/customer/C09TrackingScreen.kt",
+        "symbol": "C09TrackingScreen",
+        "logic_file": "androidapp/app/src/main/kotlin/noox/bzr/customer/CustomerLogic.kt",
+        "logic_symbol": "CustomerLogic",
+        "test_file": "androidapp/app/src/test/kotlin/noox/bzr/customer/CustomerSharedFixtureTest.kt",
+        "case_count": 11,
+        "text_keys": "source-scan",
+        "fixtures": [
+          "design/fixtures/SCR-C09/cases.json"
+        ]
+      },
+      "ios": {
+        "file": "iosapp/BzrApp/Customer/C09TrackingView.swift",
+        "symbol": "C09TrackingView",
+        "logic_file": "iosapp/Core/Sources/BzrCore/CustomerJourney.swift",
+        "logic_symbol": "CustomerLogic",
+        "test_file": "iosapp/Core/Tests/BzrCoreTests/CustomerSharedFixtureTests.swift",
+        "case_count": 11,
+        "text_keys": "source-scan",
+        "fixtures": [
+          "design/fixtures/SCR-C09/cases.json"
+        ]
+      }
+    },
+    {
+      "id": "SCR-C10",
+      "spec": "docs/screens/SCR-C10.md",
+      "android": {
+        "file": "androidapp/app/src/main/kotlin/noox/bzr/auth/CustomerAuthScreens.kt",
+        "symbol": "CustomerLoginScreen",
+        "logic_file": "androidapp/app/src/main/kotlin/noox/bzr/auth/AuthLogic.kt",
+        "logic_symbol": "AuthLogic",
+        "test_file": "androidapp/app/src/test/kotlin/noox/bzr/auth/AuthSharedFixtureTest.kt",
+        "case_count": 8,
+        "text_keys": "source-scan",
+        "fixtures": [
+          "design/fixtures/SCR-C10/cases.json"
+        ]
+      },
+      "ios": {
+        "file": "iosapp/BzrApp/Auth/CustomerAuthScreens.swift",
+        "symbol": "CustomerLoginScreen",
+        "logic_file": "iosapp/Core/Sources/BzrCore/Auth.swift",
+        "logic_symbol": "AuthLogic",
+        "test_file": "iosapp/Core/Tests/BzrCoreTests/AuthSharedFixtureTests.swift",
+        "case_count": 8,
+        "text_keys": "source-scan",
+        "fixtures": [
+          "design/fixtures/SCR-C10/cases.json"
+        ]
+      }
+    },
+    {
+      "id": "SCR-C11",
+      "spec": "docs/screens/SCR-C11.md",
+      "android": {
+        "file": "androidapp/app/src/main/kotlin/noox/bzr/auth/CustomerAuthScreens.kt",
+        "symbol": "CustomerRegisterScreen",
+        "logic_file": "androidapp/app/src/main/kotlin/noox/bzr/auth/AuthLogic.kt",
+        "logic_symbol": "AuthLogic",
+        "test_file": "androidapp/app/src/test/kotlin/noox/bzr/auth/AuthSharedFixtureTest.kt",
+        "case_count": 7,
+        "text_keys": "source-scan",
+        "fixtures": [
+          "design/fixtures/SCR-C11/cases.json"
+        ]
+      },
+      "ios": {
+        "file": "iosapp/BzrApp/Auth/CustomerAuthScreens.swift",
+        "symbol": "CustomerRegisterScreen",
+        "logic_file": "iosapp/Core/Sources/BzrCore/Auth.swift",
+        "logic_symbol": "AuthLogic",
+        "test_file": "iosapp/Core/Tests/BzrCoreTests/AuthSharedFixtureTests.swift",
+        "case_count": 7,
+        "text_keys": "source-scan",
+        "fixtures": [
+          "design/fixtures/SCR-C11/cases.json"
+        ]
+      }
+    },
+    {
+      "id": "SCR-C12",
+      "spec": "docs/screens/SCR-C12.md",
+      "android": {
+        "file": "androidapp/app/src/main/kotlin/noox/bzr/auth/CustomerAuthScreens.kt",
+        "symbol": "CustomerEmailVerificationScreen",
+        "logic_file": "androidapp/app/src/main/kotlin/noox/bzr/auth/AuthLogic.kt",
+        "logic_symbol": "AuthLogic",
+        "test_file": "androidapp/app/src/test/kotlin/noox/bzr/auth/AuthSharedFixtureTest.kt",
+        "case_count": 8,
+        "text_keys": "source-scan",
+        "fixtures": [
+          "design/fixtures/SCR-C12/cases.json"
+        ]
+      },
+      "ios": {
+        "file": "iosapp/BzrApp/Auth/CustomerAuthScreens.swift",
+        "symbol": "CustomerEmailVerificationScreen",
+        "logic_file": "iosapp/Core/Sources/BzrCore/Auth.swift",
+        "logic_symbol": "AuthLogic",
+        "test_file": "iosapp/Core/Tests/BzrCoreTests/AuthSharedFixtureTests.swift",
+        "case_count": 8,
+        "text_keys": "source-scan",
+        "fixtures": [
+          "design/fixtures/SCR-C12/cases.json"
+        ]
+      }
+    },
+    {
+      "id": "SCR-C13",
+      "spec": "docs/screens/SCR-C13.md",
+      "android": {
+        "file": "androidapp/app/src/main/kotlin/noox/bzr/auth/CustomerAuthScreens.kt",
+        "symbol": "CustomerPasswordRecoveryScreen",
+        "logic_file": "androidapp/app/src/main/kotlin/noox/bzr/auth/AuthLogic.kt",
+        "logic_symbol": "AuthLogic",
+        "test_file": "androidapp/app/src/test/kotlin/noox/bzr/auth/AuthSharedFixtureTest.kt",
+        "case_count": 6,
+        "text_keys": "source-scan",
+        "fixtures": [
+          "design/fixtures/SCR-C13/cases.json"
+        ]
+      },
+      "ios": {
+        "file": "iosapp/BzrApp/Auth/CustomerAuthScreens.swift",
+        "symbol": "CustomerPasswordRecoveryScreen",
+        "logic_file": "iosapp/Core/Sources/BzrCore/Auth.swift",
+        "logic_symbol": "AuthLogic",
+        "test_file": "iosapp/Core/Tests/BzrCoreTests/AuthSharedFixtureTests.swift",
+        "case_count": 6,
+        "text_keys": "source-scan",
+        "fixtures": [
+          "design/fixtures/SCR-C13/cases.json"
+        ]
+      }
+    },
+    {
+      "id": "SCR-C14",
+      "spec": "docs/screens/SCR-C14.md",
+      "android": {
+        "file": "androidapp/app/src/main/kotlin/noox/bzr/customer/C14AddressesScreen.kt",
+        "symbol": "C14AddressesScreen",
+        "logic_file": "androidapp/app/src/main/kotlin/noox/bzr/customer/CustomerLogic.kt",
+        "logic_symbol": "CustomerLogic",
+        "test_file": "androidapp/app/src/test/kotlin/noox/bzr/customer/CustomerSharedFixtureTest.kt",
+        "case_count": 7,
+        "text_keys": "source-scan",
+        "fixtures": [
+          "design/fixtures/SCR-C14/cases.json"
+        ]
+      },
+      "ios": {
+        "file": "iosapp/BzrApp/Customer/C14AddressesView.swift",
+        "symbol": "C14AddressesView",
+        "logic_file": "iosapp/Core/Sources/BzrCore/CustomerJourney.swift",
+        "logic_symbol": "CustomerLogic",
+        "test_file": "iosapp/Core/Tests/BzrCoreTests/CustomerSharedFixtureTests.swift",
+        "case_count": 7,
+        "text_keys": "source-scan",
+        "fixtures": [
+          "design/fixtures/SCR-C14/cases.json"
+        ]
+      }
+    },
+    {
+      "id": "SCR-C15",
+      "spec": "docs/screens/SCR-C15.md",
+      "android": {
+        "file": "androidapp/app/src/main/kotlin/noox/bzr/customer/C15AddressFormScreen.kt",
+        "symbol": "C15AddressFormScreen",
+        "logic_file": "androidapp/app/src/main/kotlin/noox/bzr/customer/CustomerLogic.kt",
+        "logic_symbol": "CustomerLogic",
+        "test_file": "androidapp/app/src/test/kotlin/noox/bzr/customer/CustomerSharedFixtureTest.kt",
+        "case_count": 8,
+        "text_keys": "source-scan",
+        "fixtures": [
+          "design/fixtures/SCR-C15/cases.json"
+        ]
+      },
+      "ios": {
+        "file": "iosapp/BzrApp/Customer/C15AddressFormView.swift",
+        "symbol": "C15AddressFormView",
+        "logic_file": "iosapp/Core/Sources/BzrCore/CustomerJourney.swift",
+        "logic_symbol": "CustomerLogic",
+        "test_file": "iosapp/Core/Tests/BzrCoreTests/CustomerSharedFixtureTests.swift",
+        "case_count": 8,
+        "text_keys": "source-scan",
+        "fixtures": [
+          "design/fixtures/SCR-C15/cases.json"
+        ]
+      }
+    },
+    {
+      "id": "SCR-C16",
+      "spec": "docs/screens/SCR-C16.md",
+      "android": {
+        "file": "androidapp/app/src/main/kotlin/noox/bzr/customer/C16SlotPickerScreen.kt",
+        "symbol": "C16SlotPickerScreen",
+        "logic_file": "androidapp/app/src/main/kotlin/noox/bzr/customer/CustomerLogic.kt",
+        "logic_symbol": "CustomerLogic",
+        "test_file": "androidapp/app/src/test/kotlin/noox/bzr/customer/CustomerSharedFixtureTest.kt",
+        "case_count": 6,
+        "text_keys": "source-scan",
+        "fixtures": [
+          "design/fixtures/SCR-C16/cases.json"
+        ]
+      },
+      "ios": {
+        "file": "iosapp/BzrApp/Customer/C16SlotPickerView.swift",
+        "symbol": "C16SlotPickerView",
+        "logic_file": "iosapp/Core/Sources/BzrCore/CustomerJourney.swift",
+        "logic_symbol": "CustomerLogic",
+        "test_file": "iosapp/Core/Tests/BzrCoreTests/CustomerSharedFixtureTests.swift",
+        "case_count": 6,
+        "text_keys": "source-scan",
+        "fixtures": [
+          "design/fixtures/SCR-C16/cases.json"
+        ]
+      }
+    },
+    {
+      "id": "SCR-C17",
+      "spec": "docs/screens/SCR-C17.md",
+      "android": {
+        "file": "androidapp/app/src/main/kotlin/noox/bzr/customer/C17MediaScreen.kt",
+        "symbol": "C17MediaScreen",
+        "logic_file": "androidapp/app/src/main/kotlin/noox/bzr/customer/CustomerLogic.kt",
+        "logic_symbol": "CustomerLogic",
+        "test_file": "androidapp/app/src/test/kotlin/noox/bzr/customer/CustomerSharedFixtureTest.kt",
+        "case_count": 8,
+        "text_keys": "source-scan",
+        "fixtures": [
+          "design/fixtures/SCR-C17/cases.json"
+        ]
+      },
+      "ios": {
+        "file": "iosapp/BzrApp/Customer/C17MediaView.swift",
+        "symbol": "C17MediaView",
+        "logic_file": "iosapp/Core/Sources/BzrCore/CustomerJourney.swift",
+        "logic_symbol": "CustomerLogic",
+        "test_file": "iosapp/Core/Tests/BzrCoreTests/CustomerSharedFixtureTests.swift",
+        "case_count": 8,
+        "text_keys": "source-scan",
+        "fixtures": [
+          "design/fixtures/SCR-C17/cases.json"
+        ]
+      }
+    },
+    {
+      "id": "SCR-C18",
+      "spec": "docs/screens/SCR-C18.md",
+      "android": {
+        "file": "androidapp/app/src/main/kotlin/noox/bzr/customer/C18MessagesScreen.kt",
+        "symbol": "C18MessagesScreen",
+        "logic_file": "androidapp/app/src/main/kotlin/noox/bzr/customer/CustomerLogic.kt",
+        "logic_symbol": "CustomerLogic",
+        "test_file": "androidapp/app/src/test/kotlin/noox/bzr/customer/CustomerSharedFixtureTest.kt",
+        "case_count": 6,
+        "text_keys": "source-scan",
+        "fixtures": [
+          "design/fixtures/SCR-C18/cases.json"
+        ]
+      },
+      "ios": {
+        "file": "iosapp/BzrApp/Customer/C18MessagesView.swift",
+        "symbol": "C18MessagesView",
+        "logic_file": "iosapp/Core/Sources/BzrCore/CustomerJourney.swift",
+        "logic_symbol": "CustomerLogic",
+        "test_file": "iosapp/Core/Tests/BzrCoreTests/CustomerSharedFixtureTests.swift",
+        "case_count": 6,
+        "text_keys": "source-scan",
+        "fixtures": [
+          "design/fixtures/SCR-C18/cases.json"
+        ]
+      }
+    },
+    {
+      "id": "SCR-C19",
+      "spec": "docs/screens/SCR-C19.md",
+      "android": {
+        "file": "androidapp/app/src/main/kotlin/noox/bzr/customer/C19ChatScreen.kt",
+        "symbol": "C19ChatScreen",
+        "logic_file": "androidapp/app/src/main/kotlin/noox/bzr/customer/CustomerLogic.kt",
+        "logic_symbol": "CustomerLogic",
+        "test_file": "androidapp/app/src/test/kotlin/noox/bzr/customer/CustomerSharedFixtureTest.kt",
+        "case_count": 8,
+        "text_keys": "source-scan",
+        "fixtures": [
+          "design/fixtures/SCR-C19/cases.json"
+        ]
+      },
+      "ios": {
+        "file": "iosapp/BzrApp/Customer/C19ChatView.swift",
+        "symbol": "C19ChatView",
+        "logic_file": "iosapp/Core/Sources/BzrCore/CustomerJourney.swift",
+        "logic_symbol": "CustomerLogic",
+        "test_file": "iosapp/Core/Tests/BzrCoreTests/CustomerSharedFixtureTests.swift",
+        "case_count": 8,
+        "text_keys": "source-scan",
+        "fixtures": [
+          "design/fixtures/SCR-C19/cases.json"
+        ]
+      }
+    },
+    {
+      "id": "SCR-C20",
+      "spec": "docs/screens/SCR-C20.md",
+      "android": {
+        "file": "androidapp/app/src/main/kotlin/noox/bzr/customer/C20CancellationScreen.kt",
+        "symbol": "C20CancellationScreen",
+        "logic_file": "androidapp/app/src/main/kotlin/noox/bzr/customer/CustomerLogic.kt",
+        "logic_symbol": "CustomerLogic",
+        "test_file": "androidapp/app/src/test/kotlin/noox/bzr/customer/CustomerSharedFixtureTest.kt",
+        "case_count": 5,
+        "text_keys": "source-scan",
+        "fixtures": [
+          "design/fixtures/SCR-C20/cases.json"
+        ]
+      },
+      "ios": {
+        "file": "iosapp/BzrApp/Customer/C20CancellationView.swift",
+        "symbol": "C20CancellationView",
+        "logic_file": "iosapp/Core/Sources/BzrCore/CustomerJourney.swift",
+        "logic_symbol": "CustomerLogic",
+        "test_file": "iosapp/Core/Tests/BzrCoreTests/CustomerSharedFixtureTests.swift",
+        "case_count": 5,
+        "text_keys": "source-scan",
+        "fixtures": [
+          "design/fixtures/SCR-C20/cases.json"
+        ]
+      }
+    },
+    {
+      "id": "SCR-C21",
+      "spec": "docs/screens/SCR-C21.md",
+      "android": {
+        "file": "androidapp/app/src/main/kotlin/noox/bzr/customer/C21PaymentSummaryScreen.kt",
+        "symbol": "C21PaymentSummaryScreen",
+        "logic_file": "androidapp/app/src/main/kotlin/noox/bzr/customer/CustomerLogic.kt",
+        "logic_symbol": "CustomerLogic",
+        "test_file": "androidapp/app/src/test/kotlin/noox/bzr/customer/CustomerSharedFixtureTest.kt",
+        "case_count": 6,
+        "text_keys": "source-scan",
+        "fixtures": [
+          "design/fixtures/SCR-C21/cases.json"
+        ]
+      },
+      "ios": {
+        "file": "iosapp/BzrApp/Customer/C21PaymentSummaryView.swift",
+        "symbol": "C21PaymentSummaryView",
+        "logic_file": "iosapp/Core/Sources/BzrCore/CustomerJourney.swift",
+        "logic_symbol": "CustomerLogic",
+        "test_file": "iosapp/Core/Tests/BzrCoreTests/CustomerSharedFixtureTests.swift",
+        "case_count": 6,
+        "text_keys": "source-scan",
+        "fixtures": [
+          "design/fixtures/SCR-C21/cases.json"
+        ]
+      }
+    },
+    {
+      "id": "SCR-C22",
+      "spec": "docs/screens/SCR-C22.md",
+      "android": {
+        "file": "androidapp/app/src/main/kotlin/noox/bzr/customer/C22ElectronicPaymentScreen.kt",
+        "symbol": "C22ElectronicPaymentScreen",
+        "logic_file": "androidapp/app/src/main/kotlin/noox/bzr/customer/CustomerLogic.kt",
+        "logic_symbol": "CustomerLogic",
+        "test_file": "androidapp/app/src/test/kotlin/noox/bzr/customer/CustomerSharedFixtureTest.kt",
+        "case_count": 10,
+        "text_keys": "source-scan",
+        "fixtures": [
+          "design/fixtures/SCR-C22/cases.json"
+        ]
+      },
+      "ios": {
+        "file": "iosapp/BzrApp/Customer/C22ElectronicPaymentView.swift",
+        "symbol": "C22ElectronicPaymentView",
+        "logic_file": "iosapp/Core/Sources/BzrCore/CustomerJourney.swift",
+        "logic_symbol": "CustomerLogic",
+        "test_file": "iosapp/Core/Tests/BzrCoreTests/CustomerSharedFixtureTests.swift",
+        "case_count": 10,
+        "text_keys": "source-scan",
+        "fixtures": [
+          "design/fixtures/SCR-C22/cases.json"
+        ]
+      }
+    },
+    {
+      "id": "SCR-C23",
+      "spec": "docs/screens/SCR-C23.md",
+      "android": {
+        "file": "androidapp/app/src/main/kotlin/noox/bzr/customer/C23CompletionScreen.kt",
+        "symbol": "C23CompletionScreen",
+        "logic_file": "androidapp/app/src/main/kotlin/noox/bzr/customer/CustomerLogic.kt",
+        "logic_symbol": "CustomerLogic",
+        "test_file": "androidapp/app/src/test/kotlin/noox/bzr/customer/CustomerSharedFixtureTest.kt",
+        "case_count": 5,
+        "text_keys": "source-scan",
+        "fixtures": [
+          "design/fixtures/SCR-C23/cases.json"
+        ]
+      },
+      "ios": {
+        "file": "iosapp/BzrApp/Customer/C23CompletionView.swift",
+        "symbol": "C23CompletionView",
+        "logic_file": "iosapp/Core/Sources/BzrCore/CustomerJourney.swift",
+        "logic_symbol": "CustomerLogic",
+        "test_file": "iosapp/Core/Tests/BzrCoreTests/CustomerSharedFixtureTests.swift",
+        "case_count": 5,
+        "text_keys": "source-scan",
+        "fixtures": [
+          "design/fixtures/SCR-C23/cases.json"
+        ]
+      }
+    },
+    {
+      "id": "SCR-C24",
+      "spec": "docs/screens/SCR-C24.md",
+      "android": {
+        "file": "androidapp/app/src/main/kotlin/noox/bzr/customer/C24RatingScreen.kt",
+        "symbol": "C24RatingScreen",
+        "logic_file": "androidapp/app/src/main/kotlin/noox/bzr/customer/CustomerLogic.kt",
+        "logic_symbol": "CustomerLogic",
+        "test_file": "androidapp/app/src/test/kotlin/noox/bzr/customer/CustomerSharedFixtureTest.kt",
+        "case_count": 10,
+        "text_keys": "source-scan",
+        "fixtures": [
+          "design/fixtures/SCR-C24/cases.json"
+        ]
+      },
+      "ios": {
+        "file": "iosapp/BzrApp/Customer/C24RatingView.swift",
+        "symbol": "C24RatingView",
+        "logic_file": "iosapp/Core/Sources/BzrCore/CustomerJourney.swift",
+        "logic_symbol": "CustomerLogic",
+        "test_file": "iosapp/Core/Tests/BzrCoreTests/CustomerSharedFixtureTests.swift",
+        "case_count": 10,
+        "text_keys": "source-scan",
+        "fixtures": [
+          "design/fixtures/SCR-C24/cases.json"
+        ]
+      }
+    },
+    {
+      "id": "SCR-C25",
+      "spec": "docs/screens/SCR-C25.md",
+      "android": {
+        "file": "androidapp/app/src/main/kotlin/noox/bzr/customer/C25OrdersScreen.kt",
+        "symbol": "C25OrdersScreen",
+        "logic_file": "androidapp/app/src/main/kotlin/noox/bzr/customer/CustomerLogic.kt",
+        "logic_symbol": "CustomerLogic",
+        "test_file": "androidapp/app/src/test/kotlin/noox/bzr/customer/CustomerSharedFixtureTest.kt",
+        "case_count": 7,
+        "text_keys": "source-scan",
+        "fixtures": [
+          "design/fixtures/SCR-C25/cases.json"
+        ]
+      },
+      "ios": {
+        "file": "iosapp/BzrApp/Customer/C25OrdersView.swift",
+        "symbol": "C25OrdersView",
+        "logic_file": "iosapp/Core/Sources/BzrCore/CustomerJourney.swift",
+        "logic_symbol": "CustomerLogic",
+        "test_file": "iosapp/Core/Tests/BzrCoreTests/CustomerSharedFixtureTests.swift",
+        "case_count": 7,
+        "text_keys": "source-scan",
+        "fixtures": [
+          "design/fixtures/SCR-C25/cases.json"
+        ]
+      }
+    },
+    {
+      "id": "SCR-C26",
+      "spec": "docs/screens/SCR-C26.md",
+      "android": {
+        "file": "androidapp/app/src/main/kotlin/noox/bzr/customer/C26OrderHistoryScreen.kt",
+        "symbol": "C26OrderHistoryScreen",
+        "logic_file": "androidapp/app/src/main/kotlin/noox/bzr/customer/CustomerLogic.kt",
+        "logic_symbol": "CustomerLogic",
+        "test_file": "androidapp/app/src/test/kotlin/noox/bzr/customer/CustomerSharedFixtureTest.kt",
+        "case_count": 8,
+        "text_keys": "source-scan",
+        "fixtures": [
+          "design/fixtures/SCR-C26/cases.json"
+        ]
+      },
+      "ios": {
+        "file": "iosapp/BzrApp/Customer/C26OrderHistoryView.swift",
+        "symbol": "C26OrderHistoryView",
+        "logic_file": "iosapp/Core/Sources/BzrCore/CustomerJourney.swift",
+        "logic_symbol": "CustomerLogic",
+        "test_file": "iosapp/Core/Tests/BzrCoreTests/CustomerSharedFixtureTests.swift",
+        "case_count": 8,
+        "text_keys": "source-scan",
+        "fixtures": [
+          "design/fixtures/SCR-C26/cases.json"
+        ]
+      }
+    },
+    {
+      "id": "SCR-C27",
+      "spec": "docs/screens/SCR-C27.md",
+      "android": {
+        "file": "androidapp/app/src/main/kotlin/noox/bzr/customer/C27DisputeScreen.kt",
+        "symbol": "C27DisputeScreen",
+        "logic_file": "androidapp/app/src/main/kotlin/noox/bzr/customer/CustomerLogic.kt",
+        "logic_symbol": "CustomerLogic",
+        "test_file": "androidapp/app/src/test/kotlin/noox/bzr/customer/CustomerSharedFixtureTest.kt",
+        "case_count": 10,
+        "text_keys": "source-scan",
+        "fixtures": [
+          "design/fixtures/SCR-C27/cases.json"
+        ]
+      },
+      "ios": {
+        "file": "iosapp/BzrApp/Customer/C27DisputeView.swift",
+        "symbol": "C27DisputeView",
+        "logic_file": "iosapp/Core/Sources/BzrCore/CustomerJourney.swift",
+        "logic_symbol": "CustomerLogic",
+        "test_file": "iosapp/Core/Tests/BzrCoreTests/CustomerSharedFixtureTests.swift",
+        "case_count": 10,
+        "text_keys": "source-scan",
+        "fixtures": [
+          "design/fixtures/SCR-C27/cases.json"
+        ]
+      }
+    },
+    {
+      "id": "SCR-C28",
+      "spec": "docs/screens/SCR-C28.md",
+      "android": {
+        "file": "androidapp/app/src/main/kotlin/noox/bzr/customer/C28ProviderReportScreen.kt",
+        "symbol": "C28ProviderReportScreen",
+        "logic_file": "androidapp/app/src/main/kotlin/noox/bzr/customer/CustomerLogic.kt",
+        "logic_symbol": "CustomerLogic",
+        "test_file": "androidapp/app/src/test/kotlin/noox/bzr/customer/CustomerSharedFixtureTest.kt",
+        "case_count": 7,
+        "text_keys": "source-scan",
+        "fixtures": [
+          "design/fixtures/SCR-C28/cases.json"
+        ]
+      },
+      "ios": {
+        "file": "iosapp/BzrApp/Customer/C28ProviderReportView.swift",
+        "symbol": "C28ProviderReportView",
+        "logic_file": "iosapp/Core/Sources/BzrCore/CustomerJourney.swift",
+        "logic_symbol": "CustomerLogic",
+        "test_file": "iosapp/Core/Tests/BzrCoreTests/CustomerSharedFixtureTests.swift",
+        "case_count": 7,
+        "text_keys": "source-scan",
+        "fixtures": [
+          "design/fixtures/SCR-C28/cases.json"
+        ]
+      }
+    },
+    {
+      "id": "SCR-C29",
+      "spec": "docs/screens/SCR-C29.md",
+      "android": {
+        "file": "androidapp/app/src/main/kotlin/noox/bzr/customer/C29HelpScreen.kt",
+        "symbol": "C29HelpScreen",
+        "parameters": [
+          "state",
+          "onExpand",
+          "onSubjectChange",
+          "onMessageChange",
+          "onSubmit"
+        ],
+        "logic_file": "androidapp/app/src/main/kotlin/noox/bzr/customer/CustomerLogic.kt",
+        "logic_symbol": "CustomerLogic",
+        "test_file": "androidapp/app/src/test/kotlin/noox/bzr/customer/CustomerSharedFixtureTest.kt",
+        "case_count": 6,
+        "text_keys": "source-scan",
+        "fixtures": [
+          "design/fixtures/SCR-C29/cases.json"
+        ]
+      },
+      "ios": {
+        "file": "iosapp/BzrApp/Customer/C29HelpView.swift",
+        "symbol": "C29HelpView",
+        "parameters": [
+          "state",
+          "onExpand",
+          "onSubjectChange",
+          "onMessageChange",
+          "onSubmit"
+        ],
+        "logic_file": "iosapp/Core/Sources/BzrCore/CustomerJourney.swift",
+        "logic_symbol": "CustomerLogic",
+        "test_file": "iosapp/Core/Tests/BzrCoreTests/CustomerSharedFixtureTests.swift",
+        "case_count": 6,
+        "text_keys": "source-scan",
+        "fixtures": [
+          "design/fixtures/SCR-C29/cases.json"
+        ]
+      }
+    },
+    {
+      "id": "SCR-C30",
+      "spec": "docs/screens/SCR-C30.md",
+      "android": {
+        "file": "androidapp/app/src/main/kotlin/noox/bzr/customer/ProposalDecisionScreen.kt",
+        "symbol": "C30ExecutionQuoteScreen",
+        "logic_file": "androidapp/app/src/main/kotlin/noox/bzr/customer/CustomerLogic.kt",
+        "logic_symbol": "CustomerLogic",
+        "test_file": "androidapp/app/src/test/kotlin/noox/bzr/customer/CustomerSharedFixtureTest.kt",
+        "case_count": 6,
+        "text_keys": "source-scan",
+        "fixtures": [
+          "design/fixtures/SCR-C30/cases.json"
+        ]
+      },
+      "ios": {
+        "file": "iosapp/BzrApp/Customer/ProposalDecisionViews.swift",
+        "symbol": "C30ExecutionQuoteView",
+        "logic_file": "iosapp/Core/Sources/BzrCore/CustomerJourney.swift",
+        "logic_symbol": "CustomerLogic",
+        "test_file": "iosapp/Core/Tests/BzrCoreTests/CustomerSharedFixtureTests.swift",
+        "case_count": 6,
+        "text_keys": "source-scan",
+        "fixtures": [
+          "design/fixtures/SCR-C30/cases.json"
+        ]
+      }
+    },
+    {
+      "id": "SCR-C31",
+      "spec": "docs/screens/SCR-C31.md",
+      "android": {
+        "file": "androidapp/app/src/main/kotlin/noox/bzr/customer/ProposalDecisionScreen.kt",
+        "symbol": "C31AdditionalCostScreen",
+        "logic_file": "androidapp/app/src/main/kotlin/noox/bzr/customer/CustomerLogic.kt",
+        "logic_symbol": "CustomerLogic",
+        "test_file": "androidapp/app/src/test/kotlin/noox/bzr/customer/CustomerSharedFixtureTest.kt",
+        "case_count": 7,
+        "text_keys": "source-scan",
+        "fixtures": [
+          "design/fixtures/SCR-C31/cases.json"
+        ]
+      },
+      "ios": {
+        "file": "iosapp/BzrApp/Customer/ProposalDecisionViews.swift",
+        "symbol": "C31AdditionalCostView",
+        "logic_file": "iosapp/Core/Sources/BzrCore/CustomerJourney.swift",
+        "logic_symbol": "CustomerLogic",
+        "test_file": "iosapp/Core/Tests/BzrCoreTests/CustomerSharedFixtureTests.swift",
+        "case_count": 7,
+        "text_keys": "source-scan",
+        "fixtures": [
+          "design/fixtures/SCR-C31/cases.json"
+        ]
+      }
+    },
+    {
+      "id": "SCR-C32",
+      "spec": "docs/screens/SCR-C32.md",
+      "android": {
+        "file": "androidapp/app/src/main/kotlin/noox/bzr/customer/C32NotificationsScreen.kt",
+        "symbol": "C32NotificationsScreen",
+        "parameters": [
+          "state",
+          "onOpen"
+        ],
+        "logic_file": "androidapp/app/src/main/kotlin/noox/bzr/customer/CustomerLogic.kt",
+        "logic_symbol": "CustomerLogic",
+        "test_file": "androidapp/app/src/test/kotlin/noox/bzr/customer/CustomerSharedFixtureTest.kt",
+        "case_count": 5,
+        "text_keys": "source-scan",
+        "fixtures": [
+          "design/fixtures/SCR-C32/cases.json"
+        ]
+      },
+      "ios": {
+        "file": "iosapp/BzrApp/Customer/C32NotificationsView.swift",
+        "symbol": "C32NotificationsView",
+        "parameters": [
+          "state",
+          "onOpen"
+        ],
+        "logic_file": "iosapp/Core/Sources/BzrCore/CustomerJourney.swift",
+        "logic_symbol": "CustomerLogic",
+        "test_file": "iosapp/Core/Tests/BzrCoreTests/CustomerSharedFixtureTests.swift",
+        "case_count": 5,
+        "text_keys": "source-scan",
+        "fixtures": [
+          "design/fixtures/SCR-C32/cases.json"
+        ]
+      }
+    },
+    {
+      "id": "SCR-C33",
+      "spec": "docs/screens/SCR-C33.md",
+      "android": {
+        "file": "androidapp/app/src/main/kotlin/noox/bzr/customer/C33AccountSettingsScreen.kt",
+        "symbol": "C33AccountSettingsScreen",
+        "parameters": [
+          "state",
+          "onAction",
+          "onFieldChange"
+        ],
+        "logic_file": "androidapp/app/src/main/kotlin/noox/bzr/customer/CustomerLogic.kt",
+        "logic_symbol": "CustomerLogic",
+        "test_file": "androidapp/app/src/test/kotlin/noox/bzr/customer/CustomerSharedFixtureTest.kt",
+        "case_count": 9,
+        "text_keys": "source-scan",
+        "fixtures": [
+          "design/fixtures/SCR-C33/cases.json"
+        ]
+      },
+      "ios": {
+        "file": "iosapp/BzrApp/Customer/C33AccountSettingsView.swift",
+        "symbol": "C33AccountSettingsView",
+        "parameters": [
+          "state",
+          "onAction",
+          "onFieldChange"
+        ],
+        "logic_file": "iosapp/Core/Sources/BzrCore/CustomerJourney.swift",
+        "logic_symbol": "CustomerLogic",
+        "test_file": "iosapp/Core/Tests/BzrCoreTests/CustomerSharedFixtureTests.swift",
+        "case_count": 9,
+        "text_keys": "source-scan",
+        "fixtures": [
+          "design/fixtures/SCR-C33/cases.json"
+        ]
+      }
+    },
+    {
+      "id": "SCR-C34",
+      "spec": "docs/screens/SCR-C34.md",
+      "android": {
+        "file": "androidapp/app/src/main/kotlin/noox/bzr/customer/C34TermsScreen.kt",
+        "symbol": "C34TermsScreen",
+        "parameters": [
+          "state"
+        ],
+        "logic_file": "androidapp/app/src/main/kotlin/noox/bzr/customer/CustomerLogic.kt",
+        "logic_symbol": "CustomerLogic",
+        "test_file": "androidapp/app/src/test/kotlin/noox/bzr/customer/CustomerSharedFixtureTest.kt",
+        "case_count": 4,
+        "text_keys": "source-scan",
+        "fixtures": [
+          "design/fixtures/SCR-C34/cases.json"
+        ]
+      },
+      "ios": {
+        "file": "iosapp/BzrApp/Customer/C34TermsView.swift",
+        "symbol": "C34TermsView",
+        "parameters": [
+          "state"
+        ],
+        "logic_file": "iosapp/Core/Sources/BzrCore/CustomerJourney.swift",
+        "logic_symbol": "CustomerLogic",
+        "test_file": "iosapp/Core/Tests/BzrCoreTests/CustomerSharedFixtureTests.swift",
+        "case_count": 4,
+        "text_keys": "source-scan",
+        "fixtures": [
+          "design/fixtures/SCR-C34/cases.json"
+        ]
+      }
+    },
+    {
+      "id": "SCR-C35",
+      "spec": "docs/screens/SCR-C35.md",
+      "android": {
+        "file": "androidapp/app/src/main/kotlin/noox/bzr/customer/C35NoOffersScreen.kt",
+        "symbol": "C35NoOffersScreen",
+        "parameters": [
+          "state",
+          "onAction"
+        ],
+        "logic_file": "androidapp/app/src/main/kotlin/noox/bzr/customer/CustomerLogic.kt",
+        "logic_symbol": "CustomerLogic",
+        "test_file": "androidapp/app/src/test/kotlin/noox/bzr/customer/CustomerSharedFixtureTest.kt",
+        "case_count": 6,
+        "text_keys": "source-scan",
+        "fixtures": [
+          "design/fixtures/SCR-C35/cases.json"
+        ]
+      },
+      "ios": {
+        "file": "iosapp/BzrApp/Customer/C35NoOffersView.swift",
+        "symbol": "C35NoOffersView",
+        "parameters": [
+          "state",
+          "onAction"
+        ],
+        "logic_file": "iosapp/Core/Sources/BzrCore/CustomerJourney.swift",
+        "logic_symbol": "CustomerLogic",
+        "test_file": "iosapp/Core/Tests/BzrCoreTests/CustomerSharedFixtureTests.swift",
+        "case_count": 6,
+        "text_keys": "source-scan",
+        "fixtures": [
+          "design/fixtures/SCR-C35/cases.json"
+        ]
+      }
+    },
+    {
+      "id": "SCR-C36",
+      "spec": "docs/25-SCREEN-INVENTORY.md",
+      "android": null,
+      "ios": null
+    },
+    {
+      "id": "SCR-P01",
+      "spec": "docs/25-SCREEN-INVENTORY.md",
+      "android": null,
+      "ios": null
+    },
+    {
+      "id": "SCR-P02",
+      "spec": "docs/25-SCREEN-INVENTORY.md",
+      "android": null,
+      "ios": null
+    },
+    {
+      "id": "SCR-P03",
+      "spec": "docs/25-SCREEN-INVENTORY.md",
+      "android": null,
+      "ios": null
+    },
+    {
+      "id": "SCR-P04",
+      "spec": "docs/25-SCREEN-INVENTORY.md",
+      "android": null,
+      "ios": null
+    },
+    {
+      "id": "SCR-P05",
+      "spec": "docs/25-SCREEN-INVENTORY.md",
+      "android": null,
+      "ios": null
+    },
+    {
+      "id": "SCR-P06",
+      "spec": "docs/25-SCREEN-INVENTORY.md",
+      "android": null,
+      "ios": null
+    },
+    {
+      "id": "SCR-P07",
+      "spec": "docs/25-SCREEN-INVENTORY.md",
+      "android": null,
+      "ios": null
+    },
+    {
+      "id": "SCR-P08",
+      "spec": "docs/25-SCREEN-INVENTORY.md",
+      "android": null,
+      "ios": null
+    },
+    {
+      "id": "SCR-P09",
+      "spec": "docs/25-SCREEN-INVENTORY.md",
+      "android": null,
+      "ios": null
+    },
+    {
+      "id": "SCR-P10",
+      "spec": "docs/25-SCREEN-INVENTORY.md",
+      "android": null,
+      "ios": null
+    },
+    {
+      "id": "SCR-P11",
+      "spec": "docs/25-SCREEN-INVENTORY.md",
+      "android": null,
+      "ios": null
+    },
+    {
+      "id": "SCR-P12",
+      "spec": "docs/25-SCREEN-INVENTORY.md",
+      "android": null,
+      "ios": null
+    },
+    {
+      "id": "SCR-P13",
+      "spec": "docs/25-SCREEN-INVENTORY.md",
+      "android": null,
+      "ios": null
+    },
+    {
+      "id": "SCR-P14",
+      "spec": "docs/25-SCREEN-INVENTORY.md",
+      "android": null,
+      "ios": null
+    },
+    {
+      "id": "SCR-P15",
+      "spec": "docs/25-SCREEN-INVENTORY.md",
+      "android": null,
+      "ios": null
+    },
+    {
+      "id": "SCR-P16",
+      "spec": "docs/25-SCREEN-INVENTORY.md",
+      "android": null,
+      "ios": null
+    },
+    {
+      "id": "SCR-P17",
+      "spec": "docs/25-SCREEN-INVENTORY.md",
+      "android": null,
+      "ios": null
+    },
+    {
+      "id": "SCR-P18",
+      "spec": "docs/25-SCREEN-INVENTORY.md",
+      "android": null,
+      "ios": null
+    },
+    {
+      "id": "SCR-P19",
+      "spec": "docs/25-SCREEN-INVENTORY.md",
+      "android": null,
+      "ios": null
+    },
+    {
+      "id": "SCR-P20",
+      "spec": "docs/25-SCREEN-INVENTORY.md",
+      "android": null,
+      "ios": null
+    },
+    {
+      "id": "SCR-P21",
+      "spec": "docs/25-SCREEN-INVENTORY.md",
+      "android": null,
+      "ios": null
+    }
+  ]
+}

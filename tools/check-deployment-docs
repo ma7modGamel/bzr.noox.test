@@ -1,0 +1,38 @@
+#!/usr/bin/env php
+<?php
+
+declare(strict_types=1);
+
+$root = dirname(__DIR__);
+$documents = [
+    'docs/30-SYSTEM-ARCHITECTURE.md',
+    'docs/44-DEPLOYMENT-CHECKLIST.md',
+];
+
+$required = [
+    '/location\s+\^~\s+\/v\//',
+    '/access_log\s+off\s*;/',
+    '/try_files\s+\$uri\s+\/index\.php\?\$query_string\s*;/',
+];
+
+$failures = [];
+foreach ($documents as $document) {
+    $contents = file_get_contents($root.'/'.$document);
+    if ($contents === false) {
+        $failures[] = $document.' is unreadable';
+        continue;
+    }
+
+    foreach ($required as $pattern) {
+        if (preg_match($pattern, $contents) !== 1) {
+            $failures[] = $document.' is missing '.$pattern;
+        }
+    }
+}
+
+if ($failures !== []) {
+    fwrite(STDERR, "Deployment privacy documentation is incomplete:\n - ".implode("\n - ", $failures)."\n");
+    exit(1);
+}
+
+fwrite(STDOUT, "Deployment docs disable /v/* access logging.\n");

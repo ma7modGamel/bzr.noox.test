@@ -27,14 +27,37 @@ app/
       StateMachine/TransitionTable.php ← جدول T-01..T-29 حرفيًا من 10
       StateMachine/OrderStateMachine.php ← المنفذ الوحيد لتغيير الحالة
       Services/ProviderEligibility.php ← BR-022 بفرعَي الوضع
-      Actions/                 ← AssignProviderAction (T-27/T-29)، CompleteInspectionOnlyAction (T-13/T-28)
-    Offers/ Pricing/ Payments/ Settlements/ Communication/ Reviews/ Support/
+      Services/SchedulingCalendar.php ← ساعات الخدمة والفترات (BR-017، CFG-020..022)
+      Services/OrderDeadlines.php ← مهلات الوضعين (CFG-010/013 مقابل CFG-093)
+      Services/OrderClosure.php   ← آثار الإغلاق: العمولة والتسوية (BR-060، BR-061)
+      Services/OrderTermination.php ← آثار الخروج النهائي: العروض والمقترحات والمحادثات
+      Jobs/                       ← المهلات التلقائية (30 §المهام المجدولة)
+      Actions/                 ← PublishRequestAction (T-01)، AssignProviderAction (T-27/T-29)، CompleteInspectionOnlyAction (T-13/T-28)
+    Offers/ Pricing/ Settlements/ Reviews/ Support/
+    Payments/
+      Services/PaymentChannels.php ← القنوات المفعّلة CASH/INSTAPAY_MANUAL/FAWRY (CFG-053..058، DEC-050)
+      Actions/Submit|Confirm|RejectInstapayTransferAction.php ← BR-057
+    Content/                   ← الصفحات القانونية بنسخ (DEC-051) + TermsService (BR-018)
+    Communication/Mail/ZeptoMailTransport.php ← البريد عبر ZeptoMail API (DEC-049)
+    Catalog/Services/CoverageCheck.php ← تحذير فئة/منطقة بلا فني نشط (DEC-053)
   Filament/
     Support/NavigationGroups.php
     Resources/                 ← مجمّعة حسب الوحدة
     Widgets/                   ← عدّادات 16 + شريط وضع التشغيل
+    Resources/PendingTransfers ← تحويلات إنستاباي بانتظار التأكيد (المدير العام)
+    Resources/LegalPages       ← وحدة «الصفحات» (المدير العام)
     Pages/OperatingSettings.php ← مفاتيح المرحلة + كل CFG
+  Http/Api/V1/               ← كونترولرز وموارد API v1 (31)
+  Http/Middleware/           ← X-App-Mode، Idempotency-Key، expected_version
+  Console/Commands/GenerateDesignTokens.php ← `design:tokens`: غلاف لـ `tools/gen-design` (DEC-043)
+  Console/Commands/GenerateOpenApiSpec.php  ← توليد عقد API من المسارات (31)
   Support/Exceptions/          ← رموز الأخطاء في 31
+
+docs/api/openapi.json          ← العقد المولَّد (لا يُعدَّل يدويًا)
+design/tokens.json             ← المصدر الواحد للهوية (43 §2) → `tools/gen-design` → CSS + موارد XML لأندرويد (DEC-047) + Swift + سمة البريد + أيقونات الفئات
+tools/compare-android-xml      ← مقارنة لقطات XML بأهداف Compose المعتمدة مع نسبة الاختلاف (43 §13)
+androidapp/                    ← تطبيق أندرويد (42)
+iosapp/                        ← تطبيق iOS (42)
 ```
 
 ## القواعد الملزمة في الكود
@@ -43,12 +66,17 @@ app/
 3. **الميزة المعطّلة تُرفض قبل أي قفل أو كتابة** (`FeatureGate` داخل الآلة نفسها) — 39، 30.
 4. **الإعدادات تُقرأ من `SettingsRepository` وحده**، لا `Setting::query()` في كود المجال.
 5. **المبالغ من `OrderAmounts` وحده** (BR-044)؛ لا حساب مبلغ في واجهة أو Action.
-6. **لا حذف فعلي** للطلبات والعروض والمقترحات والدفعات والأحداث (29 §الحذف) — ولهذا لا `cascadeOnDelete` عليها.
+6. **لا قيمة لون أو مقاس مكتوبة يدويًا** في أي منصة؛ المصدر `design/tokens.json` (DEC-043)، والتوليد بـ `tools/gen-design`، ويحرسها `tools/lint-design` و`DesignTokensTest`.
+7. **لا مسار API يعدّل الحالة مباشرة**، ولا `PUT` للإجراءات؛ كل إجراء POST مرتبط بانتقال في 10 — يحرسها `ApiContractTest`.
+8. **فشل السياسة يُترجم 404 لا 403** (23 §قاعدة الملكية)، والإدارة خارج قاعدة الملكية (`before()` في السياسات).
+9. **لا حذف فعلي** للطلبات والعروض والمقترحات والدفعات والأحداث (29 §الحذف) — ولهذا لا `cascadeOnDelete` عليها.
 
 ## ما ينقص للإطلاق (حالة اليوم)
-مبني وجاهز: المخطط الكامل، الـ enums، آلة الحالات بجدولها الكامل، بوابة المفاتيح، التعيين وإعادة التعيين، إنهاء المعاينة المجانية، حساب المبالغ، لوحة الإدارة (الطلبات، مقدمو الخدمة، الكتالوج، المدن، الإعدادات، العدّادات).
+الخطة الكاملة وحالة كل بند: **41-DELIVERY-PLAN**.
 
-لم يُبنَ بعد: باقي Actions الطلب (النشر، التتبع، المقترحات، الدفع، الإنهاء، النزاع)، واجهات API v1، تكامل فوري، FCM، المهام المجدولة، سياسات الصلاحيات التفصيلية (23)، شاشات النزاعات والمال في اللوحة.
+مبني وجاهز: المخطط الكامل، الـ enums، آلة الحالات بجدولها الكامل، بوابة المفاتيح، **دورة الطلب كاملة** (نشر، تعيين، زيارة، مقترحات، عروض، إلغاء، اعتذار، دفع، إغلاق، نزاع)، المهام المجدولة، السياسات، **API v1 وعقد OpenAPI مولَّد ومحروس**، لوحة الإدارة مع التدخلات، **توكنات التصميم المولَّدة للمنصات الثلاث**.
+
+نُفذت في API: الوسائط والمحادثة والتتبع وETA، وروابط المشاركة وصفحتها العامة SCR-W01، والتقييم. لم يُبنَ بعد: تكامل فوري وFCM، بقية واجهات النزاعات والبلاغات والإشعارات، وشاشات المنتج في التطبيقين (بوابة الدفعة 3 مغلقة حتى اعتماد معرض المنصتين).
 
 ## التشغيل محليًا
 ```bash

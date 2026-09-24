@@ -12,12 +12,14 @@ use App\Modules\Catalog\Models\Category;
 use BackedEnum;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
@@ -41,8 +43,25 @@ final class CategoryResource extends Resource
         return $schema->components([
             TextInput::make('name')->label('اسم الفئة')->required()->maxLength(100),
             TextInput::make('sort')->label('الترتيب')->numeric()->integer()->default(0),
-            Toggle::make('is_active')->label('مفعّلة')->default(true),
+            // OD-08 / DEC-053 — الفئة المفعّلة لازم يكون ليها أيقونة مسطحة ثنائية اللون.
+            Select::make('icon_path')
+                ->label('الأيقونة')
+                ->options(self::iconOptions())
+                ->requiredIf('is_active', true)
+                ->validationMessages(['required_if' => 'الفئة المفعّلة تحتاج أيقونة.']),
+            Toggle::make('is_active')->label('مفعّلة')->default(true)->live(),
         ]);
+    }
+
+    /** @return array<string, string> أيقونات design/icons/categories بعد التوليد. */
+    private static function iconOptions(): array
+    {
+        $options = [];
+        foreach (glob(public_path('design/categories/*.svg')) ?: [] as $file) {
+            $options['design/categories/'.basename($file)] = pathinfo($file, PATHINFO_FILENAME);
+        }
+
+        return $options;
     }
 
     public static function table(Table $table): Table
@@ -50,6 +69,10 @@ final class CategoryResource extends Resource
         return $table
             ->defaultSort('sort')
             ->columns([
+                ImageColumn::make('icon')
+                    ->label('')
+                    ->state(fn (Category $record): ?string => $record->icon_path === null ? null : asset($record->icon_path))
+                    ->imageSize(32),
                 TextColumn::make('name')->label('الفئة')->searchable(),
                 TextColumn::make('problem_types_count')
                     ->label('أنواع المشاكل')
@@ -60,8 +83,7 @@ final class CategoryResource extends Resource
             ->recordActions([
                 EditAction::make(),
                 DeleteAction::make(),
-            ])
-            ;
+            ]);
     }
 
     public static function getRelations(): array

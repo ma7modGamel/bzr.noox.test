@@ -82,6 +82,9 @@ erDiagram
 | `labor_total`, `materials_total`, `final_amount`, `commission_amount`, `labor_refunded`, `refunded_total` | DECIMAL(10,2) NULL |
 | `confirmed_at`, `trip_started_at`, `arrived_at`, `work_started_at`, `completed_at`, `closed_at`, `cancelled_at`, `expired_at` | |
 | `arrived_lat`, `arrived_lng`, `arrival_distance_m` | نقطة الوصول |
+| `disputed_from_status` | NULL إلا في `DISPUTED`؛ آخر حالة قبل النزاع لإبقاء الشريط عند مرحلته |
+| `eta_minutes`, `eta_approximate`, `eta_calculated_at` | آخر ETA محسوب من الخادم وحالة التقريب |
+| `eta_origin_lat`, `eta_origin_lng` | نقطة الفني التي حُسب عندها آخر ETA لتطبيق CFG-081 |
 | `cancelled_by_type`, `cancelled_by_id`, `cancel_reason_code`, `cancel_note` | |
 | `settlement_eligible_at` | |
 | `terms_version`, `terms_accepted_at` | |
@@ -114,8 +117,9 @@ CHECK: `slot_start < slot_end` عند SCHEDULED؛ المبالغ ≥ 0.
 **reviews** — `id`, `order_id` UQ, `provider_profile_id` FK, `customer_id` FK, `quality`, `punctuality`, `conduct` TINYINT (1–5 CHECK), `comment` NULL, `hidden_at`, `hidden_by`, `hidden_reason`. فهرس (`provider_profile_id`,`hidden_at`).
 **customer_ratings** — `id`, `order_id` UQ, `customer_id`, `provider_profile_id`, `stars` (1–5), `hidden_at`.
 **disputes** — `id`, `order_id` FK, `opened_by_type`, `opened_by_id`, `reason_code`, `description`, `is_post_close`, `status`, `resolution` NULL, `resolution_note`, `resolved_by`, `resolved_at`. فهرس (`status`)؛ عمود مولّد يمنع نزاعين مفتوحين على نفس الطلب.
-**dispute_attachments** — `id`, `dispute_id`, `path`, `uploaded_by`.
-**provider_reports** — `id`, `reporter_user_id`, `provider_profile_id`, `reason_code`, `description`, `status`, `reviewed_by`, `reviewed_at`.
+**dispute_attachments** — `id`, `dispute_id`, `order_media_id` FK NULL، `path`, `uploaded_by_type`, `uploaded_by_id`.
+**provider_reports** — `id`, `reporter_user_id`, `order_id` FK NULL، `provider_profile_id`, `reason_code`, `description`, `status`, `reviewed_by`, `reviewed_at`.
+**support_reasons** — `id`, `type` (`DISPUTE`/`PROVIDER_REPORT`)، `code`, `label`, `is_active`, `sort`. UQ(`type`,`code`) وفهرس (`type`,`is_active`,`sort`)؛ تديره لوحة التشغيل ويغذي `GET /config`.
 
 ### الإعدادات
 **settings** — `key` PK, `value` JSON, `updated_by`, `updated_at`. صفوف ثابتة تشمل `offers_enabled` (CFG-090) و`inspection_fee_enabled` (CFG-091) وباقي مفاتيح 04؛ تُقرأ مع تخزين مؤقت وتُبطَّل عند التعديل.

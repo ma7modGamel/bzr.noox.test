@@ -11,6 +11,7 @@ use Filament\Support\Contracts\HasLabel;
 enum PaymentStatus: string implements HasColor, HasLabel
 {
     case Pending = 'PENDING';
+    case PendingVerification = 'PENDING_VERIFICATION'; // تحويل إنستاباي بانتظار تأكيد المدير العام — BR-057
     case Succeeded = 'SUCCEEDED';
     case Failed = 'FAILED';
     case Expired = 'EXPIRED';
@@ -20,6 +21,7 @@ enum PaymentStatus: string implements HasColor, HasLabel
     {
         return match ($this) {
             self::Pending => 'قيد التنفيذ',
+            self::PendingVerification => 'بانتظار تأكيد التحويل',
             self::Succeeded => 'ناجحة',
             self::Failed => 'فاشلة',
             self::Expired => 'منتهية',
@@ -27,10 +29,16 @@ enum PaymentStatus: string implements HasColor, HasLabel
         };
     }
 
+    /** محاولة معلّقة تمنع إنشاء غيرها (قيد `pending_key`). */
+    public function isOpen(): bool
+    {
+        return $this === self::Pending || $this === self::PendingVerification;
+    }
+
     public function getColor(): string
     {
         return match ($this) {
-            self::Pending => 'warning',
+            self::Pending, self::PendingVerification => 'warning',
             self::Succeeded => 'success',
             self::Failed => 'danger',
             default => 'gray',

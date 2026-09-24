@@ -1,0 +1,2989 @@
+{
+    "openapi": "3.1.0",
+    "info": {
+        "title": "بريمو - Bremo — API v1",
+        "version": "1.0.0",
+        "description": "مولَّد من مسارات لارافيل. المرجع الملزم: docs/31-API-CONTRACT. لا يوجد أي مسار لتعديل حالة الطلب مباشرة؛ كل تغيير يمر بانتقال في docs/10."
+    },
+    "servers": [
+        {
+            "url": "/api/v1"
+        }
+    ],
+    "components": {
+        "securitySchemes": {
+            "sanctum": {
+                "type": "http",
+                "scheme": "bearer"
+            }
+        },
+        "parameters": {
+            "AppMode": {
+                "name": "X-App-Mode",
+                "in": "header",
+                "required": false,
+                "schema": {
+                    "type": "string",
+                    "enum": [
+                        "CUSTOMER",
+                        "PROVIDER"
+                    ]
+                },
+                "description": "يحدد ما يُعرض فقط؛ الصلاحية من الخادم (23)."
+            },
+            "IdempotencyKey": {
+                "name": "Idempotency-Key",
+                "in": "header",
+                "required": false,
+                "schema": {
+                    "type": "string",
+                    "format": "uuid"
+                },
+                "description": "نفس المفتاح خلال 24 ساعة يعيد نفس النتيجة."
+            }
+        },
+        "schemas": {
+            "Error": {
+                "type": "object",
+                "properties": {
+                    "error": {
+                        "type": "object",
+                        "required": [
+                            "code",
+                            "message"
+                        ],
+                        "properties": {
+                            "code": {
+                                "type": "string",
+                                "enum": [
+                                    "VALIDATION_FAILED",
+                                    "UNAUTHENTICATED",
+                                    "EMAIL_NOT_VERIFIED",
+                                    "ACCOUNT_BLOCKED",
+                                    "NOT_FOUND",
+                                    "INVALID_TRANSITION",
+                                    "CONFLICT",
+                                    "BUSINESS_RULE_VIOLATION",
+                                    "FEATURE_DISABLED",
+                                    "RATE_LIMITED"
+                                ]
+                            },
+                            "message": {
+                                "type": "string"
+                            },
+                            "rule": {
+                                "type": "string",
+                                "description": "معرّف القاعدة في docs/04 عند BUSINESS_RULE_VIOLATION"
+                            }
+                        }
+                    }
+                }
+            },
+            "OrderStatus": {
+                "type": "string",
+                "enum": [
+                    "OPEN",
+                    "CONFIRMED",
+                    "ON_THE_WAY",
+                    "ARRIVED",
+                    "AWAITING_QUOTE_APPROVAL",
+                    "IN_PROGRESS",
+                    "AWAITING_PAYMENT",
+                    "AWAITING_CONFIRMATION",
+                    "DISPUTED",
+                    "CLOSED",
+                    "CANCELLED",
+                    "EXPIRED"
+                ]
+            },
+            "OrderAction": {
+                "type": "string",
+                "description": "أسماء available_actions الثابتة في docs/31. التطبيق يعرضها ولا يستنتجها.",
+                "enum": [
+                    "accept_offer",
+                    "edit_request",
+                    "republish",
+                    "cancel",
+                    "change_payment_method",
+                    "pay_electronic",
+                    "submit_instapay_transfer",
+                    "approve_proposal",
+                    "reject_proposal",
+                    "confirm_completion",
+                    "open_dispute",
+                    "rate",
+                    "share_visit",
+                    "call",
+                    "chat",
+                    "report_provider",
+                    "submit_offer",
+                    "withdraw_offer",
+                    "start_trip",
+                    "back_out",
+                    "mark_arrived",
+                    "start_work",
+                    "submit_execution_quote",
+                    "complete_inspection_only",
+                    "submit_proposal",
+                    "withdraw_proposal",
+                    "complete_work",
+                    "report_unable",
+                    "report_no_show",
+                    "confirm_cash",
+                    "rate_customer",
+                    "navigate"
+                ]
+            },
+            "StepperState": {
+                "type": "string",
+                "enum": [
+                    "done",
+                    "active",
+                    "pending",
+                    "on_hold"
+                ]
+            },
+            "StatusStepper": {
+                "type": [
+                    "array",
+                    "null"
+                ],
+                "description": "null في OPEN/CANCELLED/EXPIRED. في DISPUTED تستخدم المرحلة السابقة on_hold.",
+                "items": {
+                    "type": "object",
+                    "required": [
+                        "key",
+                        "state"
+                    ],
+                    "properties": {
+                        "key": {
+                            "type": "string"
+                        },
+                        "state": {
+                            "$ref": "#/components/schemas/StepperState"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "security": [
+        {
+            "sanctum": []
+        }
+    ],
+    "paths": {
+        "/addresses": {
+            "get": {
+                "operationId": "addressIndex",
+                "tags": [
+                    "العناوين"
+                ],
+                "summary": "addressIndex",
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AppMode"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "نجاح"
+                    },
+                    "400": {
+                        "description": "خطأ",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "operationId": "addressStore",
+                "tags": [
+                    "العناوين"
+                ],
+                "summary": "addressStore",
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AppMode"
+                    },
+                    {
+                        "$ref": "#/components/parameters/IdempotencyKey"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "نجاح"
+                    },
+                    "400": {
+                        "description": "خطأ",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/addresses/{address}": {
+            "patch": {
+                "operationId": "addressUpdate",
+                "tags": [
+                    "العناوين"
+                ],
+                "summary": "addressUpdate",
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AppMode"
+                    },
+                    {
+                        "name": "address",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "نجاح"
+                    },
+                    "400": {
+                        "description": "خطأ",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "operationId": "addressDestroy",
+                "tags": [
+                    "العناوين"
+                ],
+                "summary": "addressDestroy",
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AppMode"
+                    },
+                    {
+                        "name": "address",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "نجاح"
+                    },
+                    "400": {
+                        "description": "خطأ",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/email/resend": {
+            "post": {
+                "operationId": "authResendVerification",
+                "tags": [
+                    "الهوية"
+                ],
+                "summary": "authResendVerification",
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AppMode"
+                    },
+                    {
+                        "$ref": "#/components/parameters/IdempotencyKey"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "نجاح"
+                    },
+                    "400": {
+                        "description": "خطأ",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/email/verify/{id}/{hash}": {
+            "get": {
+                "operationId": "authVerifyEmail",
+                "tags": [
+                    "الهوية"
+                ],
+                "summary": "authVerifyEmail",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AppMode"
+                    },
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "hash",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "نجاح"
+                    },
+                    "400": {
+                        "description": "خطأ",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/login": {
+            "post": {
+                "operationId": "authLogin",
+                "tags": [
+                    "الهوية"
+                ],
+                "summary": "authLogin",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AppMode"
+                    },
+                    {
+                        "$ref": "#/components/parameters/IdempotencyKey"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "نجاح"
+                    },
+                    "400": {
+                        "description": "خطأ",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/logout": {
+            "post": {
+                "operationId": "authLogout",
+                "tags": [
+                    "الهوية"
+                ],
+                "summary": "authLogout",
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AppMode"
+                    },
+                    {
+                        "$ref": "#/components/parameters/IdempotencyKey"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "نجاح"
+                    },
+                    "400": {
+                        "description": "خطأ",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/password/forgot": {
+            "post": {
+                "operationId": "authForgotPassword",
+                "tags": [
+                    "الهوية"
+                ],
+                "summary": "authForgotPassword",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AppMode"
+                    },
+                    {
+                        "$ref": "#/components/parameters/IdempotencyKey"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "نجاح"
+                    },
+                    "400": {
+                        "description": "خطأ",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/password/reset": {
+            "post": {
+                "operationId": "authResetPassword",
+                "tags": [
+                    "الهوية"
+                ],
+                "summary": "authResetPassword",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AppMode"
+                    },
+                    {
+                        "$ref": "#/components/parameters/IdempotencyKey"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "نجاح"
+                    },
+                    "400": {
+                        "description": "خطأ",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/register": {
+            "post": {
+                "operationId": "authRegister",
+                "tags": [
+                    "الهوية"
+                ],
+                "summary": "authRegister",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AppMode"
+                    },
+                    {
+                        "$ref": "#/components/parameters/IdempotencyKey"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "نجاح"
+                    },
+                    "400": {
+                        "description": "خطأ",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/catalog": {
+            "get": {
+                "operationId": "referenceCatalog",
+                "tags": [
+                    "المراجع"
+                ],
+                "summary": "referenceCatalog",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AppMode"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "نجاح"
+                    },
+                    "400": {
+                        "description": "خطأ",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/cities": {
+            "get": {
+                "operationId": "referenceCities",
+                "tags": [
+                    "المراجع"
+                ],
+                "summary": "referenceCities",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AppMode"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "نجاح"
+                    },
+                    "400": {
+                        "description": "خطأ",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/cities/{city}/areas": {
+            "get": {
+                "operationId": "referenceAreas",
+                "tags": [
+                    "المراجع"
+                ],
+                "summary": "referenceAreas",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AppMode"
+                    },
+                    {
+                        "name": "city",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "نجاح"
+                    },
+                    "400": {
+                        "description": "خطأ",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/config": {
+            "get": {
+                "operationId": "configController",
+                "tags": [
+                    "المراجع"
+                ],
+                "summary": "configController",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AppMode"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "نجاح"
+                    },
+                    "400": {
+                        "description": "خطأ",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/conversations": {
+            "get": {
+                "operationId": "conversationIndex",
+                "tags": [
+                    "المراجع"
+                ],
+                "summary": "conversationIndex",
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AppMode"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "نجاح"
+                    },
+                    "400": {
+                        "description": "خطأ",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "operationId": "conversationStore",
+                "tags": [
+                    "المراجع"
+                ],
+                "summary": "conversationStore",
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AppMode"
+                    },
+                    {
+                        "$ref": "#/components/parameters/IdempotencyKey"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "نجاح"
+                    },
+                    "400": {
+                        "description": "خطأ",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/conversations/{conversation}/messages": {
+            "get": {
+                "operationId": "conversationMessages",
+                "tags": [
+                    "المراجع"
+                ],
+                "summary": "conversationMessages",
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AppMode"
+                    },
+                    {
+                        "name": "conversation",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "نجاح"
+                    },
+                    "400": {
+                        "description": "خطأ",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "operationId": "conversationSend",
+                "tags": [
+                    "المراجع"
+                ],
+                "summary": "conversationSend",
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AppMode"
+                    },
+                    {
+                        "$ref": "#/components/parameters/IdempotencyKey"
+                    },
+                    {
+                        "name": "conversation",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "نجاح"
+                    },
+                    "400": {
+                        "description": "خطأ",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/me": {
+            "get": {
+                "operationId": "accountShow",
+                "tags": [
+                    "الهوية"
+                ],
+                "summary": "accountShow",
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AppMode"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "نجاح"
+                    },
+                    "400": {
+                        "description": "خطأ",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "operationId": "accountUpdate",
+                "tags": [
+                    "الهوية"
+                ],
+                "summary": "accountUpdate",
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AppMode"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "نجاح"
+                    },
+                    "400": {
+                        "description": "خطأ",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "operationId": "accountDestroy",
+                "tags": [
+                    "الهوية"
+                ],
+                "summary": "accountDestroy",
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AppMode"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "نجاح"
+                    },
+                    "400": {
+                        "description": "خطأ",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/me/avatar": {
+            "get": {
+                "operationId": "accountAvatar",
+                "tags": [
+                    "المراجع"
+                ],
+                "summary": "accountAvatar",
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AppMode"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "نجاح"
+                    },
+                    "400": {
+                        "description": "خطأ",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/me/password": {
+            "post": {
+                "operationId": "accountPassword",
+                "tags": [
+                    "المراجع"
+                ],
+                "summary": "accountPassword",
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AppMode"
+                    },
+                    {
+                        "$ref": "#/components/parameters/IdempotencyKey"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "نجاح"
+                    },
+                    "400": {
+                        "description": "خطأ",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/media": {
+            "post": {
+                "operationId": "mediaStore",
+                "tags": [
+                    "المراجع"
+                ],
+                "summary": "mediaStore",
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AppMode"
+                    },
+                    {
+                        "$ref": "#/components/parameters/IdempotencyKey"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "نجاح"
+                    },
+                    "400": {
+                        "description": "خطأ",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/media/{media}": {
+            "get": {
+                "operationId": "mediaShow",
+                "tags": [
+                    "المراجع"
+                ],
+                "summary": "mediaShow",
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AppMode"
+                    },
+                    {
+                        "name": "media",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "نجاح"
+                    },
+                    "400": {
+                        "description": "خطأ",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "operationId": "mediaDestroy",
+                "tags": [
+                    "المراجع"
+                ],
+                "summary": "mediaDestroy",
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AppMode"
+                    },
+                    {
+                        "name": "media",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "نجاح"
+                    },
+                    "400": {
+                        "description": "خطأ",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/notifications": {
+            "get": {
+                "operationId": "notificationIndex",
+                "tags": [
+                    "المراجع"
+                ],
+                "summary": "notificationIndex",
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AppMode"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "نجاح"
+                    },
+                    "400": {
+                        "description": "خطأ",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/notifications/read": {
+            "post": {
+                "operationId": "notificationRead",
+                "tags": [
+                    "المراجع"
+                ],
+                "summary": "notificationRead",
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AppMode"
+                    },
+                    {
+                        "$ref": "#/components/parameters/IdempotencyKey"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "نجاح"
+                    },
+                    "400": {
+                        "description": "خطأ",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/orders": {
+            "get": {
+                "operationId": "orderIndex",
+                "tags": [
+                    "الطلبات"
+                ],
+                "summary": "orderIndex",
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AppMode"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "نجاح"
+                    },
+                    "400": {
+                        "description": "خطأ",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "operationId": "orderStore",
+                "tags": [
+                    "الطلبات"
+                ],
+                "summary": "orderStore",
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AppMode"
+                    },
+                    {
+                        "$ref": "#/components/parameters/IdempotencyKey"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "نجاح"
+                    },
+                    "400": {
+                        "description": "خطأ",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/orders/{order}": {
+            "patch": {
+                "operationId": "orderUpdate",
+                "tags": [
+                    "الطلبات"
+                ],
+                "summary": "orderUpdate",
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AppMode"
+                    },
+                    {
+                        "name": "order",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "نجاح"
+                    },
+                    "400": {
+                        "description": "خطأ",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "get": {
+                "operationId": "orderShow",
+                "tags": [
+                    "الطلبات"
+                ],
+                "summary": "orderShow",
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AppMode"
+                    },
+                    {
+                        "name": "order",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "نجاح"
+                    },
+                    "400": {
+                        "description": "خطأ",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/orders/{order}/cancel": {
+            "post": {
+                "operationId": "orderCancel",
+                "tags": [
+                    "الطلبات"
+                ],
+                "summary": "orderCancel",
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AppMode"
+                    },
+                    {
+                        "$ref": "#/components/parameters/IdempotencyKey"
+                    },
+                    {
+                        "name": "order",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "نجاح"
+                    },
+                    "400": {
+                        "description": "خطأ",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/orders/{order}/confirm-completion": {
+            "post": {
+                "operationId": "orderConfirmCompletion",
+                "tags": [
+                    "الطلبات"
+                ],
+                "summary": "orderConfirmCompletion",
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AppMode"
+                    },
+                    {
+                        "$ref": "#/components/parameters/IdempotencyKey"
+                    },
+                    {
+                        "name": "order",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "نجاح"
+                    },
+                    "400": {
+                        "description": "خطأ",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/orders/{order}/disputes": {
+            "get": {
+                "operationId": "supportDisputes",
+                "tags": [
+                    "الطلبات"
+                ],
+                "summary": "supportDisputes",
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AppMode"
+                    },
+                    {
+                        "name": "order",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "نجاح"
+                    },
+                    "400": {
+                        "description": "خطأ",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "operationId": "supportOpenDispute",
+                "tags": [
+                    "الطلبات"
+                ],
+                "summary": "supportOpenDispute",
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AppMode"
+                    },
+                    {
+                        "$ref": "#/components/parameters/IdempotencyKey"
+                    },
+                    {
+                        "name": "order",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "نجاح"
+                    },
+                    "400": {
+                        "description": "خطأ",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/orders/{order}/instapay-transfers": {
+            "post": {
+                "operationId": "paymentInstapayTransfer",
+                "tags": [
+                    "الطلبات"
+                ],
+                "summary": "paymentInstapayTransfer",
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AppMode"
+                    },
+                    {
+                        "$ref": "#/components/parameters/IdempotencyKey"
+                    },
+                    {
+                        "name": "order",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "نجاح"
+                    },
+                    "400": {
+                        "description": "خطأ",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/orders/{order}/offers": {
+            "get": {
+                "operationId": "orderOffers",
+                "tags": [
+                    "الطلبات"
+                ],
+                "summary": "orderOffers",
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AppMode"
+                    },
+                    {
+                        "name": "order",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "نجاح"
+                    },
+                    "400": {
+                        "description": "خطأ",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/orders/{order}/offers/{offer}/accept": {
+            "post": {
+                "operationId": "orderAcceptOffer",
+                "tags": [
+                    "الطلبات"
+                ],
+                "summary": "orderAcceptOffer",
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AppMode"
+                    },
+                    {
+                        "$ref": "#/components/parameters/IdempotencyKey"
+                    },
+                    {
+                        "name": "order",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "offer",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "نجاح"
+                    },
+                    "400": {
+                        "description": "خطأ",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/orders/{order}/payment-method": {
+            "patch": {
+                "operationId": "paymentChangeMethod",
+                "tags": [
+                    "الطلبات"
+                ],
+                "summary": "paymentChangeMethod",
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AppMode"
+                    },
+                    {
+                        "name": "order",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "نجاح"
+                    },
+                    "400": {
+                        "description": "خطأ",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/orders/{order}/payments": {
+            "post": {
+                "operationId": "paymentStore",
+                "tags": [
+                    "الطلبات"
+                ],
+                "summary": "paymentStore",
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AppMode"
+                    },
+                    {
+                        "$ref": "#/components/parameters/IdempotencyKey"
+                    },
+                    {
+                        "name": "order",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "نجاح"
+                    },
+                    "400": {
+                        "description": "خطأ",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/orders/{order}/proposals": {
+            "get": {
+                "operationId": "orderProposals",
+                "tags": [
+                    "الطلبات"
+                ],
+                "summary": "orderProposals",
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AppMode"
+                    },
+                    {
+                        "name": "order",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "نجاح"
+                    },
+                    "400": {
+                        "description": "خطأ",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/orders/{order}/proposals/{proposal}/decide": {
+            "post": {
+                "operationId": "orderDecideProposal",
+                "tags": [
+                    "الطلبات"
+                ],
+                "summary": "orderDecideProposal",
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AppMode"
+                    },
+                    {
+                        "$ref": "#/components/parameters/IdempotencyKey"
+                    },
+                    {
+                        "name": "order",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "proposal",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "نجاح"
+                    },
+                    "400": {
+                        "description": "خطأ",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/orders/{order}/republish": {
+            "post": {
+                "operationId": "orderRepublish",
+                "tags": [
+                    "الطلبات"
+                ],
+                "summary": "orderRepublish",
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AppMode"
+                    },
+                    {
+                        "$ref": "#/components/parameters/IdempotencyKey"
+                    },
+                    {
+                        "name": "order",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "نجاح"
+                    },
+                    "400": {
+                        "description": "خطأ",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/orders/{order}/review": {
+            "post": {
+                "operationId": "ratingReview",
+                "tags": [
+                    "الطلبات"
+                ],
+                "summary": "ratingReview",
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AppMode"
+                    },
+                    {
+                        "$ref": "#/components/parameters/IdempotencyKey"
+                    },
+                    {
+                        "name": "order",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "نجاح"
+                    },
+                    "400": {
+                        "description": "خطأ",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/orders/{order}/share-links": {
+            "post": {
+                "operationId": "shareLinkStore",
+                "tags": [
+                    "الطلبات"
+                ],
+                "summary": "shareLinkStore",
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AppMode"
+                    },
+                    {
+                        "$ref": "#/components/parameters/IdempotencyKey"
+                    },
+                    {
+                        "name": "order",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "نجاح"
+                    },
+                    "400": {
+                        "description": "خطأ",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/orders/{order}/tracking": {
+            "get": {
+                "operationId": "trackingShow",
+                "tags": [
+                    "الطلبات"
+                ],
+                "summary": "trackingShow",
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AppMode"
+                    },
+                    {
+                        "name": "order",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "نجاح"
+                    },
+                    "400": {
+                        "description": "خطأ",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/pages/{slug}": {
+            "get": {
+                "operationId": "pageShow",
+                "tags": [
+                    "المراجع"
+                ],
+                "summary": "pageShow",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AppMode"
+                    },
+                    {
+                        "name": "slug",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "نجاح"
+                    },
+                    "400": {
+                        "description": "خطأ",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/provider/orders": {
+            "get": {
+                "operationId": "providerOrderMyOrders",
+                "tags": [
+                    "الفني"
+                ],
+                "summary": "providerOrderMyOrders",
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AppMode"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "نجاح"
+                    },
+                    "400": {
+                        "description": "خطأ",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/provider/orders/{order}/arrived": {
+            "post": {
+                "operationId": "providerOrderMarkArrived",
+                "tags": [
+                    "الفني"
+                ],
+                "summary": "providerOrderMarkArrived",
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AppMode"
+                    },
+                    {
+                        "$ref": "#/components/parameters/IdempotencyKey"
+                    },
+                    {
+                        "name": "order",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "نجاح"
+                    },
+                    "400": {
+                        "description": "خطأ",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/provider/orders/{order}/back-out": {
+            "post": {
+                "operationId": "providerOrderBackOut",
+                "tags": [
+                    "الفني"
+                ],
+                "summary": "providerOrderBackOut",
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AppMode"
+                    },
+                    {
+                        "$ref": "#/components/parameters/IdempotencyKey"
+                    },
+                    {
+                        "name": "order",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "نجاح"
+                    },
+                    "400": {
+                        "description": "خطأ",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/provider/orders/{order}/cash-received": {
+            "post": {
+                "operationId": "providerOrderCashReceived",
+                "tags": [
+                    "الفني"
+                ],
+                "summary": "providerOrderCashReceived",
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AppMode"
+                    },
+                    {
+                        "$ref": "#/components/parameters/IdempotencyKey"
+                    },
+                    {
+                        "name": "order",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "نجاح"
+                    },
+                    "400": {
+                        "description": "خطأ",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/provider/orders/{order}/complete": {
+            "post": {
+                "operationId": "providerOrderComplete",
+                "tags": [
+                    "الفني"
+                ],
+                "summary": "providerOrderComplete",
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AppMode"
+                    },
+                    {
+                        "$ref": "#/components/parameters/IdempotencyKey"
+                    },
+                    {
+                        "name": "order",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "نجاح"
+                    },
+                    "400": {
+                        "description": "خطأ",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/provider/orders/{order}/complete-inspection-only": {
+            "post": {
+                "operationId": "providerOrderCompleteInspectionOnly",
+                "tags": [
+                    "الفني"
+                ],
+                "summary": "providerOrderCompleteInspectionOnly",
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AppMode"
+                    },
+                    {
+                        "$ref": "#/components/parameters/IdempotencyKey"
+                    },
+                    {
+                        "name": "order",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "نجاح"
+                    },
+                    "400": {
+                        "description": "خطأ",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/provider/orders/{order}/customer-no-show": {
+            "post": {
+                "operationId": "providerOrderCustomerNoShow",
+                "tags": [
+                    "الفني"
+                ],
+                "summary": "providerOrderCustomerNoShow",
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AppMode"
+                    },
+                    {
+                        "$ref": "#/components/parameters/IdempotencyKey"
+                    },
+                    {
+                        "name": "order",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "نجاح"
+                    },
+                    "400": {
+                        "description": "خطأ",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/provider/orders/{order}/customer-rating": {
+            "post": {
+                "operationId": "ratingCustomerRating",
+                "tags": [
+                    "الفني"
+                ],
+                "summary": "ratingCustomerRating",
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AppMode"
+                    },
+                    {
+                        "$ref": "#/components/parameters/IdempotencyKey"
+                    },
+                    {
+                        "name": "order",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "نجاح"
+                    },
+                    "400": {
+                        "description": "خطأ",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/provider/orders/{order}/location": {
+            "post": {
+                "operationId": "providerOrderRecordLocation",
+                "tags": [
+                    "الفني"
+                ],
+                "summary": "providerOrderRecordLocation",
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AppMode"
+                    },
+                    {
+                        "$ref": "#/components/parameters/IdempotencyKey"
+                    },
+                    {
+                        "name": "order",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "نجاح"
+                    },
+                    "400": {
+                        "description": "خطأ",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/provider/orders/{order}/proposals": {
+            "post": {
+                "operationId": "providerOrderSubmitProposal",
+                "tags": [
+                    "الفني"
+                ],
+                "summary": "providerOrderSubmitProposal",
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AppMode"
+                    },
+                    {
+                        "$ref": "#/components/parameters/IdempotencyKey"
+                    },
+                    {
+                        "name": "order",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "نجاح"
+                    },
+                    "400": {
+                        "description": "خطأ",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/provider/orders/{order}/start-trip": {
+            "post": {
+                "operationId": "providerOrderStartTrip",
+                "tags": [
+                    "الفني"
+                ],
+                "summary": "providerOrderStartTrip",
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AppMode"
+                    },
+                    {
+                        "$ref": "#/components/parameters/IdempotencyKey"
+                    },
+                    {
+                        "name": "order",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "نجاح"
+                    },
+                    "400": {
+                        "description": "خطأ",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/provider/orders/{order}/start-work": {
+            "post": {
+                "operationId": "providerOrderStartWork",
+                "tags": [
+                    "الفني"
+                ],
+                "summary": "providerOrderStartWork",
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AppMode"
+                    },
+                    {
+                        "$ref": "#/components/parameters/IdempotencyKey"
+                    },
+                    {
+                        "name": "order",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "نجاح"
+                    },
+                    "400": {
+                        "description": "خطأ",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/provider/orders/{order}/unable": {
+            "post": {
+                "operationId": "providerOrderUnable",
+                "tags": [
+                    "الفني"
+                ],
+                "summary": "providerOrderUnable",
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AppMode"
+                    },
+                    {
+                        "$ref": "#/components/parameters/IdempotencyKey"
+                    },
+                    {
+                        "name": "order",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "نجاح"
+                    },
+                    "400": {
+                        "description": "خطأ",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/provider/requests": {
+            "get": {
+                "operationId": "providerOrderAvailableRequests",
+                "tags": [
+                    "الفني"
+                ],
+                "summary": "providerOrderAvailableRequests",
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AppMode"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "نجاح"
+                    },
+                    "400": {
+                        "description": "خطأ",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/provider/requests/{order}/offers": {
+            "post": {
+                "operationId": "providerOrderSubmitOffer",
+                "tags": [
+                    "الفني"
+                ],
+                "summary": "providerOrderSubmitOffer",
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AppMode"
+                    },
+                    {
+                        "$ref": "#/components/parameters/IdempotencyKey"
+                    },
+                    {
+                        "name": "order",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "نجاح"
+                    },
+                    "400": {
+                        "description": "خطأ",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/providers/{provider}": {
+            "get": {
+                "operationId": "providerShow",
+                "tags": [
+                    "الفني"
+                ],
+                "summary": "providerShow",
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AppMode"
+                    },
+                    {
+                        "name": "provider",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "order_id",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "description": "سياق الطلب المملوك للعميل لحساب available_actions ومنع استعراض ملف غير مرتبط."
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "نجاح"
+                    },
+                    "400": {
+                        "description": "خطأ",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/providers/{provider}/reports": {
+            "post": {
+                "operationId": "supportReportProvider",
+                "tags": [
+                    "الفني"
+                ],
+                "summary": "supportReportProvider",
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AppMode"
+                    },
+                    {
+                        "$ref": "#/components/parameters/IdempotencyKey"
+                    },
+                    {
+                        "name": "provider",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "نجاح"
+                    },
+                    "400": {
+                        "description": "خطأ",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/share-links/{shareLink}": {
+            "delete": {
+                "operationId": "shareLinkDestroy",
+                "tags": [
+                    "المراجع"
+                ],
+                "summary": "shareLinkDestroy",
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AppMode"
+                    },
+                    {
+                        "name": "shareLink",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "نجاح"
+                    },
+                    "400": {
+                        "description": "خطأ",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/slots": {
+            "get": {
+                "operationId": "referenceSlots",
+                "tags": [
+                    "المراجع"
+                ],
+                "summary": "referenceSlots",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AppMode"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "نجاح"
+                    },
+                    "400": {
+                        "description": "خطأ",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/support/faqs": {
+            "get": {
+                "operationId": "helpFaqs",
+                "tags": [
+                    "المراجع"
+                ],
+                "summary": "helpFaqs",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AppMode"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "نجاح"
+                    },
+                    "400": {
+                        "description": "خطأ",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/support/messages": {
+            "post": {
+                "operationId": "helpMessage",
+                "tags": [
+                    "المراجع"
+                ],
+                "summary": "helpMessage",
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AppMode"
+                    },
+                    {
+                        "$ref": "#/components/parameters/IdempotencyKey"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "نجاح"
+                    },
+                    "400": {
+                        "description": "خطأ",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/terms/current": {
+            "get": {
+                "operationId": "pageTerms",
+                "tags": [
+                    "المراجع"
+                ],
+                "summary": "pageTerms",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AppMode"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "نجاح"
+                    },
+                    "400": {
+                        "description": "خطأ",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

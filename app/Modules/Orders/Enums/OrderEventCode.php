@@ -39,6 +39,7 @@ enum OrderEventCode: string implements HasLabel
     case CashReceived = 'EVT-061';
     case ElectronicPaymentSucceeded = 'EVT-062';
     case PaymentAttemptFailed = 'EVT-063';
+    case InstapayTransferSubmitted = 'EVT-064';
     case CompletionConfirmed = 'EVT-070';
     case AutoClosed = 'EVT-071';
     case ClosedWithoutPayment = 'EVT-072';
@@ -81,6 +82,7 @@ enum OrderEventCode: string implements HasLabel
             self::CashReceived => 'تأكيد استلام نقدي',
             self::ElectronicPaymentSucceeded => 'دفع إلكتروني ناجح',
             self::PaymentAttemptFailed => 'فشل/انتهاء محاولة دفع',
+            self::InstapayTransferSubmitted => 'إرسال تحويل إنستاباي للتأكيد',
             self::CompletionConfirmed => 'تأكيد العميل للإنهاء',
             self::AutoClosed => 'إغلاق تلقائي',
             self::ClosedWithoutPayment => 'إغلاق بدون دفع',

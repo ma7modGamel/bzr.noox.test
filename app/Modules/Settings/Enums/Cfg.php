@@ -49,6 +49,12 @@ enum Cfg: string
     case PaymentDelayAlertHours = 'payments.delay_alert_hours';             // CFG-050
     case AutoCloseHours = 'payments.auto_close_hours';                      // CFG-051
     case FawryCodeValidityHours = 'payments.fawry_code_validity_hours';     // CFG-052
+    case ChannelCashEnabled = 'payments.channel_cash_enabled';              // CFG-053 (DEC-050)
+    case ChannelInstapayEnabled = 'payments.channel_instapay_enabled';      // CFG-054
+    case ChannelFawryEnabled = 'payments.channel_fawry_enabled';            // CFG-055 (OD-10)
+    case InstapayAddress = 'payments.instapay_address';                     // CFG-056
+    case InstapayDisplayName = 'payments.instapay_display_name';            // CFG-057
+    case InstapayLink = 'payments.instapay_link';                           // CFG-058
 
     // ── العمولة والتسويات ──────────────────────────────────────────────
     case DisputeWindowHours = 'settlements.dispute_window_hours';           // CFG-060
@@ -90,6 +96,12 @@ enum Cfg: string
             self::PaymentDelayAlertHours => 'CFG-050',
             self::AutoCloseHours => 'CFG-051',
             self::FawryCodeValidityHours => 'CFG-052',
+            self::ChannelCashEnabled => 'CFG-053',
+            self::ChannelInstapayEnabled => 'CFG-054',
+            self::ChannelFawryEnabled => 'CFG-055',
+            self::InstapayAddress => 'CFG-056',
+            self::InstapayDisplayName => 'CFG-057',
+            self::InstapayLink => 'CFG-058',
             self::DisputeWindowHours => 'CFG-060',
             self::ProviderDebtLimit => 'CFG-061',
             self::DefaultCommissionRate => 'CFG-062',
@@ -136,6 +148,12 @@ enum Cfg: string
             self::PaymentDelayAlertHours => 'تنبيه تأخر الدفع (ساعة)',
             self::AutoCloseHours => 'الإغلاق التلقائي بعد الإنهاء (ساعة)',
             self::FawryCodeValidityHours => 'صلاحية كود دفع فوري (ساعة)',
+            self::ChannelCashEnabled => 'قناة الدفع النقدي',
+            self::ChannelInstapayEnabled => 'قناة تحويل إنستاباي (بتأكيد الإدارة)',
+            self::ChannelFawryEnabled => 'قناة فوري',
+            self::InstapayAddress => 'عنوان إنستاباي للمنصة (IPA)',
+            self::InstapayDisplayName => 'الاسم الظاهر لحساب إنستاباي',
+            self::InstapayLink => 'رابط الدفع عبر إنستاباي (اختياري)',
             self::DisputeWindowHours => 'مهلة النزاع بعد الإغلاق (ساعة)',
             self::ProviderDebtLimit => 'حد دين الفني للمنع من العروض (جنيه)',
             self::DefaultCommissionRate => 'نسبة العمولة الافتراضية',
@@ -154,7 +172,9 @@ enum Cfg: string
     public function type(): CfgType
     {
         return match ($this) {
-            self::OffersEnabled, self::InspectionFeeEnabled => CfgType::Bool,
+            self::OffersEnabled, self::InspectionFeeEnabled,
+            self::ChannelCashEnabled, self::ChannelInstapayEnabled, self::ChannelFawryEnabled => CfgType::Bool,
+            self::InstapayAddress, self::InstapayDisplayName, self::InstapayLink => CfgType::String,
             self::MinOfferAmount, self::ProviderDebtLimit => CfgType::Decimal,
             self::DefaultCommissionRate => CfgType::Decimal,
             self::ServiceHoursFrom, self::ServiceHoursTo => CfgType::Time,
@@ -180,7 +200,9 @@ enum Cfg: string
             self::ArrivalLateAlertMinutes, self::CustomerNoShowWaitMinutes => CfgGroup::Execution,
             self::ProposalTimeoutMinutes => CfgGroup::Pricing,
             self::PaymentDelayAlertHours, self::AutoCloseHours,
-            self::FawryCodeValidityHours => CfgGroup::Payments,
+            self::FawryCodeValidityHours, self::ChannelCashEnabled, self::ChannelInstapayEnabled,
+            self::ChannelFawryEnabled, self::InstapayAddress, self::InstapayDisplayName,
+            self::InstapayLink => CfgGroup::Payments,
             self::DisputeWindowHours, self::ProviderDebtLimit, self::DefaultCommissionRate,
             self::PayoutCycle, self::EmployeeRemittanceCycle => CfgGroup::Settlements,
             self::RatingWindowDays, self::PhoneHideAfterCloseHours => CfgGroup::Ratings,
@@ -224,6 +246,9 @@ enum Cfg: string
             self::PaymentDelayAlertHours => 24,
             self::AutoCloseHours => 24,
             self::FawryCodeValidityHours => 24,
+            self::ChannelCashEnabled, self::ChannelInstapayEnabled => true,
+            self::ChannelFawryEnabled => false,     // OD-10 — حتى يجهز حساب فوري
+            self::InstapayAddress, self::InstapayDisplayName, self::InstapayLink => null, // يُدخلها المدير العام
             self::DisputeWindowHours => 72,
             self::ProviderDebtLimit => null,       // OD-02 — قبل تفعيل CFG-090
             self::DefaultCommissionRate => null,   // OD-01 — قبل تفعيل CFG-090
@@ -242,7 +267,11 @@ enum Cfg: string
     /** إعداد لا يظهر إلا للمدير العام (23). */
     public function isSuperAdminOnly(): bool
     {
-        return in_array($this->group(), [CfgGroup::OperatingMode, CfgGroup::Settlements], true);
+        return in_array($this->group(), [CfgGroup::OperatingMode, CfgGroup::Settlements], true)
+            || in_array($this, [
+                self::ChannelCashEnabled, self::ChannelInstapayEnabled, self::ChannelFawryEnabled,
+                self::InstapayAddress, self::InstapayDisplayName, self::InstapayLink,
+            ], true);
     }
 
     /** @return list<self> */

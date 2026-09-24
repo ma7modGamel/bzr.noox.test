@@ -24,9 +24,9 @@ final class OrderFactory extends Factory
 
     public function definition(): array
     {
-        $city = City::query()->firstOrCreate(['name' => 'القاهرة'], ['is_active' => true]);
+        $city = City::query()->firstOrCreate(['name' => 'دمياط الجديدة'], ['is_active' => true]); // DEC-052
         $area = Area::query()->firstOrCreate(
-            ['city_id' => $city->id, 'name' => 'مدينة نصر'],
+            ['city_id' => $city->id, 'name' => 'الحي الأول'],
             ['is_active' => true],
         );
         $category = Category::query()->firstOrCreate(['name' => 'سباكة'], ['is_active' => true]);
