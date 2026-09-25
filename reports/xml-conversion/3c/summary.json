@@ -1,0 +1,142 @@
+{
+    "scr-c14-loading": {
+        "percent": 0,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c14-error": {
+        "percent": 0.01,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c14-empty": {
+        "percent": 0,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c14-list": {
+        "percent": 0,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c14-confirm_delete": {
+        "percent": 0.02,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c14-deleting": {
+        "percent": 0.02,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c15-loading": {
+        "percent": 0,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c15-error": {
+        "percent": 0.01,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c15-empty": {
+        "percent": 0.06,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c15-unserved_area": {
+        "percent": 0.06,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c15-location_missing": {
+        "percent": 0.06,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c15-valid": {
+        "percent": 0.06,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c15-saving": {
+        "percent": 0.06,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c15-editing": {
+        "percent": 0.06,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c16-loading": {
+        "percent": 0,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c16-error": {
+        "percent": 0.01,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c16-empty": {
+        "percent": 0.02,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c16-day_selected": {
+        "percent": 0.02,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c16-slot_selected": {
+        "percent": 0.03,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c16-changing_day": {
+        "percent": 0,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c17-loading": {
+        "percent": 0,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c17-error": {
+        "percent": 0.01,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c17-empty": {
+        "percent": 0.02,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c17-uploading": {
+        "percent": 0.02,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c17-uploaded": {
+        "percent": 0.03,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c17-failed": {
+        "percent": 0.02,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c17-limit_reached": {
+        "percent": 0.02,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c17-recording": {
+        "percent": 0.02,
+        "matches": true,
+        "reason": null
+    }
+}
