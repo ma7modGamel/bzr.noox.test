@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- SCR-C22 C22ElectronicPaymentScreen content (DEC-047). -->
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:parentTag="android.widget.LinearLayout">
+
+    <TextView
+        android:id="@+id/heading"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="@style/TextAppearance.Bremo.SectionTitle"
+        android:text="@string/payment_electronic_heading" />
+
+    <noox.bzr.design.views.SummaryCardView
+        android:id="@+id/total"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:bremoTitle="@string/payment_amount_total" />
+
+    <TextView
+        android:id="@+id/channelTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="@style/TextAppearance.Bremo.SectionTitle"
+        android:text="@string/payment_channel_title" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/channels"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:nestedScrollingEnabled="false"
+        android:overScrollMode="never" />
+
+    <noox.bzr.design.views.InfoBannerView
+        android:id="@+id/creating"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:bremoText="@string/payment_creating" />
+
+    <noox.bzr.design.views.InfoBannerView
+        android:id="@+id/kioskReady"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:bremoText="@string/payment_kiosk_ready" />
+
+    <noox.bzr.design.views.SummaryCardView
+        android:id="@+id/kioskReference"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:bremoTitle="@string/payment_kiosk_reference" />
+
+    <noox.bzr.design.views.SecondaryButtonView
+        android:id="@+id/copyCode"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:bremoText="@string/payment_kiosk_copy" />
+
+    <noox.bzr.design.views.CountdownView
+        android:id="@+id/expires"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:bremoLabel="@string/payment_expires" />
+
+    <noox.bzr.design.views.InfoBannerView
+        android:id="@+id/checkoutReady"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:bremoText="@string/payment_checkout_ready" />
+
+    <noox.bzr.design.views.SecondaryButtonView
+        android:id="@+id/openCheckout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:bremoText="@string/payment_checkout_open" />
+
+    <noox.bzr.design.views.InfoBannerView
+        android:id="@+id/success"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:bremoText="@string/payment_success" />
+
+    <noox.bzr.design.views.WarningBoxView
+        android:id="@+id/failed"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:bremoText="@string/payment_failed" />
+
+    <noox.bzr.design.views.WarningBoxView
+        android:id="@+id/expired"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:bremoText="@string/payment_expired" />
+
+    <noox.bzr.design.views.PrimaryButtonView
+        android:id="@+id/create"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:bremoText="@string/payment_create" />
+</merge>
