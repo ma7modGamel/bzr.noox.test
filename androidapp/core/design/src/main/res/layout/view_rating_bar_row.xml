@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:parentTag="android.widget.LinearLayout">
+    <TextView
+        android:id="@+id/label"
+        android:layout_width="@dimen/bremo_size_rating_label_width"
+        android:layout_height="wrap_content"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:textAppearance="@style/TextAppearance.Bremo.Secondary" />
+
+    <LinearLayout
+        android:id="@+id/track"
+        android:layout_width="0dp"
+        android:layout_height="@dimen/bremo_size_rating_bar_height"
+        android:layout_weight="1"
+        android:background="@drawable/bremo_bg_rating_track"
+        android:orientation="horizontal">
+
+        <View
+            android:id="@+id/fill"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:background="@drawable/bremo_bg_rating_fill" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/value"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="@style/TextAppearance.Bremo.Caption"
+        android:textColor="@color/bremo_navy800" />
+</merge>

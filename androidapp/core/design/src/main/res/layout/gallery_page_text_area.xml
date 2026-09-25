@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:parentTag="android.widget.LinearLayout">
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/gallery_component_text_area"
+        android:textAppearance="@style/TextAppearance.Bremo.SectionTitle" />
+    <noox.bzr.design.views.TextAreaFieldView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:bremoLabel="@string/field_label"
+        app:bremoPlaceholder="@string/field_placeholder"
+        app:fieldState="empty" />
+    <noox.bzr.design.views.TextAreaFieldView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:bremoLabel="@string/field_label"
+        app:bremoPlaceholder="@string/field_placeholder"
+        app:fieldState="filled"
+        app:bremoValue="@string/field_value" />
+    <noox.bzr.design.views.TextAreaFieldView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:bremoLabel="@string/field_label"
+        app:bremoPlaceholder="@string/field_placeholder"
+        app:fieldState="focused"
+        app:bremoValue="@string/field_value" />
+    <noox.bzr.design.views.TextAreaFieldView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:bremoLabel="@string/field_label"
+        app:bremoPlaceholder="@string/field_placeholder"
+        app:fieldState="error"
+        app:bremoError="@string/field_error" />
+    <noox.bzr.design.views.TextAreaFieldView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:bremoLabel="@string/field_label"
+        app:bremoPlaceholder="@string/field_placeholder"
+        app:fieldState="disabled"
+        app:bremoValue="@string/field_value" />
+</merge>

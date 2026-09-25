@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:parentTag="android.widget.FrameLayout">
+    <noox.bzr.design.views.MaxWidthLinearLayout
+        android:id="@+id/bubble"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:divider="@drawable/bremo_gap_s"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:padding="@dimen/bremo_space_m"
+        android:showDividers="middle"
+        app:bremoMaxWidth="@dimen/bremo_size_chat_bubble_max_width">
+
+        <ImageView
+            android:id="@+id/icon"
+            android:layout_width="@dimen/bremo_size_icon"
+            android:layout_height="@dimen/bremo_size_icon"
+            android:importantForAccessibility="no" />
+
+        <TextView
+            android:id="@+id/text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="@style/TextAppearance.Bremo.Body" />
+    </noox.bzr.design.views.MaxWidthLinearLayout>
+</merge>

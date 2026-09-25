@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:parentTag="android.widget.LinearLayout">
+    <EditText
+        android:id="@+id/edit"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:background="@null"
+        android:importantForAutofill="no"
+        android:includeFontPadding="false"
+        android:inputType="textMultiLine|textCapSentences"
+        android:maxLines="1"
+        android:padding="0dp"
+        android:textAlignment="viewStart"
+        android:textAppearance="@style/TextAppearance.Bremo.Body"
+        android:textColorHint="@color/bremo_slate300" />
+
+    <ImageView
+        android:id="@+id/send"
+        android:layout_width="@dimen/bremo_size_icon"
+        android:layout_height="@dimen/bremo_size_icon"
+        android:contentDescription="@string/a11y_send"
+        app:srcCompat="@drawable/ic_send"
+        app:tint="@color/bremo_primary600" />
+</merge>

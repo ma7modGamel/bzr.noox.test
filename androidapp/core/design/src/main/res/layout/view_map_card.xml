@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:parentTag="android.widget.FrameLayout">
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:divider="@drawable/bremo_gap_s"
+        android:gravity="center_horizontal"
+        android:orientation="vertical"
+        android:showDividers="middle">
+
+        <ImageView
+            android:layout_width="@dimen/bremo_size_icon"
+            android:layout_height="@dimen/bremo_size_icon"
+            android:importantForAccessibility="no"
+            app:srcCompat="@drawable/ic_location"
+            app:tint="@color/bremo_primary600" />
+
+        <TextView
+            android:id="@+id/title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="@style/TextAppearance.Bremo.Secondary" />
+    </LinearLayout>
+
+    <FrameLayout
+        android:layout_width="@dimen/bremo_size_my_location_button"
+        android:layout_height="@dimen/bremo_size_my_location_button"
+        android:layout_gravity="bottom|end"
+        android:layout_margin="@dimen/bremo_space_m"
+        android:background="@drawable/bremo_bg_map_button">
+
+        <ImageView
+            android:layout_width="@dimen/bremo_size_icon"
+            android:layout_height="@dimen/bremo_size_icon"
+            android:layout_gravity="center"
+            android:contentDescription="@string/a11y_my_location"
+            app:srcCompat="@drawable/ic_navigation"
+            app:tint="@color/bremo_navy800" />
+    </FrameLayout>
+</merge>

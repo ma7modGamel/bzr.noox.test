@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:parentTag="android.widget.LinearLayout">
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/gallery_component_tracking"
+        android:textAppearance="@style/TextAppearance.Bremo.SectionTitle" />
+    <noox.bzr.design.views.EtaCardView
+        android:id="@+id/eta"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:unit="@string/unit_minute"
+        app:bremoTitle="@string/eta_title"
+        app:subtitle="@string/eta_subtitle" />
+    <noox.bzr.design.views.MapCardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:bremoTitle="@string/map_title" />
+    <noox.bzr.design.views.StatusStepperView
+        android:id="@+id/stepper"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+    <noox.bzr.design.views.WarningBoxView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:bremoText="@string/status_reviewing" />
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/gallery_component_order_card"
+        android:textAppearance="@style/TextAppearance.Bremo.SectionTitle" />
+    <noox.bzr.design.views.OrderCardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:bremoTitle="@string/order_title"
+        app:subtitle="@string/order_subtitle"
+        app:status="@string/order_status" />
+</merge>

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<noox.bzr.design.views.gallery.GalleryScrollView xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/scroll"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/bremo_surface"
+    android:fillViewport="true"
+    android:layoutDirection="rtl">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:divider="@drawable/bremo_gap_m"
+        android:orientation="vertical"
+        android:paddingBottom="@dimen/bremo_space_section_gap"
+        android:showDividers="middle">
+
+        <noox.bzr.design.views.AppTopBarView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:actionIcon="@drawable/ic_more"
+            app:actionLabel="@string/a11y_more"
+            app:bremoTitle="@string/gallery_title" />
+
+        <LinearLayout
+            android:id="@+id/content"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:divider="@drawable/bremo_gap_m"
+            android:orientation="vertical"
+            android:paddingStart="@dimen/bremo_space_screen_horizontal"
+            android:paddingEnd="@dimen/bremo_space_screen_horizontal"
+            android:showDividers="middle" />
+    </LinearLayout>
+</noox.bzr.design.views.gallery.GalleryScrollView>

@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:parentTag="android.widget.LinearLayout">
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/gallery_component_primary_button"
+        android:textAppearance="@style/TextAppearance.Bremo.SectionTitle" />
+    <noox.bzr.design.views.PrimaryButtonView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:bremoText="@string/gallery_state_normal" />
+    <noox.bzr.design.views.PrimaryButtonView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:bremoText="@string/gallery_state_pressed"
+        app:buttonState="pressed" />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:divider="@drawable/bremo_gap_s"
+        android:orientation="horizontal"
+        android:showDividers="middle">
+        <noox.bzr.design.views.PrimaryButtonView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:bremoText="@string/gallery_state_disabled"
+            app:buttonState="disabled"
+            android:layout_weight="1" />
+        <noox.bzr.design.views.PrimaryButtonView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:bremoText="@string/gallery_state_loading"
+            app:buttonState="loading"
+            android:layout_weight="1" />
+    </LinearLayout>
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/gallery_component_secondary_button"
+        android:textAppearance="@style/TextAppearance.Bremo.SectionTitle" />
+    <noox.bzr.design.views.SecondaryButtonView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:bremoText="@string/button_secondary" />
+    <noox.bzr.design.views.SecondaryButtonView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:bremoText="@string/gallery_state_disabled"
+        app:bremoEnabled="false" />
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/gallery_component_danger_text_button"
+        android:textAppearance="@style/TextAppearance.Bremo.SectionTitle" />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:divider="@drawable/bremo_gap_m"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:showDividers="middle">
+        <noox.bzr.design.views.DangerTextButtonView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:bremoText="@string/button_danger" />
+        <noox.bzr.design.views.IconSquareButtonView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:bremoLabel="@string/button_chat" />
+    </LinearLayout>
+</merge>

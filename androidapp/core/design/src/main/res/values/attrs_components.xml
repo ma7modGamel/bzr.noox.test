@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- XML attributes of the 42 components (43 §13). Names follow the SwiftUI parameters;
+     lists and callbacks are set from Kotlin through the same-named properties. -->
+<resources>
+    <attr name="bremoText" format="string" />
+    <attr name="bremoTitle" format="string" />
+    <attr name="bremoBody" format="string" />
+    <attr name="bremoLabel" format="string" />
+    <attr name="bremoPlaceholder" format="string" />
+    <attr name="bremoValue" format="string" />
+    <attr name="bremoError" format="string" />
+    <attr name="bremoOptionalLabel" format="string" />
+    <attr name="bremoCurrency" format="string" />
+    <attr name="bremoIcon" format="reference" />
+    <attr name="bremoEnabled" format="boolean" />
+    <attr name="bremoChecked" format="boolean" />
+    <attr name="bremoSelected" format="boolean" />
+    <attr name="bremoHeight" format="dimension" />
+    <attr name="buttonState" format="enum">
+        <enum name="normal" value="0" />
+        <enum name="pressed" value="1" />
+        <enum name="disabled" value="2" />
+        <enum name="loading" value="3" />
+    </attr>
+    <attr name="selectionState" format="enum">
+        <enum name="selected" value="0" />
+        <enum name="unselected" value="1" />
+        <enum name="disabled" value="2" />
+    </attr>
+    <attr name="fieldState" format="enum">
+        <enum name="empty" value="0" />
+        <enum name="filled" value="1" />
+        <enum name="focused" value="2" />
+        <enum name="error" value="3" />
+        <enum name="disabled" value="4" />
+    </attr>
+    <attr name="badgeKind" format="enum">
+        <enum name="highlight" value="0" />
+        <enum name="status" value="1" />
+    </attr>
+    <attr name="avatarSize" format="enum">
+        <enum name="small" value="0" />
+        <enum name="medium" value="1" />
+        <enum name="large" value="2" />
+    </attr>
+    <attr name="chatKind" format="enum">
+        <enum name="text" value="0" />
+        <enum name="image" value="1" />
+        <enum name="blocked" value="2" />
+    </attr>
+    <attr name="bremoSent" format="boolean" />
+
+    <declare-styleable name="AppTopBarView">
+        <attr name="bremoTitle" />
+        <attr name="actionIcon" format="reference" />
+        <attr name="actionLabel" format="string" />
+    </declare-styleable>
+    <declare-styleable name="PrimaryButtonView">
+        <attr name="bremoText" />
+        <attr name="buttonState" />
+        <attr name="bremoHeight" />
+    </declare-styleable>
+    <declare-styleable name="SecondaryButtonView">
+        <attr name="bremoText" />
+        <attr name="bremoEnabled" />
+    </declare-styleable>
+    <declare-styleable name="LinkButtonView">
+        <attr name="bremoText" />
+    </declare-styleable>
+    <declare-styleable name="DangerTextButtonView">
+        <attr name="bremoText" />
+    </declare-styleable>
+    <declare-styleable name="IconSquareButtonView">
+        <attr name="bremoLabel" />
+        <attr name="bremoIcon" />
+    </declare-styleable>
+    <declare-styleable name="MenuRowView">
+        <attr name="bremoIcon" />
+        <attr name="bremoText" />
+    </declare-styleable>
+    <declare-styleable name="StepIndicatorView">
+        <attr name="current" format="integer" />
+        <attr name="total" format="integer" />
+        <attr name="bremoLabel" />
+    </declare-styleable>
+    <declare-styleable name="SelectableTileView">
+        <attr name="bremoText" />
+        <attr name="bremoIcon" />
+        <attr name="selectionState" />
+    </declare-styleable>
+    <declare-styleable name="SelectableChipView">
+        <attr name="bremoText" />
+        <attr name="selectionState" />
+        <attr name="bremoHeight" />
+    </declare-styleable>
+    <declare-styleable name="RadioCardView">
+        <attr name="bremoTitle" />
+        <attr name="bremoBody" />
+        <attr name="bremoSelected" />
+    </declare-styleable>
+    <declare-styleable name="CheckRowView">
+        <attr name="bremoText" />
+        <attr name="bremoChecked" />
+    </declare-styleable>
+    <declare-styleable name="FieldView">
+        <attr name="bremoLabel" />
+        <attr name="bremoPlaceholder" />
+        <attr name="bremoValue" />
+        <attr name="fieldState" />
+        <attr name="bremoError" />
+        <attr name="bremoOptionalLabel" />
+        <attr name="bremoCurrency" />
+    </declare-styleable>
+    <declare-styleable name="SummaryCardView">
+        <attr name="bremoTitle" />
+        <attr name="editText" format="string" />
+    </declare-styleable>
+    <declare-styleable name="BadgeView">
+        <attr name="bremoText" />
+        <attr name="badgeKind" />
+        <attr name="bremoIcon" />
+    </declare-styleable>
+    <declare-styleable name="ProviderHeaderView">
+        <attr name="name" format="string" />
+        <attr name="rating" format="string" />
+        <attr name="services" format="string" />
+        <attr name="avatarSize" />
+        <attr name="verifiedLabel" format="string" />
+    </declare-styleable>
+    <declare-styleable name="BannerView">
+        <attr name="bremoText" />
+    </declare-styleable>
+    <declare-styleable name="EtaCardView">
+        <attr name="bremoValue" />
+        <attr name="unit" format="string" />
+        <attr name="bremoTitle" />
+        <attr name="subtitle" format="string" />
+    </declare-styleable>
+    <declare-styleable name="MapCardView">
+        <attr name="bremoTitle" />
+    </declare-styleable>
+    <declare-styleable name="OrderCardView">
+        <attr name="bremoTitle" />
+        <attr name="subtitle" />
+        <attr name="status" format="string" />
+    </declare-styleable>
+    <declare-styleable name="AppBottomSheetView">
+        <attr name="bremoTitle" />
+        <attr name="bremoBody" />
+        <attr name="action" format="string" />
+        <attr name="buttonState" />
+        <attr name="secondaryAction" format="string" />
+    </declare-styleable>
+    <declare-styleable name="FeedbackStateView">
+        <attr name="bremoTitle" />
+        <attr name="bremoBody" />
+        <attr name="action" />
+    </declare-styleable>
+    <declare-styleable name="CountdownView">
+        <attr name="seconds" format="integer" />
+        <attr name="bremoLabel" />
+    </declare-styleable>
+    <declare-styleable name="ChatBubbleView">
+        <attr name="bremoText" />
+        <attr name="bremoSent" />
+        <attr name="chatKind" />
+    </declare-styleable>
+    <declare-styleable name="ChatInputView">
+        <attr name="bremoPlaceholder" />
+        <attr name="bremoValue" />
+    </declare-styleable>
+    <declare-styleable name="MaxWidthLinearLayout">
+        <attr name="bremoMaxWidth" format="dimension" />
+    </declare-styleable>
+</resources>

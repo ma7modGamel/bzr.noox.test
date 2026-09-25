@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:parentTag="android.widget.FrameLayout">
+    <TextView
+        android:id="@+id/chip"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/bremo_bg_selectable_chip"
+        android:ellipsize="end"
+        android:gravity="center"
+        android:maxLines="1"
+        android:paddingStart="@dimen/bremo_space_m"
+        android:paddingEnd="@dimen/bremo_space_m"
+        android:textAppearance="@style/TextAppearance.Bremo.Body" />
+</merge>

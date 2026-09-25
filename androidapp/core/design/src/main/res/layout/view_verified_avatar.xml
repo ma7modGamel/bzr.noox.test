@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:parentTag="android.widget.FrameLayout">
+    <FrameLayout
+        android:id="@+id/avatar"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/bremo_bg_avatar">
+
+        <ImageView
+            android:layout_width="@dimen/bremo_size_icon"
+            android:layout_height="@dimen/bremo_size_icon"
+            android:layout_gravity="center"
+            android:contentDescription="@string/a11y_avatar"
+            app:srcCompat="@drawable/ic_account"
+            app:tint="@color/bremo_slate400" />
+    </FrameLayout>
+
+    <FrameLayout
+        android:id="@+id/shield"
+        android:layout_width="@dimen/bremo_size_verified_shield"
+        android:layout_height="@dimen/bremo_size_verified_shield"
+        android:layout_gravity="bottom|start"
+        android:background="@drawable/bremo_bg_verified_shield">
+
+        <ImageView
+            android:layout_width="@dimen/bremo_size_icon_small"
+            android:layout_height="@dimen/bremo_size_icon_small"
+            android:layout_gravity="center"
+            android:contentDescription="@string/a11y_verified"
+            app:srcCompat="@drawable/ic_shield"
+            app:tint="@color/bremo_on_primary" />
+    </FrameLayout>
+</merge>

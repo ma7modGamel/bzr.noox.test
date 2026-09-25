@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:parentTag="android.widget.LinearLayout">
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/gallery_component_banners"
+        android:textAppearance="@style/TextAppearance.Bremo.SectionTitle" />
+    <noox.bzr.design.views.InfoBannerView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:bremoText="@string/banner_info" />
+    <noox.bzr.design.views.WarningBoxView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:bremoText="@string/banner_warning" />
+    <noox.bzr.design.views.OfflineBannerView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:bremoText="@string/offline_message" />
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/gallery_component_countdown"
+        android:textAppearance="@style/TextAppearance.Bremo.SectionTitle" />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+        <FrameLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1">
+
+            <noox.bzr.design.views.CountdownView
+                android:id="@+id/countdownNormal"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                app:bremoLabel="@string/countdown_label" />
+        </FrameLayout>
+
+        <FrameLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1">
+
+            <noox.bzr.design.views.CountdownView
+                android:id="@+id/countdownUrgent"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                app:bremoLabel="@string/countdown_label" />
+        </FrameLayout>
+    </LinearLayout>
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/gallery_component_feedback"
+        android:textAppearance="@style/TextAppearance.Bremo.SectionTitle" />
+    <noox.bzr.design.views.EmptyStateView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:bremoTitle="@string/empty_title"
+        app:bremoBody="@string/empty_body"
+        app:action="@string/action_republish" />
+    <noox.bzr.design.views.LoadingSkeletonView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+    <noox.bzr.design.views.ErrorStateView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:bremoTitle="@string/error_title"
+        app:bremoBody="@string/error_body"
+        app:action="@string/common_retry" />
+</merge>

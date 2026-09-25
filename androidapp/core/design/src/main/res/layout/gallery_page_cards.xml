@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:parentTag="android.widget.LinearLayout">
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/gallery_component_summary_card"
+        android:textAppearance="@style/TextAppearance.Bremo.SectionTitle" />
+    <noox.bzr.design.views.SummaryCardView
+        android:id="@+id/summary"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:bremoTitle="@string/summary_title"
+        app:editText="@string/common_edit" />
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/gallery_component_offer_card"
+        android:textAppearance="@style/TextAppearance.Bremo.SectionTitle" />
+    <noox.bzr.design.views.OfferCardView
+        android:id="@+id/offerExecution"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+    <noox.bzr.design.views.OfferCardView
+        android:id="@+id/offerInspection"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+    <noox.bzr.design.views.OfferCardView
+        android:id="@+id/offerScheduled"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+</merge>

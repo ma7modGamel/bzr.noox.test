@@ -1,0 +1,82 @@
+{
+    "buttons": {
+        "percent": 0.02,
+        "matches": true,
+        "reason": null
+    },
+    "navigation": {
+        "percent": 0.39,
+        "matches": true,
+        "reason": null
+    },
+    "selection-top": {
+        "percent": 0.06,
+        "matches": true,
+        "reason": null
+    },
+    "selection-bottom": {
+        "percent": 0.06,
+        "matches": true,
+        "reason": null
+    },
+    "fields-top": {
+        "percent": 0.01,
+        "matches": true,
+        "reason": null
+    },
+    "fields-bottom": {
+        "percent": 0.02,
+        "matches": true,
+        "reason": null
+    },
+    "cards-top": {
+        "percent": 0.3,
+        "matches": true,
+        "reason": null
+    },
+    "cards-bottom": {
+        "percent": 0.45,
+        "matches": true,
+        "reason": null
+    },
+    "provider-top": {
+        "percent": 0.15,
+        "matches": true,
+        "reason": null
+    },
+    "provider-bottom": {
+        "percent": 0.06,
+        "matches": true,
+        "reason": null
+    },
+    "tracking": {
+        "percent": 0.02,
+        "matches": true,
+        "reason": null
+    },
+    "feedback-top": {
+        "percent": 0,
+        "matches": true,
+        "reason": null
+    },
+    "feedback-bottom": {
+        "percent": 0.01,
+        "matches": true,
+        "reason": null
+    },
+    "chat": {
+        "percent": 0.01,
+        "matches": true,
+        "reason": null
+    },
+    "media-sheet": {
+        "percent": 0,
+        "matches": true,
+        "reason": null
+    },
+    "text-area": {
+        "percent": 0.01,
+        "matches": true,
+        "reason": null
+    }
+}
