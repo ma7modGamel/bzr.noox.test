@@ -310,16 +310,16 @@ class C29HelpFragment : CustomerFragment<C29HelpView>(R.id.scr_c29) {
     }
 }
 
-class C30ExecutionQuoteFragment : CustomerFragment<ProposalDecisionView>(R.id.scr_c30) {
-    override fun create() = ProposalDecisionView(requireContext(), "SCR-C30")
-    override fun ProposalDecisionView.bind() {
+class C30ExecutionQuoteFragment : CustomerFragment<C30ExecutionQuoteView>(R.id.scr_c30) {
+    override fun create() = C30ExecutionQuoteView(requireContext())
+    override fun C30ExecutionQuoteView.bind() {
         onAction = viewModel::decideProposal
     }
 }
 
-class C31AdditionalCostFragment : CustomerFragment<ProposalDecisionView>(R.id.scr_c31) {
-    override fun create() = ProposalDecisionView(requireContext(), "SCR-C31")
-    override fun ProposalDecisionView.bind() {
+class C31AdditionalCostFragment : CustomerFragment<C31AdditionalCostView>(R.id.scr_c31) {
+    override fun create() = C31AdditionalCostView(requireContext())
+    override fun C31AdditionalCostView.bind() {
         onAction = viewModel::decideProposal
     }
 }

@@ -8,7 +8,7 @@ import noox.bzr.design.R
 import noox.bzr.gallery.databinding.ScreenC30ProposalBinding
 
 /** SCR-C30 execution quote and SCR-C31 additional cost (DEC-047): one content, two titles. */
-class ProposalDecisionView(context: Context, private val screen: String) : CustomerScreenView(context) {
+open class ProposalDecisionView(context: Context, private val screen: String) : CustomerScreenView(context) {
     private val binding = ScreenC30ProposalBinding.inflate(inflater, content)
     var onAction: (String) -> Unit = {}
 
@@ -44,3 +44,9 @@ class ProposalDecisionView(context: Context, private val screen: String) : Custo
         binding.actions.actions = state.visibleActions
     }
 }
+
+/** SCR-C30 (C30ExecutionQuoteView in SwiftUI). */
+class C30ExecutionQuoteView(context: Context) : ProposalDecisionView(context, "SCR-C30")
+
+/** SCR-C31 (C31AdditionalCostView in SwiftUI). */
+class C31AdditionalCostView(context: Context) : ProposalDecisionView(context, "SCR-C31")

@@ -71,7 +71,7 @@ abstract class AuthScreenView(context: Context) : FrameLayout(context) {
     }
 }
 
-class CustomerLoginView(context: Context) : AuthScreenView(context) {
+class CustomerLoginScreen(context: Context) : AuthScreenView(context) {
     private val binding = ScreenC10LoginBinding.inflate(inflater, this, true)
     private var state: AuthUiState? = null
 
@@ -92,7 +92,7 @@ class CustomerLoginView(context: Context) : AuthScreenView(context) {
     }
 }
 
-class CustomerRegisterView(context: Context) : AuthScreenView(context) {
+class CustomerRegisterScreen(context: Context) : AuthScreenView(context) {
     private val binding = ScreenC11RegisterBinding.inflate(inflater, this, true)
     private var state: AuthUiState? = null
 
@@ -114,7 +114,7 @@ class CustomerRegisterView(context: Context) : AuthScreenView(context) {
     }
 }
 
-class CustomerEmailVerificationView(context: Context) : AuthScreenView(context) {
+class CustomerEmailVerificationScreen(context: Context) : AuthScreenView(context) {
     private val binding = ScreenC12VerifyBinding.inflate(inflater, this, true)
 
     override fun render(state: AuthUiState) {
@@ -132,7 +132,7 @@ class CustomerEmailVerificationView(context: Context) : AuthScreenView(context) 
     }
 }
 
-class CustomerPasswordRecoveryView(context: Context) : AuthScreenView(context) {
+class CustomerPasswordRecoveryScreen(context: Context) : AuthScreenView(context) {
     private val binding = ScreenC13RecoveryBinding.inflate(inflater, this, true)
     private var state: AuthUiState? = null
 
@@ -153,10 +153,10 @@ class CustomerPasswordRecoveryView(context: Context) : AuthScreenView(context) {
 
 /** The view for an auth screen code (SCR-C10 is the default, as in the Compose flow). */
 fun authScreenView(context: Context, screen: String): AuthScreenView = when (screen) {
-    "SCR-C11" -> CustomerRegisterView(context)
-    "SCR-C12" -> CustomerEmailVerificationView(context)
-    "SCR-C13" -> CustomerPasswordRecoveryView(context)
-    else -> CustomerLoginView(context)
+    "SCR-C11" -> CustomerRegisterScreen(context)
+    "SCR-C12" -> CustomerEmailVerificationScreen(context)
+    "SCR-C13" -> CustomerPasswordRecoveryScreen(context)
+    else -> CustomerLoginScreen(context)
 }
 
 private fun authFieldState(value: String, error: String?): FieldVisualState = when {
