@@ -28,6 +28,11 @@ fun customerScreenView(context: Context, screen: String): CustomerScreenView = w
     "SCR-C26" -> C26OrderHistoryView(context)
     "SCR-C27" -> C27DisputeView(context)
     "SCR-C28" -> C28ProviderReportView(context)
+    "SCR-C29" -> C29HelpView(context)
     "SCR-C30", "SCR-C31" -> ProposalDecisionView(context, screen)
+    "SCR-C32" -> C32NotificationsView(context)
+    "SCR-C33" -> C33AccountSettingsView(context)
+    "SCR-C34" -> C34TermsView(context)
+    "SCR-C35" -> C35NoOffersView(context)
     else -> error("Unknown screen: $screen")
 }

@@ -1,0 +1,152 @@
+{
+    "scr-c29-loading": {
+        "percent": 0,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c29-error": {
+        "percent": 0.01,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c29-empty": {
+        "percent": 0,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c29-invalid": {
+        "percent": 0.01,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c29-submitting": {
+        "percent": 0,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c29-success": {
+        "percent": 0,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c32-loading": {
+        "percent": 0,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c32-error": {
+        "percent": 0.01,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c32-empty": {
+        "percent": 0,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c32-mixed": {
+        "percent": 0,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c32-marking_read": {
+        "percent": 0,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c33-loading": {
+        "percent": 0,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c33-error": {
+        "percent": 0.01,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c33-overview": {
+        "percent": 0.45,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c33-invalid_edit": {
+        "percent": 0.01,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c33-invalid_password": {
+        "percent": 0.01,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c33-confirm_delete": {
+        "percent": 0.01,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c33-active_order": {
+        "percent": 0.45,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c33-deleting": {
+        "percent": 0.01,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c33-success": {
+        "percent": 0.45,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c34-loading": {
+        "percent": 0,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c34-error": {
+        "percent": 0.01,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c34-empty": {
+        "percent": 0,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c34-current": {
+        "percent": 0,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c35-loading": {
+        "percent": 0,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c35-error": {
+        "percent": 0.01,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c35-edit_only": {
+        "percent": 0.01,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c35-republish_only": {
+        "percent": 0,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c35-edit_and_republish": {
+        "percent": 0.01,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c35-submitting": {
+        "percent": 0,
+        "matches": true,
+        "reason": null
+    }
+}

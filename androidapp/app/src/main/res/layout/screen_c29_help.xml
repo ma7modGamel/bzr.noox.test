@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- SCR-C29 C29HelpScreen content (DEC-047). -->
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:parentTag="android.widget.LinearLayout">
+
+    <TextView
+        android:id="@+id/faqTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="@style/TextAppearance.Bremo.SectionTitle"
+        android:text="@string/help_faq_title" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/faq"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:nestedScrollingEnabled="false"
+        android:overScrollMode="never" />
+
+    <TextView
+        android:id="@+id/contactTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="@style/TextAppearance.Bremo.SectionTitle"
+        android:text="@string/help_contact_title" />
+
+    <noox.bzr.design.views.InfoBannerView
+        android:id="@+id/success"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:bremoText="@string/help_success" />
+
+    <noox.bzr.design.views.AppTextFieldView
+        android:id="@+id/subject"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:bremoLabel="@string/help_subject"
+        app:bremoPlaceholder="@string/help_subject_placeholder" />
+
+    <noox.bzr.design.views.TextAreaFieldView
+        android:id="@+id/message"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:bremoLabel="@string/help_message"
+        app:bremoPlaceholder="@string/help_message_placeholder" />
+
+    <noox.bzr.design.views.PrimaryButtonView
+        android:id="@+id/send"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:bremoText="@string/help_send" />
+</merge>

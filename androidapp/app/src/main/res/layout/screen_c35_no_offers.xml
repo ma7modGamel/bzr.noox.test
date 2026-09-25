@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- SCR-C35 C35NoOffersScreen content (DEC-047). -->
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:parentTag="android.widget.LinearLayout">
+
+    <noox.bzr.design.views.EmptyStateView
+        android:id="@+id/empty"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:bremoTitle="@string/no_offers_title"
+        app:bremoBody="@string/no_offers_body" />
+
+    <noox.bzr.customer.ActionButtonsView
+        android:id="@+id/actions"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+</merge>
