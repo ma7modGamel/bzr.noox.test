@@ -6,7 +6,6 @@
 // the XML images come from Paparazzi. Output: side-by-side page with a difference percentage.
 //
 //   php tools/compare-android-xml gallery          → reports/xml-conversion/gallery/comparison.html
-//   php tools/compare-android-xml gallery --freeze → copy the current Compose goldens into the reference set first
 //   php tools/compare-android-xml 3a               → screens of batch 3a (also 3b 3c 4a 4b 4c 4d), same page per group
 //   php tools/compare-android-xml index            → reports/xml-conversion/comparison.html (all sets, from their summary.json)
 // Screen targets were frozen from the approved Compose snapshots into reports/xml-conversion/reference/compose-screens/
@@ -16,7 +15,6 @@ declare(strict_types=1);
 
 $root = dirname(__DIR__);
 $set = $argv[1] ?? 'gallery';
-$freeze = in_array('--freeze', $argv, true);
 
 /** Channel difference under which two pixels count as equal (font anti-aliasing, 43 §8). */
 const TOLERANCE = 24;
@@ -65,7 +63,6 @@ function near(GdImage $source, int $x, int $y, GdImage $target): bool
 $sets = [
     'gallery' => [
         'title' => 'معرض المكونات — Compose المعتمد مقابل XML',
-        'compose' => 'androidapp/core/design/src/test/snapshots/images/noox.bzr.design.gallery_ComponentGallerySnapshotTest_gallery_cases_match_shared_fixture_gallery-%s.png',
         'xml' => 'androidapp/core/design/src/test/snapshots/images/noox.bzr.design.gallery_ComponentGalleryViewsSnapshotTest_xml_gallery_cases_match_shared_fixture_xml-gallery-%s.png',
         'cases' => array_map(
             static fn (array $case): string => $case['id'],
@@ -129,9 +126,6 @@ $summary = [];
 $failures = 0;
 foreach ($config['cases'] as $case) {
     $reference = $referenceDir.'/'.$case.'.png';
-    if ($freeze && isset($config['compose'])) {
-        copy($root.'/'.sprintf($config['compose'], $case), $reference);
-    }
     $xml = $root.'/'.sprintf($config['xml'], $case);
     if (str_contains($xml, '*')) {
         $xml = (glob($xml) ?: [''])[0];

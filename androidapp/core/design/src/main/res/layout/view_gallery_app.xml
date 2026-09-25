@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- ComponentGalleryApp (43 §13): the current gallery page and back / next, as ComponentGallery.swift. -->
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:parentTag="android.widget.LinearLayout">
+
+    <FrameLayout
+        android:id="@+id/page"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:divider="@drawable/bremo_gap_s"
+        android:orientation="horizontal"
+        android:padding="@dimen/bremo_space_screen_horizontal"
+        android:showDividers="middle">
+
+        <noox.bzr.design.views.SecondaryButtonView
+            android:id="@+id/back"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            app:bremoText="@string/gallery_back" />
+
+        <noox.bzr.design.views.PrimaryButtonView
+            android:id="@+id/next"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            app:bremoText="@string/gallery_next" />
+    </LinearLayout>
+</merge>

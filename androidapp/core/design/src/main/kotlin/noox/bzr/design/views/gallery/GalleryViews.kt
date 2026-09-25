@@ -5,7 +5,9 @@ import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.View
 import androidx.core.widget.NestedScrollView
+import android.widget.LinearLayout
 import noox.bzr.design.AvatarSize
+import noox.bzr.design.ButtonVisualState
 import noox.bzr.design.BzrFormat
 import noox.bzr.design.MediaKind
 import noox.bzr.design.MediaState
@@ -24,6 +26,7 @@ import noox.bzr.design.databinding.GalleryPageProviderBinding
 import noox.bzr.design.databinding.GalleryPageSelectionBinding
 import noox.bzr.design.databinding.GalleryPageTextAreaBinding
 import noox.bzr.design.databinding.GalleryPageTrackingBinding
+import noox.bzr.design.databinding.ViewGalleryAppBinding
 import noox.bzr.design.databinding.ViewGalleryPageBinding
 import noox.bzr.design.generated.GalleryFixtures
 import noox.bzr.design.views.OfferCardView
@@ -37,6 +40,29 @@ class GalleryScrollView @JvmOverloads constructor(context: Context, attrs: Attri
     override fun onLayout(changed: Boolean, l: Int, t: Int, r: Int, b: Int) {
         super.onLayout(changed, l, t, r, b)
         if (anchorBottom && childCount > 0) scrollTo(0, maxOf(0, getChildAt(0).height - height))
+    }
+}
+
+/** ComponentGalleryApp: one page at a time with back / next, as ComponentGallery.swift. */
+class ComponentGalleryAppView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) : LinearLayout(context, attrs) {
+    private var page = 0
+    private val binding = ViewGalleryAppBinding.inflate(LayoutInflater.from(context), this)
+
+    init {
+        orientation = VERTICAL
+        layoutDirection = LAYOUT_DIRECTION_RTL
+        setBackgroundResource(R.color.bremo_surface)
+        binding.back.onClick = { if (page > 0) show(page - 1) }
+        binding.next.onClick = { if (page < ComponentGalleryViews.pageCount - 1) show(page + 1) }
+        show(0)
+    }
+
+    private fun show(index: Int) {
+        page = index
+        binding.page.removeAllViews()
+        binding.page.addView(ComponentGalleryViews.page(context, index))
+        binding.back.enabled = page > 0
+        binding.next.state = if (page == ComponentGalleryViews.pageCount - 1) ButtonVisualState.Disabled else ButtonVisualState.Normal
     }
 }
 
