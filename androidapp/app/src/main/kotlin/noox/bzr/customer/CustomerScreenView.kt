@@ -1,6 +1,7 @@
 package noox.bzr.customer
 
 import android.content.Context
+import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -55,7 +56,7 @@ abstract class CustomerScreenView(context: Context) : FrameLayout(context) {
 }
 
 /** ActionButtons: the visible order actions, primary / danger / secondary by kind. */
-class ActionButtonsView(context: Context) : LinearLayout(context) {
+class ActionButtonsView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) : LinearLayout(context, attrs) {
     var onAction: (String) -> Unit = {}
     private var shown: List<String> = emptyList()
 
@@ -63,7 +64,7 @@ class ActionButtonsView(context: Context) : LinearLayout(context) {
         orientation = VERTICAL
         dividerDrawable = androidx.core.content.ContextCompat.getDrawable(context, R.drawable.bremo_gap_m)
         showDividers = SHOW_DIVIDER_MIDDLE
-        layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT)
+        isVisible = false
     }
 
     var actions: List<String>

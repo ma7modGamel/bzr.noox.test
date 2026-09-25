@@ -62,3 +62,8 @@ dependencies {
     testImplementation("junit:junit:4.13.2")
     testImplementation("androidx.compose.ui:ui-tooling")
 }
+
+// Optional filter while converting screens: -Pbzr.screens=SCR-C01,SCR-C02 (all screens when absent).
+tasks.withType<Test>().configureEach {
+    providers.gradleProperty("bzr.screens").orNull?.let { systemProperty("bzr.screens", it) }
+}

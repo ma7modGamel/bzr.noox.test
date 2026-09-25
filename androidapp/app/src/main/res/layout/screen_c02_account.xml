@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- SCR-C02 C02AccountScreen content (DEC-047). -->
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:parentTag="android.widget.LinearLayout">
+
+    <noox.bzr.design.views.ProviderHeaderView
+        android:id="@+id/header"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:name="@string/drawer_name"
+        app:services="@string/customer_account_phone"
+        app:avatarSize="large" />
+
+    <noox.bzr.design.views.InfoBannerView
+        android:id="@+id/unverified"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:bremoText="@string/account_unverified" />
+
+    <noox.bzr.design.views.MenuRowView
+        android:id="@+id/personal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:bremoIcon="@drawable/ic_account"
+        app:bremoText="@string/customer_account_personal" />
+
+    <noox.bzr.design.views.MenuRowView
+        android:id="@+id/addresses"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:bremoIcon="@drawable/ic_location"
+        app:bremoText="@string/customer_account_addresses" />
+
+    <noox.bzr.design.views.MenuRowView
+        android:id="@+id/payments"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:bremoIcon="@drawable/ic_orders"
+        app:bremoText="@string/customer_account_payments" />
+
+    <noox.bzr.design.views.MenuRowView
+        android:id="@+id/notifications"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:bremoIcon="@drawable/ic_messages"
+        app:bremoText="@string/notifications_title" />
+
+    <noox.bzr.design.views.MenuRowView
+        android:id="@+id/help"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:bremoIcon="@drawable/ic_info"
+        app:bremoText="@string/customer_account_help" />
+
+    <noox.bzr.design.views.MenuRowView
+        android:id="@+id/logout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:bremoIcon="@drawable/ic_close"
+        app:bremoText="@string/customer_account_logout" />
+</merge>
