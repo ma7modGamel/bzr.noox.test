@@ -2,10 +2,10 @@ package noox.bzr.customer
 
 import android.os.Handler
 import android.os.Looper
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import noox.bzr.auth.AuthSessionStore
 import org.json.JSONArray
 import org.json.JSONObject
@@ -17,10 +17,21 @@ class CustomerViewModel(
     private val session: AuthSessionStore,
     private val currencyLabel: String,
 ) : ViewModel() {
-    var state by mutableStateOf(CustomerUiState("SCR-C01", CustomerPhase.Loading))
-        private set
-    var requiresAuthentication by mutableStateOf(false)
-        private set
+    // DEC-047: only the state holder changed (Compose mutableStateOf → StateFlow); fragments collect [stateFlow].
+    private val mutableState = MutableStateFlow(CustomerUiState("SCR-C01", CustomerPhase.Loading))
+    val stateFlow: StateFlow<CustomerUiState> = mutableState.asStateFlow()
+    var state: CustomerUiState
+        get() = mutableState.value
+        private set(value) {
+            mutableState.value = value
+        }
+    private val mutableRequiresAuthentication = MutableStateFlow(false)
+    val requiresAuthenticationFlow: StateFlow<Boolean> = mutableRequiresAuthentication.asStateFlow()
+    var requiresAuthentication: Boolean
+        get() = mutableRequiresAuthentication.value
+        private set(value) {
+            mutableRequiresAuthentication.value = value
+        }
     private var currentOrderId: Int? = null
     private var currentOrderVersion: Int = 0
     private var currentProposalId: Int? = null

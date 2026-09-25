@@ -2,10 +2,10 @@ package noox.bzr.auth
 
 import android.os.Handler
 import android.os.Looper
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
 interface AuthSessionStore {
     var token: String?
@@ -14,8 +14,14 @@ interface AuthSessionStore {
 }
 
 class AuthViewModel(private val api: AuthApi, private val session: AuthSessionStore) : ViewModel() {
-    var state by mutableStateOf(AuthUiState("SCR-C10", AuthPhase.Editing))
-        private set
+    // DEC-047: only the state holder changed (Compose mutableStateOf → StateFlow); fragments collect [stateFlow].
+    private val mutableState = MutableStateFlow(AuthUiState("SCR-C10", AuthPhase.Editing))
+    val stateFlow: StateFlow<AuthUiState> = mutableState.asStateFlow()
+    var state: AuthUiState
+        get() = mutableState.value
+        private set(value) {
+            mutableState.value = value
+        }
 
     fun update(field: String, value: String) {
         val input = values() + (field to value) + ("event" to "validate")

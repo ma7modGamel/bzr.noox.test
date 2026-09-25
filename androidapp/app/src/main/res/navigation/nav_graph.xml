@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- One destination per screen (DEC-047). MainActivity navigates by the ViewModel state (screen code), as the Compose flow switched on it. -->
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/scr_c10">
+
+    <fragment
+        android:id="@+id/scr_c10"
+        android:name="noox.bzr.auth.CustomerLoginFragment" />
+
+    <fragment
+        android:id="@+id/scr_c11"
+        android:name="noox.bzr.auth.CustomerRegisterFragment" />
+
+    <fragment
+        android:id="@+id/scr_c12"
+        android:name="noox.bzr.auth.CustomerEmailVerificationFragment" />
+
+    <fragment
+        android:id="@+id/scr_c13"
+        android:name="noox.bzr.auth.CustomerPasswordRecoveryFragment" />
+
+    <fragment
+        android:id="@+id/scr_c01"
+        android:name="noox.bzr.customer.C01HomeFragment" />
+
+    <fragment
+        android:id="@+id/scr_c02"
+        android:name="noox.bzr.customer.C02AccountFragment" />
+
+    <fragment
+        android:id="@+id/scr_c03"
+        android:name="noox.bzr.customer.C03ProblemFragment" />
+
+    <fragment
+        android:id="@+id/scr_c04"
+        android:name="noox.bzr.customer.C04TimingFragment" />
+
+    <fragment
+        android:id="@+id/scr_c05"
+        android:name="noox.bzr.customer.C05ReviewFragment" />
+
+    <fragment
+        android:id="@+id/scr_c06"
+        android:name="noox.bzr.customer.C06OffersFragment" />
+
+    <fragment
+        android:id="@+id/scr_c07"
+        android:name="noox.bzr.customer.C07ProviderFragment" />
+
+    <fragment
+        android:id="@+id/scr_c08"
+        android:name="noox.bzr.customer.C08OfferDetailsFragment" />
+
+    <fragment
+        android:id="@+id/scr_c09"
+        android:name="noox.bzr.customer.C09TrackingFragment" />
+
+    <fragment
+        android:id="@+id/scr_c14"
+        android:name="noox.bzr.customer.C14AddressesFragment" />
+
+    <fragment
+        android:id="@+id/scr_c15"
+        android:name="noox.bzr.customer.C15AddressFormFragment" />
+
+    <fragment
+        android:id="@+id/scr_c16"
+        android:name="noox.bzr.customer.C16SlotPickerFragment" />
+
+    <fragment
+        android:id="@+id/scr_c17"
+        android:name="noox.bzr.customer.C17MediaFragment" />
+
+    <fragment
+        android:id="@+id/scr_c18"
+        android:name="noox.bzr.customer.C18MessagesFragment" />
+
+    <fragment
+        android:id="@+id/scr_c19"
+        android:name="noox.bzr.customer.C19ChatFragment" />
+
+    <fragment
+        android:id="@+id/scr_c20"
+        android:name="noox.bzr.customer.C20CancellationFragment" />
+
+    <fragment
+        android:id="@+id/scr_c21"
+        android:name="noox.bzr.customer.C21PaymentSummaryFragment" />
+
+    <fragment
+        android:id="@+id/scr_c22"
+        android:name="noox.bzr.customer.C22ElectronicPaymentFragment" />
+
+    <fragment
+        android:id="@+id/scr_c23"
+        android:name="noox.bzr.customer.C23CompletionFragment" />
+
+    <fragment
+        android:id="@+id/scr_c24"
+        android:name="noox.bzr.customer.C24RatingFragment" />
+
+    <fragment
+        android:id="@+id/scr_c25"
+        android:name="noox.bzr.customer.C25OrdersFragment" />
+
+    <fragment
+        android:id="@+id/scr_c26"
+        android:name="noox.bzr.customer.C26OrderHistoryFragment" />
+
+    <fragment
+        android:id="@+id/scr_c27"
+        android:name="noox.bzr.customer.C27DisputeFragment" />
+
+    <fragment
+        android:id="@+id/scr_c28"
+        android:name="noox.bzr.customer.C28ProviderReportFragment" />
+
+    <fragment
+        android:id="@+id/scr_c29"
+        android:name="noox.bzr.customer.C29HelpFragment" />
+
+    <fragment
+        android:id="@+id/scr_c30"
+        android:name="noox.bzr.customer.C30ExecutionQuoteFragment" />
+
+    <fragment
+        android:id="@+id/scr_c31"
+        android:name="noox.bzr.customer.C31AdditionalCostFragment" />
+
+    <fragment
+        android:id="@+id/scr_c32"
+        android:name="noox.bzr.customer.C32NotificationsFragment" />
+
+    <fragment
+        android:id="@+id/scr_c33"
+        android:name="noox.bzr.customer.C33AccountSettingsFragment" />
+
+    <fragment
+        android:id="@+id/scr_c34"
+        android:name="noox.bzr.customer.C34TermsFragment" />
+
+    <fragment
+        android:id="@+id/scr_c35"
+        android:name="noox.bzr.customer.C35NoOffersFragment" />
+
+</navigation>
