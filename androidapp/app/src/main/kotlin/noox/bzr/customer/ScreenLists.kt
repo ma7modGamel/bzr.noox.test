@@ -69,3 +69,33 @@ fun RecyclerView.rows(adapter: RecyclerView.Adapter<*>, gap: Int, columns: Int =
     addItemDecoration(GapDecoration(gap, columns, horizontal))
     this.adapter = adapter
 }
+
+/** A RadioCard per option (reasons, payment methods, channels); [enabled] gates selection as in Compose. */
+class RadioOptions(
+    list: RecyclerView,
+    gap: Int,
+    private val body: String,
+    private val onSelect: (Int) -> Unit,
+) {
+    private data class Option(val index: Int, val label: String, val selected: Boolean, val enabled: Boolean)
+
+    private val adapter = RowAdapter<Option, noox.bzr.design.views.RadioCardView>(
+        create = { parent -> noox.bzr.design.views.RadioCardView(parent.context) },
+        bind = { card, option, _ ->
+            card.title = option.label
+            card.body = body
+            card.selected = option.selected
+            card.setOnClickListener(if (option.enabled) View.OnClickListener { onSelect(option.index) } else null)
+            card.isClickable = option.enabled
+        },
+        key = { it.index },
+    )
+
+    init {
+        list.rows(adapter, gap)
+    }
+
+    fun submit(options: List<String>, selectedIndex: Int, enabled: Boolean = true) {
+        adapter.submitList(options.mapIndexed { index, label -> Option(index, label, selectedIndex == index, enabled) })
+    }
+}

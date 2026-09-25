@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- SCR-C20 C20CancellationScreen content (DEC-047); the confirmation sheet is the overlay. -->
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:parentTag="android.widget.LinearLayout">
+
+    <noox.bzr.design.views.InfoBannerView
+        android:id="@+id/free"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:bremoText="@string/cancel_free" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/reasons"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:nestedScrollingEnabled="false"
+        android:overScrollMode="never" />
+
+    <noox.bzr.design.views.TextAreaFieldView
+        android:id="@+id/note"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:bremoLabel="@string/cancel_note_label"
+        app:bremoPlaceholder="@string/cancel_note_placeholder"
+        app:bremoOptionalLabel="@string/common_optional" />
+</merge>
