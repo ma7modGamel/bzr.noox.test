@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- CustomerScreen scaffold (43 §4): top bar, scrolling body with loading / error / content, bottom overlay for sheets. -->
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:parentTag="android.widget.FrameLayout">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/bremo_surface"
+        android:orientation="vertical">
+
+        <noox.bzr.design.views.AppTopBarView
+            android:id="@+id/topBar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <androidx.core.widget.NestedScrollView
+            android:id="@+id/scroll"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingHorizontal="@dimen/bremo_space_screen_horizontal"
+                android:paddingVertical="@dimen/bremo_space_m">
+
+                <LinearLayout
+                    android:id="@+id/loading"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:divider="@drawable/bremo_gap_m"
+                    android:orientation="vertical"
+                    android:showDividers="middle">
+
+                    <noox.bzr.design.views.LoadingSkeletonView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content" />
+
+                    <noox.bzr.design.views.LoadingSkeletonView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content" />
+
+                    <noox.bzr.design.views.LoadingSkeletonView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content" />
+                </LinearLayout>
+
+                <noox.bzr.design.views.ErrorStateView
+                    android:id="@+id/error"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:action="@string/common_retry"
+                    app:bremoBody="@string/error_body"
+                    app:bremoTitle="@string/error_title" />
+
+                <LinearLayout
+                    android:id="@+id/content"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:divider="@drawable/bremo_gap_m"
+                    android:orientation="vertical"
+                    android:showDividers="middle" />
+            </LinearLayout>
+        </androidx.core.widget.NestedScrollView>
+    </LinearLayout>
+
+    <FrameLayout
+        android:id="@+id/overlay"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom" />
+</merge>

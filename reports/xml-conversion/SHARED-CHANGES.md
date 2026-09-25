@@ -7,6 +7,7 @@
 |---|---|---|---|
 | `tools/gen-design` (الجزء المشترك، مخرج CSS) | لون `scrim` صار يُكتب RRGGBBAA بدل ARGB | خطأ ترتيب قنوات في مخرج الويب | تمّ — يحتاج موافقتك أو إرجاعه |
 | `design/reference/android-compose/gallery/` | تجميد لقطات Compose المعتمدة هدفًا للمقارنة | تبقى بعد حذف Compose | تمّ — مجلد جديد تحت `design/`، غير مذكور في قائمة المنع |
+| `design/reference/android-compose/screens/` (212 ملفًا) | **خطأ مني يحتاج حذفًا**: نسخة أولى من لقطات Compose للشاشات بأسماء خاطئة | كتبتها قبل ما أنتبه إن `design/` مشترك، والحذف اتمنع عليّ. المرجع الصحيح اتنقل لملف أملكه: `reports/xml-conversion/reference/compose-screens/` (233 لقطة) | **مطلوب منك**: `rm -r design/reference/android-compose/screens` |
 | `iosapp/` (`bundle id` و`InfoPlist.xcstrings`) | `com.bremo.app` والاسم «بريمو» | DEC-048 (دفعة منفصلة بأمر المالك، ليست جزءًا من التحويل) | تمّ — للعلم |
 
 ## تغييرات مطلوبة (لم تُنفَّذ)

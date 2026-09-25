@@ -1,0 +1,117 @@
+package noox.bzr.customer
+
+import android.content.Context
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.widget.FrameLayout
+import android.widget.LinearLayout
+import androidx.core.view.isVisible
+import noox.bzr.gallery.databinding.ViewCustomerScreenBinding
+import noox.bzr.design.ButtonVisualState
+import noox.bzr.design.R
+import noox.bzr.design.views.DangerTextButtonView
+import noox.bzr.design.views.PrimaryButtonView
+import noox.bzr.design.views.SecondaryButtonView
+
+/**
+ * XML counterpart of the Compose CustomerScreen scaffold (DEC-047): top bar, scrolling column
+ * (spacing m, screen padding), loading skeletons / error state / content by phase, and a bottom
+ * overlay for the inline sheets. Screens only render [CustomerUiState]; all decisions stay in
+ * [CustomerLogic] and [CustomerViewModel].
+ */
+abstract class CustomerScreenView(context: Context) : FrameLayout(context) {
+    protected val inflater: LayoutInflater = LayoutInflater.from(context)
+    protected val scaffold = ViewCustomerScreenBinding.inflate(inflater, this)
+    protected val content: LinearLayout get() = scaffold.content
+    protected val overlay: FrameLayout get() = scaffold.overlay
+
+    var onBack: () -> Unit = {}
+
+    init {
+        layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
+        // RTL is mandatory (43 §13), whatever the device locale — as BzrTheme did for Compose.
+        layoutDirection = LAYOUT_DIRECTION_RTL
+        scaffold.topBar.onBack = { onBack() }
+    }
+
+    fun render(state: CustomerUiState) {
+        scaffold.topBar.title = title(state)
+        scaffold.loading.isVisible = state.phase == CustomerPhase.Loading
+        scaffold.error.isVisible = state.phase == CustomerPhase.Error
+        content.isVisible = state.phase != CustomerPhase.Loading && state.phase != CustomerPhase.Error
+        if (content.isVisible) renderContent(state)
+        renderOverlay(state)
+    }
+
+    protected abstract fun title(state: CustomerUiState): String
+
+    protected abstract fun renderContent(state: CustomerUiState)
+
+    /** Sheets are drawn over the scaffold in every phase, as in Compose. */
+    protected open fun renderOverlay(state: CustomerUiState) = Unit
+
+    protected fun string(id: Int): String = context.getString(id)
+}
+
+/** ActionButtons: the visible order actions, primary / danger / secondary by kind. */
+class ActionButtonsView(context: Context) : LinearLayout(context) {
+    var onAction: (String) -> Unit = {}
+    private var shown: List<String> = emptyList()
+
+    init {
+        orientation = VERTICAL
+        dividerDrawable = androidx.core.content.ContextCompat.getDrawable(context, R.drawable.bremo_gap_m)
+        showDividers = SHOW_DIVIDER_MIDDLE
+        layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT)
+    }
+
+    var actions: List<String>
+        get() = shown
+        set(value) {
+            isVisible = value.isNotEmpty()
+            if (value == shown) return
+            shown = value
+            removeAllViews()
+            value.forEach { action -> addView(button(action), LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT)) }
+        }
+
+    private fun button(action: String): View {
+        val label = context.getString(actionLabel(action))
+        return when (action) {
+            "accept_offer", "republish", "approve_proposal", "pay_electronic", "confirm_completion", "rate" ->
+                PrimaryButtonView(context).apply { text = label; state = ButtonVisualState.Normal; onClick = { onAction(action) } }
+            "cancel", "open_dispute", "report_provider" ->
+                DangerTextButtonView(context).apply { text = label; onClick = { onAction(action) } }
+            else -> SecondaryButtonView(context).apply { text = label; onClick = { onAction(action) } }
+        }
+    }
+}
+
+internal fun actionLabel(action: String): Int = when (action) {
+    "accept_offer" -> R.string.action_accept_offer
+    "edit_request" -> R.string.action_edit_request
+    "republish" -> R.string.action_republish
+    "cancel" -> R.string.action_cancel
+    "call" -> R.string.action_call
+    "chat" -> R.string.action_chat
+    "share_visit" -> R.string.action_share_visit
+    "open_dispute" -> R.string.action_open_dispute
+    "report_provider" -> R.string.action_report_provider
+    "approve_proposal" -> R.string.action_approve_proposal
+    "reject_proposal" -> R.string.action_reject_proposal
+    "change_payment_method" -> R.string.action_change_payment_method
+    "pay_electronic" -> R.string.action_pay_electronic
+    "confirm_completion" -> R.string.action_confirm_completion
+    "rate" -> R.string.action_rate
+    else -> R.string.common_close
+}
+
+internal fun customerButtonState(state: CustomerUiState): ButtonVisualState = when {
+    state.isBusy -> ButtonVisualState.Loading
+    state.canContinue -> ButtonVisualState.Normal
+    else -> ButtonVisualState.Disabled
+}
+
+internal fun continueState(state: CustomerUiState): ButtonVisualState =
+    if (state.canContinue) ButtonVisualState.Normal else ButtonVisualState.Disabled

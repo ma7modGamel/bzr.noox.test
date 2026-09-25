@@ -7,6 +7,10 @@
 //
 //   php tools/compare-android-xml gallery          → reports/xml-conversion/gallery/comparison.html
 //   php tools/compare-android-xml gallery --freeze → copy the current Compose goldens into the reference set first
+//   php tools/compare-android-xml 3a               → screens of batch 3a (also 3b 3c 4a 4b 4c 4d), same page per group
+//   php tools/compare-android-xml index            → reports/xml-conversion/comparison.html (all sets, from their summary.json)
+// Screen targets were frozen from the approved Compose snapshots into reports/xml-conversion/reference/compose-screens/
+// (Android-owned; design/ is shared).
 
 declare(strict_types=1);
 
@@ -20,6 +24,17 @@ const TOLERANCE = 24;
 const SHIFT = 1;
 /** A pair "matches" when no more than this share of pixels differs. */
 const MATCH_PERCENT = 0.5;
+
+/** The image composited over the window background colour. */
+function flatten(GdImage $image, int $background): GdImage
+{
+    $flat = imagecreatetruecolor(imagesx($image), imagesy($image));
+    imagefill($flat, 0, 0, $background);
+    imagealphablending($flat, true);
+    imagecopy($flat, $image, 0, 0, 0, 0, imagesx($image), imagesy($image));
+
+    return $flat;
+}
 
 /** True when the pixel of $source at (x, y) has an equal pixel in $target within SHIFT. */
 function near(GdImage $source, int $x, int $y, GdImage $target): bool
@@ -59,12 +74,46 @@ $sets = [
         'notes' => $root.'/design/reference/android-compose/gallery/differences.json',
     ],
 ];
+
+/** Screen groups in the order of 43 §13 step 3; each screen belongs to the last batch that changed it. */
+const SCREEN_GROUPS = [
+    '3a' => [10, 11, 12, 13],
+    '3b' => [1, 2, 3, 4, 5, 6, 7, 8],
+    '3c' => [14, 15, 16, 17],
+    '4a' => [9, 20, 30, 31],
+    '4b' => [21, 22, 23, 24],
+    '4c' => [18, 19, 25, 26, 27, 28],
+    '4d' => [29, 32, 33, 34, 35],
+];
+foreach (SCREEN_GROUPS as $group => $numbers) {
+    $cases = [];
+    foreach ($numbers as $number) {
+        $screen = sprintf('SCR-C%02d', $number);
+        $fixture = json_decode((string) file_get_contents($root.'/design/fixtures/'.$screen.'/cases.json'), true, flags: JSON_THROW_ON_ERROR);
+        foreach ($fixture['cases'] as $case) {
+            if ($case['snapshot'] ?? true) {
+                $cases[] = strtolower($screen.'-'.$case['id']);
+            }
+        }
+    }
+    $sets[$group] = [
+        'title' => 'الشاشات '.$group.' — Compose المعتمد مقابل XML',
+        'reference' => $root.'/reports/xml-conversion/reference/compose-screens',
+        'xml' => 'androidapp/app/src/test/snapshots/images/*_xml_screen_cases_match_shared_fixture_%s.png',
+        'cases' => $cases,
+        'notes' => $root.'/reports/xml-conversion/reference/differences-'.$group.'.json',
+    ];
+}
+if ($set === 'index') {
+    writeIndex($root, $sets);
+    exit(0);
+}
 if (! isset($sets[$set])) {
     fwrite(STDERR, "Unknown set {$set}\n");
     exit(2);
 }
 $config = $sets[$set];
-$referenceDir = $root.'/design/reference/android-compose/'.$set;
+$referenceDir = $config['reference'] ?? $root.'/design/reference/android-compose/'.$set;
 $output = $root.'/reports/xml-conversion/'.$set;
 foreach ([$referenceDir, $output.'/compose', $output.'/xml', $output.'/diff'] as $directory) {
     if (! is_dir($directory) && ! mkdir($directory, 0775, true) && ! is_dir($directory)) {
@@ -72,24 +121,29 @@ foreach ([$referenceDir, $output.'/compose', $output.'/xml', $output.'/diff'] as
     }
 }
 
+// Transparent pixels (a Compose root without background) show the window background on a device: Theme.Bremo surface.
+$surface = hexdec(ltrim(json_decode((string) file_get_contents($root.'/design/tokens.json'), true, flags: JSON_THROW_ON_ERROR)['color']['surface'], '#'));
 $notes = is_file($config['notes']) ? json_decode((string) file_get_contents($config['notes']), true, flags: JSON_THROW_ON_ERROR) : [];
 $rows = [];
 $summary = [];
 $failures = 0;
 foreach ($config['cases'] as $case) {
     $reference = $referenceDir.'/'.$case.'.png';
-    if ($freeze) {
+    if ($freeze && isset($config['compose'])) {
         copy($root.'/'.sprintf($config['compose'], $case), $reference);
     }
     $xml = $root.'/'.sprintf($config['xml'], $case);
+    if (str_contains($xml, '*')) {
+        $xml = (glob($xml) ?: [''])[0];
+    }
     if (! is_file($reference) || ! is_file($xml)) {
         throw new RuntimeException("Missing image for {$case}");
     }
-    copy($reference, $output.'/compose/'.$case.'.png');
-    copy($xml, $output.'/xml/'.$case.'.png');
 
-    $a = imagecreatefrompng($reference);
-    $b = imagecreatefrompng($xml);
+    $a = flatten(imagecreatefrompng($reference), $surface);
+    $b = flatten(imagecreatefrompng($xml), $surface);
+    imagepng($a, $output.'/compose/'.$case.'.png');
+    imagepng($b, $output.'/xml/'.$case.'.png');
     $width = max(imagesx($a), imagesx($b));
     $height = max(imagesy($a), imagesy($b));
     $diff = imagecreatetruecolor($width, $height);
@@ -137,7 +191,7 @@ $html = <<<HTML
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{$title}</title>
-<link rel="stylesheet" href="../../../design/generated/tokens.css">
+
 <style>
   body { margin: 0; font-family: Cairo, sans-serif; background: var(--color-surface-alt, #f4f4f8); color: var(--color-navy800, #101d3c); }
   main { max-width: 1320px; margin: 0 auto; padding: 24px 16px; }
@@ -175,4 +229,61 @@ foreach ($summary as $case => $result) {
 fwrite(STDOUT, "{$matched}/".count($summary)." match. Page: reports/xml-conversion/{$set}/comparison.html\n");
 if (in_array('--strict', $argv, true) && $failures > 0) {
     exit(1);
+}
+
+/** @param array<string, array<string, mixed>> $sets */
+function writeIndex(string $root, array $sets): void
+{
+    $rows = [];
+    $total = 0;
+    $matched = 0;
+    foreach (array_keys($sets) as $name) {
+        $summaryPath = $root.'/reports/xml-conversion/'.$name.'/summary.json';
+        if (! is_file($summaryPath)) {
+            $rows[] = '<tr><td>'.$name.'</td><td colspan="3">لم تُقارن بعد</td></tr>';
+            continue;
+        }
+        $summary = json_decode((string) file_get_contents($summaryPath), true, flags: JSON_THROW_ON_ERROR);
+        $count = count($summary);
+        $ok = count(array_filter($summary, static fn (array $row): bool => $row['matches']));
+        $total += $count;
+        $matched += $ok;
+        $worst = $summary === [] ? 0 : max(array_column($summary, 'percent'));
+        $differs = array_keys(array_filter($summary, static fn (array $row): bool => ! $row['matches']));
+        $rows[] = '<tr><td><a href="'.$name.'/comparison.html">'.$name.'</a></td><td>'.$ok.' / '.$count.'</td><td>'.number_format($worst, 2).'٪</td><td>'
+            .($differs === [] ? '<span class="ok">كلها مطابقة — تُقفل</span>' : '<span class="bad">'.htmlspecialchars(implode('، ', $differs)).'</span>').'</td></tr>';
+    }
+    $body = implode("\n", $rows);
+    $html = <<<HTML
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>مقارنة XML بالمعتمد</title>
+<style>
+  body { margin: 0; font-family: Cairo, sans-serif; background: #f4f4f8; color: #101d3c; }
+  main { max-width: 960px; margin: 0 auto; padding: 24px 16px; }
+  table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 12px; overflow: hidden; }
+  th, td { padding: 10px 12px; border-bottom: 1px solid #e0e4e8; text-align: start; }
+  .ok { color: #1e8c8c; font-weight: 700; }
+  .bad { color: #c64f53; font-weight: 700; }
+</style>
+</head>
+<body>
+<main>
+<h1>تحويل أندرويد إلى XML — المعتمدة | XML | الفرق | نسبة الاختلاف</h1>
+<p>مطابق: <strong>{$matched}</strong> من <strong>{$total}</strong> لقطة. كل مجموعة لها صفحة تعرض المعتمدة (Compose) وXML وخريطة الفرق ونسبة الاختلاف لكل لقطة.</p>
+<table>
+<thead><tr><th>المجموعة</th><th>مطابق</th><th>أعلى اختلاف</th><th>الحالة</th></tr></thead>
+<tbody>
+{$body}
+</tbody>
+</table>
+</main>
+</body>
+</html>
+HTML;
+    file_put_contents($root.'/reports/xml-conversion/comparison.html', $html);
+    fwrite(STDOUT, "{$matched}/{$total} match. Page: reports/xml-conversion/comparison.html\n");
 }
