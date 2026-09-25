@@ -3,6 +3,8 @@ package noox.bzr.gallery
 import android.os.Bundle
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -52,6 +54,12 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        // targetSdk 35 draws edge to edge: keep the screens clear of the status and navigation bars.
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.nav_host)) { view, insets ->
+            val bars = insets.getInsets(WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.ime())
+            view.setPadding(bars.left, bars.top, bars.right, bars.bottom)
+            WindowInsetsCompat.CONSUMED
+        }
         authenticated = MutableStateFlow(session.token != null)
         val navController = (supportFragmentManager.findFragmentById(R.id.nav_host) as NavHostFragment).navController
         navController.setGraph(
