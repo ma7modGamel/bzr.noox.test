@@ -1,0 +1,12 @@
+{
+  "screen": "SCR-P04",
+  "cases": [
+    {"id":"loading","input":{"event":"loading"},"expected":{"phase":"loading","can_continue":false}},
+    {"id":"error","input":{"event":"error"},"expected":{"phase":"error","can_continue":false,"message_key":"error.body"}},
+    {"id":"empty_catalog","input":{"event":"loaded","category_labels":[],"specialty_labels":[],"category_ids":[],"specialty_ids":[]},"expected":{"phase":"empty","can_continue":false}},
+    {"id":"unselected","input":{"event":"validate","category_labels":["سباكة","كهرباء"],"specialty_labels":[],"category_ids":[],"specialty_ids":[]},"expected":{"phase":"content","can_continue":false,"field_errors":["provider.onboarding.categories.required","provider.onboarding.specialties.required"]}},
+    {"id":"category_only","input":{"event":"validate","category_labels":["سباكة","كهرباء"],"specialty_labels":["تسريب مياه"],"category_ids":["1"],"specialty_ids":[]},"expected":{"phase":"content","can_continue":false,"field_errors":["provider.onboarding.specialties.required"],"selected_count":1}},
+    {"id":"valid","input":{"event":"validate","category_labels":["سباكة","كهرباء"],"specialty_labels":["تسريب مياه","تركيب خلاط"],"category_ids":["1"],"specialty_ids":["11","12"]},"expected":{"phase":"content","can_continue":true,"selected_count":3}},
+    {"id":"invalid_relation","input":{"event":"validate","category_labels":["سباكة"],"specialty_labels":["تسريب مياه"],"category_ids":["1"],"specialty_ids":["91"],"specialty_relation_valid":false},"expected":{"phase":"content","can_continue":false,"field_errors":["provider.onboarding.specialties.required"]}}
+  ]
+}

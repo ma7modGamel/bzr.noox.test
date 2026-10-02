@@ -1,0 +1,11 @@
+{
+  "screen": "SCR-P06",
+  "cases": [
+    {"id":"loading","input":{"event":"loading"},"expected":{"phase":"loading","can_continue":false}},
+    {"id":"unselected","input":{"event":"validate","payout_labels":["إنستاباي","محفظة","حساب بنكي"],"payout_code":"","payout_details":"","available_actions":["submit_provider_application"]},"expected":{"phase":"content","can_continue":false,"field_errors":["provider.onboarding.payout.method.required","provider.onboarding.payout.details.required"]}},
+    {"id":"details_missing","input":{"event":"validate","payout_labels":["إنستاباي","محفظة","حساب بنكي"],"payout_code":"server-option-1","payout_details":"","available_actions":["submit_provider_application"]},"expected":{"phase":"content","can_continue":false,"field_errors":["provider.onboarding.payout.details.required"]}},
+    {"id":"valid","input":{"event":"validate","payout_labels":["إنستاباي","محفظة","حساب بنكي"],"payout_code":"server-option-1","payout_details":"provider@instapay","available_actions":["submit_provider_application"],"summary":["فئتان","3 تخصصات","منطقتان","3 صور"]},"expected":{"phase":"content","can_continue":true,"visible_actions":["submit_provider_application"],"item_count":4}},
+    {"id":"submitting","input":{"event":"submitting","payout_labels":["إنستاباي"],"payout_code":"server-option-1","payout_details":"provider@instapay","available_actions":["submit_provider_application"]},"expected":{"phase":"content","can_continue":false,"is_busy":true}},
+    {"id":"not_editable","input":{"event":"not_editable","payout_labels":["إنستاباي"],"payout_code":"server-option-1","payout_details":"provider@instapay","available_actions":[]},"expected":{"phase":"content","can_continue":false,"message_key":"provider.application.not_editable"}}
+  ]
+}

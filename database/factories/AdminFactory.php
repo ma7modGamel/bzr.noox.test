@@ -21,7 +21,15 @@ final class AdminFactory extends Factory
             'password' => 'password',
             'role' => AdminRole::Operations,
             'is_active' => true,
+            // ASM-14: every admin has TOTP set up; `withoutTwoFactor()` tests the forced setup.
+            'two_factor_secret' => 'JBSWY3DPEHPK3PXP',
+            'two_factor_confirmed_at' => now(),
         ];
+    }
+
+    public function withoutTwoFactor(): static
+    {
+        return $this->state(fn (): array => ['two_factor_secret' => null, 'two_factor_confirmed_at' => null]);
     }
 
     public function super(): static

@@ -1,0 +1,25 @@
+{"model":"ScreenHistory","spec":"reports/batch-6b/REPORT.md §عيوب المسار — الرجوع","root":"SCR-C01","cases":[
+  {"id":"request_wizard","steps":[
+    {"op":"show","screen":"SCR-C01"},{"op":"show","screen":"SCR-C03"},{"op":"show","screen":"SCR-C04"},{"op":"show","screen":"SCR-C05"},
+    {"op":"back","expect":"SCR-C04"},{"op":"back","expect":"SCR-C03"},{"op":"back","expect":"SCR-C01"},{"op":"back","expect":null}]},
+  {"id":"publish_resets","steps":[
+    {"op":"show","screen":"SCR-C01"},{"op":"show","screen":"SCR-C03"},{"op":"show","screen":"SCR-C04"},{"op":"show","screen":"SCR-C05"},
+    {"op":"commit"},{"op":"show","screen":"SCR-C36"},{"op":"back","expect":"SCR-C01"}]},
+  {"id":"not_restorable_skipped","steps":[
+    {"op":"show","screen":"SCR-C01"},{"op":"show","screen":"SCR-C25"},{"op":"show","screen":"SCR-C09","restorable":false},{"op":"show","screen":"SCR-C19"},
+    {"op":"back","expect":"SCR-C25"}]},
+  {"id":"cycle_truncates","steps":[
+    {"op":"show","screen":"SCR-C01"},{"op":"show","screen":"SCR-C04"},{"op":"show","screen":"SCR-C14"},{"op":"show","screen":"SCR-C04"},
+    {"op":"back","expect":"SCR-C01"}]},
+  {"id":"same_screen_refresh","steps":[
+    {"op":"show","screen":"SCR-C01"},{"op":"show","screen":"SCR-C25"},{"op":"show","screen":"SCR-C25"},{"op":"show","screen":"SCR-C26"},
+    {"op":"back","expect":"SCR-C25"},{"op":"back","expect":"SCR-C01"}]},
+  {"id":"root_clears","steps":[
+    {"op":"show","screen":"SCR-C01"},{"op":"show","screen":"SCR-C02"},{"op":"show","screen":"SCR-C33"},{"op":"show","screen":"SCR-C01"},{"op":"show","screen":"SCR-C18"},
+    {"op":"back","expect":"SCR-C01"}]},
+  {"id":"deep_link_without_history","steps":[
+    {"op":"show","screen":"SCR-C09"},{"op":"back","expect":"SCR-C01"}]},
+  {"id":"offers_to_offer","steps":[
+    {"op":"show","screen":"SCR-C01"},{"op":"show","screen":"SCR-C06"},{"op":"show","screen":"SCR-C07"},{"op":"show","screen":"SCR-C08"},
+    {"op":"back","expect":"SCR-C07"},{"op":"show","screen":"SCR-C08"},{"op":"commit"},{"op":"show","screen":"SCR-C09"},{"op":"back","expect":"SCR-C01"}]}
+]}

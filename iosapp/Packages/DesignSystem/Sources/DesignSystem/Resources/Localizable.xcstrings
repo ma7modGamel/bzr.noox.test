@@ -501,6 +501,16 @@
                 }
             }
         },
+        "common.delete": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "حذف"
+                    }
+                }
+            }
+        },
         "common.cancel": {
             "localizations": {
                 "ar": {
@@ -907,6 +917,26 @@
                     "stringUnit": {
                         "state": "translated",
                         "value": "موقع الفني الآن"
+                    }
+                }
+            }
+        },
+        "tracking.provider_location": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "موقع الفني"
+                    }
+                }
+            }
+        },
+        "tracking.destination_location": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "موقع الطلب"
                     }
                 }
             }
@@ -2226,7 +2256,7 @@
                 "ar": {
                     "stringUnit": {
                         "state": "translated",
-                        "value": "محادثة"
+                        "value": "مراسلة العميل"
                     }
                 }
             }
@@ -2597,6 +2627,16 @@
                     "stringUnit": {
                         "state": "translated",
                         "value": "التقييم"
+                    }
+                }
+            }
+        },
+        "stat.response_speed": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "سرعة الرد"
                     }
                 }
             }
@@ -3176,7 +3216,17 @@
                 "ar": {
                     "stringUnit": {
                         "state": "translated",
-                        "value": "مرحبًا، آية"
+                        "value": "مرحبًا، %1$s"
+                    }
+                }
+            }
+        },
+        "customer.greeting.plain": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "مرحبًا"
                     }
                 }
             }
@@ -3227,16 +3277,6 @@
                     "stringUnit": {
                         "state": "translated",
                         "value": "حسابي"
-                    }
-                }
-            }
-        },
-        "customer.account.phone": {
-            "localizations": {
-                "ar": {
-                    "stringUnit": {
-                        "state": "translated",
-                        "value": "01012345678"
                     }
                 }
             }
@@ -3481,6 +3521,16 @@
                 }
             }
         },
+        "request.slot.choose": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "اختر اليوم والفترة المناسبة لك."
+                    }
+                }
+            }
+        },
         "request.slot.value": {
             "localizations": {
                 "ar": {
@@ -3497,6 +3547,36 @@
                     "stringUnit": {
                         "state": "translated",
                         "value": "الميزانية المتوقعة (اختياري)"
+                    }
+                }
+            }
+        },
+        "request.budget.invalid": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "أدخل ميزانية أكبر من صفر أو اتركها فارغة."
+                    }
+                }
+            }
+        },
+        "request.materials.title": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "مسؤولية الخامات"
+                    }
+                }
+            }
+        },
+        "request.pricing.title": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "طريقة التسعير"
                     }
                 }
             }
@@ -3797,6 +3877,46 @@
                     "stringUnit": {
                         "state": "translated",
                         "value": "تم إلغاء هذا الطلب."
+                    }
+                }
+            }
+        },
+        "tracking.status.expired": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "انتهت مهلة هذا الطلب دون تعيين فني."
+                    }
+                }
+            }
+        },
+        "tracking.status.open": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "طلبك منشور وبانتظار تعيين فني."
+                    }
+                }
+            }
+        },
+        "assignment.waiting.title": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "جارٍ تعيين فني"
+                    }
+                }
+            }
+        },
+        "assignment.summary.title": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "تفاصيل طلبك"
                     }
                 }
             }
@@ -4217,6 +4337,16 @@
                     "stringUnit": {
                         "state": "translated",
                         "value": "أضف عنوان خدمة قبل المتابعة."
+                    }
+                }
+            }
+        },
+        "request.category.unavailable": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "الخدمة المختارة غير متاحة في منطقة هذا العنوان. اختر عنوانًا آخر أو خدمة أخرى."
                     }
                 }
             }
@@ -4647,6 +4777,26 @@
                     "stringUnit": {
                         "state": "translated",
                         "value": "صورة أو كاميرا"
+                    }
+                }
+            }
+        },
+        "media.source.title": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "اختيار مصدر الصورة"
+                    }
+                }
+            }
+        },
+        "media.source.camera": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "التقاط بالكاميرا"
                     }
                 }
             }
@@ -5677,6 +5827,1926 @@
                     "stringUnit": {
                         "state": "translated",
                         "value": "إعادة نشر الطلب"
+                    }
+                }
+            }
+        },
+        "provider.onboarding.intro.title": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "انضم إلى فنيي بريمو"
+                    }
+                }
+            }
+        },
+        "provider.onboarding.intro.body": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "أكمل بياناتك مرة واحدة، وسيُراجع فريقنا طلبك قبل تفعيل وضع الفني."
+                    }
+                }
+            }
+        },
+        "provider.onboarding.benefit.jobs": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "طلبات خدمة واضحة داخل مناطق عملك"
+                    }
+                }
+            }
+        },
+        "provider.onboarding.benefit.schedule": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "أنت تحدد حالة متاح الآن"
+                    }
+                }
+            }
+        },
+        "provider.onboarding.benefit.support": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "دعم ومراجعة من فريق بريمو"
+                    }
+                }
+            }
+        },
+        "provider.onboarding.data.title": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "بيانات الفني"
+                    }
+                }
+            }
+        },
+        "provider.onboarding.step.1": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "الخطوة 1 من 5"
+                    }
+                }
+            }
+        },
+        "provider.onboarding.profile_photo": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "الصورة الشخصية"
+                    }
+                }
+            }
+        },
+        "provider.onboarding.profile_photo.add": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "اختيار صورة شخصية"
+                    }
+                }
+            }
+        },
+        "provider.onboarding.profile_photo.uploaded": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "تم رفع الصورة الشخصية"
+                    }
+                }
+            }
+        },
+        "provider.onboarding.profile_photo.required": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "الصورة الشخصية مطلوبة."
+                    }
+                }
+            }
+        },
+        "provider.onboarding.experience.label": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "سنوات الخبرة"
+                    }
+                }
+            }
+        },
+        "provider.onboarding.experience.invalid": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "سنوات الخبرة يجب أن تكون بين 0 و50."
+                    }
+                }
+            }
+        },
+        "provider.onboarding.bio.label": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "نبذة عن خبرتك (اختيارية)"
+                    }
+                }
+            }
+        },
+        "provider.onboarding.bio.placeholder": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "اكتب خبرتك والتخصصات التي تعمل بها"
+                    }
+                }
+            }
+        },
+        "provider.onboarding.bio.max": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "النبذة يجب ألا تتجاوز 300 حرف."
+                    }
+                }
+            }
+        },
+        "provider.onboarding.identity.title": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "إثبات الهوية"
+                    }
+                }
+            }
+        },
+        "provider.onboarding.step.2": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "الخطوة 2 من 5"
+                    }
+                }
+            }
+        },
+        "provider.onboarding.identity.private": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "صور الهوية خاصة ولا يطّلع عليها إلا فريق المراجعة."
+                    }
+                }
+            }
+        },
+        "provider.onboarding.identity.front": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "وجه بطاقة الهوية"
+                    }
+                }
+            }
+        },
+        "provider.onboarding.identity.back": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "ظهر بطاقة الهوية"
+                    }
+                }
+            }
+        },
+        "provider.onboarding.identity.add": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "اختيار الصورة"
+                    }
+                }
+            }
+        },
+        "provider.onboarding.identity.uploaded": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "تم الرفع"
+                    }
+                }
+            }
+        },
+        "provider.onboarding.identity.required": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "صورة وجه البطاقة وظهرها مطلوبتان."
+                    }
+                }
+            }
+        },
+        "provider.onboarding.categories.title": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "الفئات والتخصصات"
+                    }
+                }
+            }
+        },
+        "provider.onboarding.step.3": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "الخطوة 3 من 5"
+                    }
+                }
+            }
+        },
+        "provider.onboarding.specialties.title": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "التخصصات"
+                    }
+                }
+            }
+        },
+        "provider.onboarding.categories.required": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "اختر فئة واحدة على الأقل."
+                    }
+                }
+            }
+        },
+        "provider.onboarding.specialties.required": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "اختر تخصصًا تابعًا للفئات المحددة."
+                    }
+                }
+            }
+        },
+        "provider.onboarding.catalog.empty": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "لا توجد فئات متاحة حاليًا."
+                    }
+                }
+            }
+        },
+        "provider.onboarding.areas.title": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "مناطق العمل"
+                    }
+                }
+            }
+        },
+        "provider.onboarding.step.4": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "الخطوة 4 من 5"
+                    }
+                }
+            }
+        },
+        "provider.onboarding.city.label": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "المدينة"
+                    }
+                }
+            }
+        },
+        "provider.onboarding.areas.required": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "اختر منطقة عمل واحدة على الأقل."
+                    }
+                }
+            }
+        },
+        "provider.onboarding.areas.empty": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "لا توجد مناطق مفعلة لهذه المدينة."
+                    }
+                }
+            }
+        },
+        "provider.onboarding.availability.note": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "في المرحلة الأولى تظهر للإدارة عند تفعيل متاح الآن، ولا توجد ورديات."
+                    }
+                }
+            }
+        },
+        "provider.onboarding.payout.title": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "استلام المستحقات"
+                    }
+                }
+            }
+        },
+        "provider.onboarding.step.5": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "الخطوة 5 من 5"
+                    }
+                }
+            }
+        },
+        "provider.onboarding.payout.method.required": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "اختر طريقة استلام المستحقات."
+                    }
+                }
+            }
+        },
+        "provider.onboarding.payout.details.required": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "أدخل بيانات طريقة الاستلام."
+                    }
+                }
+            }
+        },
+        "provider.onboarding.summary": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "ملخص طلب الانضمام"
+                    }
+                }
+            }
+        },
+        "provider.onboarding.summary.categories": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "الفئات: %1$s"
+                    }
+                }
+            }
+        },
+        "provider.onboarding.summary.specialties": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "التخصصات: %1$s"
+                    }
+                }
+            }
+        },
+        "provider.onboarding.summary.areas": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "المناطق: %1$s"
+                    }
+                }
+            }
+        },
+        "provider.onboarding.summary.documents": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "المستندات: %1$s"
+                    }
+                }
+            }
+        },
+        "provider.onboarding.review.note": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "سيُراجع فريق بريمو بياناتك ومستنداتك قبل التفعيل."
+                    }
+                }
+            }
+        },
+        "provider.application.status.title": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "حالة طلب الانضمام"
+                    }
+                }
+            }
+        },
+        "provider.application.pending": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "طلبك قيد المراجعة"
+                    }
+                }
+            }
+        },
+        "provider.application.pending.body": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "سنخبرك فور اكتمال مراجعة البيانات والمستندات."
+                    }
+                }
+            }
+        },
+        "provider.application.rejected": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "الطلب يحتاج تعديلًا"
+                    }
+                }
+            }
+        },
+        "provider.application.rejected.body": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "راجع السبب وعدّل بياناتك ثم أرسل الطلب مرة أخرى."
+                    }
+                }
+            }
+        },
+        "provider.application.active": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "تم تفعيل وضع الفني"
+                    }
+                }
+            }
+        },
+        "provider.application.active.body": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "يمكنك الآن فتح واجهة الفني وإدارة الطلبات."
+                    }
+                }
+            }
+        },
+        "provider.application.suspended": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "وضع الفني موقوف مؤقتًا"
+                    }
+                }
+            }
+        },
+        "provider.application.suspended.body": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "راجع سبب الإيقاف أو تواصل مع الدعم."
+                    }
+                }
+            }
+        },
+        "provider.application.not_editable": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "تغيّرت حالة الطلب. أعد تحميلها قبل المتابعة."
+                    }
+                }
+            }
+        },
+        "action.start_provider_application": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "بدء طلب الانضمام"
+                    }
+                }
+            }
+        },
+        "action.submit_provider_application": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "إرسال طلب الانضمام"
+                    }
+                }
+            }
+        },
+        "action.resubmit_provider_application": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "تعديل وإعادة الإرسال"
+                    }
+                }
+            }
+        },
+        "action.open_provider_home": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "فتح وضع الفني"
+                    }
+                }
+            }
+        },
+        "provider.home.title": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "رئيسية الفني"
+                    }
+                }
+            }
+        },
+        "provider.home.available.title": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "متاح الآن"
+                    }
+                }
+            }
+        },
+        "provider.home.available.body": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "فعّلها لتظهر ضمن الفنيين المتاحين للتعيين من الإدارة."
+                    }
+                }
+            }
+        },
+        "provider.home.available.on_state": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "مفعّل"
+                    }
+                }
+            }
+        },
+        "provider.home.available.off_state": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "غير مفعّل"
+                    }
+                }
+            }
+        },
+        "provider.home.availability.saved": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "تم حفظ حالة الإتاحة."
+                    }
+                }
+            }
+        },
+        "provider.home.assigned.title": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "الطلب المعيّن"
+                    }
+                }
+            }
+        },
+        "provider.home.no_assignment.title": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "لا يوجد طلب معيّن الآن"
+                    }
+                }
+            }
+        },
+        "provider.home.no_assignment.body": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "سيظهر الطلب هنا فور تعيينه لك من الإدارة."
+                    }
+                }
+            }
+        },
+        "provider.home.order_number": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "طلب رقم %1$s"
+                    }
+                }
+            }
+        },
+        "provider.home.timing.now": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "الآن"
+                    }
+                }
+            }
+        },
+        "action.open_assigned_order": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "فتح تفاصيل الطلب"
+                    }
+                }
+            }
+        },
+        "provider.order.title": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "الطلب النشط"
+                    }
+                }
+            }
+        },
+        "provider.order.customer.title": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "العميل"
+                    }
+                }
+            }
+        },
+        "provider.order.summary.title": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "تفاصيل الطلب"
+                    }
+                }
+            }
+        },
+        "provider.order.trip.not_ready": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "يمكن بدء التحرك عند دخول وقت السماح للموعد."
+                    }
+                }
+            }
+        },
+        "provider.order.location.required": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "فعّل صلاحية الموقع لإرسال موقعك وتأكيد الوصول."
+                    }
+                }
+            }
+        },
+        "provider.order.address": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "العنوان"
+                    }
+                }
+            }
+        },
+        "provider.order.timing": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "الموعد"
+                    }
+                }
+            }
+        },
+        "provider.order.service": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "الخدمة"
+                    }
+                }
+            }
+        },
+        "provider.order.number": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "رقم الطلب"
+                    }
+                }
+            }
+        },
+        "provider.order.customer.rating": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "تقييم العميل %1$s"
+                    }
+                }
+            }
+        },
+        "provider.price_guide.title": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "دليل سعر المصنعية"
+                    }
+                }
+            }
+        },
+        "provider.price_guide.range": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "من %1$s إلى %2$s جنيه"
+                    }
+                }
+            }
+        },
+        "provider.price_guide.body": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "اكتب سعر التنفيذ بعد المعاينة داخل النطاق الإرشادي."
+                    }
+                }
+            }
+        },
+        "provider.price_guide.other_review": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "نوع المشكلة «مشكلة أخرى» بلا نطاق إلزامي، وسيُعلّم السعر للإدارة للمراجعة."
+                    }
+                }
+            }
+        },
+        "provider.proposal.title": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "إضافة مقترح سعر"
+                    }
+                }
+            }
+        },
+        "provider.proposal.type": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "نوع المقترح"
+                    }
+                }
+            }
+        },
+        "provider.proposal.amount": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "المبلغ"
+                    }
+                }
+            }
+        },
+        "provider.proposal.reason": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "تفاصيل المقترح"
+                    }
+                }
+            }
+        },
+        "provider.proposal.outside_reason": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "سبب السعر خارج الدليل"
+                    }
+                }
+            }
+        },
+        "provider.proposal.amount.invalid": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "أدخل مبلغًا أكبر من صفر."
+                    }
+                }
+            }
+        },
+        "provider.proposal.reason.invalid": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "اكتب تفاصيل بين 5 و300 حرف."
+                    }
+                }
+            }
+        },
+        "provider.proposal.outside_reason.invalid": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "اكتب سببًا واضحًا بين 10 و300 حرف."
+                    }
+                }
+            }
+        },
+        "provider.proposal.photo": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "صورة توضيحية أو فاتورة"
+                    }
+                }
+            }
+        },
+        "provider.proposal.photo.add": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "إضافة صورة"
+                    }
+                }
+            }
+        },
+        "provider.proposal.pending": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "يوجد مقترح بانتظار قرار العميل؛ لا يمكن إضافة مقترح أو إنهاء العمل الآن."
+                    }
+                }
+            }
+        },
+        "provider.proposal.success": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "تم إرسال المقترح للعميل."
+                    }
+                }
+            }
+        },
+        "provider.unable.title": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "تعذّر إكمال الطلب"
+                    }
+                }
+            }
+        },
+        "provider.back_out.title": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "الاعتذار عن الطلب"
+                    }
+                }
+            }
+        },
+        "provider.no_show.title": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "العميل غير موجود"
+                    }
+                }
+            }
+        },
+        "provider.unable.reason": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "اختر السبب"
+                    }
+                }
+            }
+        },
+        "provider.unable.note": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "اكتب التفاصيل"
+                    }
+                }
+            }
+        },
+        "provider.unable.reason.required": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "اختر سببًا من القائمة."
+                    }
+                }
+            }
+        },
+        "provider.unable.note.invalid": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "اكتب تفاصيل بين 5 و500 حرف."
+                    }
+                }
+            }
+        },
+        "provider.no_show.confirm": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "تأكد من الانتظار في الموقع للمدة المحددة قبل تسجيل عدم وجود العميل."
+                    }
+                }
+            }
+        },
+        "provider.no_show.not_ready": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "لم تنتهِ مدة الانتظار المطلوبة بعد."
+                    }
+                }
+            }
+        },
+        "provider.unable.confirm": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "تأكيد الإجراء"
+                    }
+                }
+            }
+        },
+        "provider.payment.summary": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "ملخص التحصيل"
+                    }
+                }
+            }
+        },
+        "provider.payment.waiting": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "بانتظار إتمام الدفع من العميل. لا تسجل استلامًا نقديًا."
+                    }
+                }
+            }
+        },
+        "provider.payment.method": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "طريقة الدفع"
+                    }
+                }
+            }
+        },
+        "action.complete_inspection_only.free": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "إنهاء بلا تنفيذ (بدون أي مبلغ)"
+                    }
+                }
+            }
+        },
+        "action.open_earnings": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "المستحقات"
+                    }
+                }
+            }
+        },
+        "action.open_provider_profile": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "حسابي"
+                    }
+                }
+            }
+        },
+        "action.open_messages": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "الرسائل"
+                    }
+                }
+            }
+        },
+        "action.update_provider_profile": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "حفظ التعديلات"
+                    }
+                }
+            }
+        },
+        "action.add_portfolio_item": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "إضافة عمل"
+                    }
+                }
+            }
+        },
+        "action.delete_portfolio_item": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "حذف العمل"
+                    }
+                }
+            }
+        },
+        "action.contact_support": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "التواصل مع الدعم"
+                    }
+                }
+            }
+        },
+        "provider.rating.title": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "تقييم العميل"
+                    }
+                }
+            }
+        },
+        "provider.rating.label": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "كيف كانت تجربتك مع العميل؟"
+                    }
+                }
+            }
+        },
+        "provider.rating.notice": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "التقييم مرة واحدة ولا يمكن تعديله بعد الإرسال."
+                    }
+                }
+            }
+        },
+        "provider.rating.submit": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "إرسال التقييم"
+                    }
+                }
+            }
+        },
+        "provider.rating.success": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "تم إرسال تقييم العميل."
+                    }
+                }
+            }
+        },
+        "provider.rating.unavailable": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "انتهت مهلة التقييم أو سبق إرسال التقييم."
+                    }
+                }
+            }
+        },
+        "provider.rating.required": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "اختر تقييمًا من نجمة إلى خمس نجوم."
+                    }
+                }
+            }
+        },
+        "provider.earnings.title": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "المستحقات"
+                    }
+                }
+            }
+        },
+        "provider.earnings.balance": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "الرصيد المحسوب"
+                    }
+                }
+            }
+        },
+        "provider.earnings.available": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "المتاح للتسوية"
+                    }
+                }
+            }
+        },
+        "provider.earnings.pending": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "المعلّق"
+                    }
+                }
+            }
+        },
+        "provider.earnings.employee.info": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "الرصيد السالب هو النقدية المطلوب توريدها، والموجب هو قيمة الخامات التي تردها المنصة."
+                    }
+                }
+            }
+        },
+        "provider.earnings.empty": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "لا توجد حركات مالية حتى الآن."
+                    }
+                }
+            }
+        },
+        "provider.profile.experience": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "سنوات الخبرة"
+                    }
+                }
+            }
+        },
+        "provider.profile.bio": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "النبذة"
+                    }
+                }
+            }
+        },
+        "provider.profile.categories": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "الفئات"
+                    }
+                }
+            }
+        },
+        "provider.profile.specialties": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "التخصصات"
+                    }
+                }
+            }
+        },
+        "provider.profile.areas": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "مناطق العمل"
+                    }
+                }
+            }
+        },
+        "provider.profile.read_only": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "تغيير الفئات أو الهوية أو بيانات الاستلام يتم عن طريق الدعم."
+                    }
+                }
+            }
+        },
+        "provider.profile.portfolio.caption": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "وصف العمل (اختياري)"
+                    }
+                }
+            }
+        },
+        "provider.profile.portfolio.add": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "إضافة صورة للمعرض"
+                    }
+                }
+            }
+        },
+        "provider.profile.portfolio.delete.title": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "حذف صورة العمل؟"
+                    }
+                }
+            }
+        },
+        "provider.profile.portfolio.delete.body": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "سيتم حذف الصورة نهائيًا من معرض أعمالك."
+                    }
+                }
+            }
+        },
+        "provider.profile.portfolio.full": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "وصل معرض الأعمال للحد الأقصى: 20 صورة."
+                    }
+                }
+            }
+        },
+        "provider.profile.saved": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "تم حفظ تعديلات الملف."
+                    }
+                }
+            }
+        },
+        "provider.profile.name": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "بيانات الملف"
+                    }
+                }
+            }
+        },
+        "provider.market.request.title": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "تفاصيل الطلب المتاح"
+                    }
+                }
+            }
+        },
+        "provider.market.request.customer": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "العميل"
+                    }
+                }
+            }
+        },
+        "provider.market.request.details": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "تفاصيل الطلب"
+                    }
+                }
+            }
+        },
+        "provider.market.request.conditions": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "التوقيت والتسعير"
+                    }
+                }
+            }
+        },
+        "provider.market.request.media": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "وسائط الطلب"
+                    }
+                }
+            }
+        },
+        "provider.market.request.no_media": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "لم يرفق العميل وسائط."
+                    }
+                }
+            }
+        },
+        "provider.market.request.media.photo": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "صورة %1$d"
+                    }
+                }
+            }
+        },
+        "provider.market.request.media.video": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "فيديو %1$d"
+                    }
+                }
+            }
+        },
+        "provider.market.request.media.audio": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "تسجيل صوتي %1$d"
+                    }
+                }
+            }
+        },
+        "provider.market.request.unavailable": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "هذا الطلب لم يعد متاحًا لتقديم عرض."
+                    }
+                }
+            }
+        },
+        "provider.market.requests.title": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "الطلبات المتاحة"
+                    }
+                }
+            }
+        },
+        "provider.market.requests.empty": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "لا توجد طلبات مناسبة متاحة الآن."
+                    }
+                }
+            }
+        },
+        "provider.offer.title": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "تقديم عرض"
+                    }
+                }
+            }
+        },
+        "provider.offer.summary": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "ملخص الطلب"
+                    }
+                }
+            }
+        },
+        "provider.offer.price": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "السعر"
+                    }
+                }
+            }
+        },
+        "provider.offer.price.invalid": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "أدخل سعرًا لا يقل عن الحد الأدنى المعروض."
+                    }
+                }
+            }
+        },
+        "provider.offer.eta": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "وقت الوصول"
+                    }
+                }
+            }
+        },
+        "provider.offer.eta.required": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "اختر وقت الوصول المتوقع."
+                    }
+                }
+            }
+        },
+        "provider.offer.deductible": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "خصم رسوم المعاينة"
+                    }
+                }
+            }
+        },
+        "provider.offer.deductible.required": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "حدد هل تُخصم رسوم المعاينة من المصنعية."
+                    }
+                }
+            }
+        },
+        "provider.offer.includes": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "يشمل العرض"
+                    }
+                }
+            }
+        },
+        "provider.offer.includes.invalid": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "اكتب ما يشمله العرض في 150 حرفًا أو أقل."
+                    }
+                }
+            }
+        },
+        "provider.offer.note": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "ملاحظة (اختياري)"
+                    }
+                }
+            }
+        },
+        "provider.offer.note.invalid": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "الملاحظة يجب ألا تتجاوز 300 حرف."
+                    }
+                }
+            }
+        },
+        "provider.offer.note.masking": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "تُحجب أرقام الهاتف والروابط تلقائيًا."
+                    }
+                }
+            }
+        },
+        "provider.offer.net": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "صافي لك: %1$s جنيه"
+                    }
+                }
+            }
+        },
+        "provider.offer.submit": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "إرسال العرض"
+                    }
+                }
+            }
+        },
+        "provider.offer.success": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "تم إرسال عرضك للعميل."
+                    }
+                }
+            }
+        },
+        "provider.offers.title": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "عروضي"
+                    }
+                }
+            }
+        },
+        "provider.offers.empty.title": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "لا توجد عروض بعد"
+                    }
+                }
+            }
+        },
+        "provider.offers.empty.body": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "عروضك المقدمة والمسحوبة والمختارة ستظهر هنا."
+                    }
+                }
+            }
+        },
+        "provider.offers.withdraw.title": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "سحب العرض؟"
+                    }
+                }
+            }
+        },
+        "provider.offers.withdraw.body": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "لن يستطيع العميل اختيار هذا العرض بعد سحبه."
+                    }
+                }
+            }
+        },
+        "provider.offers.withdraw.action": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "تأكيد السحب"
+                    }
+                }
+            }
+        },
+        "provider.offers.withdraw.success": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "تم سحب العرض."
+                    }
+                }
+            }
+        },
+        "provider.offers.withdraw.changed": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "تغيّرت حالة العرض؛ تم تحديث القائمة."
+                    }
+                }
+            }
+        },
+        "provider.offers.card.title": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "طلب #%1$s — %2$s"
+                    }
+                }
+            }
+        },
+        "provider.offers.card.detail": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "%1$s · %2$s جنيه · صافي %3$s جنيه"
+                    }
+                }
+            }
+        },
+        "action.open_available_requests": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "عرض الطلبات المتاحة"
+                    }
+                }
+            }
+        },
+        "action.open_my_offers": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "عروضي"
+                    }
+                }
+            }
+        },
+        "action.open_available_request": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "فتح الطلب"
+                    }
+                }
+            }
+        },
+        "notifications.permission.off": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "الإشعارات متوقفة على هذا الجهاز. فعّلها لتصلك تحديثات طلباتك فورًا."
+                    }
+                }
+            }
+        },
+        "action.open_settings": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "فتح الإعدادات"
+                    }
+                }
+            }
+        },
+        "action.open_notifications": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "الإشعارات"
+                    }
+                }
+            }
+        },
+        "action.open_notifications.count": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "الإشعارات (%1$d غير مقروء)"
+                    }
+                }
+            }
+        },
+        "account.rating_reminders": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "تذكير التقييم"
+                    }
+                }
+            }
+        },
+        "account.rating_reminders.body": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "تذكير واحد بعد اكتمال الطلب إن لم تقيّم. باقي الإشعارات تشغيلية ولا تُوقف."
                     }
                 }
             }

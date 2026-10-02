@@ -31,6 +31,9 @@ return Application::configure(basePath: dirname(__DIR__))
             'webhooks/fawry',
         ]);
 
+        // لا توجد واجهة ويب للعملاء؛ مسارات الويب المحمية كلها للوحة الإدارة.
+        $middleware->redirectGuestsTo(fn () => route('filament.admin.auth.login'));
+
         $middleware->api(append: [
             ResolveAppMode::class,
             EnsureIdempotency::class,

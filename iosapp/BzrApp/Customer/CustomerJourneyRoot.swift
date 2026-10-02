@@ -6,6 +6,7 @@ import UIKit
 struct CustomerJourneyRoot: View {
     @Bindable var viewModel: CustomerViewModel
     let onLogout: () -> Void
+    let onOpenProvider: () -> Void
     @Environment(\.openURL) private var openURL
 
     var body: some View {
@@ -15,26 +16,22 @@ struct CustomerJourneyRoot: View {
             case "SCR-C03":
                 C03ProblemView(
                     state: viewModel.state,
-                    onProblemSelect: {
-                        viewModel.show(
-                            screen: "SCR-C03",
-                            input: [
-                                "event": .text("validate"), "problem_type_id": .text("selected"),
-                                "description": .text(""),
-                            ])
-                    }, onOpen: open)
-            case "SCR-C04": C04TimingView(state: viewModel.state, onOpen: open)
+                    onCategorySelect: viewModel.selectCategory,
+                    onProblemSelect: viewModel.selectProblem,
+                    onDescriptionChange: viewModel.updateProblemDescription,
+                    onOpen: open)
+            case "SCR-C04":
+                C04TimingView(
+                    state: viewModel.state, onOpen: open,
+                    onTimingSelect: viewModel.selectTiming,
+                    onMaterialSelect: viewModel.selectMaterial,
+                    onPricingSelect: viewModel.selectPricing,
+                    onBudgetChange: viewModel.updateBudget)
             case "SCR-C05":
                 C05ReviewView(
                     state: viewModel.state,
                     onTermsChange: {
-                        viewModel.show(
-                            screen: "SCR-C05",
-                            input: [
-                                "event": .text("validate"),
-                                "operating_mode": .text(viewModel.state.showPricing ? "marketplace" : "staff"),
-                                "terms_accepted": .bool(true),
-                            ])
+                        viewModel.setTermsAccepted(viewModel.state.termsError != nil)
                     },
                     onPublish: { Task { await viewModel.publishDraft() } })
             case "SCR-C06":
@@ -48,17 +45,40 @@ struct CustomerJourneyRoot: View {
                             ]),
                         onAction: { action in Task { await viewModel.noOffersAction(action) } })
                 } else {
-                    C06OffersView(state: viewModel.state)
+                    C06OffersView(
+                        state: viewModel.state,
+                        onAction: { action in
+                            if action == "cancel" {
+                                viewModel.openCancellation()
+                            } else {
+                                Task { await viewModel.noOffersAction(action) }
+                            }
+                        },
+                        onSort: { index in Task { await viewModel.selectOffersSort(index: index) } },
+                        onSelect: viewModel.openOffer,
+                        onProvider: { index in Task { await viewModel.openOfferProvider(index: index) } })
                 }
             case "SCR-C07":
                 C07ProviderView(state: viewModel.state) { action in
-                    if action == "report_provider" { viewModel.openProviderReport() }
+                    if action == "report_provider" {
+                        viewModel.openProviderReport()
+                    } else if action == "accept_offer" {
+                        viewModel.openCurrentOffer()
+                    }
                 }
-            case "SCR-C08": C08OfferDetailsView(state: viewModel.state)
+            case "SCR-C08":
+                C08OfferDetailsView(
+                    state: viewModel.state,
+                    onAction: { action in
+                        if action == "accept_offer" {
+                            Task { await viewModel.confirmSelectedOffer() }
+                        }
+                    }, onPaymentSelect: viewModel.selectOfferPayment)
             case "SCR-C09": tracking
             case "SCR-C14":
                 C14AddressesView(
-                    state: viewModel.state, onSelect: viewModel.confirmAddress,
+                    state: viewModel.state,
+                    onSelect: { index in Task { await viewModel.confirmAddress(index: index) } },
                     onEdit: { index in Task { await viewModel.openEditAddress(index: index) } },
                     onDelete: viewModel.requestDeleteAddress,
                     onCancelDelete: viewModel.cancelDeleteAddress,
@@ -68,6 +88,7 @@ struct CustomerJourneyRoot: View {
                 C15AddressFormView(
                     state: viewModel.state, onAreaSelect: viewModel.selectArea,
                     onFieldChange: viewModel.updateAddressField,
+                    onLocationChange: viewModel.updateAddressLocation,
                     onDefaultChange: viewModel.toggleAddressDefault,
                     onSave: { Task { await viewModel.saveAddress() } })
             case "SCR-C16":
@@ -85,6 +106,9 @@ struct CustomerJourneyRoot: View {
                 C17MediaView(
                     state: viewModel.state,
                     onDelete: { index in Task { await viewModel.deleteMedia(index: index) } },
+                    onRetry: { index in Task { await viewModel.retryMedia(index: index) } },
+                    onUpload: { upload, kind in Task { await viewModel.uploadMedia(upload, kind: kind) } },
+                    onRecordingChange: viewModel.setMediaRecording,
                     onDone: viewModel.completeMediaSelection)
             case "SCR-C18":
                 C18MessagesView(
@@ -166,7 +190,8 @@ struct CustomerJourneyRoot: View {
             case "SCR-C32":
                 C32NotificationsView(
                     state: viewModel.state,
-                    onOpen: { index in Task { await viewModel.openNotification(index: index) } })
+                    onOpen: { index in Task { await viewModel.openNotification(index: index) } },
+                    onOpenSettings: openNotificationSettings)
             case "SCR-C33":
                 C33AccountSettingsView(
                     state: viewModel.state,
@@ -179,20 +204,44 @@ struct CustomerJourneyRoot: View {
                                 if viewModel.accountDeleted { onLogout() }
                             }
                         }
-                    }, onFieldChange: viewModel.updateAccountField)
+                    }, onFieldChange: viewModel.updateAccountField,
+                    onRatingRemindersChange: { enabled in
+                        Task { await viewModel.setRatingReminders(enabled) }
+                    })
             case "SCR-C34": C34TermsView(state: viewModel.state)
             case "SCR-C35":
                 C35NoOffersView(
                     state: viewModel.state,
                     onAction: { action in Task { await viewModel.noOffersAction(action) } })
-            default: C01HomeView(state: viewModel.state, onOpen: open)
+            case "SCR-C36":
+                C36AssignmentView(
+                    state: viewModel.state,
+                    onAction: { action in
+                        if action == "cancel" {
+                            viewModel.openCancellation()
+                        } else {
+                            Task { await viewModel.noOffersAction(action) }
+                        }
+                    })
+            default:
+                C01HomeView(
+                    state: viewModel.state, onOpen: open,
+                    onCategorySelect: viewModel.selectCategory,
+                    onOrderSelect: { index in Task { await viewModel.selectOrder(index: index) } })
             }
         }
+        .environment(\.customerBack) { Task { await viewModel.goBack() } }
         .task { await viewModel.loadHome() }
     }
 
     private var tracking: some View {
-        C09TrackingView(state: viewModel.state) { action in
+        C09TrackingView(
+            state: viewModel.state,
+            tracking: viewModel.trackingPayload,
+            destinationLatitude: viewModel.orderDestinationLatitude,
+            destinationLongitude: viewModel.orderDestinationLongitude,
+            onRefreshTracking: viewModel.refreshTracking
+        ) { action in
             if action == "cancel" {
                 viewModel.openCancellation()
             } else if ["approve_proposal", "reject_proposal"].contains(action) {
@@ -228,9 +277,11 @@ struct CustomerJourneyRoot: View {
     // swiftlint:disable:next cyclomatic_complexity
     private func open(_ screen: String) {
         switch screen {
+        case "SCR-P01": onOpenProvider()
         case "SCR-C09": Task { await viewModel.openCurrentOrder() }
         case "SCR-C10": onLogout()
-        case "SCR-C14": Task { await viewModel.loadAddresses(selectionMode: viewModel.state.screen == "SCR-C04") }
+        case "SCR-C14":
+            Task { await viewModel.loadAddresses(selectionMode: viewModel.state.screen == "SCR-C04") }
         case "SCR-C16":
             Task {
                 await viewModel.loadSlots(
@@ -238,11 +289,15 @@ struct CustomerJourneyRoot: View {
                     evening: bzrString("format.evening.short"))
             }
         case "SCR-C17": viewModel.openMedia()
+        case "SCR-C03": viewModel.openProblem()
         case "SCR-C18": Task { await viewModel.loadConversations() }
         case "SCR-C25": Task { await viewModel.loadOrders(tabIndex: 0) }
         case "SCR-C29": Task { await viewModel.loadHelp() }
         case "SCR-C32": Task { await viewModel.loadNotifications() }
         case "SCR-C33": Task { await viewModel.loadAccount() }
+        case "SCR-C02": Task { await viewModel.loadAccountSummary() }
+        case "SCR-C04": viewModel.openTiming()
+        case "SCR-C05": viewModel.openReview()
         case "SCR-C34": Task { await viewModel.loadTerms() }
         default: viewModel.show(screen: screen, input: defaultInput(screen))
         }
@@ -250,21 +305,31 @@ struct CustomerJourneyRoot: View {
 
     private func defaultInput(_ screen: String) -> [String: CustomerInputValue] {
         switch screen {
-        case "SCR-C03": ["event": .text("validate"), "problem_type_id": .text(""), "description": .text("")]
-        case "SCR-C04": ["event": .text("validate"), "operating_mode": .text("marketplace"), "timing_type": .text("now"), "now_available": .bool(true), "address_id": .text("12")]
-        case "SCR-C05": ["event": .text("validate"), "operating_mode": .text("marketplace"), "terms_accepted": .bool(false)]
-        case "SCR-C09": ["event": .text("loaded"), "status": .text("CONFIRMED"), "display_status": .text(""), "stepper": .bool(true)]
-        case "SCR-C14": ["event": .text("loaded"), "selection_mode": .bool(true), "address_labels": .strings([]), "address_details": .strings([])]
-        case "SCR-C16": ["event": .text("loaded"), "day_labels": .strings([]), "slot_labels": .strings([])]
-        case "SCR-C17": ["event": .text("validate"), "media_kinds": .strings([]), "media_states": .strings([])]
+        case "SCR-C03":
+            ["event": .text("validate"), "problem_type_id": .text(""), "description": .text("")]
+        case "SCR-C09":
+            [
+                "event": .text("loaded"), "status": .text("CONFIRMED"), "display_status": .text(""),
+                "stepper": .bool(true),
+            ]
+        case "SCR-C14":
+            [
+                "event": .text("loaded"), "selection_mode": .bool(true), "address_labels": .strings([]),
+                "address_details": .strings([]),
+            ]
+        case "SCR-C16":
+            ["event": .text("loaded"), "day_labels": .strings([]), "slot_labels": .strings([])]
+        case "SCR-C17":
+            ["event": .text("validate"), "media_kinds": .strings([]), "media_states": .strings([])]
         default: ["event": .text("loaded")]
         }
     }
 
     private var slotDayLabels: [String] {
         [
-            "slot.day.today", "slot.day.tomorrow", "slot.day.saturday", "slot.day.sunday",
-            "slot.day.monday", "slot.day.tuesday", "slot.day.wednesday", "slot.day.thursday",
+            // Today, tomorrow, then Monday…Sunday; the view model names each date from these (6ب).
+            "slot.day.today", "slot.day.tomorrow", "slot.day.monday", "slot.day.tuesday", "slot.day.wednesday",
+            "slot.day.thursday", "slot.day.friday", "slot.day.saturday", "slot.day.sunday",
         ].map(bzrString)
     }
 }

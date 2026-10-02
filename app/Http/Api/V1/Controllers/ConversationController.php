@@ -21,7 +21,7 @@ final class ConversationController
 
         $conversations = Conversation::query()
             ->with([
-                'order.category', 'order.problemType', 'order.area', 'providerProfile.user',
+                'order.category', 'order.problemType', 'order.area', 'providerProfile.user', 'customer',
                 'messages' => fn ($query) => $query->reorder()->latest('id')->limit(1),
             ])
             ->where(fn ($query) => $query
@@ -57,7 +57,7 @@ final class ConversationController
 
         return new JsonResponse([
             'data' => $this->conversation(
-                $conversation->load(['order.category', 'order.problemType', 'order.area', 'providerProfile.user']),
+                $conversation->load(['order.category', 'order.problemType', 'order.area', 'providerProfile.user', 'customer']),
                 $request->user()->getKey(),
             ),
         ], 201);
@@ -67,7 +67,7 @@ final class ConversationController
     {
         $service->assertParticipant($conversation, $request->user());
 
-        $conversation->load(['order.category', 'order.problemType', 'order.area', 'providerProfile.user']);
+        $conversation->load(['order.category', 'order.problemType', 'order.area', 'providerProfile.user', 'customer']);
         $messages = $conversation->messages()->with('media')->reorder()->latest('id')->paginate(50);
 
         return new JsonResponse([
@@ -117,6 +117,12 @@ final class ConversationController
                 'name' => $conversation->providerProfile?->user?->name,
                 'avatar_path' => $conversation->providerProfile?->user?->avatar_path,
                 'is_verified' => $conversation->providerProfile?->isVerified() ?? false,
+            ],
+            'customer' => [
+                'id' => $conversation->customer_id,
+                'name' => $conversation->customer?->name,
+                'avatar_path' => $conversation->customer?->avatar_path,
+                'rating_avg' => $conversation->customer?->customer_rating_avg,
             ],
             'status' => $conversation->status->value,
             'last_message' => $conversation->relationLoaded('messages') && $conversation->messages->isNotEmpty()

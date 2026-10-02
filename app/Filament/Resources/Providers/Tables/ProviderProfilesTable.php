@@ -6,8 +6,8 @@ namespace App\Filament\Resources\Providers\Tables;
 
 use App\Modules\Providers\Enums\EmploymentType;
 use App\Modules\Providers\Enums\ProviderStatus;
-use App\Modules\Providers\Models\ProviderProfile;
 use App\Modules\Settings\Services\FeatureGate;
+use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
@@ -62,6 +62,7 @@ final class ProviderProfilesTable
                         ->mapWithKeys(fn (EmploymentType $e) => [$e->value => $e->getLabel()])
                         ->all()),
             ])
+            ->recordActions([ViewAction::make()->label('مراجعة')])
             ->defaultSort('id', 'desc');
     }
 }

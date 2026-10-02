@@ -101,6 +101,7 @@ public enum DesignSize {
     public static let tileIcon: CGFloat = 40
     public static let chipHeight: CGFloat = 40
     public static let sortChipHeight: CGFloat = 36
+    public static let touchTargetMin: CGFloat = 48
     public static let fieldHeight: CGFloat = 48
     public static let currencyBoxWidth: CGFloat = 50
     public static let textAreaHeight: CGFloat = 90
@@ -172,4 +173,4 @@ public enum DesignFont {
     public static let bold = "Cairo-Bold"
     public static let files = ["Cairo-Regular", "Cairo-Medium", "Cairo-SemiBold", "Cairo-Bold"]
 }
-public enum DesignMeta { public static let tokensSha256 = "9b178b5f5254e044de52542bed6e4ef54c61214220bfcb963120801d4a68510d" }
+public enum DesignMeta { public static let tokensSha256 = "a7b2a986144c2f52fdcc748399f7bb18be95b980bc55c0abc1362f84e1281a89" }

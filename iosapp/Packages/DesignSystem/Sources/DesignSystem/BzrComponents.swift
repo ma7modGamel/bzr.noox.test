@@ -1,3 +1,4 @@
+// swiftlint:disable file_length
 import SwiftUI
 import UIKit
 
@@ -8,6 +9,7 @@ import UIKit
 public enum ButtonVisualState { case normal, pressed, disabled, loading }
 public enum SelectionState { case selected, unselected, disabled }
 public enum FieldVisualState: CaseIterable { case empty, filled, focused, error, disabled }
+public enum FieldImeAction { case next, done }
 public enum OfferVariant { case execution, inspection, scheduled }
 public enum StepState { case done, active, pending, onHold }
 public enum MediaState { case uploading, uploaded, failed }
@@ -34,7 +36,9 @@ private struct HorizontalLine: View {
 
 private struct VerticalLine: View {
     let height: CGFloat
-    var body: some View { Rectangle().fill(DesignColors.border).frame(width: DesignBorder.width, height: height) }
+    var body: some View {
+        Rectangle().fill(DesignColors.border).frame(width: DesignBorder.width, height: height)
+    }
 }
 
 /// Deterministic arc instead of an animated spinner, so snapshots always show the loading state.
@@ -53,8 +57,8 @@ private struct ProgressArc: View {
     }
 }
 
-private extension View {
-    func selectionFrame(_ state: SelectionState, radius: CGFloat) -> some View {
+extension View {
+    fileprivate func selectionFrame(_ state: SelectionState, radius: CGFloat) -> some View {
         let selected = state == .selected
         return
             self
@@ -77,7 +81,10 @@ public struct AppTopBar: View {
     private let onBack: () -> Void
     private let onAction: () -> Void
 
-    public init(title: String, actionIcon: BzrIconKey? = nil, actionLabel: String? = nil, onBack: @escaping () -> Void = {}, onAction: @escaping () -> Void = {}) {
+    public init(
+        title: String, actionIcon: BzrIconKey? = nil, actionLabel: String? = nil,
+        onBack: @escaping () -> Void = {}, onAction: @escaping () -> Void = {}
+    ) {
         self.title = title
         self.actionIcon = actionIcon
         self.actionLabel = actionLabel
@@ -102,9 +109,12 @@ public struct AppTopBar: View {
         .background(DesignColors.surface)
     }
 
-    private func iconButton(_ icon: BzrIconKey, label: String?, action: @escaping () -> Void) -> some View {
+    private func iconButton(_ icon: BzrIconKey, label: String?, action: @escaping () -> Void)
+        -> some View
+    {
         Button(action: action) {
-            BzrIcon(icon, label: label).frame(width: DesignSize.menuIconBox, height: DesignSize.menuIconBox)
+            BzrIcon(icon, label: label).frame(
+                width: DesignSize.menuIconBox, height: DesignSize.menuIconBox)
         }
         .buttonStyle(BzrPressStyle())
     }
@@ -116,7 +126,10 @@ public struct PrimaryButton: View {
     private let height: CGFloat
     private let onClick: () -> Void
 
-    public init(text: String, state: ButtonVisualState = .normal, height: CGFloat = DesignSize.primaryButtonHeight, onClick: @escaping () -> Void = {}) {
+    public init(
+        text: String, state: ButtonVisualState = .normal,
+        height: CGFloat = DesignSize.primaryButtonHeight, onClick: @escaping () -> Void = {}
+    ) {
         self.text = text
         self.state = state
         self.height = height
@@ -159,7 +172,9 @@ public struct SecondaryButton: View {
             BzrText(text, style: DesignType.button.colored(DesignColors.primary700), lineLimit: 1)
                 .frame(maxWidth: .infinity)
                 .frame(height: DesignSize.secondaryButtonHeight)
-                .bzrFrame(radius: DesignRadius.button, fill: DesignColors.surface, border: DesignColors.primary600, width: DesignBorder.width)
+                .bzrFrame(
+                    radius: DesignRadius.button, fill: DesignColors.surface, border: DesignColors.primary600,
+                    width: DesignBorder.width)
         }
         .buttonStyle(BzrPressStyle())
         .disabled(!enabled)
@@ -220,7 +235,9 @@ public struct IconSquareButton: View {
         Button(action: onClick) {
             BzrIcon(icon, label: label, tint: DesignColors.primary600)
                 .frame(width: DesignSize.chatSquareButtonW, height: DesignSize.chatSquareButtonH)
-                .bzrFrame(radius: DesignRadius.button, fill: DesignColors.surface, border: DesignColors.primary600, width: DesignBorder.width)
+                .bzrFrame(
+                    radius: DesignRadius.button, fill: DesignColors.surface, border: DesignColors.primary600,
+                    width: DesignBorder.width)
         }
         .buttonStyle(BzrPressStyle())
     }
@@ -231,13 +248,17 @@ public struct BottomNav: View {
     private let selectedIndex: Int
     private let onSelect: (Int) -> Void
 
-    public init(items: [(BzrIconKey, String)], selectedIndex: Int, onSelect: @escaping (Int) -> Void = { _ in }) {
+    public init(
+        items: [(BzrIconKey, String)], selectedIndex: Int, onSelect: @escaping (Int) -> Void = { _ in }
+    ) {
         self.items = items
         self.selectedIndex = selectedIndex
         self.onSelect = onSelect
     }
 
-    private func color(_ index: Int) -> Color { index == selectedIndex ? DesignColors.primary500 : DesignColors.slate400 }
+    private func color(_ index: Int) -> Color {
+        index == selectedIndex ? DesignColors.primary500 : DesignColors.slate400
+    }
 
     public var body: some View {
         VStack(spacing: 0) {
@@ -298,7 +319,10 @@ public struct DrawerMenu: View {
     private let actionState: ButtonVisualState
     private let onAction: () -> Void
 
-    public init(name: String, rating: String, verifiedLabel: String, rows: [(BzrIconKey, String)], action: String, onAction: @escaping () -> Void = {}) {
+    public init(
+        name: String, rating: String, verifiedLabel: String, rows: [(BzrIconKey, String)],
+        action: String, onAction: @escaping () -> Void = {}
+    ) {
         self.name = name
         self.rating = rating
         self.verifiedLabel = verifiedLabel
@@ -309,7 +333,8 @@ public struct DrawerMenu: View {
 
     public var body: some View {
         VStack(alignment: .leading, spacing: DesignSpace.s) {
-            ProviderHeader(name: name, rating: rating, services: nil, size: .large, verifiedLabel: verifiedLabel)
+            ProviderHeader(
+                name: name, rating: rating, services: nil, size: .large, verifiedLabel: verifiedLabel)
             Color.clear.frame(height: DesignSpace.s)
             ForEach(rows.indices, id: \.self) { index in
                 MenuRow(icon: rows[index].0, text: rows[index].1)
@@ -366,7 +391,8 @@ private struct StepCircle: View {
         let filledColor = state == .onHold ? DesignColors.star : DesignColors.primary600
         ZStack {
             Circle().fill(filled ? filledColor : DesignColors.surface)
-            Circle().strokeBorder(filled ? filledColor : DesignColors.border, lineWidth: DesignSize.controlStroke)
+            Circle().strokeBorder(
+                filled ? filledColor : DesignColors.border, lineWidth: DesignSize.controlStroke)
             switch state {
             case .done:
                 BzrIcon(.check, tint: DesignColors.onPrimary, size: DesignSize.iconSmall)
@@ -386,16 +412,28 @@ public struct SelectableTile: View {
     private let text: String
     private let icon: BzrIconKey
     private let state: SelectionState
+    private let categoryIcon: String?
 
-    public init(text: String, icon: BzrIconKey, state: SelectionState) {
+    /// `categoryIcon` is the `icon_path` file name from `/catalog`, drawn in its own two tones (DEC-059).
+    public init(text: String, icon: BzrIconKey, state: SelectionState, categoryIcon: String? = nil) {
         self.text = text
         self.icon = icon
         self.state = state
+        self.categoryIcon = categoryIcon
     }
 
     public var body: some View {
         VStack(spacing: DesignSpace.s) {
-            BzrIcon(icon, tint: state == .selected ? DesignColors.primary600 : DesignColors.navy800, size: DesignSize.tileIcon)
+            if let asset = categoryIcon.flatMap(CategoryIcons.asset) {
+                Image(asset, bundle: .module)
+                    .resizable()
+                    .frame(width: DesignSize.tileIcon, height: DesignSize.tileIcon)
+                    .accessibilityHidden(true)
+            } else {
+                BzrIcon(
+                    icon, tint: state == .selected ? DesignColors.primary600 : DesignColors.navy800,
+                    size: DesignSize.tileIcon)
+            }
             BzrText(text, alignment: .center, lineLimit: 1)
         }
         .padding(DesignSpace.s)
@@ -421,6 +459,12 @@ public struct SelectableChip: View {
             .padding(.horizontal, DesignSpace.m)
             .frame(height: height)
             .selectionFrame(state, radius: DesignRadius.chip)
+            .frame(minHeight: DesignSize.touchTargetMin)
+            .contentShape(Rectangle())
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel(text)
+            .accessibilityAddTraits(state == .selected ? [.isButton, .isSelected] : .isButton)
+            .disabled(state == .disabled)
     }
 }
 
@@ -438,9 +482,12 @@ public struct RadioCard: View {
     public var body: some View {
         HStack(spacing: DesignSpace.m) {
             ZStack {
-                Circle().strokeBorder(selected ? DesignColors.primary600 : DesignColors.slate300, lineWidth: DesignSize.controlStroke)
+                Circle().strokeBorder(
+                    selected ? DesignColors.primary600 : DesignColors.slate300,
+                    lineWidth: DesignSize.controlStroke)
                 if selected {
-                    Circle().fill(DesignColors.primary600).frame(width: DesignSize.radioDot, height: DesignSize.radioDot)
+                    Circle().fill(DesignColors.primary600).frame(
+                        width: DesignSize.radioDot, height: DesignSize.radioDot)
                 }
             }
             .frame(width: DesignSize.radio, height: DesignSize.radio)
@@ -468,9 +515,12 @@ public struct CheckRow: View {
     public var body: some View {
         HStack(spacing: DesignSpace.m) {
             ZStack {
-                RoundedRectangle(cornerRadius: DesignRadius.checkbox).fill(checked ? DesignColors.primary600 : DesignColors.surface)
+                RoundedRectangle(cornerRadius: DesignRadius.checkbox).fill(
+                    checked ? DesignColors.primary600 : DesignColors.surface)
                 RoundedRectangle(cornerRadius: DesignRadius.checkbox)
-                    .strokeBorder(checked ? DesignColors.primary600 : DesignColors.slate300, lineWidth: DesignSize.controlStroke)
+                    .strokeBorder(
+                        checked ? DesignColors.primary600 : DesignColors.slate300,
+                        lineWidth: DesignSize.controlStroke)
                 if checked {
                     BzrIcon(.check, tint: DesignColors.onPrimary, size: DesignSize.iconSmall)
                 }
@@ -479,7 +529,9 @@ public struct CheckRow: View {
             BzrText(text).frame(maxWidth: .infinity, alignment: .leading)
         }
         .padding(DesignSpace.m)
-        .bzrFrame(radius: DesignRadius.field, fill: checked ? DesignColors.primary50 : DesignColors.surface, border: DesignColors.border, width: DesignBorder.width)
+        .bzrFrame(
+            radius: DesignRadius.field, fill: checked ? DesignColors.primary50 : DesignColors.surface,
+            border: DesignColors.border, width: DesignBorder.width)
     }
 }
 
@@ -495,7 +547,8 @@ private struct FieldShell<Content: View>: View {
     let content: Content
 
     init(
-        label: String, state: FieldVisualState, focused: Bool, error: String?, optionalLabel: String?, height: CGFloat, topAligned: Bool, padding: EdgeInsets,
+        label: String, state: FieldVisualState, focused: Bool, error: String?, optionalLabel: String?,
+        height: CGFloat, topAligned: Bool, padding: EdgeInsets,
         @ViewBuilder content: () -> Content
     ) {
         self.label = label
@@ -539,7 +592,8 @@ private struct FieldShell<Content: View>: View {
                 radius: DesignRadius.field,
                 fill: DesignColors.surface,
                 border: borderColor,
-                width: effective == .error || effective == .focused ? DesignBorder.selectedWidth : DesignBorder.width
+                width: effective == .error || effective == .focused
+                    ? DesignBorder.selectedWidth : DesignBorder.width
             )
             if let error {
                 BzrText(error, style: DesignType.caption.colored(DesignColors.danger))
@@ -556,6 +610,8 @@ private struct FieldValue: View {
     let enabled: Bool
     let singleLine: Bool
     let onValueChange: ((String) -> Void)?
+    let accessibilityLabel: String
+    let imeAction: FieldImeAction
 
     var body: some View {
         Group {
@@ -564,10 +620,15 @@ private struct FieldValue: View {
                     if value.isEmpty {
                         BzrText(placeholder, style: DesignType.placeholder)
                     }
-                    TextField("", text: Binding(get: { value }, set: onValueChange), axis: singleLine ? .horizontal : .vertical)
-                        .font(.custom(DesignType.body.fontName, size: DesignType.body.size))
-                        .foregroundStyle(DesignType.body.color)
-                        .disabled(!enabled)
+                    TextField(
+                        "", text: Binding(get: { value }, set: onValueChange),
+                        axis: singleLine ? .horizontal : .vertical
+                    )
+                    .font(.custom(DesignType.body.fontName, size: DesignType.body.size))
+                    .foregroundStyle(DesignType.body.color)
+                    .accessibilityLabel(accessibilityLabel)
+                    .submitLabel(imeAction == .next ? .next : .done)
+                    .disabled(!enabled)
                 }
             } else {
                 BzrText(
@@ -589,10 +650,13 @@ public struct AppTextField: View {
     private let state: FieldVisualState
     private let error: String?
     private let optionalLabel: String?
+    private let imeAction: FieldImeAction
     private let onValueChange: ((String) -> Void)?
 
     public init(
-        label: String, placeholder: String, value: String, state: FieldVisualState, error: String? = nil, optionalLabel: String? = nil, onValueChange: ((String) -> Void)? = nil
+        label: String, placeholder: String, value: String, state: FieldVisualState,
+        error: String? = nil, optionalLabel: String? = nil,
+        imeAction: FieldImeAction = .next, onValueChange: ((String) -> Void)? = nil
     ) {
         self.label = label
         self.placeholder = placeholder
@@ -600,6 +664,7 @@ public struct AppTextField: View {
         self.state = state
         self.error = error
         self.optionalLabel = optionalLabel
+        self.imeAction = imeAction
         self.onValueChange = onValueChange
     }
 
@@ -609,8 +674,11 @@ public struct AppTextField: View {
             height: DesignSize.fieldHeight, topAligned: false,
             padding: EdgeInsets(top: 0, leading: DesignSpace.m, bottom: 0, trailing: DesignSpace.m)
         ) {
-            FieldValue(value: value, placeholder: placeholder, enabled: state != .disabled, singleLine: true, onValueChange: onValueChange)
-                .focused($focused)
+            FieldValue(
+                value: value, placeholder: placeholder, enabled: state != .disabled, singleLine: true,
+                onValueChange: onValueChange, accessibilityLabel: label, imeAction: imeAction
+            )
+            .focused($focused)
         }
     }
 }
@@ -626,7 +694,8 @@ public struct SecureTextField: View {
     private let onValueChange: ((String) -> Void)?
 
     public init(
-        label: String, placeholder: String, value: String, state: FieldVisualState, error: String? = nil, optionalLabel: String? = nil, onValueChange: ((String) -> Void)? = nil
+        label: String, placeholder: String, value: String, state: FieldVisualState,
+        error: String? = nil, optionalLabel: String? = nil, onValueChange: ((String) -> Void)? = nil
     ) {
         self.label = label
         self.placeholder = placeholder
@@ -655,7 +724,9 @@ public struct SecureTextField: View {
                             .disabled(state == .disabled)
                     }
                 } else {
-                    BzrText(value.isEmpty ? placeholder : String(repeating: "•", count: value.count), style: value.isEmpty ? DesignType.placeholder : DesignType.body)
+                    BzrText(
+                        value.isEmpty ? placeholder : String(repeating: "•", count: value.count),
+                        style: value.isEmpty ? DesignType.placeholder : DesignType.body)
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -676,7 +747,8 @@ public struct AmountField: View {
     private let onValueChange: ((String) -> Void)?
 
     public init(
-        label: String, placeholder: String, value: String, currency: String, state: FieldVisualState, error: String? = nil, optionalLabel: String? = nil,
+        label: String, placeholder: String, value: String, currency: String, state: FieldVisualState,
+        error: String? = nil, optionalLabel: String? = nil,
         onValueChange: ((String) -> Void)? = nil
     ) {
         self.label = label
@@ -693,10 +765,15 @@ public struct AmountField: View {
         FieldShell(
             label: label, state: state, focused: focused, error: error, optionalLabel: optionalLabel,
             height: DesignSize.fieldHeight, topAligned: false,
-            padding: EdgeInsets(top: DesignSpace.xs, leading: DesignSpace.m, bottom: DesignSpace.xs, trailing: DesignSpace.xs)
+            padding: EdgeInsets(
+                top: DesignSpace.xs, leading: DesignSpace.m, bottom: DesignSpace.xs,
+                trailing: DesignSpace.xs)
         ) {
-            FieldValue(value: value, placeholder: placeholder, enabled: state != .disabled, singleLine: true, onValueChange: onValueChange)
-                .focused($focused)
+            FieldValue(
+                value: value, placeholder: placeholder, enabled: state != .disabled, singleLine: true,
+                onValueChange: onValueChange, accessibilityLabel: label, imeAction: .next
+            )
+            .focused($focused)
             BzrText(currency)
                 .frame(width: DesignSize.currencyBoxWidth)
                 .frame(maxHeight: .infinity)
@@ -717,7 +794,8 @@ public struct TextAreaField: View {
     private let onValueChange: ((String) -> Void)?
 
     public init(
-        label: String, placeholder: String, value: String, state: FieldVisualState, error: String? = nil, optionalLabel: String? = nil, onValueChange: ((String) -> Void)? = nil
+        label: String, placeholder: String, value: String, state: FieldVisualState,
+        error: String? = nil, optionalLabel: String? = nil, onValueChange: ((String) -> Void)? = nil
     ) {
         self.label = label
         self.placeholder = placeholder
@@ -732,10 +810,14 @@ public struct TextAreaField: View {
         FieldShell(
             label: label, state: state, focused: focused, error: error, optionalLabel: optionalLabel,
             height: DesignSize.textAreaHeight, topAligned: true,
-            padding: EdgeInsets(top: DesignSpace.m, leading: DesignSpace.m, bottom: DesignSpace.m, trailing: DesignSpace.m)
+            padding: EdgeInsets(
+                top: DesignSpace.m, leading: DesignSpace.m, bottom: DesignSpace.m, trailing: DesignSpace.m)
         ) {
-            FieldValue(value: value, placeholder: placeholder, enabled: state != .disabled, singleLine: false, onValueChange: onValueChange)
-                .focused($focused)
+            FieldValue(
+                value: value, placeholder: placeholder, enabled: state != .disabled, singleLine: false,
+                onValueChange: onValueChange, accessibilityLabel: label, imeAction: .done
+            )
+            .focused($focused)
         }
     }
 }
@@ -748,7 +830,10 @@ public struct SummaryCard: View {
     private let editText: String?
     private let onEdit: () -> Void
 
-    public init(title: String, rows: [(BzrIconKey, String)], editText: String?, onEdit: @escaping () -> Void = {}) {
+    public init(
+        title: String, rows: [(BzrIconKey, String)], editText: String?,
+        onEdit: @escaping () -> Void = {}
+    ) {
         self.title = title
         self.rows = rows
         self.editText = editText
@@ -797,7 +882,10 @@ public struct Badge: View {
             if let icon {
                 BzrIcon(icon, tint: DesignColors.star, size: DesignSize.iconSmall)
             }
-            BzrText(text, style: DesignType.badge.colored(kind == .highlight ? DesignColors.badgeText : DesignColors.primary700), lineLimit: 1)
+            BzrText(
+                text,
+                style: DesignType.badge.colored(
+                    kind == .highlight ? DesignColors.badgeText : DesignColors.primary700), lineLimit: 1)
         }
         .padding(.horizontal, DesignSpace.s)
         .padding(.vertical, DesignSpace.xs)
@@ -826,7 +914,9 @@ private struct VerifiedAvatar: View {
             ZStack {
                 Circle().fill(DesignColors.primary500)
                 Circle().strokeBorder(DesignColors.surface, lineWidth: DesignSize.controlStroke)
-                BzrIcon(.shield, label: bzrString("a11y.verified"), tint: DesignColors.onPrimary, size: DesignSize.iconSmall)
+                BzrIcon(
+                    .shield, label: bzrString("a11y.verified"), tint: DesignColors.onPrimary,
+                    size: DesignSize.iconSmall)
             }
             .frame(width: DesignSize.verifiedShield, height: DesignSize.verifiedShield)
         }
@@ -858,7 +948,9 @@ public struct ProviderHeader: View {
     private let size: AvatarSize
     private let verifiedLabel: String?
 
-    public init(name: String, rating: String, services: String?, size: AvatarSize, verifiedLabel: String? = nil) {
+    public init(
+        name: String, rating: String, services: String?, size: AvatarSize, verifiedLabel: String? = nil
+    ) {
         self.name = name
         self.rating = rating
         self.services = services
@@ -873,7 +965,8 @@ public struct ProviderHeader: View {
                 BzrText(name, style: DesignType.cardTitle)
                 if let verifiedLabel {
                     HStack(spacing: DesignSpace.xs) {
-                        Circle().fill(DesignColors.primary500).frame(width: DesignSize.statusDot, height: DesignSize.statusDot)
+                        Circle().fill(DesignColors.primary500).frame(
+                            width: DesignSize.statusDot, height: DesignSize.statusDot)
                         BzrText(verifiedLabel, style: DesignType.secondary.colored(DesignColors.primary700))
                     }
                 }
@@ -894,13 +987,19 @@ public struct OfferCard: View {
     private let chatLabel: String
     private let variant: OfferVariant
     private let priceCaption: String?
+    private let showSelect: Bool
+    private let showChat: Bool
+    private let onOpen: () -> Void
     private let onSelect: () -> Void
     private let onChat: () -> Void
 
     public init(
-        provider: String, rating: String, services: String, price: String, detail: String, badge: String,
+        provider: String, rating: String, services: String, price: String, detail: String,
+        badge: String,
         button: String, chatLabel: String, variant: OfferVariant, priceCaption: String? = nil,
-        onSelect: @escaping () -> Void = {}, onChat: @escaping () -> Void = {}
+        showSelect: Bool = true, showChat: Bool = true,
+        onOpen: @escaping () -> Void = {}, onSelect: @escaping () -> Void = {},
+        onChat: @escaping () -> Void = {}
     ) {
         self.provider = provider
         self.rating = rating
@@ -912,6 +1011,9 @@ public struct OfferCard: View {
         self.chatLabel = chatLabel
         self.variant = variant
         self.priceCaption = priceCaption
+        self.showSelect = showSelect
+        self.showChat = showChat
+        self.onOpen = onOpen
         self.onSelect = onSelect
         self.onChat = onChat
     }
@@ -926,21 +1028,29 @@ public struct OfferCard: View {
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 VStack(alignment: .trailing, spacing: DesignSpace.xs) {
-                    Badge(text: badge, kind: .highlight, icon: .starFilled)
+                    if !badge.isEmpty { Badge(text: badge, kind: .highlight, icon: .starFilled) }
                     if variant == .inspection, let priceCaption {
                         BzrText(priceCaption, style: DesignType.caption)
                     }
                     BzrText(price, style: DesignType.price)
                     HStack(spacing: DesignSpace.xs) {
-                        BzrIcon(variant == .scheduled ? .calendar : .clock, tint: DesignColors.slate500, size: DesignSize.iconSmall)
+                        BzrIcon(
+                            variant == .scheduled ? .calendar : .clock, tint: DesignColors.slate500,
+                            size: DesignSize.iconSmall)
                         BzrText(detail, style: DesignType.secondary)
                     }
                 }
             }
-            HorizontalLine()
-            HStack(spacing: DesignSpace.s) {
-                PrimaryButton(text: button, height: DesignSize.compactButtonHeight, onClick: onSelect)
-                IconSquareButton(label: chatLabel, onClick: onChat)
+            .contentShape(Rectangle())
+            .onTapGesture(perform: onOpen)
+            if showSelect || showChat {
+                HorizontalLine()
+                HStack(spacing: DesignSpace.s) {
+                    if showSelect {
+                        PrimaryButton(text: button, height: DesignSize.compactButtonHeight, onClick: onSelect)
+                    }
+                    if showChat { IconSquareButton(label: chatLabel, onClick: onChat) }
+                }
             }
         }
     }
@@ -953,7 +1063,10 @@ public struct SortChips: View {
     private let selectedIndex: Int
     private let onSelect: (Int) -> Void
 
-    public init(title: String?, labels: [String], selectedIndex: Int, onSelect: @escaping (Int) -> Void = { _ in }) {
+    public init(
+        title: String?, labels: [String], selectedIndex: Int,
+        onSelect: @escaping (Int) -> Void = { _ in }
+    ) {
         self.title = title
         self.labels = labels
         self.selectedIndex = selectedIndex
@@ -970,7 +1083,9 @@ public struct SortChips: View {
                     Button {
                         onSelect(index)
                     } label: {
-                        SelectableChip(text: labels[index], state: index == selectedIndex ? .selected : .unselected, height: DesignSize.sortChipHeight)
+                        SelectableChip(
+                            text: labels[index], state: index == selectedIndex ? .selected : .unselected,
+                            height: DesignSize.sortChipHeight)
                     }
                     .buttonStyle(BzrPressStyle())
                 }
@@ -1003,7 +1118,8 @@ public struct StatRow: View {
                     VStack(spacing: DesignSpace.xs) {
                         BzrIcon(items[index].icon, tint: DesignColors.primary500)
                         BzrText(items[index].value, style: DesignType.cardTitle)
-                        BzrText(items[index].label, style: DesignType.secondary, alignment: .center, lineLimit: 1)
+                        BzrText(
+                            items[index].label, style: DesignType.secondary, alignment: .center, lineLimit: 1)
                     }
                     .frame(maxWidth: .infinity)
                     if index != items.count - 1 {
@@ -1040,7 +1156,9 @@ public struct RatingBars: View {
                         .background(Capsule().fill(DesignColors.surfaceAlt))
                     }
                     .frame(height: DesignSize.ratingBarHeight)
-                    BzrText(BzrFormat.number(items[index].1), style: DesignType.caption.colored(DesignColors.navy800))
+                    BzrText(
+                        BzrFormat.number(items[index].1),
+                        style: DesignType.caption.colored(DesignColors.navy800))
                 }
             }
         }
@@ -1081,7 +1199,8 @@ public struct ReviewCard: View {
             HStack(alignment: .top, spacing: DesignSpace.m) {
                 Avatar(size: DesignSize.avatarXs)
                 VStack(alignment: .leading, spacing: DesignSpace.xs) {
-                    BzrText(name, style: DesignType.body.weighted(DesignFont.bold).colored(DesignColors.navy900))
+                    BzrText(
+                        name, style: DesignType.body.weighted(DesignFont.bold).colored(DesignColors.navy900))
                     HStack(spacing: DesignSpace.s) {
                         Stars(count: rating)
                         BzrIcon(.check, tint: DesignColors.primary600, size: DesignSize.iconSmall)
@@ -1111,7 +1230,10 @@ public struct StickyActionBar: View {
     private let onAction: () -> Void
     private let onChat: () -> Void
 
-    public init(priceLabel: String, price: String, action: String, chatLabel: String, onAction: @escaping () -> Void = {}, onChat: @escaping () -> Void = {}) {
+    public init(
+        priceLabel: String, price: String, action: String, chatLabel: String,
+        onAction: @escaping () -> Void = {}, onChat: @escaping () -> Void = {}
+    ) {
         self.priceLabel = priceLabel
         self.price = price
         self.action = action
@@ -1149,7 +1271,8 @@ private struct Banner: View {
     var body: some View {
         HStack(spacing: DesignSpace.m) {
             BzrIcon(icon, tint: iconTint)
-            BzrText(text, style: DesignType.body.colored(foreground)).frame(maxWidth: .infinity, alignment: .leading)
+            BzrText(text, style: DesignType.body.colored(foreground)).frame(
+                maxWidth: .infinity, alignment: .leading)
         }
         .padding(DesignSpace.l)
         .background(fill)
@@ -1161,7 +1284,9 @@ public struct InfoBanner: View {
     private let text: String
     public init(text: String) { self.text = text }
     public var body: some View {
-        Banner(text: text, icon: .shield, iconTint: DesignColors.primary600, fill: DesignColors.primary50Info, foreground: DesignColors.primary700)
+        Banner(
+            text: text, icon: .shield, iconTint: DesignColors.primary600,
+            fill: DesignColors.primary50Info, foreground: DesignColors.primary700)
     }
 }
 
@@ -1169,7 +1294,9 @@ public struct WarningBox: View {
     private let text: String
     public init(text: String) { self.text = text }
     public var body: some View {
-        Banner(text: text, icon: .warningFilled, iconTint: DesignColors.star, fill: DesignColors.warningBg, foreground: DesignColors.warningText)
+        Banner(
+            text: text, icon: .warningFilled, iconTint: DesignColors.star, fill: DesignColors.warningBg,
+            foreground: DesignColors.warningText)
     }
 }
 
@@ -1177,7 +1304,9 @@ public struct OfflineBanner: View {
     private let text: String
     public init(text: String) { self.text = text }
     public var body: some View {
-        Banner(text: text, icon: .offline, iconTint: DesignColors.navy800, fill: DesignColors.surfaceAlt, foreground: DesignColors.navy800)
+        Banner(
+            text: text, icon: .offline, iconTint: DesignColors.navy800, fill: DesignColors.surfaceAlt,
+            foreground: DesignColors.navy800)
     }
 }
 
@@ -1220,7 +1349,12 @@ public struct EtaCard: View {
 /// Placeholder frame for the map SDK view (Google Maps / MapKit are platform views, 43 §7).
 public struct MapCard: View {
     private let title: String
-    public init(title: String) { self.title = title }
+    private let onMyLocation: () -> Void
+
+    public init(title: String, onMyLocation: @escaping () -> Void = {}) {
+        self.title = title
+        self.onMyLocation = onMyLocation
+    }
 
     public var body: some View {
         VStack(spacing: DesignSpace.s) {
@@ -1230,12 +1364,19 @@ public struct MapCard: View {
         .frame(maxWidth: .infinity)
         .frame(height: DesignSize.mapCardHeight)
         .overlay(alignment: .bottomTrailing) {
-            BzrIcon(.navigation, label: bzrString("a11y.my_location"))
-                .frame(width: DesignSize.myLocationButton, height: DesignSize.myLocationButton)
-                .bzrFrame(radius: DesignRadius.button, fill: DesignColors.surface, border: DesignColors.border, width: DesignBorder.width)
-                .padding(DesignSpace.m)
+            Button(action: onMyLocation) {
+                BzrIcon(.navigation, label: bzrString("a11y.my_location"))
+                    .frame(width: DesignSize.myLocationButton, height: DesignSize.myLocationButton)
+                    .bzrFrame(
+                        radius: DesignRadius.button, fill: DesignColors.surface,
+                        border: DesignColors.border, width: DesignBorder.width)
+            }
+            .buttonStyle(BzrPressStyle())
+            .padding(DesignSpace.m)
         }
-        .bzrFrame(radius: DesignRadius.card, fill: DesignColors.surfaceAlt2, border: DesignColors.border, width: DesignBorder.width)
+        .bzrFrame(
+            radius: DesignRadius.card, fill: DesignColors.surfaceAlt2, border: DesignColors.border,
+            width: DesignBorder.width)
     }
 }
 
@@ -1254,14 +1395,16 @@ private struct StepperDot: View {
             ZStack {
                 Circle().fill(DesignColors.surface)
                 Circle().strokeBorder(DesignColors.primary600, lineWidth: DesignSize.controlStroke)
-                Circle().fill(DesignColors.primary600).frame(width: DesignSize.radioDot, height: DesignSize.radioDot)
+                Circle().fill(DesignColors.primary600).frame(
+                    width: DesignSize.radioDot, height: DesignSize.radioDot)
             }
             .frame(width: DesignSize.stepperDotActive, height: DesignSize.stepperDotActive)
         case .onHold:
             ZStack {
                 Circle().fill(DesignColors.surface)
                 Circle().strokeBorder(DesignColors.star, lineWidth: DesignSize.controlStroke)
-                Circle().fill(DesignColors.star).frame(width: DesignSize.radioDot, height: DesignSize.radioDot)
+                Circle().fill(DesignColors.star).frame(
+                    width: DesignSize.radioDot, height: DesignSize.radioDot)
             }
             .frame(width: DesignSize.stepperDotActive, height: DesignSize.stepperDotActive)
         case .pending:
@@ -1303,13 +1446,18 @@ public struct StatusStepper: View {
                                 .fill(lineColor(reached: steps[index].1 != .pending, hidden: index == 0))
                                 .frame(height: DesignSize.stepperLine)
                             Rectangle()
-                                .fill(lineColor(reached: index < steps.count - 1 && steps[index + 1].1 != .pending, hidden: index == steps.count - 1))
+                                .fill(
+                                    lineColor(
+                                        reached: index < steps.count - 1 && steps[index + 1].1 != .pending,
+                                        hidden: index == steps.count - 1)
+                                )
                                 .frame(height: DesignSize.stepperLine)
                         }
                         StepperDot(state: steps[index].1)
                     }
                     .frame(height: DesignSize.stepperDotActive)
-                    BzrText(steps[index].0, style: labelStyle(steps[index].1), alignment: .center, lineLimit: 2)
+                    BzrText(
+                        steps[index].0, style: labelStyle(steps[index].1), alignment: .center, lineLimit: 2)
                 }
                 .frame(maxWidth: .infinity)
             }
@@ -1433,7 +1581,9 @@ public struct EmptyState: View {
     private let action: String?
     private let onAction: () -> Void
 
-    public init(title: String, body: String, action: String? = nil, onAction: @escaping () -> Void = {}) {
+    public init(
+        title: String, body: String, action: String? = nil, onAction: @escaping () -> Void = {}
+    ) {
         self.title = title
         self.detail = body
         self.action = action
@@ -1441,7 +1591,10 @@ public struct EmptyState: View {
     }
 
     public var body: some View {
-        FeedbackState(icon: .empty, iconTint: DesignColors.primary600, iconBackground: DesignColors.primary50, title: title, detail: detail) {
+        FeedbackState(
+            icon: .empty, iconTint: DesignColors.primary600, iconBackground: DesignColors.primary50,
+            title: title, detail: detail
+        ) {
             if let action { PrimaryButton(text: action, onClick: onAction) }
         }
     }
@@ -1461,14 +1614,20 @@ public struct ErrorState: View {
     }
 
     public var body: some View {
-        FeedbackState(icon: .error, iconTint: DesignColors.danger, iconBackground: DesignColors.surfaceAlt, title: title, detail: detail) {
+        FeedbackState(
+            icon: .error, iconTint: DesignColors.danger, iconBackground: DesignColors.surfaceAlt,
+            title: title, detail: detail
+        ) {
             if let retry { SecondaryButton(text: retry, onClick: onRetry) }
         }
     }
 }
 
-private extension FeedbackState {
-    init(icon: BzrIconKey, iconTint: Color, iconBackground: Color, title: String, detail: String, @ViewBuilder action: () -> Action) {
+extension FeedbackState {
+    fileprivate init(
+        icon: BzrIconKey, iconTint: Color, iconBackground: Color, title: String, detail: String,
+        @ViewBuilder action: () -> Action
+    ) {
         self.icon = icon
         self.iconTint = iconTint
         self.iconBackground = iconBackground
@@ -1484,7 +1643,8 @@ public struct LoadingSkeleton: View {
     public var body: some View {
         BzrCard {
             HStack(spacing: DesignSpace.m) {
-                Circle().fill(DesignColors.surfaceAlt).frame(width: DesignSize.avatarSmall, height: DesignSize.avatarSmall)
+                Circle().fill(DesignColors.surfaceAlt).frame(
+                    width: DesignSize.avatarSmall, height: DesignSize.avatarSmall)
                 VStack(alignment: .leading, spacing: DesignSpace.s) {
                     SkeletonLine(fraction: 1)
                     SkeletonLine(fraction: DesignRatio.skeletonShortLine)
@@ -1526,7 +1686,10 @@ public struct Countdown: View {
     public var body: some View {
         let urgent = seconds < DesignThreshold.countdownUrgentSeconds
         VStack(spacing: 0) {
-            BzrText(BzrFormat.countdown(seconds), style: DesignType.displayNumber.colored(urgent ? DesignColors.danger : DesignColors.primary700))
+            BzrText(
+                BzrFormat.countdown(seconds),
+                style: DesignType.displayNumber.colored(
+                    urgent ? DesignColors.danger : DesignColors.primary700))
             BzrText(label, style: DesignType.secondary)
         }
     }
@@ -1547,8 +1710,12 @@ public struct ChatBubble: View {
 
     private var blocked: Bool { kind == .blocked }
     private var fill: Color { sent && !blocked ? DesignColors.primary600 : DesignColors.surface }
-    private var borderColor: Color { blocked ? DesignColors.danger : (sent ? DesignColors.primary600 : DesignColors.border) }
-    private var foreground: Color { blocked ? DesignColors.danger : (sent ? DesignColors.onPrimary : DesignColors.navy800) }
+    private var borderColor: Color {
+        blocked ? DesignColors.danger : (sent ? DesignColors.primary600 : DesignColors.border)
+    }
+    private var foreground: Color {
+        blocked ? DesignColors.danger : (sent ? DesignColors.onPrimary : DesignColors.navy800)
+    }
 
     public var body: some View {
         HStack(spacing: 0) {
@@ -1562,7 +1729,9 @@ public struct ChatBubble: View {
                 BzrText(text, style: DesignType.body.colored(foreground))
             }
             .padding(DesignSpace.m)
-            .bzrFrame(radius: DesignRadius.card, fill: fill, border: borderColor, width: DesignBorder.width)
+            .bzrFrame(
+                radius: DesignRadius.card, fill: fill, border: borderColor, width: DesignBorder.width
+            )
             .frame(maxWidth: DesignSize.chatBubbleMaxWidth, alignment: sent ? .leading : .trailing)
             if sent { Spacer(minLength: 0) }
         }
@@ -1575,7 +1744,10 @@ public struct ChatInput: View {
     private let onValueChange: ((String) -> Void)?
     private let onSend: () -> Void
 
-    public init(placeholder: String, value: String = "", onValueChange: ((String) -> Void)? = nil, onSend: @escaping () -> Void = {}) {
+    public init(
+        placeholder: String, value: String = "", onValueChange: ((String) -> Void)? = nil,
+        onSend: @escaping () -> Void = {}
+    ) {
         self.placeholder = placeholder
         self.value = value
         self.onValueChange = onValueChange
@@ -1584,7 +1756,10 @@ public struct ChatInput: View {
 
     public var body: some View {
         HStack(spacing: DesignSpace.s) {
-            FieldValue(value: value, placeholder: placeholder, enabled: true, singleLine: true, onValueChange: onValueChange)
+            FieldValue(
+                value: value, placeholder: placeholder, enabled: true, singleLine: true,
+                onValueChange: onValueChange, accessibilityLabel: placeholder, imeAction: .done
+            )
             Button(action: onSend) {
                 BzrIcon(.send, label: bzrString("a11y.send"), tint: DesignColors.primary600)
             }
@@ -1592,7 +1767,9 @@ public struct ChatInput: View {
         }
         .padding(.horizontal, DesignSpace.m)
         .frame(height: DesignSize.fieldHeight)
-        .bzrFrame(radius: DesignRadius.field, fill: DesignColors.surface, border: DesignColors.border, width: DesignBorder.width)
+        .bzrFrame(
+            radius: DesignRadius.field, fill: DesignColors.surface, border: DesignColors.border,
+            width: DesignBorder.width)
     }
 }
 
@@ -1601,13 +1778,18 @@ public struct MediaThumb: View {
     private let stateLabel: String
     private let kind: MediaKind
     private let state: MediaState
+    private let readOnly: Bool
     private let onDelete: () -> Void
 
-    public init(title: String, stateLabel: String, kind: MediaKind, state: MediaState, onDelete: @escaping () -> Void = {}) {
+    public init(
+        title: String, stateLabel: String, kind: MediaKind, state: MediaState,
+        readOnly: Bool = false, onDelete: @escaping () -> Void = {}
+    ) {
         self.title = title
         self.stateLabel = stateLabel
         self.kind = kind
         self.state = state
+        self.readOnly = readOnly
         self.onDelete = onDelete
     }
 
@@ -1628,18 +1810,25 @@ public struct MediaThumb: View {
                     .clipShape(RoundedRectangle(cornerRadius: DesignRadius.menuIconBox))
                 VStack(alignment: .leading, spacing: DesignSpace.xs) {
                     BzrText(title)
-                    BzrText(stateLabel, style: DesignType.caption.colored(state == .failed ? DesignColors.danger : DesignColors.slate500))
+                    if !stateLabel.isEmpty {
+                        BzrText(
+                            stateLabel,
+                            style: DesignType.caption.colored(
+                                state == .failed ? DesignColors.danger : DesignColors.slate500))
+                    }
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
-                switch state {
-                case .uploading: ProgressArc(color: DesignColors.primary600, label: stateLabel)
-                case .uploaded: BzrIcon(.check, label: stateLabel, tint: DesignColors.primary600)
-                case .failed: BzrIcon(.error, label: stateLabel, tint: DesignColors.danger)
+                if !readOnly {
+                    switch state {
+                    case .uploading: ProgressArc(color: DesignColors.primary600, label: stateLabel)
+                    case .uploaded: BzrIcon(.check, label: stateLabel, tint: DesignColors.primary600)
+                    case .failed: BzrIcon(.error, label: stateLabel, tint: DesignColors.danger)
+                    }
+                    Button(action: onDelete) {
+                        BzrIcon(.trash, label: bzrString("a11y.delete"), tint: DesignColors.danger)
+                    }
+                    .buttonStyle(BzrPressStyle())
                 }
-                Button(action: onDelete) {
-                    BzrIcon(.trash, label: bzrString("a11y.delete"), tint: DesignColors.danger)
-                }
-                .buttonStyle(BzrPressStyle())
             }
         }
     }

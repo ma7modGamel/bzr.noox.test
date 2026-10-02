@@ -81,17 +81,23 @@ public struct CustomerLoginScreen: View {
             BzrText(bzrString("auth.login.body"), style: DesignType.secondary)
             authMessage(state: state)
             AppTextField(
-                label: bzrString("auth.email.label"), placeholder: bzrString("auth.email.placeholder"), value: state.email,
+                label: bzrString("auth.email.label"), placeholder: bzrString("auth.email.placeholder"),
+                value: state.email,
                 state: fieldState(state.email, error: state.emailError), error: localized(state.emailError),
                 onValueChange: fieldHandler("email", onFieldChange)
             )
             SecureTextField(
-                label: bzrString("auth.password.label"), placeholder: bzrString("auth.password.placeholder"), value: state.password,
-                state: fieldState(state.password, error: state.passwordError), error: localized(state.passwordError),
+                label: bzrString("auth.password.label"),
+                placeholder: bzrString("auth.password.placeholder"), value: state.password,
+                state: fieldState(state.password, error: state.passwordError),
+                error: localized(state.passwordError),
                 onValueChange: fieldHandler("password", onFieldChange)
             )
-            PrimaryButton(text: bzrString("auth.login.action"), state: buttonState(state), onClick: onSubmit)
-            SecondaryButton(text: bzrString("auth.register.open"), enabled: state.phase != .loading, onClick: onRegister)
+            PrimaryButton(
+                text: bzrString("auth.login.action"), state: buttonState(state), onClick: onSubmit)
+            SecondaryButton(
+                text: bzrString("auth.register.open"), enabled: state.phase != .loading, onClick: onRegister
+            )
             LinkButton(text: bzrString("auth.password.forgot.open"), onClick: onForgotPassword)
         }
     }
@@ -124,18 +130,27 @@ public struct CustomerRegisterScreen: View {
             AuthBody {
                 authMessage(state: state)
                 AppTextField(
-                    label: bzrString("auth.name.label"), placeholder: bzrString("auth.name.placeholder"), value: state.name, state: fieldState(state.name, error: state.nameError),
+                    label: bzrString("auth.name.label"), placeholder: bzrString("auth.name.placeholder"),
+                    value: state.name, state: fieldState(state.name, error: state.nameError),
                     error: localized(state.nameError), onValueChange: fieldHandler("name", onFieldChange))
                 AppTextField(
-                    label: bzrString("auth.email.label"), placeholder: bzrString("auth.email.placeholder"), value: state.email,
-                    state: fieldState(state.email, error: state.emailError), error: localized(state.emailError), onValueChange: fieldHandler("email", onFieldChange))
+                    label: bzrString("auth.email.label"), placeholder: bzrString("auth.email.placeholder"),
+                    value: state.email,
+                    state: fieldState(state.email, error: state.emailError),
+                    error: localized(state.emailError), onValueChange: fieldHandler("email", onFieldChange))
                 AppTextField(
-                    label: bzrString("auth.phone.label"), placeholder: bzrString("auth.phone.placeholder"), value: state.phone,
-                    state: fieldState(state.phone, error: state.phoneError), error: localized(state.phoneError), onValueChange: fieldHandler("phone", onFieldChange))
+                    label: bzrString("auth.phone.label"), placeholder: bzrString("auth.phone.placeholder"),
+                    value: state.phone,
+                    state: fieldState(state.phone, error: state.phoneError),
+                    error: localized(state.phoneError), onValueChange: fieldHandler("phone", onFieldChange))
                 SecureTextField(
-                    label: bzrString("auth.password.label"), placeholder: bzrString("auth.password.hint"), value: state.password,
-                    state: fieldState(state.password, error: state.passwordError), error: localized(state.passwordError), onValueChange: fieldHandler("password", onFieldChange))
-                PrimaryButton(text: bzrString("auth.register.action"), state: buttonState(state), onClick: onSubmit)
+                    label: bzrString("auth.password.label"), placeholder: bzrString("auth.password.hint"),
+                    value: state.password,
+                    state: fieldState(state.password, error: state.passwordError),
+                    error: localized(state.passwordError),
+                    onValueChange: fieldHandler("password", onFieldChange))
+                PrimaryButton(
+                    text: bzrString("auth.register.action"), state: buttonState(state), onClick: onSubmit)
                 LinkButton(text: bzrString("auth.login.open"), onClick: onLogin)
             }
         }
@@ -149,7 +164,10 @@ public struct CustomerEmailVerificationScreen: View {
     private let onResend: () -> Void
     private let onLogout: () -> Void
 
-    public init(state: AuthUIState, onCheck: @escaping () -> Void = {}, onResend: @escaping () -> Void = {}, onLogout: @escaping () -> Void = {}) {
+    public init(
+        state: AuthUIState, onCheck: @escaping () -> Void = {}, onResend: @escaping () -> Void = {},
+        onLogout: @escaping () -> Void = {}
+    ) {
         self.state = state
         self.onCheck = onCheck
         self.onResend = onResend
@@ -165,8 +183,10 @@ public struct CustomerEmailVerificationScreen: View {
                     body: bzrString("auth.verify.waiting.body") + "\n" + state.email
                 )
                 authMessage(state: state)
-                PrimaryButton(text: bzrString("auth.verify.check"), state: buttonState(state), onClick: onCheck)
-                SecondaryButton(text: bzrString("auth.verify.resend"), enabled: state.canSubmit, onClick: onResend)
+                PrimaryButton(
+                    text: bzrString("auth.verify.check"), state: buttonState(state), onClick: onCheck)
+                SecondaryButton(
+                    text: bzrString("auth.verify.resend"), enabled: state.canSubmit, onClick: onResend)
                 LinkButton(text: bzrString("auth.logout.action"), onClick: onLogout)
             }
         }
@@ -202,11 +222,15 @@ public struct CustomerPasswordRecoveryScreen: View {
                 BzrText(bzrString("auth.password.forgot.body"), style: DesignType.secondary)
                 authMessage(state: state)
                 AppTextField(
-                    label: bzrString("auth.email.label"), placeholder: bzrString("auth.email.placeholder"), value: state.email,
-                    state: fieldState(state.email, error: state.emailError), error: localized(state.emailError),
+                    label: bzrString("auth.email.label"), placeholder: bzrString("auth.email.placeholder"),
+                    value: state.email,
+                    state: fieldState(state.email, error: state.emailError),
+                    error: localized(state.emailError),
                     onValueChange: fieldHandler("email", onFieldChange)
                 )
-                PrimaryButton(text: bzrString("auth.password.forgot.action"), state: buttonState(state), onClick: onSubmit)
+                PrimaryButton(
+                    text: bzrString("auth.password.forgot.action"), state: buttonState(state),
+                    onClick: onSubmit)
                 LinkButton(text: bzrString("auth.login.open"), onClick: onLogin)
             }
         }
@@ -245,9 +269,15 @@ private func localized(_ key: String?) -> String? {
     if key == "auth.error.rate_limited" { return bzrString("auth.error.rate_limited") }
     return key.map(bzrString)
 }
-private func fieldHandler(_ field: String, _ handler: ((String, String) -> Void)?) -> ((String) -> Void)? {
+private func fieldHandler(_ field: String, _ handler: ((String, String) -> Void)?) -> (
+    (String) -> Void
+)? {
     guard let handler else { return nil }
     return { handler(field, $0) }
 }
-private func fieldState(_ value: String, error: String?) -> FieldVisualState { error != nil ? .error : (value.isEmpty ? .empty : .filled) }
-private func buttonState(_ state: AuthUIState) -> ButtonVisualState { state.phase == .loading ? .loading : (state.canSubmit ? .normal : .disabled) }
+private func fieldState(_ value: String, error: String?) -> FieldVisualState {
+    error != nil ? .error : (value.isEmpty ? .empty : .filled)
+}
+private func buttonState(_ state: AuthUIState) -> ButtonVisualState {
+    state.phase == .loading ? .loading : (state.canSubmit ? .normal : .disabled)
+}

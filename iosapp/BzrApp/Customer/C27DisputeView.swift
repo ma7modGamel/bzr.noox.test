@@ -56,16 +56,21 @@ public struct C27DisputeView: View {
                     placeholder: bzrString("dispute.description.placeholder"),
                     value: state.fieldValues.first ?? "", state: state.isBusy ? .disabled : .empty,
                     onValueChange: onDescriptionChange)
-                SecondaryButton(text: bzrString("dispute.photo.add"), onClick: { photoPickerPresented = true })
-                    .photosPicker(isPresented: $photoPickerPresented, selection: $selectedPhoto, matching: .images)
-                    .onChange(of: selectedPhoto) { _, item in
-                        guard let item else { return }
-                        Task {
-                            guard let data = try? await item.loadTransferable(type: Data.self) else { return }
-                            onPhotoSelected(
-                                CustomerMediaUpload(fileName: "dispute-image.jpg", mimeType: "image/jpeg", data: data))
-                        }
+                SecondaryButton(
+                    text: bzrString("dispute.photo.add"), onClick: { photoPickerPresented = true }
+                )
+                .photosPicker(
+                    isPresented: $photoPickerPresented, selection: $selectedPhoto, matching: .images
+                )
+                .onChange(of: selectedPhoto) { _, item in
+                    guard let item else { return }
+                    Task {
+                        guard let data = try? await item.loadTransferable(type: Data.self) else { return }
+                        onPhotoSelected(
+                            CustomerMediaUpload(fileName: "dispute-image.jpg", mimeType: "image/jpeg", data: data)
+                        )
                     }
+                }
                 if state.hasPhoto {
                     MediaThumb(
                         title: bzrString("dispute.photo.title"), stateLabel: bzrString("media.uploaded"),

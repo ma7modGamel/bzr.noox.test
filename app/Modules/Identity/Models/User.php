@@ -28,7 +28,7 @@ final class User extends Authenticatable implements MustVerifyEmail
     use Notifiable;
     use SoftDeletes;
 
-    protected $fillable = ['name', 'email', 'password', 'phone', 'avatar_path', 'status'];
+    protected $fillable = ['name', 'email', 'password', 'phone', 'avatar_path', 'status', 'rating_reminders_enabled'];
 
     protected $hidden = ['password', 'remember_token'];
 
@@ -41,6 +41,7 @@ final class User extends Authenticatable implements MustVerifyEmail
             'email_verified_at' => 'immutable_datetime',
             'status' => UserStatus::class,
             'customer_rating_avg' => 'decimal:2',
+            'rating_reminders_enabled' => 'bool',
         ];
     }
 

@@ -23,6 +23,13 @@ final class ProposalResource extends JsonResource
             'projected_total' => OrderAmounts::projected($this->order, $this->resource)->finalAmount,
             'reason' => $this->reason,
             'photo_path' => $this->photo_path,
+            'price_guide' => $this->price_guide_min === null && $this->price_guide_max === null ? null : [
+                'minimum' => $this->price_guide_min,
+                'maximum' => $this->price_guide_max,
+            ],
+            'outside_price_guide' => $this->outside_price_guide,
+            'price_review_reason' => $this->price_review_reason?->value,
+            'outside_price_guide_reason' => $this->outside_price_guide_reason,
             'status' => $this->status->value,
             'status_label' => $this->status->getLabel(),
             // العدّاد يُحسب من هنا لا من ساعة الجهاز (42 §التحديث اللحظي)

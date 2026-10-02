@@ -1,0 +1,11 @@
+{
+  "screen": "SCR-P05",
+  "cases": [
+    {"id":"loading","input":{"event":"loading"},"expected":{"phase":"loading","can_continue":false}},
+    {"id":"error","input":{"event":"error"},"expected":{"phase":"error","can_continue":false,"message_key":"error.body"}},
+    {"id":"no_areas","input":{"event":"loaded","city_labels":["القاهرة"],"area_labels":[],"area_ids":[]},"expected":{"phase":"empty","can_continue":false}},
+    {"id":"unselected","input":{"event":"validate","city_labels":["القاهرة"],"area_labels":["مدينة نصر","المعادي"],"area_ids":[]},"expected":{"phase":"content","can_continue":false,"field_errors":["provider.onboarding.areas.required"]}},
+    {"id":"selected","input":{"event":"validate","city_labels":["القاهرة"],"area_labels":["مدينة نصر","المعادي"],"area_ids":["4","5"]},"expected":{"phase":"content","can_continue":true,"selected_count":2}},
+    {"id":"invalid_area","input":{"event":"validate","city_labels":["القاهرة"],"area_labels":["مدينة نصر"],"area_ids":["99"],"area_selection_valid":false},"expected":{"phase":"content","can_continue":false,"field_errors":["provider.onboarding.areas.required"]}}
+  ]
+}

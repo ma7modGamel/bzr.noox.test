@@ -1,4 +1,5 @@
 import Foundation
+
 #if canImport(FoundationNetworking)
     import FoundationNetworking
 #endif
@@ -32,6 +33,13 @@ public struct URLSessionTransport: HTTPTransport {
 public enum APIClientError: Error, Equatable {
     case invalidResponse
     case httpStatus(Int)
+    /// 422 with the server's own reason (VALIDATION_FAILED, BUSINESS_RULE_VIOLATION), shown as sent (SCR-C05).
+    case rejected(message: String)
+
+    /// The server's reason for a refused request, or nil for transport and other HTTP errors.
+    public var serverMessage: String? {
+        if case let .rejected(message) = self { message } else { nil }
+    }
 }
 
 public struct APIClient: Sendable {
@@ -52,7 +60,9 @@ public struct APIClient: Sendable {
         self.transport = transport
     }
 
-    public func get<Value: Decodable & Sendable>(_ path: String, as type: Value.Type = Value.self) async throws -> Value {
+    public func get<Value: Decodable & Sendable>(_ path: String, as type: Value.Type = Value.self)
+        async throws -> Value
+    {
         try await request(path, method: "GET", as: type)
     }
 
@@ -67,7 +77,9 @@ public struct APIClient: Sendable {
             idempotencyKey: idempotencyKey, as: type)
     }
 
-    public func postWithoutBody<Value: Decodable & Sendable>(_ path: String, as type: Value.Type = Value.self) async throws -> Value {
+    public func postWithoutBody<Value: Decodable & Sendable>(
+        _ path: String, as type: Value.Type = Value.self
+    ) async throws -> Value {
         try await request(path, method: "POST", body: Data("{}".utf8), as: type)
     }
 
@@ -85,8 +97,18 @@ public struct APIClient: Sendable {
         try await request(path, method: "PATCH", body: try BzrJSON.encoder().encode(body), as: type)
     }
 
+    public func put<Body: Encodable, Value: Decodable & Sendable>(
+        _ path: String, body: Body, as type: Value.Type = Value.self
+    ) async throws -> Value {
+        try await request(path, method: "PUT", body: try BzrJSON.encoder().encode(body), as: type)
+    }
+
     public func delete(_ path: String) async throws {
         _ = try await request(path, method: "DELETE")
+    }
+
+    public func delete<Body: Encodable>(_ path: String, body: Body) async throws {
+        _ = try await request(path, method: "DELETE", body: try BzrJSON.encoder().encode(body))
     }
 
     public func multipart<Value: Decodable & Sendable>(
@@ -96,7 +118,8 @@ public struct APIClient: Sendable {
         let boundary = "BzrBoundary\(UUID().uuidString)"
         var body = Data()
         body.append(Data("--\(boundary)\r\n".utf8))
-        body.append(Data("Content-Disposition: form-data; name=\"\(field)\"; filename=\"\(fileName)\"\r\n".utf8))
+        body.append(
+            Data("Content-Disposition: form-data; name=\"\(field)\"; filename=\"\(fileName)\"\r\n".utf8))
         body.append(Data("Content-Type: \(mimeType)\r\n\r\n".utf8))
         body.append(data)
         body.append(Data("\r\n--\(boundary)--\r\n".utf8))
@@ -145,6 +168,12 @@ public struct APIClient: Sendable {
 
         let result = try await transport.send(request)
         guard (200..<300).contains(result.statusCode) else {
+            if result.statusCode == 422,
+                let body = try? JSONSerialization.jsonObject(with: result.data) as? [String: Any],
+                let error = body["error"] as? [String: Any], let message = error["message"] as? String
+            {
+                throw APIClientError.rejected(message: message)
+            }
             throw APIClientError.httpStatus(result.statusCode)
         }
         return result

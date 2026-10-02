@@ -23,13 +23,15 @@ final class CustomerSharedFixtureTests: XCTestCase {
             "design/fixtures/SCR-C30/cases.json", "design/fixtures/SCR-C31/cases.json",
             "design/fixtures/SCR-C32/cases.json", "design/fixtures/SCR-C33/cases.json",
             "design/fixtures/SCR-C34/cases.json", "design/fixtures/SCR-C35/cases.json",
+            "design/fixtures/SCR-C36/cases.json",
         ]
         for path in fixturePaths {
             let url = repositoryRoot().appendingPathComponent(path)
             let fixture = try JSONDecoder().decode(CustomerFixture.self, from: Data(contentsOf: url))
             let screen = fixture.screen
             for testCase in fixture.cases {
-                let actual = CustomerLogic.reduce(screen: screen, input: testCase.input.mapValues(\.customerValue))
+                let actual = CustomerLogic.reduce(
+                    screen: screen, input: testCase.input.mapValues(\.customerValue))
                 let expected = testCase.expected
                 let label = "\(screen)/\(testCase.id)"
                 XCTAssertEqual(actual.phase.rawValue, expected.phase, label)
@@ -55,10 +57,17 @@ final class CustomerSharedFixtureTests: XCTestCase {
                 optional(expected.pendingIndex, actual.pendingIndex, label)
                 optional(expected.countdownSeconds, actual.countdownSeconds, label)
                 optional(expected.hasPhoto, actual.hasPhoto, label)
+                optional(expected.mapLatitude, actual.mapLatitude, label)
+                optional(expected.mapLongitude, actual.mapLongitude, label)
+                optional(expected.notificationsDenied, actual.notificationsDenied, label)
+                optional(expected.ratingRemindersEnabled, actual.ratingRemindersEnabled, label)
+                optional(expected.selectedMaterialIndex, actual.selectedMaterialIndex, label)
+                optional(expected.selectedPricingIndex, actual.selectedPricingIndex, label)
+                optional(expected.providerVerified, actual.providerVerified, label)
                 count += 1
             }
         }
-        XCTAssertEqual(count, 206)
+        XCTAssertEqual(count, 227)
     }
 
     private func optional<T: Equatable>(_ expected: T?, _ actual: T, _ label: String) {
@@ -111,6 +120,13 @@ private struct CustomerExpectedState: Decodable {
     let pendingIndex: Int?
     let countdownSeconds: Int?
     let hasPhoto: Bool?
+    let mapLatitude: Double?
+    let mapLongitude: Double?
+    let notificationsDenied: Bool?
+    let ratingRemindersEnabled: Bool?
+    let selectedMaterialIndex: Int?
+    let selectedPricingIndex: Int?
+    let providerVerified: Bool?
 
     enum CodingKeys: String, CodingKey {
         case phase
@@ -136,11 +152,21 @@ private struct CustomerExpectedState: Decodable {
         case pendingIndex = "pending_index"
         case countdownSeconds = "countdown_seconds"
         case hasPhoto = "has_photo"
+        case mapLatitude = "map_latitude"
+        case mapLongitude = "map_longitude"
+        case notificationsDenied = "notifications_denied"
+        case ratingRemindersEnabled = "rating_reminders_enabled"
+        case selectedMaterialIndex = "selected_material_index"
+        case selectedPricingIndex = "selected_pricing_index"
+        case providerVerified = "provider_verified"
     }
 }
 
 private enum CustomerFixtureValue: Decodable {
-    case text(String), bool(Bool), integer(Int), strings([String])
+    case text(String)
+    case bool(Bool)
+    case integer(Int)
+    case strings([String])
 
     init(from decoder: Decoder) throws {
         let container = try decoder.singleValueContainer()

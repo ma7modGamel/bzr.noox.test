@@ -8,6 +8,7 @@ public struct C19ChatView: View {
     let onDraftChange: (String) -> Void
     let onSend: () -> Void
     let onPhotoSelected: (CustomerMediaUpload) -> Void
+    let onBack: () -> Void
     @State private var selectedPhoto: PhotosPickerItem?
     @State private var photoPickerPresented = false
 
@@ -15,19 +16,24 @@ public struct C19ChatView: View {
         state: CustomerUIState,
         onDraftChange: @escaping (String) -> Void = { _ in },
         onSend: @escaping () -> Void = {},
-        onPhotoSelected: @escaping (CustomerMediaUpload) -> Void = { _ in }
+        onPhotoSelected: @escaping (CustomerMediaUpload) -> Void = { _ in },
+        onBack: @escaping () -> Void = {}
     ) {
         self.state = state
         self.onDraftChange = onDraftChange
         self.onSend = onSend
         self.onPhotoSelected = onPhotoSelected
+        self.onBack = onBack
     }
 
     public var body: some View {
-        CustomerScreen(title: providerName.isEmpty ? bzrString("messages.title") : providerName, state: state) {
+        CustomerScreen(
+            title: providerName.isEmpty ? bzrString("messages.title") : providerName,
+            state: state, onBack: onBack
+        ) {
             ProviderHeader(
                 name: providerName, rating: "", services: nil, size: .small,
-                verifiedLabel: bzrString("provider.verified"))
+                verifiedLabel: viewerRole == "PROVIDER" ? nil : bzrString("provider.verified"))
             BzrText(value(state.options, 1), style: DesignType.secondary)
             if state.messageKey == "chat.masking.notice" {
                 InfoBanner(text: bzrString("chat.masking.notice"))
@@ -58,12 +64,15 @@ public struct C19ChatView: View {
                     text: bzrString("chat.add_photo"),
                     onClick: { photoPickerPresented = true }
                 )
-                .photosPicker(isPresented: $photoPickerPresented, selection: $selectedPhoto, matching: .images)
+                .photosPicker(
+                    isPresented: $photoPickerPresented, selection: $selectedPhoto, matching: .images
+                )
                 .onChange(of: selectedPhoto) { _, item in
                     guard let item else { return }
                     Task {
                         guard let data = try? await item.loadTransferable(type: Data.self) else { return }
-                        onPhotoSelected(CustomerMediaUpload(fileName: "chat-image.jpg", mimeType: "image/jpeg", data: data))
+                        onPhotoSelected(
+                            CustomerMediaUpload(fileName: "chat-image.jpg", mimeType: "image/jpeg", data: data))
                     }
                 }
             }
@@ -71,6 +80,7 @@ public struct C19ChatView: View {
     }
 
     private var providerName: String { state.options.first ?? "" }
+    private var viewerRole: String { value(state.options, 3) }
     private func value(_ values: [String], _ index: Int) -> String {
         values.indices.contains(index) ? values[index] : ""
     }

@@ -38,7 +38,12 @@ public struct C14AddressesView: View {
                         VStack(spacing: DesignSpace.s) {
                             SummaryCard(
                                 title: label,
-                                rows: [(.location, state.itemDetails.indices.contains(index) ? state.itemDetails[index] : "")],
+                                rows: [
+                                    (
+                                        .location,
+                                        state.itemDetails.indices.contains(index) ? state.itemDetails[index] : ""
+                                    )
+                                ],
                                 editText: bzrString("common.edit"), onEdit: { onEdit(index) })
                             if state.selectionMode {
                                 Button(

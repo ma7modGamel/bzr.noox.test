@@ -2,6 +2,7 @@ import SnapshotTesting
 import SwiftUI
 import UIKit
 import XCTest
+
 @testable import DesignSystem
 
 /// Same cases and viewport as Android's `ComponentGallerySnapshotTest` (design/fixtures/gallery/components.json).
@@ -12,7 +13,8 @@ import XCTest
 ///    Before that, the test does not fail just because references are missing (43 §8: the reference is
 ///    the approved Android snapshot; the iOS–Android difference is computed by tools/gen-gallery-report).
 final class ComponentGallerySnapshotTests: XCTestCase {
-    private let size = CGSize(width: GalleryFixtures.viewportWidth, height: GalleryFixtures.viewportHeight)
+    private let size = CGSize(
+        width: GalleryFixtures.viewportWidth, height: GalleryFixtures.viewportHeight)
     private let traits = UITraitCollection(traitsFrom: [
         UITraitCollection(displayScale: 1),
         UITraitCollection(layoutDirection: .rightToLeft),
@@ -28,14 +30,17 @@ final class ComponentGallerySnapshotTests: XCTestCase {
         for fixture in GalleryFixtures.snapshotCases {
             let name = "gallery-\(fixture.id)"
             let controller = UIHostingController(
-                rootView: GalleryPage(page: fixture.page, anchorBottom: fixture.anchorBottom, snapshot: true)
-                    .frame(width: size.width, height: size.height)
+                rootView: GalleryPage(
+                    page: fixture.page, anchorBottom: fixture.anchorBottom, snapshot: true
+                )
+                .frame(width: size.width, height: size.height)
             )
             controller.overrideUserInterfaceStyle = .light
 
             let rendered = expectation(description: name)
             strategy.snapshot(controller).run { image in
-                XCTAssertEqual(image.size.width * image.scale, self.size.width, "\(name) must be exported at 1×")
+                XCTAssertEqual(
+                    image.size.width * image.scale, self.size.width, "\(name) must be exported at 1×")
                 try? image.pngData()?.write(to: exportDirectory.appendingPathComponent("\(name).png"))
                 rendered.fulfill()
             }
@@ -51,12 +56,15 @@ final class ComponentGallerySnapshotTests: XCTestCase {
         if let path = ProcessInfo.processInfo.environment["GALLERY_EXPORT_DIR"], !path.isEmpty {
             return URL(fileURLWithPath: path, isDirectory: true)
         }
-        return URL(fileURLWithPath: #filePath).deletingLastPathComponent().appendingPathComponent("__Exports__", isDirectory: true)
+        return URL(fileURLWithPath: #filePath).deletingLastPathComponent().appendingPathComponent(
+            "__Exports__", isDirectory: true)
     }
 
     private static func referenceURL(named name: String) -> URL {
         URL(fileURLWithPath: #filePath)
             .deletingLastPathComponent()
-            .appendingPathComponent("__Snapshots__/ComponentGallerySnapshotTests/test_gallery_pages_match_shared_fixture.\(name).png")
+            .appendingPathComponent(
+                "__Snapshots__/ComponentGallerySnapshotTests/test_gallery_pages_match_shared_fixture.\(name).png"
+            )
     }
 }

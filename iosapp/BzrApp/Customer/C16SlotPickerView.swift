@@ -27,7 +27,8 @@ public struct C16SlotPickerView: View {
                         Button(
                             action: { onDaySelect(index) },
                             label: {
-                                SelectableChip(text: day, state: state.selectedOptionIndex == index ? .selected : .unselected)
+                                SelectableChip(
+                                    text: day, state: state.selectedOptionIndex == index ? .selected : .unselected)
                             }
                         )
                         .buttonStyle(BzrPressStyle())
@@ -42,7 +43,9 @@ public struct C16SlotPickerView: View {
                     HStack(spacing: DesignSpace.m) {
                         SlotChip(label: state.items[start], index: start, state: state, onSelect: onSlotSelect)
                         if state.items.indices.contains(start + 1) {
-                            SlotChip(label: state.items[start + 1], index: start + 1, state: state, onSelect: onSlotSelect)
+                            SlotChip(
+                                label: state.items[start + 1], index: start + 1, state: state,
+                                onSelect: onSlotSelect)
                         } else {
                             Spacer().frame(maxWidth: .infinity)
                         }

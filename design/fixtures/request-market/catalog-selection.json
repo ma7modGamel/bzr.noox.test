@@ -1,0 +1,37 @@
+{
+  "cases": [
+    {
+      "id": "second_category_clears_foreign_problem",
+      "operation": "category",
+      "category_ids": [11, 22],
+      "problem_ids_by_category": [[101, 102], [201, 202]],
+      "selected_index": 1,
+      "current_category_id": 11,
+      "current_problem_id": 102,
+      "expected_category_id": 22,
+      "expected_problem_id": null
+    },
+    {
+      "id": "same_category_preserves_valid_problem",
+      "operation": "category",
+      "category_ids": [11, 22],
+      "problem_ids_by_category": [[101, 102], [201, 202]],
+      "selected_index": 0,
+      "current_category_id": 11,
+      "current_problem_id": 102,
+      "expected_category_id": 11,
+      "expected_problem_id": 102
+    },
+    {
+      "id": "second_problem_keeps_exact_backend_ids",
+      "operation": "problem",
+      "category_ids": [11, 22],
+      "problem_ids_by_category": [[101, 102], [201, 202]],
+      "selected_index": 1,
+      "current_category_id": 22,
+      "current_problem_id": null,
+      "expected_category_id": 22,
+      "expected_problem_id": 202
+    }
+  ]
+}

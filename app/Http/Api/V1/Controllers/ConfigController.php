@@ -12,6 +12,8 @@ use App\Modules\Orders\Enums\TimingType;
 use App\Modules\Payments\Enums\PaymentChannel;
 use App\Modules\Payments\Enums\PaymentMethod;
 use App\Modules\Payments\Services\PaymentChannels;
+use App\Modules\Pricing\Enums\ProposalType;
+use App\Modules\Providers\Enums\PayoutMethod;
 use App\Modules\Settings\Enums\Cfg;
 use App\Modules\Settings\Services\FeatureGate;
 use App\Modules\Settings\Services\SettingsRepository;
@@ -76,6 +78,8 @@ final class ConfigController
             ],
             'option_lists' => [
                 'customer_cancellation_reasons' => $this->enumOptions(CancelReason::forActor(ActorType::Customer)),
+                'provider_cancellation_reasons' => $this->enumOptions(CancelReason::forActor(ActorType::Provider)),
+                'proposal_types' => $this->enumOptions(ProposalType::cases()),
                 'dispute_reasons' => $supportReasons
                     ->get(SupportReasonType::Dispute->value, collect())
                     ->map(fn (SupportReason $reason): array => $reason->toOption())
@@ -91,6 +95,14 @@ final class ConfigController
                 'payment_channels' => $this->enumOptions(PaymentChannel::cases()),
                 // DEC-050 — القنوات المفعّلة من اللوحة فقط؛ التطبيق لا يعرض غيرها.
                 'payment_gateways' => $this->enumOptions($channels->enabled()),
+                'provider_payout_methods' => array_map(
+                    static fn (PayoutMethod $method): array => [
+                        'code' => $method->value,
+                        'label' => $method->getLabel(),
+                        'field_label' => $method->fieldLabel(),
+                    ],
+                    PayoutMethod::cases(),
+                ),
             ],
             'option_defaults' => [
                 'timing_type' => TimingType::Now->value,

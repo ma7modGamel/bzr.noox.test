@@ -574,7 +574,7 @@ body {
 .expired h1 { margin: 0; color: var(--color-navy900); font-size: var(--type-sectiontitle-size); font-weight: var(--type-sectiontitle-weight); }
 CSS;
 
-syncText($root, 'androidapp/core/design/src/main/kotlin/noox/bzr/design/generated/DesignTokens.kt', $kotlin."\n", $checkOnly, $errors, $outputs);
+// DEC-047 step 4: Android is XML Views only; the Compose DesignTokens.kt is no longer generated (values/*.xml are).
 syncText($root, 'androidapp/core/design/src/main/res/values/strings.xml', implode("\n", $androidStrings)."\n", $checkOnly, $errors, $outputs);
 syncText($root, 'androidapp/core/design/src/main/res/values/colors.xml', implode("\n", $androidColors)."\n", $checkOnly, $errors, $outputs);
 require __DIR__.'/gen-design-android-views.php';

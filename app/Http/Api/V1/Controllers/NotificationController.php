@@ -4,16 +4,19 @@ declare(strict_types=1);
 
 namespace App\Http\Api\V1\Controllers;
 
+use App\Http\Middleware\ResolveAppMode;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Notifications\DatabaseNotification;
 
-/** C32 — القائمة الداخلية تبقى متاحة حتى عند فشل Push. */
+/** C32 — القائمة الداخلية تبقى متاحة حتى عند فشل Push (EC-22)، ومصفّاة حسب `X-App-Mode` (DEC-058). */
 final class NotificationController
 {
     public function index(Request $request): JsonResponse
     {
-        $notifications = $request->user()->notifications()->paginate(20);
+        $notifications = $this->forMode($request->user()->notifications(), $request)->paginate(20);
 
         return new JsonResponse([
             'data' => $notifications->getCollection()->map(
@@ -30,7 +33,7 @@ final class NotificationController
             'meta' => [
                 'current_page' => $notifications->currentPage(),
                 'last_page' => $notifications->lastPage(),
-                'unread_count' => $request->user()->unreadNotifications()->count(),
+                'unread_count' => self::unreadCount($request),
             ],
         ]);
     }
@@ -47,5 +50,21 @@ final class NotificationController
             ->update(['read_at' => now()]);
 
         return new JsonResponse(status: 204);
+    }
+
+    /** يُستخدم أيضًا في رئيسية الفني (P08). */
+    public static function unreadCount(Request $request): int
+    {
+        return (new self)->forMode($request->user()->unreadNotifications(), $request)->count();
+    }
+
+    /** الإشعارات القديمة بلا `app_mode` تُعد إشعارات عميل. */
+    private function forMode(MorphMany $query, Request $request): MorphMany
+    {
+        $mode = (string) $request->attributes->get('app_mode', ResolveAppMode::CUSTOMER);
+
+        return $query->where(fn (Builder $q) => $mode === ResolveAppMode::CUSTOMER
+            ? $q->where('app_mode', $mode)->orWhereNull('app_mode')
+            : $q->where('app_mode', $mode));
     }
 }

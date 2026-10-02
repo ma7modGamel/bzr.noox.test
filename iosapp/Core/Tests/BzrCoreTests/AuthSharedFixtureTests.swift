@@ -13,9 +13,11 @@ final class AuthSharedFixtureTests: XCTestCase {
         ]
         var count = 0
         for path in fixturePaths {
-            let fixture = try JSONDecoder().decode(AuthFixture.self, from: Data(contentsOf: repositoryRoot().appendingPathComponent(path)))
+            let fixture = try JSONDecoder().decode(
+                AuthFixture.self, from: Data(contentsOf: repositoryRoot().appendingPathComponent(path)))
             for testCase in fixture.cases {
-                let actual = AuthLogic.reduce(screen: fixture.screen, input: testCase.input.mapValues(\.authValue))
+                let actual = AuthLogic.reduce(
+                    screen: fixture.screen, input: testCase.input.mapValues(\.authValue))
                 let label = "\(fixture.screen)/\(testCase.id)"
                 XCTAssertEqual(actual.phase.rawValue, testCase.expected.phase, label)
                 XCTAssertEqual(actual.canSubmit, testCase.expected.canSubmit, label)

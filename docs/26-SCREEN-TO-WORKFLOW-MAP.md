@@ -28,7 +28,7 @@
 | SCR-P11 | OPEN | `withdrawOffer` (O-02) |
 | SCR-P12 | CONFIRMED | `startTrip` (T-05)، `backOut` (T-06) |
 | SCR-P13 | ON_THE_WAY | `sendLocation`، `markArrived` (T-10)، `backOut` (T-07) |
-| SCR-P14 | ARRIVED | `startWork` (T-11)، `submitProposal(EXECUTION_QUOTE)` (T-12)، `completeInspectionOnly` (T-13)، `reportUnableToPerform` / `reportCustomerNoShow` (T-16)، `openDispute` |
+| SCR-P14 | ARRIVED | `startWork` (T-11)، `submitProposal(EXECUTION_QUOTE)` (T-12، مع دليل السعر وسبب الخروج في وضع الموظفين — BR-046)، `completeInspectionOnly` (T-13)، `reportUnableToPerform` / `reportCustomerNoShow` (T-16)، `openDispute` |
 | SCR-P15، P20 | IN_PROGRESS | `submitProposal`، `withdrawProposal`، `completeWork` (T-17)، `reportUnableToPerform` (T-18) |
 | SCR-P16 | AWAITING_PAYMENT | `confirmCashReceived` (T-19)، `openDispute` |
 | SCR-P17 | CLOSED | `rateCustomer` |

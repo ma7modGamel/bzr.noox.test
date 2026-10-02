@@ -33,12 +33,15 @@ public struct C23CompletionView: View {
                     onClick: { onAction("confirm_completion") })
             }
             if state.visibleActions.contains("open_dispute") {
-                SecondaryButton(text: bzrString("completion.report_problem"), onClick: { onAction("open_dispute") })
+                SecondaryButton(
+                    text: bzrString("completion.report_problem"), onClick: { onAction("open_dispute") })
             }
         }
     }
 }
 
-private extension Array {
-    subscript(safe index: Index) -> Element? { indices.contains(index) ? self[index] : nil }
+extension Array {
+    fileprivate subscript(safe index: Index) -> Element? {
+        indices.contains(index) ? self[index] : nil
+    }
 }

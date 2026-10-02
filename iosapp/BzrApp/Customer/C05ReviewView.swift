@@ -20,17 +20,27 @@ public struct C05ReviewView: View {
         CustomerScreen(title: bzrString("request.review.title"), state: state) {
             SummaryCard(
                 title: bzrString("summary.title"),
-                rows: [
-                    (.home, bzrString("request.review.service")), (.edit, bzrString("request.review.description")),
-                    (.location, bzrString("request.address.value")), (.calendar, bzrString("request.slot.value")),
-                ], editText: bzrString("common.edit"))
+                rows: state.items.enumerated().map { index, value in
+                    (index == 0 ? .home : .edit, value)
+                }
+                    + state.itemDetails.enumerated().map { index, value in
+                        (index == 0 ? .location : .calendar, value)
+                    } + state.itemStates.map { (.orders, $0) },
+                editText: bzrString("common.edit"))
             if !state.showPricing { InfoBanner(text: bzrString("request.staff.pricing")) }
             Button(action: onTermsChange) {
                 CheckRow(text: bzrString("request.review.terms"), checked: state.termsError == nil)
             }
             .buttonStyle(BzrPressStyle())
             if state.termsError != nil { InfoBanner(text: bzrString("request.terms.required")) }
-            PrimaryButton(text: bzrString("request.publish"), state: state.canContinue ? .normal : .disabled, onClick: onPublish)
+            // A refused publish shows the server's reason here (SCR-C05 §الأخطاء).
+            if state.messageKey == "request.publish.error" {
+                WarningBox(text: (state.fieldValues.first ?? "").isEmpty ? bzrString("error.body") : state.fieldValues[0])
+            }
+            PrimaryButton(
+                text: bzrString("request.publish"),
+                state: state.isBusy ? .loading : (state.canContinue ? .normal : .disabled),
+                onClick: onPublish)
         }
     }
 }

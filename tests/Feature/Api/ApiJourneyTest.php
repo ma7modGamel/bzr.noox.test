@@ -91,6 +91,11 @@ final class ApiJourneyTest extends TestCase
         $customer = User::factory()->create();
         $address = CustomerAddress::factory()->create(['user_id' => $customer->id]);
         $category = Category::query()->where('name', 'سباكة')->sole();
+        // BR-046: عرض التنفيذ في وضع الموظفين يتطلب دليل سعر فعّالًا لنوع المشكلة.
+        $category->problemTypes()->where('is_other', false)->firstOrFail()->update([
+            'employee_price_min' => '300.00',
+            'employee_price_max' => '500.00',
+        ]);
 
         // 1) العميل ينشر الطلب
         $publish = $this->actingAs($customer, 'sanctum')

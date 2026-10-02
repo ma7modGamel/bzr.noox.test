@@ -1,0 +1,10 @@
+{
+  "screen": "SCR-P03",
+  "cases": [
+    {"id":"empty","input":{"event":"validate","id_front_uploaded":false,"id_back_uploaded":false},"expected":{"phase":"empty","can_continue":false,"field_errors":["provider.onboarding.identity.required"]}},
+    {"id":"front_only","input":{"event":"validate","id_front_uploaded":true,"id_back_uploaded":false},"expected":{"phase":"content","can_continue":false,"field_errors":["provider.onboarding.identity.required"],"has_id_front":true}},
+    {"id":"complete","input":{"event":"validate","id_front_uploaded":true,"id_back_uploaded":true},"expected":{"phase":"content","can_continue":true,"has_id_front":true,"has_id_back":true}},
+    {"id":"uploading","input":{"event":"uploading","id_front_uploaded":true,"id_back_uploaded":false},"expected":{"phase":"content","can_continue":false,"is_busy":true}},
+    {"id":"invalid_media","input":{"event":"media_error","id_front_uploaded":false,"id_back_uploaded":false},"expected":{"phase":"content","can_continue":false,"message_key":"media.error.invalid"}}
+  ]
+}

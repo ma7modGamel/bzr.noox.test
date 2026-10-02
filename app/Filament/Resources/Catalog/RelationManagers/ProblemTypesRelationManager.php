@@ -29,7 +29,21 @@ final class ProblemTypesRelationManager extends RelationManager
             TextInput::make('sort')->label('الترتيب')->numeric()->integer()->default(0),
             Toggle::make('is_other')
                 ->label('"مشكلة أخرى"')
-                ->helperText('يجعل وصف الطلب إلزاميًا (BR-013). نوع واحد لكل فئة.'),
+                ->helperText('يجعل وصف الطلب إلزاميًا، ويعفيه من إلزام دليل السعر مع تعليم كل سعر للمراجعة.'),
+            TextInput::make('employee_price_min')
+                ->label('أقل مصنعية')
+                ->numeric()
+                ->minValue(0.01)
+                ->prefix('ج.م'),
+            TextInput::make('employee_price_max')
+                ->label('أعلى مصنعية')
+                ->numeric()
+                ->minValue(0.01)
+                ->gte('employee_price_min')
+                ->prefix('ج.م'),
+            TextInput::make('employee_price_notes')
+                ->label('ملاحظات دليل السعر')
+                ->maxLength(2000),
             Toggle::make('is_active')->label('مفعّل')->default(true),
         ]);
     }
@@ -42,6 +56,8 @@ final class ProblemTypesRelationManager extends RelationManager
             ->columns([
                 TextColumn::make('name')->label('النوع')->searchable(),
                 IconColumn::make('is_other')->label('"مشكلة أخرى"')->boolean(),
+                TextColumn::make('employee_price_min')->label('من')->money('EGP'),
+                TextColumn::make('employee_price_max')->label('إلى')->money('EGP'),
                 IconColumn::make('is_active')->label('مفعّل')->boolean(),
             ])
             ->headerActions([CreateAction::make()->label('إضافة نوع')])

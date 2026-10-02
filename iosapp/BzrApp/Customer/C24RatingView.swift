@@ -31,7 +31,11 @@ public struct C24RatingView: View {
                 value: state.fieldValues.first ?? "", state: state.fieldErrors.isEmpty ? .filled : .error,
                 error: state.fieldErrors.first.map(errorText), onValueChange: onCommentChange)
             if let message = state.messageKey {
-                if message == "rating.success" { InfoBanner(text: bzrString(message)) } else { WarningBox(text: bzrString(message)) }
+                if message == "rating.success" {
+                    InfoBanner(text: bzrString(message))
+                } else {
+                    WarningBox(text: bzrString(message))
+                }
             }
             if state.visibleActions.contains("rate") {
                 PrimaryButton(
@@ -42,7 +46,9 @@ public struct C24RatingView: View {
         }
     }
 
-    private func rating(_ index: Int) -> Int { state.ratings.indices.contains(index) ? state.ratings[index] : 0 }
+    private func rating(_ index: Int) -> Int {
+        state.ratings.indices.contains(index) ? state.ratings[index] : 0
+    }
     private func errorText(_ key: String) -> String { bzrString(key) }
 }
 
@@ -56,7 +62,9 @@ private struct RatingRow: View {
             BzrText(label, style: DesignType.cardTitle)
             HStack(spacing: DesignSpace.s) {
                 ForEach(1...5, id: \.self) { value in
-                    IconSquareButton(label: "\(label) \(value)", icon: value <= selected ? .starFilled : .star) {
+                    IconSquareButton(
+                        label: "\(label) \(value)", icon: value <= selected ? .starFilled : .star
+                    ) {
                         onSelect(value)
                     }
                 }

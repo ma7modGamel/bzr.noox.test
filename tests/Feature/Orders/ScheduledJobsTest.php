@@ -110,6 +110,11 @@ final class ScheduledJobsTest extends TestCase
         $order = app(AssignProviderAction::class)->execute($order, $provider, Admin::factory()->create());
         $order = app(StartTripAction::class)->execute($order, $provider);
         $order = app(MarkArrivedAction::class)->execute($order, $provider, 30.0600, 31.3400);
+        // BR-046: عرض التنفيذ في وضع الموظفين يتطلب دليل سعر فعّالًا لنوع المشكلة.
+        $order->problemType()->firstOrFail()->update([
+            'employee_price_min' => '300.00',
+            'employee_price_max' => '500.00',
+        ]);
 
         $quote = app(SubmitProposalAction::class)->execute(
             $order, $provider, ProposalType::ExecutionQuote, '450.00', 'يحتاج تغيير المواسير',

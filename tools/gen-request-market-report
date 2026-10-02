@@ -1,0 +1,99 @@
+#!/usr/bin/env php
+<?php
+
+declare(strict_types=1);
+
+$root = dirname(__DIR__);
+$output = $root.'/reports/batch-6b/request-market';
+$androidOutput = $output.'/android';
+$referenceOutput = $output.'/reference';
+foreach ([$androidOutput, $referenceOutput] as $directory) {
+    if (! is_dir($directory) && ! mkdir($directory, 0775, true) && ! is_dir($directory)) {
+        throw new RuntimeException('Cannot create batch 6b report output.');
+    }
+}
+
+$references = [
+    'SCR-C01' => 'C01-home.jpeg',
+    'SCR-C03' => 'C03-request-step1-service.jpeg',
+    'SCR-C04' => 'C04-request-step2-visit.jpeg',
+    'SCR-C05' => 'C05-request-step3-review.jpeg',
+    'SCR-C06' => 'C06-offers-list.jpeg',
+    'SCR-C07' => 'C07-provider-profile.jpeg',
+    'SCR-C08' => 'C08-confirm-selection.jpeg',
+    // C36 has no original mock; its visual reference is SCR-C09 in the OPEN state (SCR-C36.md).
+    'SCR-C36' => null,
+];
+$rows = [];
+$snapshotCount = 0;
+$caseCount = 0;
+foreach (array_keys($references) as $screen) {
+    $fixture = json_decode(
+        (string) file_get_contents($root.'/design/fixtures/'.$screen.'/cases.json'),
+        true,
+        flags: JSON_THROW_ON_ERROR,
+    );
+    $caseCount += count($fixture['cases']);
+    $reference = $references[$screen];
+    if ($reference !== null) {
+        copy($root.'/design/reference/'.$reference, $referenceOutput.'/'.$reference);
+    }
+    foreach ($fixture['cases'] as $case) {
+        if (! ($case['snapshot'] ?? true)) {
+            continue;
+        }
+        $id = $screen.'-'.$case['id'];
+        $matches = glob($root.'/androidapp/app/src/test/snapshots/images/*_'.strtolower($id).'.png') ?: [];
+        if (count($matches) !== 1) {
+            throw new RuntimeException("Missing Android snapshot for {$id}");
+        }
+        $target = 'android/'.$id.'.png';
+        copy($matches[0], $output.'/'.$target);
+        $rows[] = '<section class="comparison" id="'.htmlspecialchars($id).'">'
+            .'<header><strong>'.htmlspecialchars($screen).' · '.htmlspecialchars((string) $case['id']).'</strong>'
+            .'<code>'.htmlspecialchars((string) $case['expected']['phase']).'</code></header><div class="columns">'
+            .($reference === null
+                ? '<article><h2>المرجع الأصلي</h2><div class="pending">لا يوجد نموذج أصلي؛ المرجع SCR-C09 في حالة OPEN بلا خريطة ولا عداد.</div></article>'
+                : '<article><h2>المرجع الأصلي</h2><a href="reference/'.htmlspecialchars($reference).'">'
+                    .'<img src="reference/'.htmlspecialchars($reference).'" alt="'.htmlspecialchars($screen).' reference" loading="lazy"></a></article>')
+            .'<article><h2>Android · XML/Paparazzi</h2><a href="'.htmlspecialchars($target).'">'
+            .'<img src="'.htmlspecialchars($target).'" alt="'.htmlspecialchars($id).'" loading="lazy"></a></article>'
+            .'<article><h2>iOS · SwiftUI</h2><div class="pending">Swift Core وملف SwiftUI اجتازا فحوص Linux؛ البناء والرسم واللقطة مؤجلة لدفعة «تحقق iOS».</div></article>'
+            .'</div></section>';
+        $snapshotCount++;
+    }
+}
+
+$runtimeCaptions = [
+    '01-open-order-c36.png' => 'وضع الموظفين: فتح طلب OPEN من الرئيسية يفتح C36، وزر الرجوع يعيد للرئيسية.',
+    '02-c04-staff.png' => 'C04 بعنوان الحساب الحقيقي وخيارات الخامات من /config و«المعاينة مجانية».',
+    '03-c05-review.png' => 'C05 بملخص المسودة الفعلية (كهرباء — لوحة كهرباء).',
+    '04-after-publish.png' => 'بعد النشر: الطلب #2 منشور بالفئة والمشكلة المختارتين، وC36 «جارٍ تعيين فني».',
+    'fix-01-back-to-c03.png' => 'إصلاح 1: رجوع الشريط من C04 يعيد C03 بالاختيار نفسه، ورجوع النظام يعيد للرئيسية ثم يغلق التطبيق منها.',
+    'fix-02-category-unavailable.png' => 'إصلاح 3: عنوان في مدينة لا تخدم الفئة يظهر التنبيه في C04 ويمنع المتابعة قبل رفض النشر.',
+    'fix-04-publish-refused.png' => 'إصلاح 2: رفض الخادم للنشر (حد الطلبات المفتوحة) يبقى على C05 برسالته، لا على C36 كخطأ شبكة.',
+    'fix-06-c04-slot-label.png' => 'إصلاح 5 ومعه: «موعد محدد» يعرض الموعد المختار «غدًا · 1:00 م–3:00 م» أو دعوة للاختيار، بلا تاريخ ثابت.',
+    'fix-07-c05-slot-row.png' => 'إصلاح 4 ومعه: صف الموعد في C05 باسمه لا برمزه، والطلب يُحفظ بالموعد الصحيح (الخميس 1 أكتوبر 13:00–15:00).',
+];
+$runtime = '<section class="intro"><h2>أدلة التشغيل — Android على المحاكي مع الخادم</h2></section>';
+foreach ($runtimeCaptions as $file => $caption) {
+    $runtime .= '<section class="comparison"><header><strong>'.htmlspecialchars($caption).'</strong></header>'
+        .'<a href="runtime/'.$file.'"><img src="runtime/'.$file.'" alt="'.htmlspecialchars($file).'" loading="lazy"></a></section>';
+}
+
+$html = '<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8">'
+    .'<meta name="viewport" content="width=device-width,initial-scale=1"><title>الدفعة 6ب — إنشاء الطلب والسوق</title>'
+    .'<link rel="stylesheet" href="../../../design/generated/tokens.css"><style>'
+    .'*{box-sizing:border-box}body{margin:0;padding:var(--space-xl);background:var(--color-surfacealt);color:var(--color-navy800);font-family:var(--font-family),sans-serif}'
+    .'main{max-width:1450px;margin:auto}.intro,.comparison{background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-card);padding:var(--space-l);margin-bottom:var(--space-l)}'
+    .'header{display:flex;justify-content:space-between;gap:var(--space-m);align-items:center}.columns{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--space-l)}'
+    .'img{width:100%;max-width:400px;aspect-ratio:1/2;object-fit:contain;object-position:top;border:1px solid var(--color-border);border-radius:var(--radius-card)}'
+    .'.pending{min-height:400px;display:grid;place-items:center;text-align:center;padding:var(--space-l);border:1px dashed var(--color-border);border-radius:var(--radius-card);color:var(--color-slate500)}'
+    .'.notice{background:var(--color-primary50info);border-radius:var(--radius-card);padding:var(--space-m)}@media(max-width:1000px){.columns{grid-template-columns:1fr}}'
+    .'</style></head><body><main><section class="intro"><h1>الدفعة 6ب — ربط إنشاء الطلب والسوق</h1>'
+    .'<p>'.$snapshotCount.' لقطة Android من '.$caseCount.' حالة مشتركة لـ C01 وC03–C08 وC36، مع C04 لأنها تحمل بقية مسودة النشر.</p><p>C36 «جارٍ تعيين فني» مضافة بعد مراجعة المالك: وجهة النشر وفتح الطلب المفتوح في وضع الموظفين.</p>'
+    .'<p class="notice"><strong>بوابة الاعتماد:</strong> راجع بيانات الكتالوج والملخص والعروض وملف الفني وتأكيد العرض. لا تُغلق 6ب قبل اعتماد هذه الصفحة.</p>'
+    .'</section>'.implode("\n", $rows).$runtime.'</main></body></html>';
+
+file_put_contents($output.'/comparison.html', $html);
+fwrite(STDOUT, "Generated reports/batch-6b/request-market/comparison.html ({$snapshotCount} snapshots, {$caseCount} cases)\n");

@@ -1,0 +1,11 @@
+{
+  "screen": "SCR-P07",
+  "cases": [
+    {"id":"loading","input":{"event":"loading"},"expected":{"phase":"loading","can_continue":false}},
+    {"id":"error","input":{"event":"error"},"expected":{"phase":"error","can_continue":false,"message_key":"error.body"}},
+    {"id":"pending","input":{"event":"loaded","status":"PENDING_REVIEW","display_status":"provider.application.pending","available_actions":[]},"expected":{"phase":"content","can_continue":true,"message_key":"provider.application.pending"}},
+    {"id":"rejected","input":{"event":"loaded","status":"REJECTED","display_status":"provider.application.rejected","reason":"صورة البطاقة غير واضحة","available_actions":["resubmit_provider_application","submit_provider_application"]},"expected":{"phase":"content","can_continue":true,"message_key":"provider.application.rejected","visible_actions":["resubmit_provider_application","submit_provider_application"],"item_count":1}},
+    {"id":"active","input":{"event":"loaded","status":"ACTIVE","display_status":"provider.application.active","available_actions":["open_provider_home"]},"expected":{"phase":"content","can_continue":true,"message_key":"provider.application.active","visible_actions":["open_provider_home"]}},
+    {"id":"suspended","input":{"event":"loaded","status":"SUSPENDED","display_status":"provider.application.suspended","reason":"الحساب موقوف للمراجعة","available_actions":[]},"expected":{"phase":"content","can_continue":true,"message_key":"provider.application.suspended","item_count":1}}
+  ]
+}

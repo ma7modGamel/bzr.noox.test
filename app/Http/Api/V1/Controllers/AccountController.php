@@ -29,6 +29,7 @@ final class AccountController
             'name' => ['sometimes', 'string', 'min:2', 'max:100'],
             'phone' => ['sometimes', 'regex:/^01[0-9]{9}$/'],
             'avatar_media_id' => ['sometimes', 'nullable', 'integer'],
+            'rating_reminders_enabled' => ['sometimes', 'boolean'], // NTF-18 فقط (17، DEC-058)
         ]);
 
         /** @var User $user */
@@ -108,6 +109,7 @@ final class AccountController
             'phone' => $user->phone,
             'avatar_url' => $user->avatar_path === null ? null : route('api.account.avatar'),
             'is_verified' => $user->isVerified(),
+            'rating_reminders_enabled' => (bool) ($user->rating_reminders_enabled ?? true),
             // BR-018 — C05 يعرض الموافقة فقط عند نسخة شروط لم يوافق عليها العميل بعد.
             'terms' => [
                 'current_version' => app(TermsService::class)->currentVersion(),

@@ -9,9 +9,10 @@ namespace App\Support\Exceptions;
  */
 final class BusinessRuleViolationException extends DomainException
 {
-    public static function rule(string $rule, string $message): self
+    /** @param array<string, mixed> $context */
+    public static function rule(string $rule, string $message, array $context = []): self
     {
-        return new self($message, ['rule' => $rule]);
+        return new self($message, ['rule' => $rule, ...$context]);
     }
 
     public function errorCode(): string

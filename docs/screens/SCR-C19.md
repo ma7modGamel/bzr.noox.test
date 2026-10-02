@@ -2,17 +2,17 @@
 
 - النمط: خاص — محادثة.
 - المرجع البصري: 43 §4 (`ProviderHeader` + `ChatBubble` + `ChatInput`).
-- الطرف والوضع: العميل — السوق والموظفين.
-- الدخول من: C18 أو إجراء `chat` في C07/C09 · الخروج إلى: الشاشة السابقة.
+- الطرف والوضع: العميل والفني — السوق والموظفين؛ نفس الشاشة تتغير فيها هوية الطرف المقابل حسب الدور.
+- الدخول من: C18 أو إجراء `chat` في C07/C09/P12..P16 · الخروج إلى: الشاشة السابقة.
 - القواعد: BR-100..BR-102، BR-014 للصور، 18، 23.
-- الـ API: `GET /conversations/{conversation}/messages?page={page}` و`POST /conversations/{conversation}/messages`، ورفع الصورة أولًا عبر `POST /media`.
+- الـ API: `GET /conversations`، `GET /conversations/{conversation}/messages?page={page}` و`POST /conversations/{conversation}/messages`، ورفع الصورة أولًا عبر `POST /media`.
 - التخطيط (من أعلى لأسفل):
-  1. `AppTopBar` بعنوان اسم الفني المختصر، وتحته رقم الطلب وحالته.
+  1. `AppTopBar` بعنوان الطرف المقابل: اسم الفني المختصر للعميل، واسم العميل للفني بلا شارة توثيق؛ وتحته رقم الطلب وحالته.
   2. في الطلب `OPEN`: `InfoBanner` بالمفتاح `chat.masking.notice`. إذا أعاد الخادم رسالة محجوبة تعرض فقاعة `ChatBubble(kind=blocked)` بالنص المعاد ومفتاح `chat.masked.label`.
   3. الرسائل من الأقدم للأحدث: المرسلة `ChatBubble(sent=true)` والمستلمة `sent=false`، والصور `kind=image`. وقت الرسالة نص ثانوي ملاصق لها.
   4. عند `status=OPEN`: `ChatInput` للنص، وإجراء `chat.add_photo` بعد التأكيد فقط. عند `READ_ONLY`: `InfoBanner` بالمفتاح `chat.read_only` بدل أدوات الإرسال.
 - السلوك: يعاد الاستعلام كل 5 ثوانٍ ما دامت الشاشة ظاهرة. الإرسال يقبل نصًا حتى 1000 حرف أو حتى 5 صور؛ الزر لا يعمل مع رسالة فارغة. `was_masked` من الخادم هو المصدر الوحيد لعرض حالة الحجب. الأزرار التي تفتح المحادثة تظهر فقط مع `chat` في `available_actions`، أما قابلية الإرسال داخلها فمن `conversation.status`.
 - الحالات: تحميل / خطأ / محادثة فارغة / رسائل نصية / رسالة محجوبة / صور / إرسال جارٍ / للقراءة فقط.
 - الأخطاء: `404` لمحادثة غير مملوكة يعيد C18؛ `BUSINESS_RULE_VIOLATION` مع BR-101/BR-102 يعيد تحميل المحادثة ويعرض سبب عدم الإرسال؛ `VALIDATION_FAILED` يظهر بجوار الإدخال.
-- fixtures: `design/fixtures/SCR-C19/cases.json`.
+- fixtures: `design/fixtures/SCR-C19/cases.json` وتشمل منظور العميل ومنظور الفني.
 - أسئلة مفتوحة: لا يوجد.

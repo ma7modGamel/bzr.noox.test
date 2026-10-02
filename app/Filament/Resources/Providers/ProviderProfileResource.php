@@ -5,12 +5,15 @@ declare(strict_types=1);
 namespace App\Filament\Resources\Providers;
 
 use App\Filament\Resources\Providers\Pages\ListProviderProfiles;
+use App\Filament\Resources\Providers\Pages\ViewProviderProfile;
+use App\Filament\Resources\Providers\Schemas\ProviderProfileInfolist;
 use App\Filament\Resources\Providers\Tables\ProviderProfilesTable;
 use App\Filament\Support\NavigationGroups;
 use App\Modules\Providers\Enums\ProviderStatus;
 use App\Modules\Providers\Models\ProviderProfile;
 use BackedEnum;
 use Filament\Resources\Resource;
+use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 
@@ -34,10 +37,16 @@ final class ProviderProfileResource extends Resource
         return ProviderProfilesTable::configure($table);
     }
 
+    public static function infolist(Schema $schema): Schema
+    {
+        return ProviderProfileInfolist::configure($schema);
+    }
+
     public static function getPages(): array
     {
         return [
             'index' => ListProviderProfiles::route('/'),
+            'view' => ViewProviderProfile::route('/{record}'),
         ];
     }
 

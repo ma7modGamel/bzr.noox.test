@@ -6,7 +6,9 @@ namespace App\Modules\Support\Actions;
 
 use App\Modules\Identity\Models\Admin;
 use App\Modules\Orders\Enums\ActorType;
+use App\Modules\Orders\Enums\OrderEventCode;
 use App\Modules\Orders\Models\Order;
+use App\Modules\Orders\Models\OrderEvent;
 use App\Modules\Orders\Services\OrderClosure;
 use App\Modules\Orders\Services\OrderTermination;
 use App\Modules\Orders\StateMachine\OrderStateMachine;
@@ -14,6 +16,7 @@ use App\Modules\Support\Enums\DisputeResolution;
 use App\Modules\Support\Enums\DisputeStatus;
 use App\Modules\Support\Models\Dispute;
 use App\Support\Exceptions\BusinessRuleViolationException;
+use Illuminate\Support\Facades\DB;
 
 /**
  * T-23 / T-24 — قرار النزاع (16 §قرار النزاع). كل قرار يُسجَّل باسم المسؤول (AC-ADM-03).
@@ -40,6 +43,10 @@ final readonly class ResolveDisputeAction
 
         if (mb_strlen(trim($note)) < 5) {
             throw BusinessRuleViolationException::rule('BR-120', 'ملاحظة القرار إلزامية.');
+        }
+
+        if ($dispute->is_post_close) {
+            return $this->resolveAfterClose($order, $dispute, $admin, $resolution, $note);
         }
 
         $cancels = $resolution === DisputeResolution::CancelFullRefund;
@@ -77,5 +84,41 @@ final readonly class ResolveDisputeAction
             refType: 'dispute',
             refId: $dispute->getKey(),
         );
+    }
+
+    /**
+     * BR-120 — نزاع بعد الإغلاق: الطلب يبقى CLOSED بلا انتقال، ويُسجَّل القرار في 24 (EVT-081).
+     * الاسترداد الجزئي/الكلي يُسجَّل مستقلًا من صلاحية المدير العام (DEC-019).
+     */
+    private function resolveAfterClose(Order $order, Dispute $dispute, Admin $admin, DisputeResolution $resolution, string $note): Order
+    {
+        if (! in_array($resolution, [DisputeResolution::CloseAsIs, DisputeResolution::CloseWithRefund], true)) {
+            throw BusinessRuleViolationException::rule('BR-120', 'النزاع بعد الإغلاق يُحسم بإبقاء الطلب مغلقًا، مع استرداد أو بدونه.');
+        }
+
+        DB::transaction(function () use ($order, $dispute, $admin, $resolution, $note): void {
+            $dispute->forceFill([
+                'status' => DisputeStatus::Resolved,
+                'resolution' => $resolution,
+                'resolution_note' => $note,
+                'resolved_by' => $admin->getKey(),
+                'resolved_at' => now(),
+            ])->save();
+
+            OrderEvent::query()->create([
+                'order_id' => $order->getKey(),
+                'event_code' => OrderEventCode::DisputeResolved,
+                'actor_type' => ActorType::Admin,
+                'actor_id' => $admin->getKey(),
+                'from_status' => $order->status,
+                'to_status' => $order->status,
+                'ref_type' => 'dispute',
+                'ref_id' => $dispute->getKey(),
+                'meta' => ['resolution' => $resolution->value, 'note' => $note, 'post_close' => true],
+                'created_at' => now(),
+            ]);
+        });
+
+        return $order->refresh();
     }
 }

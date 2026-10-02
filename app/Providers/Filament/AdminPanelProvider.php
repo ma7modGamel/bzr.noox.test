@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Providers\Filament;
 
 use App\Filament\Support\NavigationGroups;
+use Filament\Auth\MultiFactor\App\AppAuthentication;
 use Filament\Enums\ThemeMode;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
@@ -36,6 +37,8 @@ final class AdminPanelProvider extends PanelProvider
             ->path('admin')
             ->authGuard('admin')          // حسابات منفصلة عن المستخدمين (03)
             ->login()
+            // ASM-14، DEC-060 — TOTP إلزامي؛ الحساب بلا إعداد يُحوَّل لإعداده قبل أي صفحة.
+            ->multiFactorAuthentication([AppAuthentication::make()->recoverable()], isRequired: true)
             ->brandName(config('app.name').' — لوحة التشغيل')
             ->colors([
                 'primary' => Color::hex('#149C94'), // primary-600 (38 §1)

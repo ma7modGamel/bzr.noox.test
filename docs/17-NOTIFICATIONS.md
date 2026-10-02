@@ -53,4 +53,78 @@
 داخل اللوحة فقط (عدادات 16)، بلا Push أو بريد في النسخة الأولى.
 
 ## الإعدادات للمستخدم
-المستخدم يستطيع إيقاف NTF-18 فقط. باقي الإشعارات تشغيلية ولا تُعطَّل.
+المستخدم يستطيع إيقاف NTF-18 فقط من C33 (`rating_reminders_enabled`، مفعّل افتراضيًا). باقي الإشعارات تشغيلية ولا تُعطَّل.
+
+## الإرسال وإعادة المحاولة (DEC-058)
+1. الحدث يُكتب في `notifications` داخل التطبيق أولًا، مع `code` و`title` و`body` و`deep_link` و`app_mode` و`order_id` إن وُجد.
+2. بعد الحفظ تُرسل مهمة Push مستقلة في الطابور لكل رمز في `device_tokens` للمستخدم. الرموز تشمل كل الأوضاع، ويحدد `app_mode` في الحمولة الوضع المطلوب.
+3. الإرسال عبر **FCM HTTP v1** للمنصتين. iOS يستقبل عبر APNs من خلال Firebase Messaging.
+4. **EC-22:** كل مهمة لها 3 محاولات بفواصل 10 ثوانٍ ثم 60 ثم 300، عند انقطاع الشبكة أو 429 أو 5xx. الرمز غير الصالح (`UNREGISTERED` أو 404، أو `INVALID_ARGUMENT` للرمز) يُحذف فورًا بلا إعادة. خطأ الاعتماد (401/403) يسجَّل كخطأ تشغيل ولا يُعاد. فشل Push لا يحذف الإشعار الداخلي ولا يوقف أي إجراء.
+5. البريد، إن كان للرمز بريد، يُرسل من الطابور مستقلًا عن Push. فشل أحدهما لا يؤثر في الآخر.
+6. `PUSH_DRIVER=fcm` في staging وproduction. القيمة `log` للتطوير والاختبار فقط: تسجّل الرمز `NTF-xx` ورقم الإشعار، بلا رمز جهاز أو نص.
+7. السجلات لا تحتوي رمز الجهاز كاملًا ولا نص الإشعار (32).
+
+### حمولة Push
+```json
+{
+  "notification": {"title": "…", "body": "…"},
+  "data": {"notification_id": "uuid", "code": "NTF-08", "deep_link": "bremo://orders/42", "app_mode": "CUSTOMER"},
+  "android": {"priority": "HIGH", "notification": {"channel_id": "orders", "tag": "order-42"}},
+  "apns": {"payload": {"aps": {"sound": "default", "thread-id": "order-42"}}}
+}
+```
+قنوات Android: `orders` للطلبات والمال، و`messages` لـNTF-25، و`account` لـNTF-22..24. `tag` و`thread-id` يجمعان إشعارات الطلب الواحد.
+
+**الخصوصية:** NTF-25 لا يحمل نص الرسالة أبدًا في Push ولا في القائمة. نصه: «رسالة جديدة بخصوص طلب #n».
+
+## الروابط العميقة (DEC-058)
+المخطط `bremo://`. الخادم يضع الرابط في الإشعار، والتطبيق يطابقه مع القائمة المغلقة التالية فقط. أي رابط غير معروف يفتح C32 للوضع نفسه.
+
+| الرابط | الوضع | الشاشة |
+|---|---|---|
+| `bremo://orders/{id}` | عميل | شاشة الطلب حسب حالته (C06/C09/C21/C23…) كما يفتحها C25 |
+| `bremo://orders/{id}/offers` | عميل | C06 |
+| `bremo://orders/{id}/chat` | عميل | C19 |
+| `bremo://orders/{id}/rating` | عميل | C24 |
+| `bremo://orders/{id}/dispute` | عميل | C27 |
+| `bremo://notifications` | عميل | C32 |
+| `bremo://provider/requests/{id}` | فني | P09 |
+| `bremo://provider/offers` | فني | P11 |
+| `bremo://provider/orders/{id}` | فني | شاشة الطلب النشط حسب حالته، أو P17 للمغلق |
+| `bremo://provider/orders/{id}/chat` | فني | C19 بمنظور الفني |
+| `bremo://provider/orders/{id}/rating` | فني | P17 |
+| `bremo://provider/application` | فني | P07 |
+| `bremo://provider/earnings` | فني | P18 |
+| `bremo://provider/notifications` | فني | C32 بوضع الفني |
+
+- الرابط الذي يبدأ بـ`provider/` يحتاج ملف فني نشطًا، أو ملفًا قيد المراجعة لرابط `provider/application`. بدونه يفتح C32 في وضع العميل.
+- المستخدم غير المسجّل: يُحفظ الرابط ويُفتح بعد الدخول بنفس الحساب.
+- رابط البريد `https://{APP_DOMAIN}/app/<المسار بعد bremo://>` يفتح التطبيق عبر App Links (`/.well-known/assetlinks.json`) وUniversal Links (`/.well-known/apple-app-site-association`). بدون التطبيق تظهر صفحة ويب عربية بديلة بلا بيانات الطلب.
+
+### رابط كل إشعار
+| الرمز | الرابط |
+|---|---|
+| NTF-01 | `provider/requests/{id}` |
+| NTF-02، 03، 08، 09، 10، 11، 13، 15، 20، 29، 30 | `orders/{id}` |
+| NTF-04 | `orders/{id}/offers` |
+| NTF-05، 07، 12، 14، 28 | `provider/orders/{id}` |
+| NTF-06، 21 | `provider/offers` |
+| NTF-16، 19 | العميل `orders/{id}`، والفني `provider/orders/{id}`. أصحاب العروض في NTF-19 `provider/offers` |
+| NTF-17 | العميل `orders/{id}/dispute`، والفني `provider/orders/{id}` |
+| NTF-18 | العميل `orders/{id}/rating`، والفني `provider/orders/{id}/rating` |
+| NTF-22 | `provider/application` |
+| NTF-23، 24 | `provider/earnings` |
+| NTF-25 | `orders/{id}/chat` أو `provider/orders/{id}/chat` حسب المستلم |
+| NTF-26، 27 | بريد فقط، بلا رابط تطبيق (NTF-27 يفتح W02) |
+| NTF-31 | داخل اللوحة فقط |
+
+## التوقيت
+| الرمز | المُطلِق |
+|---|---|
+| NTF-07 | مهمة مجدولة: طلب `CONFIRMED` لم يبدأ التحرك بعد CFG-031 من التأكيد (NOW)، أو عند بداية الفترة (مجدول). مرة واحدة لكل تعيين |
+| NTF-18 | مهمة مجدولة: بعد CFG-072 من `CLOSED` إذا لم يقيّم المستلم، ونافذة CFG-070 مفتوحة، و`rating_reminders_enabled`. مرة واحدة لكل طرف |
+| NTF-04 | إشعار فوري لأول عرض، ثم لا إشعار آخر للطلب نفسه قبل 5 دقائق. عند انتهاء النافذة يُرسل إشعار واحد «n عروض جديدة» إن وصل عرض داخلها |
+| الباقي | بعد حفظ معاملة الحدث المرتبط في 24 (`afterCommit`)، فلا يصل إشعار لحدث تراجعت معاملته |
+
+## إذن الإشعارات على الجهاز
+يُطلب إذن النظام مرة واحدة بعد أول وصول إلى C01 أو P08: Android 13+ عبر `POST_NOTIFICATIONS`، وiOS عبر `UNUserNotificationCenter`. تسجيل الرمز `POST /me/devices` يتم بعد الدخول وعند تغيّر الرمز، و`DELETE /me/devices` عند الخروج. الرفض لا يمنع أي وظيفة، وC32 يعرض `InfoBanner` مع `open_settings`.

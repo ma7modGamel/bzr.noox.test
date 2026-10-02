@@ -16,8 +16,9 @@ use Illuminate\Database\Eloquent\Builder;
 /**
  * أهلية مقدم الخدمة — BR-022.
  *
- * في وضع الموظفين تُطبَّق البنود 1، 2، 3، 5، 6 فقط؛ البند 4 (المنع بسبب المستحقات)
- * خاص بالعروض ولا يُطبق (BR-065). وشرط الموعد يُفحص عند التعيين لا عند العرض (08).
+ * في وضع الموظفين تُطبَّق البنود 1، 2، 3، 5 مع اشتراط available_now لكل تعيين؛
+ * البند 4 (المنع بسبب المستحقات) خاص بالعروض ولا يُطبق (BR-065). ولا توجد ورديات
+ * في المرحلة الأولى؛ تعارض الموعد يُفحص عند التعيين (DEC-057، 08).
  */
 final class ProviderEligibility
 {
@@ -34,17 +35,25 @@ final class ProviderEligibility
             ->whereHas('areas', fn (Builder $q) => $q->where('areas.id', $order->area_id))
             ->where('user_id', '!=', $order->customer_id); // البند 5 — لا يقدم على طلبه
 
+        $offersEnabled = $this->features->offersEnabled();
+
         // البند 4 — المنع بسبب المستحقات: وضع السوق فقط (BR-063، BR-065)
-        if ($this->features->offersEnabled()) {
+        if ($offersEnabled) {
             $query->whereNull('dues_blocked_at');
+        } else {
+            // DEC-057 — لوحة التعيين تعرض الموظفين المتاحين الآن فقط، لكل المواعيد.
+            $query->where('available_now', true);
         }
 
         // البند 6 — طلب NOW: متاح الآن ولا طلب NOW نشط
         if ($order->timing_type === TimingType::Now) {
-            $query->where('available_now', true)
-                ->whereDoesntHave('orders', fn (Builder $q) => $q
-                    ->where('timing_type', TimingType::Now->value)
-                    ->whereNotIn('status', $this->finalStatuses()));
+            if ($offersEnabled) {
+                $query->where('available_now', true);
+            }
+
+            $query->whereDoesntHave('orders', fn (Builder $q) => $q
+                ->where('timing_type', TimingType::Now->value)
+                ->whereNotIn('status', $this->finalStatuses()));
         } elseif ($order->slot_start !== null && $order->slot_end !== null) {
             // لا فترات مجدولة متداخلة (ASM-10، BR-034)
             $query->whereDoesntHave('orders', fn (Builder $q) => $q

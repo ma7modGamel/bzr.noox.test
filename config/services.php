@@ -47,6 +47,22 @@ return [
         'routes_url' => env('GOOGLE_ROUTES_URL', 'https://routes.googleapis.com/directions/v2:computeRoutes'),
     ],
 
+    // DEC-058 — مسار Push واحد عبر FCM HTTP v1 للمنصتين. `log` للتطوير والاختبار فقط.
+    'fcm' => [
+        'driver' => env('PUSH_DRIVER', 'log'),
+        'project_id' => env('FCM_PROJECT_ID'),
+        'credentials' => env('FCM_CREDENTIALS_PATH'),
+        'timeout' => (int) env('FCM_TIMEOUT', 10),
+    ],
+
+    // DEC-058 — App Links وUniversal Links لروابط البريد `https://{APP_DOMAIN}/app/*`.
+    'app_links' => [
+        'package' => 'com.bremo.app',
+        'android_sha256' => array_values(array_filter(array_map('trim', explode(',', (string) env('ANDROID_APP_LINK_SHA256', ''))))),
+        'apple_team_id' => env('APPLE_TEAM_ID'),
+        'bundle_id' => 'com.bremo.app',
+    ],
+
     'fawry' => [
         'driver' => env('PAYMENT_GATEWAY_DRIVER', 'staging'),
         'merchant_code' => env('FAWRY_MERCHANT_CODE'),

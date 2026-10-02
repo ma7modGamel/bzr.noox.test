@@ -3,6 +3,9 @@
 namespace App\Providers;
 
 use App\Modules\Communication\Mail\ZeptoMailTransport;
+use App\Modules\Notifications\Contracts\PushSender;
+use App\Modules\Notifications\Push\FcmPushSender;
+use App\Modules\Notifications\Push\LogPushSender;
 use App\Modules\Orders\Contracts\RouteEtaProvider;
 use App\Modules\Orders\Services\GoogleRoutesEtaProvider;
 use App\Modules\Payments\Contracts\PaymentGateway;
@@ -33,6 +36,20 @@ class AppServiceProvider extends ServiceProvider
             }
 
             return app(StagingPaymentGateway::class);
+        });
+        // DEC-058 — `log` للتطوير والاختبار فقط؛ production يرفض أي مسار غير FCM.
+        $this->app->bind(PushSender::class, function (): PushSender {
+            $driver = (string) config('services.fcm.driver');
+
+            if ($driver === 'fcm') {
+                return app(FcmPushSender::class);
+            }
+
+            if ($this->app->environment('production')) {
+                throw new RuntimeException('PUSH_DRIVER must be fcm in production (DEP-PUSH-01).');
+            }
+
+            return app(LogPushSender::class);
         });
     }
 

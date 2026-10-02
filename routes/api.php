@@ -7,14 +7,20 @@ use App\Http\Api\V1\Controllers\AddressController;
 use App\Http\Api\V1\Controllers\AuthController;
 use App\Http\Api\V1\Controllers\ConfigController;
 use App\Http\Api\V1\Controllers\ConversationController;
+use App\Http\Api\V1\Controllers\DeviceController;
 use App\Http\Api\V1\Controllers\HelpController;
 use App\Http\Api\V1\Controllers\MediaController;
 use App\Http\Api\V1\Controllers\NotificationController;
 use App\Http\Api\V1\Controllers\OrderController;
 use App\Http\Api\V1\Controllers\PageController;
 use App\Http\Api\V1\Controllers\PaymentController;
+use App\Http\Api\V1\Controllers\ProviderApplicationController;
 use App\Http\Api\V1\Controllers\ProviderController;
+use App\Http\Api\V1\Controllers\ProviderEarningsController;
+use App\Http\Api\V1\Controllers\ProviderHomeController;
 use App\Http\Api\V1\Controllers\ProviderOrderController;
+use App\Http\Api\V1\Controllers\ProviderPortfolioController;
+use App\Http\Api\V1\Controllers\ProviderProfileController;
 use App\Http\Api\V1\Controllers\RatingController;
 use App\Http\Api\V1\Controllers\ReferenceController;
 use App\Http\Api\V1\Controllers\ShareLinkController;
@@ -57,6 +63,8 @@ Route::middleware('auth:sanctum')->group(function (): void {
     Route::patch('me', [AccountController::class, 'update']);
     Route::post('me/password', [AccountController::class, 'password'])->middleware('throttle:5,1');
     Route::delete('me', [AccountController::class, 'destroy'])->middleware('throttle:3,60');
+    Route::post('me/devices', [DeviceController::class, 'store'])->middleware('throttle:30,1');   // DEC-058
+    Route::delete('me/devices', [DeviceController::class, 'destroy']);
     Route::post('support/messages', [HelpController::class, 'message'])->middleware('throttle:5,60');
     Route::get('notifications', [NotificationController::class, 'index']);
     Route::post('notifications/read', [NotificationController::class, 'read']);
@@ -110,12 +118,27 @@ Route::middleware('auth:sanctum')->group(function (): void {
 
     // ── الفني ─────────────────────────────────────────────────────────
     Route::prefix('provider')->group(function (): void {
+        Route::get('application', [ProviderApplicationController::class, 'show']);
+        Route::post('application', [ProviderApplicationController::class, 'store'])
+            ->middleware('throttle:5,60');
+        Route::get('home', [ProviderHomeController::class, 'show']);
+        Route::get('earnings', ProviderEarningsController::class);
+        Route::get('profile', [ProviderProfileController::class, 'show']);
+        Route::patch('profile', [ProviderProfileController::class, 'update']);
+        Route::post('portfolio', [ProviderPortfolioController::class, 'store']);
+        Route::delete('portfolio/{portfolio}', [ProviderPortfolioController::class, 'destroy']);
+        Route::put('availability', [ProviderHomeController::class, 'updateAvailability'])
+            ->middleware('throttle:30,1');
         Route::get('requests', [ProviderOrderController::class, 'availableRequests']);
+        Route::get('requests/{order}', [ProviderOrderController::class, 'availableRequest']);
+        Route::get('offers', [ProviderOrderController::class, 'myOffers']);
         Route::get('orders', [ProviderOrderController::class, 'myOrders']);
         Route::post('orders/{order}/customer-rating', [RatingController::class, 'customerRating']);
 
         Route::middleware(CheckExpectedVersion::class)->group(function (): void {
             Route::post('requests/{order}/offers', [ProviderOrderController::class, 'submitOffer'])
+                ->middleware('throttle:60,60');
+            Route::post('offers/{offer}/withdraw', [ProviderOrderController::class, 'withdrawOffer'])
                 ->middleware('throttle:60,60');
             Route::post('orders/{order}/start-trip', [ProviderOrderController::class, 'startTrip']);
             Route::post('orders/{order}/location', [ProviderOrderController::class, 'recordLocation'])

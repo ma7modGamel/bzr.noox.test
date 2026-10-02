@@ -1,0 +1,12 @@
+{
+  "screen": "SCR-P02",
+  "cases": [
+    {"id":"loading","input":{"event":"loading"},"expected":{"phase":"loading","can_continue":false}},
+    {"id":"empty","input":{"event":"validate","experience_years":"","bio":"","profile_photo_uploaded":false},"expected":{"phase":"empty","can_continue":false,"field_errors":["provider.onboarding.profile_photo.required","provider.onboarding.experience.invalid"]}},
+    {"id":"photo_missing","input":{"event":"validate","experience_years":"8","bio":"خبرة عملية","profile_photo_uploaded":false},"expected":{"phase":"content","can_continue":false,"field_errors":["provider.onboarding.profile_photo.required"]}},
+    {"id":"experience_invalid","input":{"event":"validate","experience_years":"51","bio":"","profile_photo_uploaded":true},"expected":{"phase":"content","can_continue":false,"field_errors":["provider.onboarding.experience.invalid"]}},
+    {"id":"bio_too_long","input":{"event":"validate","experience_years":"8","bio_length":301,"profile_photo_uploaded":true},"expected":{"phase":"content","can_continue":false,"field_errors":["provider.onboarding.bio.max"]}},
+    {"id":"valid","input":{"event":"validate","experience_years":"8","bio":"خبرة في أعمال الصيانة المنزلية","profile_photo_uploaded":true},"expected":{"phase":"content","can_continue":true,"has_profile_photo":true}},
+    {"id":"uploading","input":{"event":"uploading","experience_years":"8","bio":"خبرة عملية","profile_photo_uploaded":false},"expected":{"phase":"content","can_continue":false,"is_busy":true}}
+  ]
+}

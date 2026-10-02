@@ -13,7 +13,7 @@ public struct C26OrderHistoryView: View {
 
     public var body: some View {
         CustomerScreen(title: bzrString("order.details.title"), state: state) {
-            Badge(text: state.displayStatus)
+            Badge(text: localizedCustomerDisplayStatus(state.displayStatus))
             SummaryCard(
                 title: bzrString("order.details.service"),
                 rows: rows(Array(state.items.prefix(5)), labels: serviceLabels), editText: nil)
@@ -40,15 +40,21 @@ public struct C26OrderHistoryView: View {
     }
 
     private var serviceLabels: [String] {
-        ["receipt.number", "receipt.category", "receipt.problem", "receipt.area", "receipt.visit"].map(bzrString)
+        ["receipt.number", "receipt.category", "receipt.problem", "receipt.area", "receipt.visit"].map(
+            bzrString)
     }
 
     private var receiptLabels: [String] {
-        ["receipt.labor", "receipt.materials", "receipt.total", "receipt.payment_method", "receipt.payment_status"].map(bzrString)
+        [
+            "receipt.labor", "receipt.materials", "receipt.total", "receipt.payment_method",
+            "receipt.payment_status",
+        ].map(bzrString)
     }
 
     private func rows(_ values: [String], labels: [String]) -> [(BzrIconKey, String)] {
-        values.enumerated().map { index, value in (.info, "\(labels.indices.contains(index) ? labels[index] : ""): \(value)") }
+        values.enumerated().map { index, value in
+            (.info, "\(labels.indices.contains(index) ? labels[index] : ""): \(value)")
+        }
     }
 
     private func value(_ values: [String], _ index: Int) -> String {

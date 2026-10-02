@@ -28,6 +28,13 @@ final class OrderResource extends JsonResource
         $actor = $isProviderView ? ActorType::Provider : ActorType::Customer;
         $showFullAddress = $this->showsFullAddress($isProviderView);
         $presentation = app(OrderPresentation::class);
+        $conversation = $this->relationLoaded('conversations')
+            ? ($isProviderView
+                ? $this->conversations->firstWhere('provider_profile_id', $request->user()?->providerProfile?->getKey())
+                : ($this->provider_profile_id === null
+                    ? $this->conversations->first()
+                    : $this->conversations->firstWhere('provider_profile_id', $this->provider_profile_id)))
+            : null;
 
         return [
             'id' => $this->id,
@@ -42,8 +49,26 @@ final class OrderResource extends JsonResource
             'customer_address_id' => $this->customer_address_id,
             'description' => $this->description,
             'pricing_mode' => $this->pricing_mode->value,
+            'pricing_mode_label' => $this->pricing_mode->getLabel(),
             'materials_responsibility' => $this->materials_responsibility->value,
+            'materials_responsibility_label' => $this->materials_responsibility->getLabel(),
             'budget_amount' => $this->budget_amount,
+            'execution_price_guide' => $this->when(
+                $isProviderView
+                    && $this->operating_mode->value === 'EMPLOYEE'
+                    && $this->pricing_mode->value === 'INSPECTION',
+                fn (): ?array => $this->problemType === null || $this->problemType->is_other
+                    ? null
+                    : [
+                        'minimum' => $this->problemType->employee_price_min,
+                        'maximum' => $this->problemType->employee_price_max,
+                        'currency' => 'جنيه',
+                    ],
+            ),
+            'price_guide_review_required' => $this->when(
+                $isProviderView && $this->operating_mode->value === 'EMPLOYEE',
+                (bool) $this->problemType?->is_other,
+            ),
 
             'timing' => [
                 'type' => $this->timing_type->value,
@@ -66,6 +91,7 @@ final class OrderResource extends JsonResource
             'deadlines' => $presentation->deadlines($this->resource),
             'display_status' => $presentation->displayStatus($this->resource, $actor),
             'stepper' => $presentation->stepper($this->resource),
+            'conversation_id' => $conversation?->getKey(),
 
             // BR-057 — يُكتب في ملاحظة تحويل إنستاباي حتى تطابقه الإدارة.
             'payment_reference' => '#'.$this->number,
@@ -75,6 +101,7 @@ final class OrderResource extends JsonResource
                 'materials_total' => $this->materials_total,
                 'final_amount' => $this->final_amount,
                 'payment_method' => $this->payment_method?->value,
+                'payment_method_label' => $this->payment_method?->getLabel(),
                 'payment_status' => $this->payment_status->value,
             ],
 

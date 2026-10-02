@@ -53,8 +53,8 @@ final class CustomerAccountNotificationSupportTest extends TestCase
     {
         $user = User::factory()->create();
         $other = User::factory()->create();
-        $user->notify(new CustomerDatabaseNotification('NTF-09', 'وصل الفني', 'الفني عند موقع الخدمة.', 'bzr://orders/44'));
-        $other->notify(new CustomerDatabaseNotification('NTF-16', 'اكتمل الطلب', 'اكتملت الخدمة.', 'bzr://orders/77'));
+        $user->notify(new CustomerDatabaseNotification('NTF-09', 'وصل الفني', 'الفني عند موقع الخدمة.', 'bremo://orders/44'));
+        $other->notify(new CustomerDatabaseNotification('NTF-16', 'اكتمل الطلب', 'اكتملت الخدمة.', 'bremo://orders/77'));
         $notificationId = $user->notifications()->value('id');
 
         $this->actingAs($user, 'sanctum')

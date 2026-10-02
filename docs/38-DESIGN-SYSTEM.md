@@ -239,6 +239,7 @@
 | `opacity.disabled` | 0.4 | §9 |
 | `motion.*` | 250ms | 43 §7 |
 | `a11y.maxFontScale` | 1.3 | 43 §2 |
+| `size.touchTargetMin` | 48 | 43 §13 — أقل مساحة لمس لـ `SelectableChip` مع بقاء ارتفاع الرسم 40 |
 | `font.files` | Cairo بأربع ملفات ثابتة (400/500/600/700) | 43 §2 — مولّدة من `Cairo-Variable.ttf` بـ `fonttools varLib.instancer` |
 
 ### قيم أُزيلت

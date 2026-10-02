@@ -6,6 +6,7 @@ namespace App\Modules\Pricing\Models;
 
 use App\Modules\Orders\Enums\ActorType;
 use App\Modules\Orders\Models\Order;
+use App\Modules\Pricing\Enums\PriceReviewReason;
 use App\Modules\Pricing\Enums\ProposalStatus;
 use App\Modules\Pricing\Enums\ProposalType;
 use App\Modules\Providers\Models\ProviderProfile;
@@ -24,6 +25,10 @@ final class PriceProposal extends Model
             'status' => ProposalStatus::class,
             'decided_by_type' => ActorType::class,
             'amount' => 'decimal:2',
+            'price_guide_min' => 'decimal:2',
+            'price_guide_max' => 'decimal:2',
+            'outside_price_guide' => 'bool',
+            'price_review_reason' => PriceReviewReason::class,
             'expires_at' => 'immutable_datetime',
             'decided_at' => 'immutable_datetime',
         ];

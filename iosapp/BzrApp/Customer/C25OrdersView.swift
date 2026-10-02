@@ -24,8 +24,12 @@ public struct C25OrdersView: View {
                 selectedIndex: state.selectedOptionIndex, onSelect: onTabSelect)
             if state.phase == .empty {
                 EmptyState(
-                    title: bzrString(state.selectedOptionIndex == 1 ? "orders.past.empty.title" : "orders.current.empty.title"),
-                    body: bzrString(state.selectedOptionIndex == 1 ? "orders.past.empty.body" : "orders.current.empty.body"))
+                    title: bzrString(
+                        state.selectedOptionIndex == 1
+                            ? "orders.past.empty.title" : "orders.current.empty.title"),
+                    body: bzrString(
+                        state.selectedOptionIndex == 1 ? "orders.past.empty.body" : "orders.current.empty.body")
+                )
             }
             ForEach(state.items.indices, id: \.self) { index in
                 OrderCard(

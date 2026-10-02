@@ -1,0 +1,9 @@
+{"screen":"SCR-P17","cases":[
+  {"id":"loading","snapshot":true,"input":{"event":"loading"},"expected":{"phase":"loading","can_continue":false}},
+  {"id":"error","snapshot":true,"input":{"event":"error"},"expected":{"phase":"error","can_continue":false,"message_key":"error.body"}},
+  {"id":"unselected","snapshot":true,"input":{"event":"loaded","order_summary":["#1042","أحمد محمود","سباكة — تسريب مياه"],"stars":0,"available_actions":["rate_customer"]},"expected":{"phase":"content","can_continue":false,"selected_option_index":-1,"visible_actions":["rate_customer"]}},
+  {"id":"selected","snapshot":true,"input":{"event":"loaded","order_summary":["#1042","أحمد محمود","سباكة — تسريب مياه"],"stars":5,"available_actions":["rate_customer"]},"expected":{"phase":"content","can_continue":true,"selected_option_index":4,"visible_actions":["rate_customer"]}},
+  {"id":"submitting","snapshot":true,"input":{"event":"submitting","order_summary":["#1042","أحمد محمود","سباكة — تسريب مياه"],"stars":4,"available_actions":["rate_customer"]},"expected":{"phase":"content","can_continue":false,"selected_option_index":3,"is_busy":true}},
+  {"id":"success","snapshot":true,"input":{"event":"success","order_summary":["#1042","أحمد محمود","سباكة — تسريب مياه"],"stars":5,"available_actions":[]},"expected":{"phase":"content","can_continue":false,"selected_option_index":4,"message_key":"provider.rating.success"}},
+  {"id":"window_closed","snapshot":true,"input":{"event":"loaded","order_summary":["#1042","أحمد محمود","سباكة — تسريب مياه"],"stars":0,"available_actions":[],"message_key":"provider.rating.unavailable"},"expected":{"phase":"content","can_continue":false,"selected_option_index":-1,"message_key":"provider.rating.unavailable"}}
+]}

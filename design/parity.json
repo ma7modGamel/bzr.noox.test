@@ -1,6 +1,15 @@
 {
   "version": 1,
   "contract": "docs/43-UI-BUILD-CONTRACT.md",
+  "workflow_fixtures": [
+    {
+      "id": "request-market-catalog-selection",
+      "fixture": "design/fixtures/request-market/catalog-selection.json",
+      "case_count": 3,
+      "android_test": "androidapp/app/src/test/kotlin/noox/bzr/customer/CustomerCatalogSelectionFixtureTest.kt",
+      "ios_test": "iosapp/Core/Tests/BzrCoreTests/CustomerCatalogSelectionFixtureTests.swift"
+    }
+  ],
   "components": [
     {
       "id": "AppTopBar",
@@ -334,7 +343,8 @@
         "parameters": [
           "text",
           "icon",
-          "state"
+          "state",
+          "categoryIcon"
         ],
         "text_keys": [],
         "fixtures": [
@@ -347,7 +357,8 @@
         "parameters": [
           "text",
           "icon",
-          "state"
+          "state",
+          "categoryIcon"
         ],
         "text_keys": [],
         "fixtures": [
@@ -460,6 +471,7 @@
           "state",
           "error",
           "optionalLabel",
+          "imeAction",
           "onValueChange"
         ],
         "text_keys": [],
@@ -477,6 +489,7 @@
           "state",
           "error",
           "optionalLabel",
+          "imeAction",
           "onValueChange"
         ],
         "text_keys": [],
@@ -727,6 +740,9 @@
           "chatLabel",
           "variant",
           "priceCaption",
+          "showSelect",
+          "showChat",
+          "onOpen",
           "onSelect",
           "onChat"
         ],
@@ -749,6 +765,9 @@
           "chatLabel",
           "variant",
           "priceCaption",
+          "showSelect",
+          "showChat",
+          "onOpen",
           "onSelect",
           "onChat"
         ],
@@ -1043,7 +1062,8 @@
         "layout": "androidapp/core/design/src/main/res/layout/view_map_card.xml",
         "symbol": "MapCardView",
         "parameters": [
-          "title"
+          "title",
+          "onMyLocation"
         ],
         "text_keys": [
           "a11y.my_location"
@@ -1056,7 +1076,8 @@
         "file": "iosapp/Packages/DesignSystem/Sources/DesignSystem/BzrComponents.swift",
         "symbol": "MapCard",
         "parameters": [
-          "title"
+          "title",
+          "onMyLocation"
         ],
         "text_keys": [
           "a11y.my_location"
@@ -1367,6 +1388,7 @@
           "stateLabel",
           "kind",
           "state",
+          "readOnly",
           "onDelete"
         ],
         "text_keys": [
@@ -1384,6 +1406,7 @@
           "stateLabel",
           "kind",
           "state",
+          "readOnly",
           "onDelete"
         ],
         "text_keys": [
@@ -1420,8 +1443,8 @@
       "id": "SCR-C01",
       "spec": "docs/screens/SCR-C01.md",
       "android": {
-        "file": "androidapp/app/src/main/kotlin/noox/bzr/customer/C01HomeScreen.kt",
-        "symbol": "C01HomeScreen",
+        "file": "androidapp/app/src/main/kotlin/noox/bzr/customer/C01HomeView.kt",
+        "symbol": "C01HomeView",
         "logic_file": "androidapp/app/src/main/kotlin/noox/bzr/customer/CustomerLogic.kt",
         "logic_symbol": "CustomerLogic",
         "test_file": "androidapp/app/src/test/kotlin/noox/bzr/customer/CustomerSharedFixtureTest.kt",
@@ -1448,8 +1471,8 @@
       "id": "SCR-C02",
       "spec": "docs/screens/SCR-C02.md",
       "android": {
-        "file": "androidapp/app/src/main/kotlin/noox/bzr/customer/C02AccountScreen.kt",
-        "symbol": "C02AccountScreen",
+        "file": "androidapp/app/src/main/kotlin/noox/bzr/customer/C02AccountView.kt",
+        "symbol": "C02AccountView",
         "logic_file": "androidapp/app/src/main/kotlin/noox/bzr/customer/CustomerLogic.kt",
         "logic_symbol": "CustomerLogic",
         "test_file": "androidapp/app/src/test/kotlin/noox/bzr/customer/CustomerSharedFixtureTest.kt",
@@ -1476,12 +1499,12 @@
       "id": "SCR-C03",
       "spec": "docs/screens/SCR-C03.md",
       "android": {
-        "file": "androidapp/app/src/main/kotlin/noox/bzr/customer/C03ProblemScreen.kt",
-        "symbol": "C03ProblemScreen",
+        "file": "androidapp/app/src/main/kotlin/noox/bzr/customer/C03ProblemView.kt",
+        "symbol": "C03ProblemView",
         "logic_file": "androidapp/app/src/main/kotlin/noox/bzr/customer/CustomerLogic.kt",
         "logic_symbol": "CustomerLogic",
         "test_file": "androidapp/app/src/test/kotlin/noox/bzr/customer/CustomerSharedFixtureTest.kt",
-        "case_count": 5,
+        "case_count": 7,
         "text_keys": "source-scan",
         "fixtures": [
           "design/fixtures/SCR-C03/cases.json"
@@ -1493,7 +1516,7 @@
         "logic_file": "iosapp/Core/Sources/BzrCore/CustomerJourney.swift",
         "logic_symbol": "CustomerLogic",
         "test_file": "iosapp/Core/Tests/BzrCoreTests/CustomerSharedFixtureTests.swift",
-        "case_count": 5,
+        "case_count": 7,
         "text_keys": "source-scan",
         "fixtures": [
           "design/fixtures/SCR-C03/cases.json"
@@ -1504,12 +1527,12 @@
       "id": "SCR-C04",
       "spec": "docs/screens/SCR-C04.md",
       "android": {
-        "file": "androidapp/app/src/main/kotlin/noox/bzr/customer/C04TimingScreen.kt",
-        "symbol": "C04TimingScreen",
+        "file": "androidapp/app/src/main/kotlin/noox/bzr/customer/C04TimingView.kt",
+        "symbol": "C04TimingView",
         "logic_file": "androidapp/app/src/main/kotlin/noox/bzr/customer/CustomerLogic.kt",
         "logic_symbol": "CustomerLogic",
         "test_file": "androidapp/app/src/test/kotlin/noox/bzr/customer/CustomerSharedFixtureTest.kt",
-        "case_count": 7,
+        "case_count": 9,
         "text_keys": "source-scan",
         "fixtures": [
           "design/fixtures/SCR-C04/cases.json"
@@ -1521,7 +1544,7 @@
         "logic_file": "iosapp/Core/Sources/BzrCore/CustomerJourney.swift",
         "logic_symbol": "CustomerLogic",
         "test_file": "iosapp/Core/Tests/BzrCoreTests/CustomerSharedFixtureTests.swift",
-        "case_count": 7,
+        "case_count": 9,
         "text_keys": "source-scan",
         "fixtures": [
           "design/fixtures/SCR-C04/cases.json"
@@ -1532,12 +1555,12 @@
       "id": "SCR-C05",
       "spec": "docs/screens/SCR-C05.md",
       "android": {
-        "file": "androidapp/app/src/main/kotlin/noox/bzr/customer/C05ReviewScreen.kt",
-        "symbol": "C05ReviewScreen",
+        "file": "androidapp/app/src/main/kotlin/noox/bzr/customer/C05ReviewView.kt",
+        "symbol": "C05ReviewView",
         "logic_file": "androidapp/app/src/main/kotlin/noox/bzr/customer/CustomerLogic.kt",
         "logic_symbol": "CustomerLogic",
         "test_file": "androidapp/app/src/test/kotlin/noox/bzr/customer/CustomerSharedFixtureTest.kt",
-        "case_count": 5,
+        "case_count": 7,
         "text_keys": "source-scan",
         "fixtures": [
           "design/fixtures/SCR-C05/cases.json"
@@ -1549,7 +1572,7 @@
         "logic_file": "iosapp/Core/Sources/BzrCore/CustomerJourney.swift",
         "logic_symbol": "CustomerLogic",
         "test_file": "iosapp/Core/Tests/BzrCoreTests/CustomerSharedFixtureTests.swift",
-        "case_count": 5,
+        "case_count": 7,
         "text_keys": "source-scan",
         "fixtures": [
           "design/fixtures/SCR-C05/cases.json"
@@ -1560,8 +1583,8 @@
       "id": "SCR-C06",
       "spec": "docs/screens/SCR-C06.md",
       "android": {
-        "file": "androidapp/app/src/main/kotlin/noox/bzr/customer/C06OffersScreen.kt",
-        "symbol": "C06OffersScreen",
+        "file": "androidapp/app/src/main/kotlin/noox/bzr/customer/C06OffersView.kt",
+        "symbol": "C06OffersView",
         "logic_file": "androidapp/app/src/main/kotlin/noox/bzr/customer/CustomerLogic.kt",
         "logic_symbol": "CustomerLogic",
         "test_file": "androidapp/app/src/test/kotlin/noox/bzr/customer/CustomerSharedFixtureTest.kt",
@@ -1588,12 +1611,12 @@
       "id": "SCR-C07",
       "spec": "docs/screens/SCR-C07.md",
       "android": {
-        "file": "androidapp/app/src/main/kotlin/noox/bzr/customer/C07ProviderScreen.kt",
-        "symbol": "C07ProviderScreen",
+        "file": "androidapp/app/src/main/kotlin/noox/bzr/customer/C07ProviderView.kt",
+        "symbol": "C07ProviderView",
         "logic_file": "androidapp/app/src/main/kotlin/noox/bzr/customer/CustomerLogic.kt",
         "logic_symbol": "CustomerLogic",
         "test_file": "androidapp/app/src/test/kotlin/noox/bzr/customer/CustomerSharedFixtureTest.kt",
-        "case_count": 4,
+        "case_count": 5,
         "text_keys": "source-scan",
         "fixtures": [
           "design/fixtures/SCR-C07/cases.json"
@@ -1605,7 +1628,7 @@
         "logic_file": "iosapp/Core/Sources/BzrCore/CustomerJourney.swift",
         "logic_symbol": "CustomerLogic",
         "test_file": "iosapp/Core/Tests/BzrCoreTests/CustomerSharedFixtureTests.swift",
-        "case_count": 4,
+        "case_count": 5,
         "text_keys": "source-scan",
         "fixtures": [
           "design/fixtures/SCR-C07/cases.json"
@@ -1616,12 +1639,12 @@
       "id": "SCR-C08",
       "spec": "docs/screens/SCR-C08.md",
       "android": {
-        "file": "androidapp/app/src/main/kotlin/noox/bzr/customer/C08OfferDetailsScreen.kt",
-        "symbol": "C08OfferDetailsScreen",
+        "file": "androidapp/app/src/main/kotlin/noox/bzr/customer/C08OfferDetailsView.kt",
+        "symbol": "C08OfferDetailsView",
         "logic_file": "androidapp/app/src/main/kotlin/noox/bzr/customer/CustomerLogic.kt",
         "logic_symbol": "CustomerLogic",
         "test_file": "androidapp/app/src/test/kotlin/noox/bzr/customer/CustomerSharedFixtureTest.kt",
-        "case_count": 5,
+        "case_count": 7,
         "text_keys": "source-scan",
         "fixtures": [
           "design/fixtures/SCR-C08/cases.json"
@@ -1633,7 +1656,7 @@
         "logic_file": "iosapp/Core/Sources/BzrCore/CustomerJourney.swift",
         "logic_symbol": "CustomerLogic",
         "test_file": "iosapp/Core/Tests/BzrCoreTests/CustomerSharedFixtureTests.swift",
-        "case_count": 5,
+        "case_count": 7,
         "text_keys": "source-scan",
         "fixtures": [
           "design/fixtures/SCR-C08/cases.json"
@@ -1644,12 +1667,12 @@
       "id": "SCR-C09",
       "spec": "docs/screens/SCR-C09.md",
       "android": {
-        "file": "androidapp/app/src/main/kotlin/noox/bzr/customer/C09TrackingScreen.kt",
-        "symbol": "C09TrackingScreen",
+        "file": "androidapp/app/src/main/kotlin/noox/bzr/customer/C09TrackingView.kt",
+        "symbol": "C09TrackingView",
         "logic_file": "androidapp/app/src/main/kotlin/noox/bzr/customer/CustomerLogic.kt",
         "logic_symbol": "CustomerLogic",
         "test_file": "androidapp/app/src/test/kotlin/noox/bzr/customer/CustomerSharedFixtureTest.kt",
-        "case_count": 11,
+        "case_count": 13,
         "text_keys": "source-scan",
         "fixtures": [
           "design/fixtures/SCR-C09/cases.json"
@@ -1661,7 +1684,7 @@
         "logic_file": "iosapp/Core/Sources/BzrCore/CustomerJourney.swift",
         "logic_symbol": "CustomerLogic",
         "test_file": "iosapp/Core/Tests/BzrCoreTests/CustomerSharedFixtureTests.swift",
-        "case_count": 11,
+        "case_count": 13,
         "text_keys": "source-scan",
         "fixtures": [
           "design/fixtures/SCR-C09/cases.json"
@@ -1672,7 +1695,7 @@
       "id": "SCR-C10",
       "spec": "docs/screens/SCR-C10.md",
       "android": {
-        "file": "androidapp/app/src/main/kotlin/noox/bzr/auth/CustomerAuthScreens.kt",
+        "file": "androidapp/app/src/main/kotlin/noox/bzr/auth/CustomerAuthViews.kt",
         "symbol": "CustomerLoginScreen",
         "logic_file": "androidapp/app/src/main/kotlin/noox/bzr/auth/AuthLogic.kt",
         "logic_symbol": "AuthLogic",
@@ -1700,7 +1723,7 @@
       "id": "SCR-C11",
       "spec": "docs/screens/SCR-C11.md",
       "android": {
-        "file": "androidapp/app/src/main/kotlin/noox/bzr/auth/CustomerAuthScreens.kt",
+        "file": "androidapp/app/src/main/kotlin/noox/bzr/auth/CustomerAuthViews.kt",
         "symbol": "CustomerRegisterScreen",
         "logic_file": "androidapp/app/src/main/kotlin/noox/bzr/auth/AuthLogic.kt",
         "logic_symbol": "AuthLogic",
@@ -1728,7 +1751,7 @@
       "id": "SCR-C12",
       "spec": "docs/screens/SCR-C12.md",
       "android": {
-        "file": "androidapp/app/src/main/kotlin/noox/bzr/auth/CustomerAuthScreens.kt",
+        "file": "androidapp/app/src/main/kotlin/noox/bzr/auth/CustomerAuthViews.kt",
         "symbol": "CustomerEmailVerificationScreen",
         "logic_file": "androidapp/app/src/main/kotlin/noox/bzr/auth/AuthLogic.kt",
         "logic_symbol": "AuthLogic",
@@ -1756,7 +1779,7 @@
       "id": "SCR-C13",
       "spec": "docs/screens/SCR-C13.md",
       "android": {
-        "file": "androidapp/app/src/main/kotlin/noox/bzr/auth/CustomerAuthScreens.kt",
+        "file": "androidapp/app/src/main/kotlin/noox/bzr/auth/CustomerAuthViews.kt",
         "symbol": "CustomerPasswordRecoveryScreen",
         "logic_file": "androidapp/app/src/main/kotlin/noox/bzr/auth/AuthLogic.kt",
         "logic_symbol": "AuthLogic",
@@ -1784,8 +1807,8 @@
       "id": "SCR-C14",
       "spec": "docs/screens/SCR-C14.md",
       "android": {
-        "file": "androidapp/app/src/main/kotlin/noox/bzr/customer/C14AddressesScreen.kt",
-        "symbol": "C14AddressesScreen",
+        "file": "androidapp/app/src/main/kotlin/noox/bzr/customer/C14AddressesView.kt",
+        "symbol": "C14AddressesView",
         "logic_file": "androidapp/app/src/main/kotlin/noox/bzr/customer/CustomerLogic.kt",
         "logic_symbol": "CustomerLogic",
         "test_file": "androidapp/app/src/test/kotlin/noox/bzr/customer/CustomerSharedFixtureTest.kt",
@@ -1812,8 +1835,8 @@
       "id": "SCR-C15",
       "spec": "docs/screens/SCR-C15.md",
       "android": {
-        "file": "androidapp/app/src/main/kotlin/noox/bzr/customer/C15AddressFormScreen.kt",
-        "symbol": "C15AddressFormScreen",
+        "file": "androidapp/app/src/main/kotlin/noox/bzr/customer/C15AddressFormView.kt",
+        "symbol": "C15AddressFormView",
         "logic_file": "androidapp/app/src/main/kotlin/noox/bzr/customer/CustomerLogic.kt",
         "logic_symbol": "CustomerLogic",
         "test_file": "androidapp/app/src/test/kotlin/noox/bzr/customer/CustomerSharedFixtureTest.kt",
@@ -1840,8 +1863,8 @@
       "id": "SCR-C16",
       "spec": "docs/screens/SCR-C16.md",
       "android": {
-        "file": "androidapp/app/src/main/kotlin/noox/bzr/customer/C16SlotPickerScreen.kt",
-        "symbol": "C16SlotPickerScreen",
+        "file": "androidapp/app/src/main/kotlin/noox/bzr/customer/C16SlotPickerView.kt",
+        "symbol": "C16SlotPickerView",
         "logic_file": "androidapp/app/src/main/kotlin/noox/bzr/customer/CustomerLogic.kt",
         "logic_symbol": "CustomerLogic",
         "test_file": "androidapp/app/src/test/kotlin/noox/bzr/customer/CustomerSharedFixtureTest.kt",
@@ -1868,8 +1891,8 @@
       "id": "SCR-C17",
       "spec": "docs/screens/SCR-C17.md",
       "android": {
-        "file": "androidapp/app/src/main/kotlin/noox/bzr/customer/C17MediaScreen.kt",
-        "symbol": "C17MediaScreen",
+        "file": "androidapp/app/src/main/kotlin/noox/bzr/customer/C17MediaView.kt",
+        "symbol": "C17MediaView",
         "logic_file": "androidapp/app/src/main/kotlin/noox/bzr/customer/CustomerLogic.kt",
         "logic_symbol": "CustomerLogic",
         "test_file": "androidapp/app/src/test/kotlin/noox/bzr/customer/CustomerSharedFixtureTest.kt",
@@ -1896,8 +1919,8 @@
       "id": "SCR-C18",
       "spec": "docs/screens/SCR-C18.md",
       "android": {
-        "file": "androidapp/app/src/main/kotlin/noox/bzr/customer/C18MessagesScreen.kt",
-        "symbol": "C18MessagesScreen",
+        "file": "androidapp/app/src/main/kotlin/noox/bzr/customer/C18MessagesView.kt",
+        "symbol": "C18MessagesView",
         "logic_file": "androidapp/app/src/main/kotlin/noox/bzr/customer/CustomerLogic.kt",
         "logic_symbol": "CustomerLogic",
         "test_file": "androidapp/app/src/test/kotlin/noox/bzr/customer/CustomerSharedFixtureTest.kt",
@@ -1924,12 +1947,12 @@
       "id": "SCR-C19",
       "spec": "docs/screens/SCR-C19.md",
       "android": {
-        "file": "androidapp/app/src/main/kotlin/noox/bzr/customer/C19ChatScreen.kt",
-        "symbol": "C19ChatScreen",
+        "file": "androidapp/app/src/main/kotlin/noox/bzr/customer/C19ChatView.kt",
+        "symbol": "C19ChatView",
         "logic_file": "androidapp/app/src/main/kotlin/noox/bzr/customer/CustomerLogic.kt",
         "logic_symbol": "CustomerLogic",
         "test_file": "androidapp/app/src/test/kotlin/noox/bzr/customer/CustomerSharedFixtureTest.kt",
-        "case_count": 8,
+        "case_count": 10,
         "text_keys": "source-scan",
         "fixtures": [
           "design/fixtures/SCR-C19/cases.json"
@@ -1941,7 +1964,7 @@
         "logic_file": "iosapp/Core/Sources/BzrCore/CustomerJourney.swift",
         "logic_symbol": "CustomerLogic",
         "test_file": "iosapp/Core/Tests/BzrCoreTests/CustomerSharedFixtureTests.swift",
-        "case_count": 8,
+        "case_count": 10,
         "text_keys": "source-scan",
         "fixtures": [
           "design/fixtures/SCR-C19/cases.json"
@@ -1952,8 +1975,8 @@
       "id": "SCR-C20",
       "spec": "docs/screens/SCR-C20.md",
       "android": {
-        "file": "androidapp/app/src/main/kotlin/noox/bzr/customer/C20CancellationScreen.kt",
-        "symbol": "C20CancellationScreen",
+        "file": "androidapp/app/src/main/kotlin/noox/bzr/customer/C20CancellationView.kt",
+        "symbol": "C20CancellationView",
         "logic_file": "androidapp/app/src/main/kotlin/noox/bzr/customer/CustomerLogic.kt",
         "logic_symbol": "CustomerLogic",
         "test_file": "androidapp/app/src/test/kotlin/noox/bzr/customer/CustomerSharedFixtureTest.kt",
@@ -1980,8 +2003,8 @@
       "id": "SCR-C21",
       "spec": "docs/screens/SCR-C21.md",
       "android": {
-        "file": "androidapp/app/src/main/kotlin/noox/bzr/customer/C21PaymentSummaryScreen.kt",
-        "symbol": "C21PaymentSummaryScreen",
+        "file": "androidapp/app/src/main/kotlin/noox/bzr/customer/C21PaymentSummaryView.kt",
+        "symbol": "C21PaymentSummaryView",
         "logic_file": "androidapp/app/src/main/kotlin/noox/bzr/customer/CustomerLogic.kt",
         "logic_symbol": "CustomerLogic",
         "test_file": "androidapp/app/src/test/kotlin/noox/bzr/customer/CustomerSharedFixtureTest.kt",
@@ -2008,8 +2031,8 @@
       "id": "SCR-C22",
       "spec": "docs/screens/SCR-C22.md",
       "android": {
-        "file": "androidapp/app/src/main/kotlin/noox/bzr/customer/C22ElectronicPaymentScreen.kt",
-        "symbol": "C22ElectronicPaymentScreen",
+        "file": "androidapp/app/src/main/kotlin/noox/bzr/customer/C22ElectronicPaymentView.kt",
+        "symbol": "C22ElectronicPaymentView",
         "logic_file": "androidapp/app/src/main/kotlin/noox/bzr/customer/CustomerLogic.kt",
         "logic_symbol": "CustomerLogic",
         "test_file": "androidapp/app/src/test/kotlin/noox/bzr/customer/CustomerSharedFixtureTest.kt",
@@ -2036,8 +2059,8 @@
       "id": "SCR-C23",
       "spec": "docs/screens/SCR-C23.md",
       "android": {
-        "file": "androidapp/app/src/main/kotlin/noox/bzr/customer/C23CompletionScreen.kt",
-        "symbol": "C23CompletionScreen",
+        "file": "androidapp/app/src/main/kotlin/noox/bzr/customer/C23CompletionView.kt",
+        "symbol": "C23CompletionView",
         "logic_file": "androidapp/app/src/main/kotlin/noox/bzr/customer/CustomerLogic.kt",
         "logic_symbol": "CustomerLogic",
         "test_file": "androidapp/app/src/test/kotlin/noox/bzr/customer/CustomerSharedFixtureTest.kt",
@@ -2064,8 +2087,8 @@
       "id": "SCR-C24",
       "spec": "docs/screens/SCR-C24.md",
       "android": {
-        "file": "androidapp/app/src/main/kotlin/noox/bzr/customer/C24RatingScreen.kt",
-        "symbol": "C24RatingScreen",
+        "file": "androidapp/app/src/main/kotlin/noox/bzr/customer/C24RatingView.kt",
+        "symbol": "C24RatingView",
         "logic_file": "androidapp/app/src/main/kotlin/noox/bzr/customer/CustomerLogic.kt",
         "logic_symbol": "CustomerLogic",
         "test_file": "androidapp/app/src/test/kotlin/noox/bzr/customer/CustomerSharedFixtureTest.kt",
@@ -2092,8 +2115,8 @@
       "id": "SCR-C25",
       "spec": "docs/screens/SCR-C25.md",
       "android": {
-        "file": "androidapp/app/src/main/kotlin/noox/bzr/customer/C25OrdersScreen.kt",
-        "symbol": "C25OrdersScreen",
+        "file": "androidapp/app/src/main/kotlin/noox/bzr/customer/C25OrdersView.kt",
+        "symbol": "C25OrdersView",
         "logic_file": "androidapp/app/src/main/kotlin/noox/bzr/customer/CustomerLogic.kt",
         "logic_symbol": "CustomerLogic",
         "test_file": "androidapp/app/src/test/kotlin/noox/bzr/customer/CustomerSharedFixtureTest.kt",
@@ -2120,8 +2143,8 @@
       "id": "SCR-C26",
       "spec": "docs/screens/SCR-C26.md",
       "android": {
-        "file": "androidapp/app/src/main/kotlin/noox/bzr/customer/C26OrderHistoryScreen.kt",
-        "symbol": "C26OrderHistoryScreen",
+        "file": "androidapp/app/src/main/kotlin/noox/bzr/customer/C26OrderHistoryView.kt",
+        "symbol": "C26OrderHistoryView",
         "logic_file": "androidapp/app/src/main/kotlin/noox/bzr/customer/CustomerLogic.kt",
         "logic_symbol": "CustomerLogic",
         "test_file": "androidapp/app/src/test/kotlin/noox/bzr/customer/CustomerSharedFixtureTest.kt",
@@ -2148,8 +2171,8 @@
       "id": "SCR-C27",
       "spec": "docs/screens/SCR-C27.md",
       "android": {
-        "file": "androidapp/app/src/main/kotlin/noox/bzr/customer/C27DisputeScreen.kt",
-        "symbol": "C27DisputeScreen",
+        "file": "androidapp/app/src/main/kotlin/noox/bzr/customer/C27DisputeView.kt",
+        "symbol": "C27DisputeView",
         "logic_file": "androidapp/app/src/main/kotlin/noox/bzr/customer/CustomerLogic.kt",
         "logic_symbol": "CustomerLogic",
         "test_file": "androidapp/app/src/test/kotlin/noox/bzr/customer/CustomerSharedFixtureTest.kt",
@@ -2176,8 +2199,8 @@
       "id": "SCR-C28",
       "spec": "docs/screens/SCR-C28.md",
       "android": {
-        "file": "androidapp/app/src/main/kotlin/noox/bzr/customer/C28ProviderReportScreen.kt",
-        "symbol": "C28ProviderReportScreen",
+        "file": "androidapp/app/src/main/kotlin/noox/bzr/customer/C28ProviderReportView.kt",
+        "symbol": "C28ProviderReportView",
         "logic_file": "androidapp/app/src/main/kotlin/noox/bzr/customer/CustomerLogic.kt",
         "logic_symbol": "CustomerLogic",
         "test_file": "androidapp/app/src/test/kotlin/noox/bzr/customer/CustomerSharedFixtureTest.kt",
@@ -2204,8 +2227,8 @@
       "id": "SCR-C29",
       "spec": "docs/screens/SCR-C29.md",
       "android": {
-        "file": "androidapp/app/src/main/kotlin/noox/bzr/customer/C29HelpScreen.kt",
-        "symbol": "C29HelpScreen",
+        "file": "androidapp/app/src/main/kotlin/noox/bzr/customer/C29HelpView.kt",
+        "symbol": "C29HelpView",
         "parameters": [
           "state",
           "onExpand",
@@ -2246,8 +2269,8 @@
       "id": "SCR-C30",
       "spec": "docs/screens/SCR-C30.md",
       "android": {
-        "file": "androidapp/app/src/main/kotlin/noox/bzr/customer/ProposalDecisionScreen.kt",
-        "symbol": "C30ExecutionQuoteScreen",
+        "file": "androidapp/app/src/main/kotlin/noox/bzr/customer/ProposalDecisionView.kt",
+        "symbol": "C30ExecutionQuoteView",
         "logic_file": "androidapp/app/src/main/kotlin/noox/bzr/customer/CustomerLogic.kt",
         "logic_symbol": "CustomerLogic",
         "test_file": "androidapp/app/src/test/kotlin/noox/bzr/customer/CustomerSharedFixtureTest.kt",
@@ -2274,8 +2297,8 @@
       "id": "SCR-C31",
       "spec": "docs/screens/SCR-C31.md",
       "android": {
-        "file": "androidapp/app/src/main/kotlin/noox/bzr/customer/ProposalDecisionScreen.kt",
-        "symbol": "C31AdditionalCostScreen",
+        "file": "androidapp/app/src/main/kotlin/noox/bzr/customer/ProposalDecisionView.kt",
+        "symbol": "C31AdditionalCostView",
         "logic_file": "androidapp/app/src/main/kotlin/noox/bzr/customer/CustomerLogic.kt",
         "logic_symbol": "CustomerLogic",
         "test_file": "androidapp/app/src/test/kotlin/noox/bzr/customer/CustomerSharedFixtureTest.kt",
@@ -2302,8 +2325,8 @@
       "id": "SCR-C32",
       "spec": "docs/screens/SCR-C32.md",
       "android": {
-        "file": "androidapp/app/src/main/kotlin/noox/bzr/customer/C32NotificationsScreen.kt",
-        "symbol": "C32NotificationsScreen",
+        "file": "androidapp/app/src/main/kotlin/noox/bzr/customer/C32NotificationsView.kt",
+        "symbol": "C32NotificationsView",
         "parameters": [
           "state",
           "onOpen"
@@ -2311,7 +2334,7 @@
         "logic_file": "androidapp/app/src/main/kotlin/noox/bzr/customer/CustomerLogic.kt",
         "logic_symbol": "CustomerLogic",
         "test_file": "androidapp/app/src/test/kotlin/noox/bzr/customer/CustomerSharedFixtureTest.kt",
-        "case_count": 5,
+        "case_count": 8,
         "text_keys": "source-scan",
         "fixtures": [
           "design/fixtures/SCR-C32/cases.json"
@@ -2327,7 +2350,7 @@
         "logic_file": "iosapp/Core/Sources/BzrCore/CustomerJourney.swift",
         "logic_symbol": "CustomerLogic",
         "test_file": "iosapp/Core/Tests/BzrCoreTests/CustomerSharedFixtureTests.swift",
-        "case_count": 5,
+        "case_count": 8,
         "text_keys": "source-scan",
         "fixtures": [
           "design/fixtures/SCR-C32/cases.json"
@@ -2338,8 +2361,8 @@
       "id": "SCR-C33",
       "spec": "docs/screens/SCR-C33.md",
       "android": {
-        "file": "androidapp/app/src/main/kotlin/noox/bzr/customer/C33AccountSettingsScreen.kt",
-        "symbol": "C33AccountSettingsScreen",
+        "file": "androidapp/app/src/main/kotlin/noox/bzr/customer/C33AccountSettingsView.kt",
+        "symbol": "C33AccountSettingsView",
         "parameters": [
           "state",
           "onAction",
@@ -2348,7 +2371,7 @@
         "logic_file": "androidapp/app/src/main/kotlin/noox/bzr/customer/CustomerLogic.kt",
         "logic_symbol": "CustomerLogic",
         "test_file": "androidapp/app/src/test/kotlin/noox/bzr/customer/CustomerSharedFixtureTest.kt",
-        "case_count": 9,
+        "case_count": 10,
         "text_keys": "source-scan",
         "fixtures": [
           "design/fixtures/SCR-C33/cases.json"
@@ -2365,7 +2388,7 @@
         "logic_file": "iosapp/Core/Sources/BzrCore/CustomerJourney.swift",
         "logic_symbol": "CustomerLogic",
         "test_file": "iosapp/Core/Tests/BzrCoreTests/CustomerSharedFixtureTests.swift",
-        "case_count": 9,
+        "case_count": 10,
         "text_keys": "source-scan",
         "fixtures": [
           "design/fixtures/SCR-C33/cases.json"
@@ -2376,8 +2399,8 @@
       "id": "SCR-C34",
       "spec": "docs/screens/SCR-C34.md",
       "android": {
-        "file": "androidapp/app/src/main/kotlin/noox/bzr/customer/C34TermsScreen.kt",
-        "symbol": "C34TermsScreen",
+        "file": "androidapp/app/src/main/kotlin/noox/bzr/customer/C34TermsView.kt",
+        "symbol": "C34TermsView",
         "parameters": [
           "state"
         ],
@@ -2410,8 +2433,8 @@
       "id": "SCR-C35",
       "spec": "docs/screens/SCR-C35.md",
       "android": {
-        "file": "androidapp/app/src/main/kotlin/noox/bzr/customer/C35NoOffersScreen.kt",
-        "symbol": "C35NoOffersScreen",
+        "file": "androidapp/app/src/main/kotlin/noox/bzr/customer/C35NoOffersView.kt",
+        "symbol": "C35NoOffersView",
         "parameters": [
           "state",
           "onAction"
@@ -2444,135 +2467,438 @@
     },
     {
       "id": "SCR-C36",
-      "spec": "docs/25-SCREEN-INVENTORY.md",
-      "android": null,
-      "ios": null
+      "spec": "docs/screens/SCR-C36.md",
+      "android": {
+        "file": "androidapp/app/src/main/kotlin/noox/bzr/customer/C36AssignmentView.kt",
+        "symbol": "C36AssignmentView",
+        "parameters": [
+          "state",
+          "onAction"
+        ],
+        "logic_file": "androidapp/app/src/main/kotlin/noox/bzr/customer/CustomerLogic.kt",
+        "logic_symbol": "CustomerLogic",
+        "test_file": "androidapp/app/src/test/kotlin/noox/bzr/customer/CustomerSharedFixtureTest.kt",
+        "case_count": 4,
+        "text_keys": "source-scan",
+        "fixtures": [
+          "design/fixtures/SCR-C36/cases.json"
+        ]
+      },
+      "ios": {
+        "file": "iosapp/BzrApp/Customer/C36AssignmentView.swift",
+        "symbol": "C36AssignmentView",
+        "parameters": [
+          "state",
+          "onAction"
+        ],
+        "logic_file": "iosapp/Core/Sources/BzrCore/CustomerJourney.swift",
+        "logic_symbol": "CustomerLogic",
+        "test_file": "iosapp/Core/Tests/BzrCoreTests/CustomerSharedFixtureTests.swift",
+        "case_count": 4,
+        "text_keys": "source-scan",
+        "fixtures": [
+          "design/fixtures/SCR-C36/cases.json"
+        ]
+      }
     },
     {
       "id": "SCR-P01",
-      "spec": "docs/25-SCREEN-INVENTORY.md",
-      "android": null,
-      "ios": null
+      "spec": "docs/screens/SCR-P01.md",
+      "android": {
+        "file": "androidapp/app/src/main/kotlin/noox/bzr/provider/P01IntroView.kt", "symbol": "P01IntroView",
+        "parameters": ["state", "onAction", "onBack"], "logic_file": "androidapp/app/src/main/kotlin/noox/bzr/provider/ProviderLogic.kt",
+        "logic_symbol": "ProviderLogic", "test_file": "androidapp/app/src/test/kotlin/noox/bzr/provider/ProviderSharedFixtureTest.kt",
+        "case_count": 7, "text_keys": "source-scan", "fixtures": ["design/fixtures/SCR-P01/cases.json"]
+      },
+      "ios": {
+        "file": "iosapp/BzrApp/Provider/ProviderJourneyViews.swift", "symbol": "P01IntroView",
+        "parameters": ["state", "onAction", "onBack"], "logic_file": "iosapp/Core/Sources/BzrCore/ProviderJourney.swift",
+        "logic_symbol": "ProviderLogic", "test_file": "iosapp/Core/Tests/BzrCoreTests/ProviderSharedFixtureTests.swift",
+        "case_count": 7, "text_keys": "source-scan", "fixtures": ["design/fixtures/SCR-P01/cases.json"]
+      }
     },
     {
       "id": "SCR-P02",
-      "spec": "docs/25-SCREEN-INVENTORY.md",
-      "android": null,
-      "ios": null
+      "spec": "docs/screens/SCR-P02.md",
+      "android": {
+        "file": "androidapp/app/src/main/kotlin/noox/bzr/provider/P02ProfileView.kt", "symbol": "P02ProfileView",
+        "parameters": ["state", "onExperienceChange", "onBioChange", "onUpload", "onNext", "onBack"],
+        "logic_file": "androidapp/app/src/main/kotlin/noox/bzr/provider/ProviderLogic.kt", "logic_symbol": "ProviderLogic",
+        "test_file": "androidapp/app/src/test/kotlin/noox/bzr/provider/ProviderSharedFixtureTest.kt", "case_count": 7,
+        "text_keys": "source-scan", "fixtures": ["design/fixtures/SCR-P02/cases.json"]
+      },
+      "ios": {
+        "file": "iosapp/BzrApp/Provider/ProviderJourneyViews.swift", "symbol": "P02ProfileView",
+        "parameters": ["state", "onExperienceChange", "onBioChange", "onUpload", "onNext", "onBack"],
+        "logic_file": "iosapp/Core/Sources/BzrCore/ProviderJourney.swift", "logic_symbol": "ProviderLogic",
+        "test_file": "iosapp/Core/Tests/BzrCoreTests/ProviderSharedFixtureTests.swift", "case_count": 7,
+        "text_keys": "source-scan", "fixtures": ["design/fixtures/SCR-P02/cases.json"]
+      }
     },
     {
       "id": "SCR-P03",
-      "spec": "docs/25-SCREEN-INVENTORY.md",
-      "android": null,
-      "ios": null
+      "spec": "docs/screens/SCR-P03.md",
+      "android": {
+        "file": "androidapp/app/src/main/kotlin/noox/bzr/provider/P03IdentityView.kt", "symbol": "P03IdentityView",
+        "parameters": ["state", "onUpload", "onNext", "onBack"], "logic_file": "androidapp/app/src/main/kotlin/noox/bzr/provider/ProviderLogic.kt",
+        "logic_symbol": "ProviderLogic", "test_file": "androidapp/app/src/test/kotlin/noox/bzr/provider/ProviderSharedFixtureTest.kt",
+        "case_count": 5, "text_keys": "source-scan", "fixtures": ["design/fixtures/SCR-P03/cases.json"]
+      },
+      "ios": {
+        "file": "iosapp/BzrApp/Provider/ProviderJourneyViews.swift", "symbol": "P03IdentityView",
+        "parameters": ["state", "onUpload", "onNext", "onBack"], "logic_file": "iosapp/Core/Sources/BzrCore/ProviderJourney.swift",
+        "logic_symbol": "ProviderLogic", "test_file": "iosapp/Core/Tests/BzrCoreTests/ProviderSharedFixtureTests.swift",
+        "case_count": 5, "text_keys": "source-scan", "fixtures": ["design/fixtures/SCR-P03/cases.json"]
+      }
     },
     {
       "id": "SCR-P04",
-      "spec": "docs/25-SCREEN-INVENTORY.md",
-      "android": null,
-      "ios": null
+      "spec": "docs/screens/SCR-P04.md",
+      "android": {
+        "file": "androidapp/app/src/main/kotlin/noox/bzr/provider/P04CatalogView.kt", "symbol": "P04CatalogView",
+        "parameters": ["state", "onCategory", "onSpecialty", "onNext", "onBack"],
+        "logic_file": "androidapp/app/src/main/kotlin/noox/bzr/provider/ProviderLogic.kt", "logic_symbol": "ProviderLogic",
+        "test_file": "androidapp/app/src/test/kotlin/noox/bzr/provider/ProviderSharedFixtureTest.kt", "case_count": 7,
+        "text_keys": "source-scan", "fixtures": ["design/fixtures/SCR-P04/cases.json"]
+      },
+      "ios": {
+        "file": "iosapp/BzrApp/Provider/ProviderJourneyViews.swift", "symbol": "P04CatalogView",
+        "parameters": ["state", "onCategory", "onSpecialty", "onNext", "onBack"],
+        "logic_file": "iosapp/Core/Sources/BzrCore/ProviderJourney.swift", "logic_symbol": "ProviderLogic",
+        "test_file": "iosapp/Core/Tests/BzrCoreTests/ProviderSharedFixtureTests.swift", "case_count": 7,
+        "text_keys": "source-scan", "fixtures": ["design/fixtures/SCR-P04/cases.json"]
+      }
     },
     {
       "id": "SCR-P05",
-      "spec": "docs/25-SCREEN-INVENTORY.md",
-      "android": null,
-      "ios": null
+      "spec": "docs/screens/SCR-P05.md",
+      "android": {
+        "file": "androidapp/app/src/main/kotlin/noox/bzr/provider/P05AreasView.kt", "symbol": "P05AreasView",
+        "parameters": ["state", "onCity", "onArea", "onNext", "onBack"],
+        "logic_file": "androidapp/app/src/main/kotlin/noox/bzr/provider/ProviderLogic.kt", "logic_symbol": "ProviderLogic",
+        "test_file": "androidapp/app/src/test/kotlin/noox/bzr/provider/ProviderSharedFixtureTest.kt", "case_count": 6,
+        "text_keys": "source-scan", "fixtures": ["design/fixtures/SCR-P05/cases.json"]
+      },
+      "ios": {
+        "file": "iosapp/BzrApp/Provider/ProviderJourneyViews.swift", "symbol": "P05AreasView",
+        "parameters": ["state", "onCity", "onArea", "onNext", "onBack"],
+        "logic_file": "iosapp/Core/Sources/BzrCore/ProviderJourney.swift", "logic_symbol": "ProviderLogic",
+        "test_file": "iosapp/Core/Tests/BzrCoreTests/ProviderSharedFixtureTests.swift", "case_count": 6,
+        "text_keys": "source-scan", "fixtures": ["design/fixtures/SCR-P05/cases.json"]
+      }
     },
     {
       "id": "SCR-P06",
-      "spec": "docs/25-SCREEN-INVENTORY.md",
-      "android": null,
-      "ios": null
+      "spec": "docs/screens/SCR-P06.md",
+      "android": {
+        "file": "androidapp/app/src/main/kotlin/noox/bzr/provider/P06PayoutView.kt", "symbol": "P06PayoutView",
+        "parameters": ["state", "onMethod", "onDetailsChange", "onSubmit", "onBack"],
+        "logic_file": "androidapp/app/src/main/kotlin/noox/bzr/provider/ProviderLogic.kt", "logic_symbol": "ProviderLogic",
+        "test_file": "androidapp/app/src/test/kotlin/noox/bzr/provider/ProviderSharedFixtureTest.kt", "case_count": 6,
+        "text_keys": "source-scan", "fixtures": ["design/fixtures/SCR-P06/cases.json"]
+      },
+      "ios": {
+        "file": "iosapp/BzrApp/Provider/ProviderJourneyViews.swift", "symbol": "P06PayoutView",
+        "parameters": ["state", "onMethod", "onDetailsChange", "onSubmit", "onBack"],
+        "logic_file": "iosapp/Core/Sources/BzrCore/ProviderJourney.swift", "logic_symbol": "ProviderLogic",
+        "test_file": "iosapp/Core/Tests/BzrCoreTests/ProviderSharedFixtureTests.swift", "case_count": 6,
+        "text_keys": "source-scan", "fixtures": ["design/fixtures/SCR-P06/cases.json"]
+      }
     },
     {
       "id": "SCR-P07",
-      "spec": "docs/25-SCREEN-INVENTORY.md",
-      "android": null,
-      "ios": null
+      "spec": "docs/screens/SCR-P07.md",
+      "android": {
+        "file": "androidapp/app/src/main/kotlin/noox/bzr/provider/P07StatusView.kt", "symbol": "P07StatusView",
+        "parameters": ["state", "onAction", "onBack"], "logic_file": "androidapp/app/src/main/kotlin/noox/bzr/provider/ProviderLogic.kt",
+        "logic_symbol": "ProviderLogic", "test_file": "androidapp/app/src/test/kotlin/noox/bzr/provider/ProviderSharedFixtureTest.kt",
+        "case_count": 6, "text_keys": "source-scan", "fixtures": ["design/fixtures/SCR-P07/cases.json"]
+      },
+      "ios": {
+        "file": "iosapp/BzrApp/Provider/ProviderJourneyViews.swift", "symbol": "P07StatusView",
+        "parameters": ["state", "onAction", "onBack"], "logic_file": "iosapp/Core/Sources/BzrCore/ProviderJourney.swift",
+        "logic_symbol": "ProviderLogic", "test_file": "iosapp/Core/Tests/BzrCoreTests/ProviderSharedFixtureTests.swift",
+        "case_count": 6, "text_keys": "source-scan", "fixtures": ["design/fixtures/SCR-P07/cases.json"]
+      }
     },
     {
       "id": "SCR-P08",
-      "spec": "docs/25-SCREEN-INVENTORY.md",
-      "android": null,
-      "ios": null
+      "spec": "docs/screens/SCR-P08.md",
+      "android": {
+        "file": "androidapp/app/src/main/kotlin/noox/bzr/provider/P08HomeView.kt", "symbol": "P08HomeView",
+        "parameters": ["state", "onAvailabilityChange", "onAction", "onRequest", "onBack"],
+        "logic_file": "androidapp/app/src/main/kotlin/noox/bzr/provider/ProviderLogic.kt", "logic_symbol": "ProviderLogic",
+        "test_file": "androidapp/app/src/test/kotlin/noox/bzr/provider/ProviderSharedFixtureTest.kt", "case_count": 8,
+        "text_keys": "source-scan", "fixtures": ["design/fixtures/SCR-P08/cases.json"]
+      },
+      "ios": {
+        "file": "iosapp/BzrApp/Provider/ProviderJourneyViews.swift", "symbol": "P08HomeView",
+        "parameters": ["state", "onAvailabilityChange", "onAction", "onRequest", "onBack"],
+        "logic_file": "iosapp/Core/Sources/BzrCore/ProviderJourney.swift", "logic_symbol": "ProviderLogic",
+        "test_file": "iosapp/Core/Tests/BzrCoreTests/ProviderSharedFixtureTests.swift", "case_count": 8,
+        "text_keys": "source-scan", "fixtures": ["design/fixtures/SCR-P08/cases.json"]
+      }
     },
     {
       "id": "SCR-P09",
-      "spec": "docs/25-SCREEN-INVENTORY.md",
-      "android": null,
-      "ios": null
+      "spec": "docs/screens/SCR-P09.md",
+      "android": {
+        "file": "androidapp/app/src/main/kotlin/noox/bzr/provider/P09AvailableRequestView.kt", "symbol": "P09AvailableRequestView",
+        "parameters": ["state", "onAction", "onBack"],
+        "logic_file": "androidapp/app/src/main/kotlin/noox/bzr/provider/ProviderLogic.kt", "logic_symbol": "ProviderLogic",
+        "test_file": "androidapp/app/src/test/kotlin/noox/bzr/provider/ProviderSharedFixtureTest.kt", "case_count": 7,
+        "text_keys": "source-scan", "fixtures": ["design/fixtures/SCR-P09/cases.json"]
+      },
+      "ios": {
+        "file": "iosapp/BzrApp/Provider/ProviderJourneyViews.swift", "symbol": "P09AvailableRequestView",
+        "parameters": ["state", "onAction", "onBack"],
+        "logic_file": "iosapp/Core/Sources/BzrCore/ProviderJourney.swift", "logic_symbol": "ProviderLogic",
+        "test_file": "iosapp/Core/Tests/BzrCoreTests/ProviderSharedFixtureTests.swift", "case_count": 7,
+        "text_keys": "source-scan", "fixtures": ["design/fixtures/SCR-P09/cases.json"]
+      }
     },
     {
       "id": "SCR-P10",
-      "spec": "docs/25-SCREEN-INVENTORY.md",
-      "android": null,
-      "ios": null
+      "spec": "docs/screens/SCR-P10.md",
+      "android": {
+        "file": "androidapp/app/src/main/kotlin/noox/bzr/provider/P10OfferView.kt", "symbol": "P10OfferView",
+        "parameters": ["state", "onEtaSelect", "onDeductibleSelect", "onPriceChange", "onIncludesChange", "onNoteChange", "onSubmit", "onBack"],
+        "logic_file": "androidapp/app/src/main/kotlin/noox/bzr/provider/ProviderLogic.kt", "logic_symbol": "ProviderLogic",
+        "test_file": "androidapp/app/src/test/kotlin/noox/bzr/provider/ProviderSharedFixtureTest.kt", "case_count": 9,
+        "text_keys": "source-scan", "fixtures": ["design/fixtures/SCR-P10/cases.json"]
+      },
+      "ios": {
+        "file": "iosapp/BzrApp/Provider/ProviderJourneyViews.swift", "symbol": "P10OfferView",
+        "parameters": ["state", "onEtaSelect", "onDeductibleSelect", "onPriceChange", "onIncludesChange", "onNoteChange", "onSubmit", "onBack"],
+        "logic_file": "iosapp/Core/Sources/BzrCore/ProviderJourney.swift", "logic_symbol": "ProviderLogic",
+        "test_file": "iosapp/Core/Tests/BzrCoreTests/ProviderSharedFixtureTests.swift", "case_count": 9,
+        "text_keys": "source-scan", "fixtures": ["design/fixtures/SCR-P10/cases.json"]
+      }
     },
     {
       "id": "SCR-P11",
-      "spec": "docs/25-SCREEN-INVENTORY.md",
-      "android": null,
-      "ios": null
+      "spec": "docs/screens/SCR-P11.md",
+      "android": {
+        "file": "androidapp/app/src/main/kotlin/noox/bzr/provider/P11OffersView.kt", "symbol": "P11OffersView",
+        "parameters": ["state", "onOfferAction", "onConfirmWithdraw", "onCancelWithdraw", "onBack"],
+        "logic_file": "androidapp/app/src/main/kotlin/noox/bzr/provider/ProviderLogic.kt", "logic_symbol": "ProviderLogic",
+        "test_file": "androidapp/app/src/test/kotlin/noox/bzr/provider/ProviderSharedFixtureTest.kt", "case_count": 8,
+        "text_keys": "source-scan", "fixtures": ["design/fixtures/SCR-P11/cases.json"]
+      },
+      "ios": {
+        "file": "iosapp/BzrApp/Provider/ProviderJourneyViews.swift", "symbol": "P11OffersView",
+        "parameters": ["state", "onOfferAction", "onConfirmWithdraw", "onCancelWithdraw", "onBack"],
+        "logic_file": "iosapp/Core/Sources/BzrCore/ProviderJourney.swift", "logic_symbol": "ProviderLogic",
+        "test_file": "iosapp/Core/Tests/BzrCoreTests/ProviderSharedFixtureTests.swift", "case_count": 8,
+        "text_keys": "source-scan", "fixtures": ["design/fixtures/SCR-P11/cases.json"]
+      }
     },
     {
       "id": "SCR-P12",
-      "spec": "docs/25-SCREEN-INVENTORY.md",
-      "android": null,
-      "ios": null
+      "spec": "docs/screens/SCR-P12.md",
+      "android": {
+        "file": "androidapp/app/src/main/kotlin/noox/bzr/provider/ProviderActiveOrderView.kt", "symbol": "P12ConfirmedOrderView",
+        "parameters": ["state", "destination", "onAction", "onBack"],
+        "logic_file": "androidapp/app/src/main/kotlin/noox/bzr/provider/ProviderLogic.kt", "logic_symbol": "ProviderLogic",
+        "test_file": "androidapp/app/src/test/kotlin/noox/bzr/provider/ProviderSharedFixtureTest.kt", "case_count": 5,
+        "text_keys": "source-scan", "fixtures": ["design/fixtures/SCR-P12/cases.json"]
+      },
+      "ios": {
+        "file": "iosapp/BzrApp/Provider/ProviderJourneyViews.swift", "symbol": "P12ConfirmedOrderView",
+        "parameters": ["state", "destination", "onAction", "onBack"],
+        "logic_file": "iosapp/Core/Sources/BzrCore/ProviderJourney.swift", "logic_symbol": "ProviderLogic",
+        "test_file": "iosapp/Core/Tests/BzrCoreTests/ProviderSharedFixtureTests.swift", "case_count": 5,
+        "text_keys": "source-scan", "fixtures": ["design/fixtures/SCR-P12/cases.json"]
+      }
     },
     {
       "id": "SCR-P13",
-      "spec": "docs/25-SCREEN-INVENTORY.md",
-      "android": null,
-      "ios": null
+      "spec": "docs/screens/SCR-P13.md",
+      "android": {
+        "file": "androidapp/app/src/main/kotlin/noox/bzr/provider/ProviderActiveOrderView.kt", "symbol": "P13OnTheWayView",
+        "parameters": ["state", "destination", "onAction", "onBack"],
+        "logic_file": "androidapp/app/src/main/kotlin/noox/bzr/provider/ProviderLogic.kt", "logic_symbol": "ProviderLogic",
+        "test_file": "androidapp/app/src/test/kotlin/noox/bzr/provider/ProviderSharedFixtureTest.kt", "case_count": 5,
+        "text_keys": "source-scan", "fixtures": ["design/fixtures/SCR-P13/cases.json"]
+      },
+      "ios": {
+        "file": "iosapp/BzrApp/Provider/ProviderJourneyViews.swift", "symbol": "P13OnTheWayView",
+        "parameters": ["state", "destination", "onAction", "onBack"],
+        "logic_file": "iosapp/Core/Sources/BzrCore/ProviderJourney.swift", "logic_symbol": "ProviderLogic",
+        "test_file": "iosapp/Core/Tests/BzrCoreTests/ProviderSharedFixtureTests.swift", "case_count": 5,
+        "text_keys": "source-scan", "fixtures": ["design/fixtures/SCR-P13/cases.json"]
+      }
     },
     {
       "id": "SCR-P14",
-      "spec": "docs/25-SCREEN-INVENTORY.md",
-      "android": null,
-      "ios": null
+      "spec": "docs/screens/SCR-P14.md",
+      "android": {
+        "file": "androidapp/app/src/main/kotlin/noox/bzr/provider/ProviderActiveOrderView.kt", "symbol": "P14ArrivedView",
+        "parameters": ["state", "destination", "onAction", "onBack"],
+        "logic_file": "androidapp/app/src/main/kotlin/noox/bzr/provider/ProviderLogic.kt", "logic_symbol": "ProviderLogic",
+        "test_file": "androidapp/app/src/test/kotlin/noox/bzr/provider/ProviderSharedFixtureTest.kt", "case_count": 6,
+        "text_keys": "source-scan", "fixtures": ["design/fixtures/SCR-P14/cases.json"]
+      },
+      "ios": {
+        "file": "iosapp/BzrApp/Provider/ProviderJourneyViews.swift", "symbol": "P14ArrivedView",
+        "parameters": ["state", "destination", "onAction", "onBack"],
+        "logic_file": "iosapp/Core/Sources/BzrCore/ProviderJourney.swift", "logic_symbol": "ProviderLogic",
+        "test_file": "iosapp/Core/Tests/BzrCoreTests/ProviderSharedFixtureTests.swift", "case_count": 6,
+        "text_keys": "source-scan", "fixtures": ["design/fixtures/SCR-P14/cases.json"]
+      }
     },
     {
       "id": "SCR-P15",
-      "spec": "docs/25-SCREEN-INVENTORY.md",
-      "android": null,
-      "ios": null
+      "spec": "docs/screens/SCR-P15.md",
+      "android": {
+        "file": "androidapp/app/src/main/kotlin/noox/bzr/provider/ProviderActiveOrderView.kt", "symbol": "P15InProgressView",
+        "parameters": ["state", "destination", "onAction", "onBack"],
+        "logic_file": "androidapp/app/src/main/kotlin/noox/bzr/provider/ProviderLogic.kt", "logic_symbol": "ProviderLogic",
+        "test_file": "androidapp/app/src/test/kotlin/noox/bzr/provider/ProviderSharedFixtureTest.kt", "case_count": 5,
+        "text_keys": "source-scan", "fixtures": ["design/fixtures/SCR-P15/cases.json"]
+      },
+      "ios": {
+        "file": "iosapp/BzrApp/Provider/ProviderJourneyViews.swift", "symbol": "P15InProgressView",
+        "parameters": ["state", "destination", "onAction", "onBack"],
+        "logic_file": "iosapp/Core/Sources/BzrCore/ProviderJourney.swift", "logic_symbol": "ProviderLogic",
+        "test_file": "iosapp/Core/Tests/BzrCoreTests/ProviderSharedFixtureTests.swift", "case_count": 5,
+        "text_keys": "source-scan", "fixtures": ["design/fixtures/SCR-P15/cases.json"]
+      }
     },
     {
       "id": "SCR-P16",
-      "spec": "docs/25-SCREEN-INVENTORY.md",
-      "android": null,
-      "ios": null
+      "spec": "docs/screens/SCR-P16.md",
+      "android": {
+        "file": "androidapp/app/src/main/kotlin/noox/bzr/provider/ProviderActiveOrderView.kt", "symbol": "P16AwaitingPaymentView",
+        "parameters": ["state", "destination", "onAction", "onBack"],
+        "logic_file": "androidapp/app/src/main/kotlin/noox/bzr/provider/ProviderLogic.kt", "logic_symbol": "ProviderLogic",
+        "test_file": "androidapp/app/src/test/kotlin/noox/bzr/provider/ProviderSharedFixtureTest.kt", "case_count": 5,
+        "text_keys": "source-scan", "fixtures": ["design/fixtures/SCR-P16/cases.json"]
+      },
+      "ios": {
+        "file": "iosapp/BzrApp/Provider/ProviderJourneyViews.swift", "symbol": "P16AwaitingPaymentView",
+        "parameters": ["state", "destination", "onAction", "onBack"],
+        "logic_file": "iosapp/Core/Sources/BzrCore/ProviderJourney.swift", "logic_symbol": "ProviderLogic",
+        "test_file": "iosapp/Core/Tests/BzrCoreTests/ProviderSharedFixtureTests.swift", "case_count": 5,
+        "text_keys": "source-scan", "fixtures": ["design/fixtures/SCR-P16/cases.json"]
+      }
     },
     {
       "id": "SCR-P17",
-      "spec": "docs/25-SCREEN-INVENTORY.md",
-      "android": null,
-      "ios": null
+      "spec": "docs/screens/SCR-P17.md",
+      "android": {
+        "file": "androidapp/app/src/main/kotlin/noox/bzr/provider/P17CustomerRatingView.kt",
+        "layout": "androidapp/app/src/main/res/layout/screen_p17_customer_rating.xml",
+        "symbol": "P17CustomerRatingView",
+        "parameters": ["state", "onRate", "onSubmit", "onBack"],
+        "logic_file": "androidapp/app/src/main/kotlin/noox/bzr/provider/ProviderLogic.kt",
+        "logic_symbol": "ProviderLogic",
+        "test_file": "androidapp/app/src/test/kotlin/noox/bzr/provider/ProviderSharedFixtureTest.kt",
+        "case_count": 7,
+        "text_keys": "source-scan",
+        "fixtures": ["design/fixtures/SCR-P17/cases.json"]
+      },
+      "ios": {
+        "file": "iosapp/BzrApp/Provider/ProviderJourneyViews.swift",
+        "symbol": "P17CustomerRatingView",
+        "parameters": ["state", "onRate", "onSubmit", "onBack"],
+        "logic_file": "iosapp/Core/Sources/BzrCore/ProviderJourney.swift",
+        "logic_symbol": "ProviderLogic",
+        "test_file": "iosapp/Core/Tests/BzrCoreTests/ProviderSharedFixtureTests.swift",
+        "case_count": 7,
+        "text_keys": "source-scan",
+        "fixtures": ["design/fixtures/SCR-P17/cases.json"]
+      }
     },
     {
       "id": "SCR-P18",
-      "spec": "docs/25-SCREEN-INVENTORY.md",
-      "android": null,
-      "ios": null
+      "spec": "docs/screens/SCR-P18.md",
+      "android": {
+        "file": "androidapp/app/src/main/kotlin/noox/bzr/provider/P18EarningsView.kt",
+        "layout": "androidapp/app/src/main/res/layout/screen_p18_earnings.xml",
+        "symbol": "P18EarningsView",
+        "parameters": ["state", "onBack"],
+        "logic_file": "androidapp/app/src/main/kotlin/noox/bzr/provider/ProviderLogic.kt",
+        "logic_symbol": "ProviderLogic",
+        "test_file": "androidapp/app/src/test/kotlin/noox/bzr/provider/ProviderSharedFixtureTest.kt",
+        "case_count": 6,
+        "text_keys": "source-scan",
+        "fixtures": ["design/fixtures/SCR-P18/cases.json"]
+      },
+      "ios": {
+        "file": "iosapp/BzrApp/Provider/ProviderJourneyViews.swift",
+        "symbol": "P18EarningsView",
+        "parameters": ["state", "onBack"],
+        "logic_file": "iosapp/Core/Sources/BzrCore/ProviderJourney.swift",
+        "logic_symbol": "ProviderLogic",
+        "test_file": "iosapp/Core/Tests/BzrCoreTests/ProviderSharedFixtureTests.swift",
+        "case_count": 6,
+        "text_keys": "source-scan",
+        "fixtures": ["design/fixtures/SCR-P18/cases.json"]
+      }
     },
     {
       "id": "SCR-P19",
-      "spec": "docs/25-SCREEN-INVENTORY.md",
-      "android": null,
-      "ios": null
+      "spec": "docs/screens/SCR-P19.md",
+      "android": {
+        "file": "androidapp/app/src/main/kotlin/noox/bzr/provider/P19ProfileView.kt",
+        "layout": "androidapp/app/src/main/res/layout/screen_p19_profile.xml",
+        "symbol": "P19ProfileView",
+        "parameters": ["state", "onExperienceChange", "onBioChange", "onSpecialty", "onArea", "onCaptionChange", "onAvatar", "onPortfolio", "onDeletePortfolio", "onSupport", "onSave", "onBack"],
+        "logic_file": "androidapp/app/src/main/kotlin/noox/bzr/provider/ProviderLogic.kt",
+        "logic_symbol": "ProviderLogic",
+        "test_file": "androidapp/app/src/test/kotlin/noox/bzr/provider/ProviderSharedFixtureTest.kt",
+        "case_count": 8,
+        "text_keys": "source-scan",
+        "fixtures": ["design/fixtures/SCR-P19/cases.json"]
+      },
+      "ios": {
+        "file": "iosapp/BzrApp/Provider/ProviderJourneyViews.swift",
+        "symbol": "P19ProfileView",
+        "parameters": ["state", "onExperienceChange", "onBioChange", "onSpecialty", "onArea", "onCaptionChange", "onAvatar", "onPortfolio", "onDeletePortfolio", "onSupport", "onSave", "onBack"],
+        "logic_file": "iosapp/Core/Sources/BzrCore/ProviderJourney.swift",
+        "logic_symbol": "ProviderLogic",
+        "test_file": "iosapp/Core/Tests/BzrCoreTests/ProviderSharedFixtureTests.swift",
+        "case_count": 8,
+        "text_keys": "source-scan",
+        "fixtures": ["design/fixtures/SCR-P19/cases.json"]
+      }
     },
     {
       "id": "SCR-P20",
-      "spec": "docs/25-SCREEN-INVENTORY.md",
-      "android": null,
-      "ios": null
+      "spec": "docs/screens/SCR-P20.md",
+      "android": {
+        "file": "androidapp/app/src/main/kotlin/noox/bzr/provider/P20ProposalView.kt", "symbol": "P20ProposalView",
+        "parameters": ["state", "onTypeSelect", "onAmountChange", "onReasonChange", "onOutsideReasonChange", "onPickPhoto", "onDeletePhoto", "onSubmit", "onBack"],
+        "logic_file": "androidapp/app/src/main/kotlin/noox/bzr/provider/ProviderLogic.kt", "logic_symbol": "ProviderLogic",
+        "test_file": "androidapp/app/src/test/kotlin/noox/bzr/provider/ProviderSharedFixtureTest.kt", "case_count": 8,
+        "text_keys": "source-scan", "fixtures": ["design/fixtures/SCR-P20/cases.json"]
+      },
+      "ios": {
+        "file": "iosapp/BzrApp/Provider/ProviderJourneyViews.swift", "symbol": "P20ProposalView",
+        "parameters": ["state", "onTypeSelect", "onAmountChange", "onReasonChange", "onOutsideReasonChange", "onPickPhoto", "onDeletePhoto", "onSubmit", "onBack"],
+        "logic_file": "iosapp/Core/Sources/BzrCore/ProviderJourney.swift", "logic_symbol": "ProviderLogic",
+        "test_file": "iosapp/Core/Tests/BzrCoreTests/ProviderSharedFixtureTests.swift", "case_count": 8,
+        "text_keys": "source-scan", "fixtures": ["design/fixtures/SCR-P20/cases.json"]
+      }
     },
     {
       "id": "SCR-P21",
-      "spec": "docs/25-SCREEN-INVENTORY.md",
-      "android": null,
-      "ios": null
+      "spec": "docs/screens/SCR-P21.md",
+      "android": {
+        "file": "androidapp/app/src/main/kotlin/noox/bzr/provider/P21UnableView.kt", "symbol": "P21UnableView",
+        "parameters": ["state", "onReasonSelect", "onNoteChange", "onConfirm", "onBack"],
+        "logic_file": "androidapp/app/src/main/kotlin/noox/bzr/provider/ProviderLogic.kt", "logic_symbol": "ProviderLogic",
+        "test_file": "androidapp/app/src/test/kotlin/noox/bzr/provider/ProviderSharedFixtureTest.kt", "case_count": 7,
+        "text_keys": "source-scan", "fixtures": ["design/fixtures/SCR-P21/cases.json"]
+      },
+      "ios": {
+        "file": "iosapp/BzrApp/Provider/ProviderJourneyViews.swift", "symbol": "P21UnableView",
+        "parameters": ["state", "onReasonSelect", "onNoteChange", "onConfirm", "onBack"],
+        "logic_file": "iosapp/Core/Sources/BzrCore/ProviderJourney.swift", "logic_symbol": "ProviderLogic",
+        "test_file": "iosapp/Core/Tests/BzrCoreTests/ProviderSharedFixtureTests.swift", "case_count": 7,
+        "text_keys": "source-scan", "fixtures": ["design/fixtures/SCR-P21/cases.json"]
+      }
     }
   ]
 }

@@ -7,9 +7,9 @@
 - الـ API: `GET /cities`، `GET /cities/{city}/areas`، `POST /addresses`، `PATCH /addresses/{address}`
 - التخطيط (من أعلى لأسفل):
   1. `AppTopBar`  title=`address.form.add_title` أو `address.form.edit_title`
-  2. `MapCard`  title=`address.map.title`؛ الدبوس/موقعي من خرائط النظام ويعيدان `lat/lng` فقط للمنطق المشترك
+  2. `MapCard`  title=`address.map.title`؛ خريطة النظام الأصلية (Google Maps في Android وMapKit في iOS) تعرض الدبوس المحفوظ عند التعديل، والنقر أو زر موقعي يعيدان `lat/lng` فقط للمنطق المشترك
   3. `ScreenHeading`  title=`address.area.title`
-  4. `SelectableChip` لكل منطقة مفعّلة من الخادم
+  4. قائمة أفقية ديناميكية من `SelectableChip` لكل منطقة مفعّلة من الخادم؛ لا توجد قائمة مناطق احتياطية داخل التطبيق
   5. `AppTextField` للتسمية، الشارع/التفاصيل، المبنى، الدور، الشقة، والعلامة المميزة؛ المفاتيح `address.field.*`
   6. `CheckRow`  text=`address.default`
   7. `PrimaryButton`  text=`common.save`
@@ -18,5 +18,5 @@
 - الحالات: تحميل المراجع / خطأ شبكة / نموذج فارغ / أخطاء حقول / موقع غير محدد / نموذج صالح / حفظ جارٍ.
 - الأخطاء: `422` ← إبقاء القيم وإظهار `address.validation.invalid` أو مفتاح الحقل؛ `BUSINESS_RULE_VIOLATION`/`BR-010` ← `address.validation.unserved_area`؛ خطأ شبكة ← `error.body`.
 - fixtures: `design/fixtures/SCR-C15/cases.json`
+- إعداد البناء: مفتاح Android يأتي من `MAPS_ANDROID_API_KEY` في إعداد Gradle/بيئة البناء، وليس من المصدر أو `.env` المحلي. مفتاح الإنتاج مقيّد باسم الحزمة `com.bremo.app` وبصمات SHA-1 لشهادات التطوير وstaging والإنتاج.
 - أسئلة مفتوحة: لا يوجد؛ المدينة تأتي من المدينة المختارة في بيانات المرجع، والمنطقة اختيار صريح كما تلزم وثيقة 20.
-

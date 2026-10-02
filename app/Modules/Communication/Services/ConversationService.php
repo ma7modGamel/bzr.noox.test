@@ -8,6 +8,7 @@ use App\Modules\Communication\Enums\ConversationStatus;
 use App\Modules\Communication\Models\Conversation;
 use App\Modules\Communication\Models\Message;
 use App\Modules\Identity\Models\User;
+use App\Modules\Notifications\Services\OrderNotifications;
 use App\Modules\Offers\Enums\OfferStatus;
 use App\Modules\Orders\Enums\OrderStatus;
 use App\Modules\Orders\Models\Order;
@@ -18,7 +19,10 @@ use Illuminate\Support\Facades\DB;
 
 final readonly class ConversationService
 {
-    public function __construct(private ContactMasker $masker) {}
+    public function __construct(
+        private ContactMasker $masker,
+        private OrderNotifications $notifications,
+    ) {}
 
     public function start(User $customer, Order $order, ProviderProfile $provider): Conversation
     {
@@ -69,7 +73,7 @@ final readonly class ConversationService
             ? $this->masker->mask($body)
             : ['body' => $body, 'masked' => false];
 
-        return DB::transaction(function () use ($conversation, $sender, $body, $mediaIds, $masked, $order): Message {
+        $message = DB::transaction(function () use ($conversation, $sender, $body, $mediaIds, $masked, $order): Message {
             $media = collect();
 
             if ($mediaIds !== []) {
@@ -110,6 +114,25 @@ final readonly class ConversationService
             $conversation->touch();
 
             return $message->load('media');
+        });
+
+        $this->notifyRecipient($conversation, $order, $sender);
+
+        return $message;
+    }
+
+    /** NTF-25 للطرف الآخر بلا نص الرسالة (DEC-058). فشل الإشعار لا يُفشل الإرسال. */
+    private function notifyRecipient(Conversation $conversation, Order $order, User $sender): void
+    {
+        rescue(function () use ($conversation, $order, $sender): void {
+            $senderIsCustomer = $conversation->customer_id === $sender->getKey();
+            $recipient = $senderIsCustomer
+                ? $conversation->providerProfile()->with('user')->first()?->user
+                : User::query()->find($conversation->customer_id);
+
+            if ($recipient !== null) {
+                $this->notifications->newMessage($order, $recipient, recipientIsProvider: $senderIsCustomer);
+            }
         });
     }
 

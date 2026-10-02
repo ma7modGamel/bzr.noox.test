@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\AccountLinkController;
+use App\Http\Controllers\Admin\ProviderDocumentController;
+use App\Http\Controllers\AppLinkController;
 use App\Http\Controllers\FawryWebhookController;
 use App\Http\Controllers\LegalPageController;
 use App\Http\Controllers\ShareVisitController;
@@ -22,6 +24,19 @@ Route::middleware('throttle:20,1')->group(function (): void {
     Route::get('/password/reset/{token}', [AccountLinkController::class, 'showReset'])->name('password.reset');
     Route::post('/password/reset', [AccountLinkController::class, 'reset'])->name('password.update');
 });
+
+// DEC-060 — مستندات هوية الفني داخل جلسة اللوحة فقط.
+Route::get('/admin/provider-documents/{document}', ProviderDocumentController::class)
+    ->middleware(['web', 'auth:admin'])
+    ->name('admin.provider-documents.show');
+
+// DEC-058 — App Links وUniversal Links لروابط البريد، وصفحة بديلة بلا بيانات.
+Route::get('/.well-known/assetlinks.json', [AppLinkController::class, 'assetLinks']);
+Route::get('/.well-known/apple-app-site-association', [AppLinkController::class, 'appleAppSiteAssociation']);
+Route::get('/app/{path}', [AppLinkController::class, 'fallback'])
+    ->where('path', '[a-z0-9/_-]+')
+    ->middleware('throttle:60,1')
+    ->name('app.link');
 
 // DEC-051 — الصفحات القانونية العامة (المتاجر، روابط البريد، C34 على الويب).
 Route::get('/{slug}', LegalPageController::class)

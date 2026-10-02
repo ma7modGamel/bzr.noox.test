@@ -34,11 +34,13 @@ final class ApiContractTest extends TestCase
                 "المسار {$route->uri()} يوحي بتعديل الحالة مباشرة.",
             );
 
-            $this->assertNotContains(
-                'PUT',
-                $route->methods(),
-                "المسار {$route->uri()} يستخدم PUT؛ الإجراءات تُنفَّذ بـ POST مرتبطة بانتقال في 10.",
-            );
+            if (in_array('PUT', $route->methods(), true)) {
+                $this->assertSame(
+                    'api/v1/provider/availability',
+                    $route->uri(),
+                    "المسار {$route->uri()} يستخدم PUT خارج مورد إتاحة الفني الموثق في 31.",
+                );
+            }
         }
     }
 

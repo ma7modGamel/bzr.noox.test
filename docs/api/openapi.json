@@ -981,6 +981,75 @@
                 }
             }
         },
+        "/me/devices": {
+            "post": {
+                "operationId": "deviceStore",
+                "tags": [
+                    "المراجع"
+                ],
+                "summary": "deviceStore",
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AppMode"
+                    },
+                    {
+                        "$ref": "#/components/parameters/IdempotencyKey"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "نجاح"
+                    },
+                    "400": {
+                        "description": "خطأ",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "operationId": "deviceDestroy",
+                "tags": [
+                    "المراجع"
+                ],
+                "summary": "deviceDestroy",
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AppMode"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "نجاح"
+                    },
+                    "400": {
+                        "description": "خطأ",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/me/password": {
             "post": {
                 "operationId": "accountPassword",
@@ -2070,6 +2139,256 @@
                 }
             }
         },
+        "/provider/application": {
+            "get": {
+                "operationId": "providerApplicationShow",
+                "tags": [
+                    "الفني"
+                ],
+                "summary": "providerApplicationShow",
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AppMode"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "نجاح"
+                    },
+                    "400": {
+                        "description": "خطأ",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "operationId": "providerApplicationStore",
+                "tags": [
+                    "الفني"
+                ],
+                "summary": "providerApplicationStore",
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AppMode"
+                    },
+                    {
+                        "$ref": "#/components/parameters/IdempotencyKey"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "نجاح"
+                    },
+                    "400": {
+                        "description": "خطأ",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/provider/availability": {
+            "put": {
+                "operationId": "providerHomeUpdateAvailability",
+                "tags": [
+                    "الفني"
+                ],
+                "summary": "providerHomeUpdateAvailability",
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AppMode"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "نجاح"
+                    },
+                    "400": {
+                        "description": "خطأ",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/provider/earnings": {
+            "get": {
+                "operationId": "providerEarningsController",
+                "tags": [
+                    "الفني"
+                ],
+                "summary": "providerEarningsController",
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AppMode"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "نجاح"
+                    },
+                    "400": {
+                        "description": "خطأ",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/provider/home": {
+            "get": {
+                "operationId": "providerHomeShow",
+                "tags": [
+                    "الفني"
+                ],
+                "summary": "providerHomeShow",
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AppMode"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "نجاح"
+                    },
+                    "400": {
+                        "description": "خطأ",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/provider/offers": {
+            "get": {
+                "operationId": "providerOrderMyOffers",
+                "tags": [
+                    "الفني"
+                ],
+                "summary": "providerOrderMyOffers",
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AppMode"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "نجاح"
+                    },
+                    "400": {
+                        "description": "خطأ",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/provider/offers/{offer}/withdraw": {
+            "post": {
+                "operationId": "providerOrderWithdrawOffer",
+                "tags": [
+                    "الفني"
+                ],
+                "summary": "providerOrderWithdrawOffer",
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AppMode"
+                    },
+                    {
+                        "$ref": "#/components/parameters/IdempotencyKey"
+                    },
+                    {
+                        "name": "offer",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "نجاح"
+                    },
+                    "400": {
+                        "description": "خطأ",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/provider/orders": {
             "get": {
                 "operationId": "providerOrderMyOrders",
@@ -2644,6 +2963,151 @@
                 }
             }
         },
+        "/provider/portfolio": {
+            "post": {
+                "operationId": "providerPortfolioStore",
+                "tags": [
+                    "الفني"
+                ],
+                "summary": "providerPortfolioStore",
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AppMode"
+                    },
+                    {
+                        "$ref": "#/components/parameters/IdempotencyKey"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "نجاح"
+                    },
+                    "400": {
+                        "description": "خطأ",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/provider/portfolio/{portfolio}": {
+            "delete": {
+                "operationId": "providerPortfolioDestroy",
+                "tags": [
+                    "الفني"
+                ],
+                "summary": "providerPortfolioDestroy",
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AppMode"
+                    },
+                    {
+                        "name": "portfolio",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "نجاح"
+                    },
+                    "400": {
+                        "description": "خطأ",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/provider/profile": {
+            "get": {
+                "operationId": "providerProfileShow",
+                "tags": [
+                    "الفني"
+                ],
+                "summary": "providerProfileShow",
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AppMode"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "نجاح"
+                    },
+                    "400": {
+                        "description": "خطأ",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "operationId": "providerProfileUpdate",
+                "tags": [
+                    "الفني"
+                ],
+                "summary": "providerProfileUpdate",
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AppMode"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "نجاح"
+                    },
+                    "400": {
+                        "description": "خطأ",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/provider/requests": {
             "get": {
                 "operationId": "providerOrderAvailableRequests",
@@ -2659,6 +3123,48 @@
                 "parameters": [
                     {
                         "$ref": "#/components/parameters/AppMode"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "نجاح"
+                    },
+                    "400": {
+                        "description": "خطأ",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/provider/requests/{order}": {
+            "get": {
+                "operationId": "providerOrderAvailableRequest",
+                "tags": [
+                    "الفني"
+                ],
+                "summary": "providerOrderAvailableRequest",
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AppMode"
+                    },
+                    {
+                        "name": "order",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
                     }
                 ],
                 "responses": {

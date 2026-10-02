@@ -24,9 +24,13 @@ public func bzrString(_ key: String) -> String {
     String(localized: String.LocalizationValue(key), bundle: .module)
 }
 
-public extension BzrTextStyle {
-    func colored(_ color: Color) -> BzrTextStyle { BzrTextStyle(size: size, fontName: fontName, color: color) }
-    func weighted(_ fontName: String) -> BzrTextStyle { BzrTextStyle(size: size, fontName: fontName, color: color) }
+extension BzrTextStyle {
+    public func colored(_ color: Color) -> BzrTextStyle {
+        BzrTextStyle(size: size, fontName: fontName, color: color)
+    }
+    public func weighted(_ fontName: String) -> BzrTextStyle {
+        BzrTextStyle(size: size, fontName: fontName, color: color)
+    }
 }
 
 /// Text in a token style. Dynamic Type follows the environment and is capped at DesignA11y.maxFontScale.
@@ -37,7 +41,10 @@ public struct BzrText: View {
     private let alignment: TextAlignment
     private let lineLimit: Int?
 
-    public init(_ value: String, style: BzrTextStyle = DesignType.body, alignment: TextAlignment = .leading, lineLimit: Int? = nil) {
+    public init(
+        _ value: String, style: BzrTextStyle = DesignType.body, alignment: TextAlignment = .leading,
+        lineLimit: Int? = nil
+    ) {
         self.value = value
         self.style = style
         self.alignment = alignment
@@ -45,7 +52,8 @@ public struct BzrText: View {
     }
 
     private var scaledSize: CGFloat {
-        let traits = UITraitCollection(preferredContentSizeCategory: UIContentSizeCategory(dynamicTypeSize))
+        let traits = UITraitCollection(
+            preferredContentSizeCategory: UIContentSizeCategory(dynamicTypeSize))
         let scaled = UIFontMetrics.default.scaledValue(for: style.size, compatibleWith: traits)
         return min(scaled, style.size * DesignA11y.maxFontScale)
     }
@@ -65,7 +73,10 @@ public struct BzrIcon: View {
     private let tint: Color
     private let size: CGFloat
 
-    public init(_ key: BzrIconKey, label: String? = nil, tint: Color = DesignIcon.color, size: CGFloat = DesignSize.icon) {
+    public init(
+        _ key: BzrIconKey, label: String? = nil, tint: Color = DesignIcon.color,
+        size: CGFloat = DesignSize.icon
+    ) {
         self.key = key
         self.label = label
         self.tint = tint
@@ -96,7 +107,9 @@ public struct BzrCard<Content: View>: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(DesignSpace.cardPadding)
-        .bzrFrame(radius: DesignRadius.card, fill: DesignColors.surface, border: DesignColors.border, width: DesignBorder.width)
+        .bzrFrame(
+            radius: DesignRadius.card, fill: DesignColors.surface, border: DesignColors.border,
+            width: DesignBorder.width)
     }
 }
 
@@ -108,9 +121,9 @@ public struct BzrPressStyle: ButtonStyle {
     }
 }
 
-public extension View {
+extension View {
     /// Fill + inner border + clip, matching Compose `background().border()` (border drawn inside the bounds).
-    func bzrFrame(radius: CGFloat, fill: Color, border: Color, width: CGFloat) -> some View {
+    public func bzrFrame(radius: CGFloat, fill: Color, border: Color, width: CGFloat) -> some View {
         self
             .background(RoundedRectangle(cornerRadius: radius).fill(fill))
             .overlay(RoundedRectangle(cornerRadius: radius).strokeBorder(border, lineWidth: width))

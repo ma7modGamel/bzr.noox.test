@@ -1,0 +1,4 @@
+"NSLocationWhenInUseUsageDescription" = "نستخدم موقعك لتحديد عنوان الخدمة على الخريطة.";
+"NSCameraUsageDescription" = "نستخدم الكاميرا لإرفاق صورة توضح المشكلة.";
+"NSPhotoLibraryUsageDescription" = "نستخدم الصور والفيديو التي تختارها لإرفاقها بالطلب.";
+"NSMicrophoneUsageDescription" = "نستخدم الميكروفون لتسجيل وصف صوتي للمشكلة.";

@@ -1,0 +1,53 @@
+#!/usr/bin/env php
+<?php
+
+declare(strict_types=1);
+
+$root = dirname(__DIR__);
+$output = $root.'/reports/batch-5b/provider-home';
+$androidOutput = $output.'/android';
+if (! is_dir($androidOutput) && ! mkdir($androidOutput, 0775, true) && ! is_dir($androidOutput)) {
+    throw new RuntimeException('Cannot create provider home report output.');
+}
+
+$fixture = json_decode(
+    (string) file_get_contents($root.'/design/fixtures/SCR-P08/cases.json'),
+    true,
+    flags: JSON_THROW_ON_ERROR,
+);
+$rows = [];
+foreach ($fixture['cases'] as $case) {
+    $id = 'SCR-P08-'.$case['id'];
+    $matches = glob($root.'/androidapp/app/src/test/snapshots/images/*_'.strtolower($id).'.png') ?: [];
+    if (count($matches) !== 1) {
+        throw new RuntimeException("Missing Android snapshot for {$id}");
+    }
+    $target = 'android/'.$id.'.png';
+    copy($matches[0], $output.'/'.$target);
+    $rows[] = '<section class="comparison" id="'.htmlspecialchars($id).'">'
+        .'<header><strong>SCR-P08 · '.htmlspecialchars((string) $case['id']).'</strong>'
+        .'<code>'.htmlspecialchars((string) $case['expected']['phase']).'</code></header>'
+        .'<div class="columns">'
+        .'<article><h2>Android · XML/Paparazzi</h2><a href="'.htmlspecialchars($target).'">'
+        .'<img src="'.htmlspecialchars($target).'" alt="'.htmlspecialchars($id).'" loading="lazy"></a></article>'
+        .'<article><h2>iOS · SwiftUI</h2><div class="pending">Swift Core وملف SwiftUI متحقق منهما آليًا على Linux؛ الرسم واللقطة مؤجلان لدفعة «تحقق iOS».</div></article>'
+        .'</div></section>';
+}
+
+$count = count($fixture['cases']);
+$html = '<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8">'
+    .'<meta name="viewport" content="width=device-width,initial-scale=1"><title>الدفعة 5ب — رئيسية الفني</title>'
+    .'<link rel="stylesheet" href="../../../design/generated/tokens.css"><style>'
+    .'*{box-sizing:border-box}body{margin:0;padding:var(--space-xl);background:var(--color-surfacealt);color:var(--color-navy800);font-family:var(--font-family),sans-serif}'
+    .'main{max-width:1100px;margin:auto}.intro,.comparison{background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-card);padding:var(--space-l);margin-bottom:var(--space-l)}'
+    .'header{display:flex;justify-content:space-between;gap:var(--space-m);align-items:center}.columns{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--space-l)}'
+    .'img{width:100%;max-width:400px;aspect-ratio:1/2;object-fit:contain;object-position:top;border:1px solid var(--color-border);border-radius:var(--radius-card)}'
+    .'.pending{min-height:400px;display:grid;place-items:center;text-align:center;padding:var(--space-l);border:1px dashed var(--color-border);border-radius:var(--radius-card);color:var(--color-slate500)}'
+    .'.notice{background:var(--color-primary50info);border-radius:var(--radius-card);padding:var(--space-m)}@media(max-width:800px){.columns{grid-template-columns:1fr}}'
+    .'</style></head><body><main><section class="intro"><h1>الدفعة 5ب — SCR-P08</h1>'
+    .'<p>'.$count.' حالات مشتركة: التحميل، الخطأ، غير متاح، متاح، الحفظ، نجاح الحفظ، والطلب المعيّن.</p>'
+    .'<p class="notice"><strong>بوابة الاعتماد:</strong> راجع لقطات Android. لن تبدأ 5ج قبل اعتماد هذه الدفعة.</p>'
+    .'</section>'.implode("\n", $rows).'</main></body></html>';
+
+file_put_contents($output.'/comparison.html', $html);
+fwrite(STDOUT, "Generated reports/batch-5b/provider-home/comparison.html ({$count} snapshots)\n");

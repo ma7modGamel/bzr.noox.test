@@ -12,6 +12,10 @@ packages:
   SnapshotTesting:
     url: https://github.com/pointfreeco/swift-snapshot-testing
     from: 1.19.0
+  # DEC-058 — APNs through Firebase Messaging; GoogleService-Info.plist is injected at build (DEP-PUSH-02).
+  Firebase:
+    url: https://github.com/firebase/firebase-ios-sdk
+    from: 12.0.0
 targets:
   BzrApp:
     type: application
@@ -21,15 +25,36 @@ targets:
     dependencies:
       - package: BzrCore
       - package: DesignSystem
+      - package: Firebase
+        product: FirebaseMessaging
+    entitlements:
+      path: BzrApp/BzrApp.entitlements
+      properties:
+        aps-environment: development
+        com.apple.developer.associated-domains:
+          - applinks:$(BZR_APP_LINK_HOST)
+    info:
+      path: BzrApp/Info.plist
+      properties:
+        CFBundleURLTypes:
+          - CFBundleURLName: com.bremo.app.links
+            CFBundleURLSchemes: [bremo]
+        UIBackgroundModes: [remote-notification]
+        FirebaseAppDelegateProxyEnabled: false
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.bremo.app # DEC-048
+        BZR_APP_LINK_HOST: app-domain.invalid # DEP-LINK-01 / DEP-ID-01
         DEVELOPMENT_TEAM: ""
         CODE_SIGNING_ALLOWED: NO
         SWIFT_VERSION: 5.10
         GENERATE_INFOPLIST_FILE: YES
         INFOPLIST_KEY_UIUserInterfaceStyle: Light
         INFOPLIST_KEY_BZRApiBaseURL: "$(BZR_API_BASE_URL)"
+        INFOPLIST_KEY_NSLocationWhenInUseUsageDescription: "Location access is required to choose the service address."
+        INFOPLIST_KEY_NSCameraUsageDescription: "Camera access is required to attach a problem photo."
+        INFOPLIST_KEY_NSPhotoLibraryUsageDescription: "Photo library access is required to attach selected media."
+        INFOPLIST_KEY_NSMicrophoneUsageDescription: "Microphone access is required to record an audio description."
         INFOPLIST_KEY_UIApplicationSceneManifest_Generation: YES
         INFOPLIST_KEY_UILaunchScreen_Generation: YES
   BzrAppTests:

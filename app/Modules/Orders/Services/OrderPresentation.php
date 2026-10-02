@@ -259,8 +259,17 @@ final readonly class OrderPresentation
         if ($order->status === OrderStatus::Open && $order->provider_profile_id === null) {
             $actions = [];
 
+            $ownOffer = $order->offers->first(
+                fn ($offer): bool => $offer->provider_profile_id === $profile->getKey()
+                    && $offer->status === OfferStatus::Submitted,
+            );
+
             if ($this->features->offersEnabled() && $this->submitOffer->canSubmit($order, $profile)) {
                 $actions[] = 'submit_offer';
+            }
+
+            if ($this->features->offersEnabled() && $ownOffer !== null) {
+                $actions[] = 'withdraw_offer';
             }
 
             if ($order->conversations->contains('provider_profile_id', $profile->getKey())) {

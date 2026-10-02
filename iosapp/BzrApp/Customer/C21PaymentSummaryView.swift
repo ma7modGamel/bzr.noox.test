@@ -42,7 +42,8 @@ public struct C21PaymentSummaryView: View {
                     state: state.isBusy ? .loading : (state.canContinue ? .normal : .disabled),
                     onClick: onPay)
             }
-            ActionButtons(actions: state.visibleActions.filter { $0 == "open_dispute" }, onAction: onAction)
+            ActionButtons(
+                actions: state.visibleActions.filter { $0 == "open_dispute" }, onAction: onAction)
         }
     }
 
@@ -50,7 +51,9 @@ public struct C21PaymentSummaryView: View {
         Button(
             action: { onMethodSelect(index) },
             label: {
-                RadioCard(title: title, body: bzrString("payment.option.body"), selected: state.selectedOptionIndex == index)
+                RadioCard(
+                    title: title, body: bzrString("payment.option.body"),
+                    selected: state.selectedOptionIndex == index)
             }
         )
         .buttonStyle(.plain)
@@ -58,6 +61,8 @@ public struct C21PaymentSummaryView: View {
     }
 }
 
-private extension Array {
-    subscript(safe index: Index) -> Element? { indices.contains(index) ? self[index] : nil }
+extension Array {
+    fileprivate subscript(safe index: Index) -> Element? {
+        indices.contains(index) ? self[index] : nil
+    }
 }

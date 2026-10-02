@@ -49,21 +49,13 @@ final class DesignTokensTest extends TestCase
     #[Test]
     public function لقطات_معرض_اندرويد_المعتمدة_تطابق_لقطات_الاختبار(): void
     {
-        $fixture = json_decode(
-            (string) file_get_contents(base_path('design/fixtures/gallery/components.json')),
-            true,
-            flags: JSON_THROW_ON_ERROR,
+        $process = new Process(
+            [PHP_BINARY, base_path('tools/compare-android-xml'), 'gallery', '--strict'],
+            base_path(),
         );
+        $process->run();
 
-        foreach ($fixture['snapshot_cases'] as $case) {
-            $matches = glob(base_path("androidapp/core/design/src/test/snapshots/images/*_gallery-{$case['id']}.png"));
-            $this->assertCount(1, $matches, "Android snapshot {$case['id']} is missing or duplicated.");
-            $this->assertFileEquals(
-                $matches[0],
-                base_path("design/reference/gallery/gallery-{$case['id']}.png"),
-                "Approved Android reference {$case['id']} has drifted.",
-            );
-        }
+        $this->assertSame(0, $process->getExitCode(), $process->getErrorOutput().$process->getOutput());
     }
 
     #[Test]
@@ -128,15 +120,26 @@ final class DesignTokensTest extends TestCase
             true,
             flags: JSON_THROW_ON_ERROR,
         );
-        $androidComponents = (string) file_get_contents(base_path('androidapp/core/design/src/main/kotlin/noox/bzr/design/BzrComponents.kt'));
-        $iosComponents = (string) file_get_contents(base_path('iosapp/Packages/DesignSystem/Sources/DesignSystem/BzrComponents.swift'));
+        $parity = json_decode(
+            (string) file_get_contents(base_path('design/parity.json')),
+            true,
+            flags: JSON_THROW_ON_ERROR,
+        );
+        $components = collect($parity['components'])->keyBy('id');
 
         foreach ($fixture['sections'] as $section) {
             foreach ($section['components'] as $component) {
-                $escapedComponent = preg_quote($component, '/');
+                $entry = $components->get($component);
 
-                $this->assertMatchesRegularExpression("/fun\\s+{$escapedComponent}\\b/", $androidComponents, "Android is missing {$component}.");
-                $this->assertMatchesRegularExpression("/struct\\s+{$escapedComponent}\\b/", $iosComponents, "iOS is missing {$component}.");
+                $this->assertIsArray($entry, "Parity manifest is missing {$component}.");
+                foreach (['android', 'ios'] as $platform) {
+                    $source = (string) file_get_contents(base_path($entry[$platform]['file']));
+                    $this->assertStringContainsString(
+                        $entry[$platform]['symbol'],
+                        $source,
+                        "{$platform} is missing {$component}.",
+                    );
+                }
             }
         }
 

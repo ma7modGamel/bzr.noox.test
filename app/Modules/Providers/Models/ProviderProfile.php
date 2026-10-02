@@ -14,6 +14,8 @@ use App\Modules\Orders\Models\Order;
 use App\Modules\Providers\Enums\EmploymentType;
 use App\Modules\Providers\Enums\ProviderStatus;
 use App\Modules\Reviews\Models\Review;
+use App\Modules\Settlements\Models\ProviderPayout;
+use App\Modules\Settlements\Models\ProviderRemittance;
 use Database\Factories\ProviderProfileFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -98,6 +100,16 @@ final class ProviderProfile extends Model
     public function orders(): HasMany
     {
         return $this->hasMany(Order::class);
+    }
+
+    public function payouts(): HasMany
+    {
+        return $this->hasMany(ProviderPayout::class);
+    }
+
+    public function remittances(): HasMany
+    {
+        return $this->hasMany(ProviderRemittance::class);
     }
 
     /** BR-005 — الفني الموثّق: هوية مراجَعة + هاتف موثق يدويًا (DEC-033). */

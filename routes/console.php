@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+use App\Modules\Notifications\Jobs\SendRatingReminders;
+use App\Modules\Notifications\Jobs\SendTripStartReminders;
 use App\Modules\Orders\Jobs\AutoCloseConfirmedOrders;
 use App\Modules\Orders\Jobs\ExpirePendingProposals;
 use App\Modules\Orders\Jobs\ExpireStaleOrders;
@@ -37,3 +39,15 @@ Schedule::job(new PurgeExpiredMedia)
     ->hourly()
     ->withoutOverlapping()
     ->name('media:purge-expired');
+
+// NTF-07 — تذكير الفني ببدء التحرك (CFG-031، EC-07)
+Schedule::job(new SendTripStartReminders)
+    ->everyMinute()
+    ->withoutOverlapping()
+    ->name('notifications:trip-start-reminders');
+
+// NTF-18 — تذكير التقييم مرة واحدة بعد CFG-072 (DEC-058)
+Schedule::job(new SendRatingReminders)
+    ->everyFifteenMinutes()
+    ->withoutOverlapping()
+    ->name('notifications:rating-reminders');

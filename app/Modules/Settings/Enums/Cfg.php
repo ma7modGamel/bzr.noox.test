@@ -66,6 +66,7 @@ enum Cfg: string
     // ── التقييم والتواصل ───────────────────────────────────────────────
     case RatingWindowDays = 'ratings.window_days';                          // CFG-070
     case PhoneHideAfterCloseHours = 'ratings.phone_hide_after_close_hours'; // CFG-071
+    case RatingReminderHours = 'ratings.reminder_hours';                    // CFG-072 (DEC-058)
 
     // ── الموقع والخصوصية (DEC-030) ─────────────────────────────────────
     case LocationUpdateSeconds = 'tracking.location_update_seconds';        // CFG-080
@@ -108,6 +109,7 @@ enum Cfg: string
             self::PayoutCycle => 'CFG-063',
             self::RatingWindowDays => 'CFG-070',
             self::PhoneHideAfterCloseHours => 'CFG-071',
+            self::RatingReminderHours => 'CFG-072',
             self::LocationUpdateSeconds => 'CFG-080',
             self::EtaRecalcSeconds, self::EtaRecalcDistanceMeters => 'CFG-081',
             self::ArrivalWarningDistanceMeters => 'CFG-082',
@@ -161,6 +163,7 @@ enum Cfg: string
             self::EmployeeRemittanceCycle => 'دورية توريد النقدية من الموظف',
             self::RatingWindowDays => 'نافذة التقييم (يوم)',
             self::PhoneHideAfterCloseHours => 'إخفاء الرقم بعد الإغلاق (ساعة)',
+            self::RatingReminderHours => 'تذكير التقييم بعد الإغلاق (ساعة)',
             self::LocationUpdateSeconds => 'تحديث موقع الفني (ثانية)',
             self::EtaRecalcSeconds => 'إعادة حساب وقت الوصول (ثانية)',
             self::EtaRecalcDistanceMeters => 'إعادة حساب وقت الوصول عند تحرك (متر)',
@@ -205,7 +208,7 @@ enum Cfg: string
             self::InstapayLink => CfgGroup::Payments,
             self::DisputeWindowHours, self::ProviderDebtLimit, self::DefaultCommissionRate,
             self::PayoutCycle, self::EmployeeRemittanceCycle => CfgGroup::Settlements,
-            self::RatingWindowDays, self::PhoneHideAfterCloseHours => CfgGroup::Ratings,
+            self::RatingWindowDays, self::PhoneHideAfterCloseHours, self::RatingReminderHours => CfgGroup::Ratings,
             self::LocationUpdateSeconds, self::EtaRecalcSeconds, self::EtaRecalcDistanceMeters,
             self::ArrivalWarningDistanceMeters, self::ArrivalPointRetentionDays => CfgGroup::Tracking,
         };
@@ -256,6 +259,7 @@ enum Cfg: string
             self::EmployeeRemittanceCycle => 'daily',
             self::RatingWindowDays => 7,
             self::PhoneHideAfterCloseHours => 24,
+            self::RatingReminderHours => 24,
             self::LocationUpdateSeconds => 30,
             self::EtaRecalcSeconds => 120,
             self::EtaRecalcDistanceMeters => 300,

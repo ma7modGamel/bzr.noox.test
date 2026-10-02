@@ -33,16 +33,17 @@ erDiagram
 
 ## الجداول
 ### الهوية
-**users** — `id`, `name` (100), `email` UQ, `email_verified_at`, `password`, `phone` (20), `avatar_path` NULL, `status` (ACTIVE/BLOCKED), `blocked_reason` NULL, `customer_rating_avg` DECIMAL(3,2) NULL, `customer_rating_count` INT, `deleted_at`. فهرس: `status`.
+**users** — `id`, `name` (100), `email` UQ, `email_verified_at`, `password`, `phone` (20), `avatar_path` NULL, `status` (ACTIVE/BLOCKED), `blocked_reason` NULL, `customer_rating_avg` DECIMAL(3,2) NULL, `customer_rating_count` INT, `rating_reminders_enabled` BOOL افتراضي true (NTF-18)، `deleted_at`. فهرس: `status`.
 **admins** — `id`, `name`, `email` UQ, `password`, `role` (OPERATIONS/SUPER), `is_active`.
-**device_tokens** — `id`, `user_id` FK, `token` UQ, `platform` (ANDROID/IOS), `app_mode` (CUSTOMER/PROVIDER), `last_used_at`.
+**device_tokens** — `id`, `user_id` FK, `token` UQ, `platform` (ANDROID/IOS), `app_mode` (CUSTOMER/PROVIDER — آخر وضع سجّل منه، للمعلومة فقط؛ Push يصل لكل رموز المستخدم، DEC-058), `last_used_at`.
+**notifications** (لارافيل) — `data` JSON يحمل `code`, `title`, `body`, `deep_link`, `app_mode`, و`order_id` إن وُجد؛ عمود `app_mode` مفهرس مع `notifiable` للتصفية حسب الوضع. **notification_dispatches** — `id`, `notification_id`, `code`, `order_id` NULL, `user_id`, `key` UQ (يمنع تكرار NTF-07 وNTF-18 والتجميع في NTF-04), `created_at`.
 + جداول لارافيل: `personal_access_tokens` (Sanctum)، `password_reset_tokens`، `notifications`، `jobs`، `failed_jobs`، `sessions` (للوحة).
 
 ### الجغرافيا والكتالوج
 **cities** — `id`, `name`, `is_active`, `timezone`, `center_lat`, `center_lng`, `radius_km` NULL.
 **areas** — `id`, `city_id` FK, `name`, `is_active`, `sort`. UQ(`city_id`,`name`).
 **categories** — `id`, `name`, `icon_path`, `sort`, `is_active`.
-**problem_types** — `id`, `category_id` FK, `name`, `is_other` BOOL, `sort`, `is_active`. UQ(`category_id`,`name`).
+**problem_types** — `id`, `category_id` FK, `name`, `is_other` BOOL, `employee_price_min` NULL، `employee_price_max` NULL، `employee_price_notes` NULL، `sort`, `is_active`. UQ(`category_id`,`name`). في وضع الموظفين يتطلب النوع العادي المفعّل حدين موجبَين و`employee_price_min ≤ employee_price_max`؛ `is_other=true` معفى ويجوز أن يبقيا فارغين (BR-046).
 **city_categories** — PK(`city_id`,`category_id`), `is_active`.
 
 ### العملاء
@@ -55,6 +56,8 @@ erDiagram
 **provider_specialties** — PK(`provider_profile_id`,`problem_type_id`).
 **provider_areas** — PK(`provider_profile_id`,`area_id`); فهرس (`area_id`) للتوزيع.
 **portfolio_items** — `id`, `provider_profile_id` FK, `image_path`, `caption` NULL, `sort`.
+
+لا يوجد جدول ورديات أو دوام في المرحلة الأولى؛ `provider_profiles.available_now` هو مصدر الإتاحة الوحيد، وتُفحص تعارضات الطلبات عند التعيين (DEC-057).
 
 ### الطلبات
 **orders**
@@ -97,7 +100,7 @@ CHECK: `slot_start < slot_end` عند SCHEDULED؛ المبالغ ≥ 0.
 **offers** — `id`, `order_id` FK, `provider_profile_id` FK, `source` (PROVIDER/ADMIN_ASSIGNMENT، افتراضي PROVIDER), `price` (≥ 0؛ يساوي 0 فقط عند `ADMIN_ASSIGNMENT`), `eta_minutes` NULL, `inspection_fee_deductible` NULL, `includes_text`, `note` NULL, `status`, `previous_offer_id` NULL, `submitted_at`, `withdrawn_at`, `decided_at`.
 - عمود مولّد `active_key = IF(status IN ('SUBMITTED','NOT_SELECTED','ACCEPTED'), CONCAT(order_id,':',provider_profile_id), NULL)` مع UQ ← عرض نشط واحد (BR-030).
 - فهرس: (`order_id`,`status`)، (`provider_profile_id`,`status`).
-**price_proposals** — `id`, `order_id` FK, `provider_profile_id` FK, `type`, `amount`, `reason`, `photo_path` NULL, `status`, `expires_at`, `decided_at`, `decided_by_type`.
+**price_proposals** — `id`, `order_id` FK, `provider_profile_id` FK, `type`, `amount`, `reason`, `photo_path` NULL, `price_guide_min` NULL، `price_guide_max` NULL، `outside_price_guide` BOOL افتراضي false، `price_review_reason` NULL (`OUTSIDE_RANGE`/`OTHER_PROBLEM`)، `outside_price_guide_reason` NULL، `status`, `expires_at`, `decided_at`, `decided_by_type`. حقول الدليل تُملأ لـ`EXECUTION_QUOTE` في وضع الموظفين وتحفظ نسخة النطاق وقت الإرسال إن وُجد (BR-046).
 - عمود مولّد `pending_key = IF(status='PENDING', order_id, NULL)` مع UQ ← مقترح معلّق واحد (BR-041).
 - فهرس: (`status`,`expires_at`).
 **order_events** — `id`, `order_id` FK, `event_code`, `actor_type`, `actor_id` NULL, `from_status`, `to_status`, `ref_type`, `ref_id`, `meta` JSON, `created_at`. فهرس (`order_id`,`id`). لا تعديل ولا حذف.
@@ -137,7 +140,7 @@ JOIN users u ON u.id = pp.user_id AND u.status = 'ACTIVE'
 JOIN provider_categories pc ON pc.provider_profile_id = pp.id AND pc.category_id = :category
 JOIN provider_areas pa ON pa.provider_profile_id = pp.id AND pa.area_id = :area
 WHERE pp.status = 'ACTIVE' AND pp.user_id <> :customer
-  -- + شرط NOW: available_now = 1 AND لا طلب NOW نشط
+  -- + في السوق لطلب NOW: available_now = 1 AND لا طلب NOW نشط
   -- + استبعاد الممنوعين بسبب المستحقات (محسوب ومخزن مؤقتًا بمهمة كل 10 دقائق)
 ```
-نفس الاستعلام يخدم **لوحة التعيين** في وضع الموظفين بحذف شرط المستحقات (BR-065) وإضافة عمود الحِمل الحالي (عدد الطلبات غير النهائية لكل مقدم خدمة) للترتيب.
+نفس الاستعلام يخدم **لوحة التعيين** في وضع الموظفين بحذف شرط المستحقات (BR-065)، وإلزام `available_now = 1` لكل المواعيد، وإضافة عمود الحِمل الحالي (عدد الطلبات غير النهائية لكل مقدم خدمة) للترتيب. لا join لورديات غير موجودة.

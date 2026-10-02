@@ -25,6 +25,7 @@ use App\Modules\Payments\Actions\ConfirmCashReceivedAction;
 use App\Modules\Payments\Enums\OrderPaymentStatus;
 use App\Modules\Pricing\Actions\DecideProposalAction;
 use App\Modules\Pricing\Actions\SubmitProposalAction;
+use App\Modules\Pricing\Enums\PriceReviewReason;
 use App\Modules\Pricing\Enums\ProposalType;
 use App\Modules\Providers\Models\ProviderProfile;
 use App\Support\Exceptions\BusinessRuleViolationException;
@@ -161,6 +162,80 @@ final class EmployeeModeJourneyTest extends TestCase
         app(SubmitProposalAction::class)->execute($order->refresh(), $provider, ProposalType::ExecutionQuote, '500.00', 'سبب آخر');
     }
 
+    #[Test]
+    public function السعر_خارج_الدليل_يمر_للعميل_بسبب_ويتعلم_للمراجعة(): void
+    {
+        [, $provider, , $order] = $this->publishAndAssign();
+        $order = app(StartTripAction::class)->execute($order, $provider);
+        $order = app(MarkArrivedAction::class)->execute($order, $provider, 30.0600, 31.3400);
+
+        $quote = app(SubmitProposalAction::class)->execute(
+            $order,
+            $provider,
+            ProposalType::ExecutionQuote,
+            '650.00',
+            'إصلاح كامل بعد المعاينة',
+            outsidePriceGuideReason: 'حالة المواسير تحتاج عملا إضافيا',
+        );
+
+        $this->assertSame('300.00', $quote->price_guide_min);
+        $this->assertSame('500.00', $quote->price_guide_max);
+        $this->assertTrue($quote->outside_price_guide);
+        $this->assertSame(PriceReviewReason::OutsideRange, $quote->price_review_reason);
+        $this->assertSame('حالة المواسير تحتاج عملا إضافيا', $quote->outside_price_guide_reason);
+        $this->assertSame(OrderStatus::AwaitingQuoteApproval, $order->refresh()->status);
+    }
+
+    #[Test]
+    public function السعر_خارج_الدليل_يرفض_بلا_سبب(): void
+    {
+        [, $provider, , $order] = $this->publishAndAssign();
+        $order = app(StartTripAction::class)->execute($order, $provider);
+        $order = app(MarkArrivedAction::class)->execute($order, $provider, 30.0600, 31.3400);
+
+        $this->expectException(BusinessRuleViolationException::class);
+        $this->expectExceptionMessage('سبب السعر خارج دليل الأسعار');
+
+        app(SubmitProposalAction::class)->execute(
+            $order, $provider, ProposalType::ExecutionQuote, '650.00', 'إصلاح كامل بعد المعاينة',
+        );
+    }
+
+    #[Test]
+    public function مشكلة_أخرى_معفاة_من_الدليل_وكل_سعر_فيها_يتعلم_للمراجعة(): void
+    {
+        [, $provider, , $order] = $this->publishAndAssign(otherProblem: true, withGuide: false);
+        $order = app(StartTripAction::class)->execute($order, $provider);
+        $order = app(MarkArrivedAction::class)->execute($order, $provider, 30.0600, 31.3400);
+
+        $quote = app(SubmitProposalAction::class)->execute(
+            $order, $provider, ProposalType::ExecutionQuote, '900.00', 'تفاصيل الحالة بعد المعاينة',
+        );
+
+        $this->assertTrue($quote->outside_price_guide);
+        $this->assertSame(PriceReviewReason::OtherProblem, $quote->price_review_reason);
+        $this->assertNull($quote->outside_price_guide_reason);
+        $this->assertSame(OrderStatus::AwaitingQuoteApproval, $order->refresh()->status);
+    }
+
+    #[Test]
+    public function النوع_العادي_بلا_دليل_يرفض_عرض_التنفيذ(): void
+    {
+        [, $provider, , $order] = $this->publishAndAssign(withGuide: false);
+        $order = app(StartTripAction::class)->execute($order, $provider);
+        $order = app(MarkArrivedAction::class)->execute($order, $provider, 30.0600, 31.3400);
+
+        try {
+            app(SubmitProposalAction::class)->execute(
+                $order, $provider, ProposalType::ExecutionQuote, '450.00', 'تفاصيل التنفيذ المطلوبة',
+            );
+            $this->fail('كان يجب رفض العرض بلا دليل سعر.');
+        } catch (BusinessRuleViolationException $exception) {
+            $this->assertSame('BR-046', $exception->context['rule']);
+            $this->assertSame('PRICE_GUIDE_MISSING', $exception->context['reason']);
+        }
+    }
+
     /** BR-045 — لا إنهاء مع مقترح معلّق. */
     #[Test]
     public function الإنهاء_مرفوض_مع_مقترح_معلق(): void
@@ -219,16 +294,25 @@ final class EmployeeModeJourneyTest extends TestCase
     }
 
     /** @return array{User, ProviderProfile, Admin, Order} */
-    private function publishAndAssign(): array
+    private function publishAndAssign(bool $otherProblem = false, bool $withGuide = true): array
     {
         $customer = User::factory()->create();
         $address = CustomerAddress::factory()->create(['user_id' => $customer->id]);
         $category = Category::query()->where('name', 'سباكة')->sole();
 
+        $problemType = $category->problemTypes()->where('is_other', $otherProblem)->firstOrFail();
+
+        if ($withGuide && ! $problemType->is_other) {
+            $problemType->update([
+                'employee_price_min' => '300.00',
+                'employee_price_max' => '500.00',
+            ]);
+        }
+
         $order = app(PublishRequestAction::class)->execute($customer, new PublishRequestData(
             customerAddressId: $address->id,
             categoryId: $category->id,
-            problemTypeId: $category->problemTypes()->where('is_other', false)->value('id'),
+            problemTypeId: $problemType->getKey(),
             timingType: TimingType::Now,
             materialsResponsibility: MaterialsResponsibility::Unsure,
             termsAccepted: true,

@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Orders\Schemas;
 
+use App\Modules\Customers\Services\CustomerInspectionMetrics;
 use App\Modules\Orders\Enums\OrderStatus;
 use App\Modules\Orders\Models\Order;
+use App\Modules\Pricing\Enums\PriceReviewReason;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
@@ -75,6 +77,39 @@ final class OrderInfolist
                             ->visible(fn (Order $record): bool => $record->isEmployeeMode()),
                     ]),
             ]),
+
+            Section::make('رقابة وضع الموظفين')
+                ->description('مؤشرات معلوماتية فقط؛ لا تمنع العميل ولا تغيّر السعر تلقائيًا (BR-046/047).')
+                ->visible(fn (Order $record): bool => $record->isEmployeeMode())
+                ->columns(4)
+                ->schema([
+                    TextEntry::make('customer_explicit_quote_rejections')
+                        ->label('رفض عروض التنفيذ')
+                        ->state(fn (Order $record): int => app(CustomerInspectionMetrics::class)->for($record->customer)->explicitRejections),
+                    TextEntry::make('customer_expired_quotes')
+                        ->label('عروض انتهت مهلتها')
+                        ->state(fn (Order $record): int => app(CustomerInspectionMetrics::class)->for($record->customer)->expiredQuotes),
+                    TextEntry::make('customer_free_inspections')
+                        ->label('معاينات مجانية بلا تنفيذ')
+                        ->state(fn (Order $record): int => app(CustomerInspectionMetrics::class)->for($record->customer)->freeInspectionsClosedWithoutExecution),
+                    TextEntry::make('flagged_price_proposals')
+                        ->label('أسعار معلّمة للمراجعة في الطلب')
+                        ->badge()
+                        ->state(fn (Order $record): int => $record->proposals()->where('outside_price_guide', true)->count())
+                        ->helperText(function (Order $record): ?string {
+                            $reasons = $record->proposals()
+                                ->where('outside_price_guide', true)
+                                ->pluck('price_review_reason')
+                                ->unique()
+                                ->map(fn (string $reason): string => match (PriceReviewReason::from($reason)) {
+                                    PriceReviewReason::OutsideRange => 'سعر خارج النطاق',
+                                    PriceReviewReason::OtherProblem => 'مشكلة أخرى',
+                                })
+                                ->implode('، ');
+
+                            return $reasons === '' ? null : $reasons;
+                        }),
+                ]),
 
             Section::make('المبالغ')
                 ->description('السعر المقبول لا يُعدَّل أبدًا؛ أي تغيير يتم بمقترح سعر (BR-040).')

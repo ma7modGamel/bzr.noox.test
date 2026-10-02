@@ -9,7 +9,7 @@
 - التخطيط (من أعلى لأسفل):
   1. `AppTopBar` بعنوان من `display_status`.
   2. CONFIRMED: `EtaCard` بنص `tracking.waiting_to_move` بلا خريطة.
-  3. ON_THE_WAY فقط: `EtaCard` من ETA الخادم، وإضافة `tracking.approximate` عند `eta_approximate=true`، ثم `MapCard`.
+  3. ON_THE_WAY فقط: `EtaCard` من ETA الخادم، وإضافة `tracking.approximate` عند `eta_approximate=true`، ثم خريطة النظام الأصلية داخل `MapCard` (Google Maps في Android وMapKit في iOS) بدبوسي الفني ووجهة الطلب. يعاد `GET /tracking` كل 30 ثانية ما دامت الشاشة ظاهرة والحالة ON_THE_WAY؛ التطبيقات لا تتصل بخدمة Routes ولا تحسب ETA.
   4. `StatusStepper` كما يرسله الخادم: تم التأكيد ← في الطريق ← وصل ← جاري التنفيذ ← الدفع ← مكتمل؛ في وضع الموظفين تبدأ تسمية المرحلة الأولى بـ`tracking.step.assignment`.
   5. DISPUTED: آخر مرحلة `on_hold` و`WarningBox` بالمفتاح `tracking.on_hold`.
   6. `ProviderHeader` متوسط.

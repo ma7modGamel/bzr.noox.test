@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>بريمو — بوابة الدفعة 4هـ</title>
+  <style>
+    body { font-family: Cairo, sans-serif; margin: 0; background: #f5f7fa; color: #162033; }
+    main { max-width: 1120px; margin: auto; padding: 32px 20px; }
+    h1 { margin-top: 0; }
+    .notice { background: #fff4d6; border: 1px solid #e7bd4c; border-radius: 12px; padding: 16px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-top: 24px; }
+    article { background: white; border: 1px solid #dce2ea; border-radius: 14px; padding: 16px; }
+    img { display: block; width: 200px; max-width: 100%; margin: 12px auto; border: 1px solid #dce2ea; }
+    .ok { color: #087f5b; font-weight: 700; }
+    .pending { color: #9a6700; font-weight: 700; }
+    li { margin: 8px 0; }
+  </style>
+</head>
+<body>
+<main>
+  <h1>الدفعة 4هـ — مقارنة القدرات الأصلية</h1>
+  <p class="notice"><strong>الحالة: مغلقة.</strong> حُقن مفتاح development محليًا من إعداد البناء، وشُغّلت الأدلة التالية على محاكي Pixel_9a من دون وضع المفتاح في git أو تعديل <code>.env</code>.</p>
+  <section class="grid">
+    <article>
+      <h2>C09 — التتبع</h2>
+      <a href="android-runtime/SCR-C09-tracking-live.png"><img src="android-runtime/SCR-C09-tracking-live.png" alt="تشغيل Android الفعلي لشاشة التتبع"></a>
+      <p class="ok">المصدر: Google MapView + API تتبع كل 30 ثانية أثناء ON_THE_WAY.</p>
+      <p class="ok">ظهر دبوسا الفني والطلب، وETA تقريبي، والحالة المترجمة، ورقم الطلب والمنطقة الفعليان من API. توقف التتبع خارج ON_THE_WAY مغطى بالحالات المشتركة.</p>
+    </article>
+    <article>
+      <h2>C15 — اختيار الموقع</h2>
+      <a href="android-runtime/SCR-C15-map-selected.png"><img src="android-runtime/SCR-C15-map-selected.png" alt="تشغيل Android الفعلي لاختيار الموقع"></a>
+      <p class="ok">المصدر: Google MapView، دبوس محفوظ، نقر للاختيار، وزر موقعي.</p>
+      <p class="ok">حُمّلت البلاطات الفعلية واختير موضع جديد بالنقر. مسارا الإذن والعنوان المحفوظ مغطّيان آليًا.</p>
+    </article>
+    <article>
+      <h2>C17 — الوسائط</h2>
+      <a href="android-runtime/SCR-C17-audio-uploaded.png"><img src="android-runtime/SCR-C17-audio-uploaded.png" alt="تسجيل صوتي مرفوع فعليًا من Android"></a>
+      <a href="android-runtime/SCR-C17-photo-sources.png"><img src="android-runtime/SCR-C17-photo-sources.png" alt="مصادر الكاميرا والملفات في Android"></a>
+      <p class="ok">المصدر: منتقيات النظام، الكاميرا، AAC/m4a، رفع وحذف وإعادة محاولة.</p>
+      <p class="ok">ظهر اختيار الكاميرا/الملفات والفيديو، وسُجل AAC/m4a ثم اكتمل رفعه. الرفض وإعادة المحاولة مغطّيان بالاختبارات.</p>
+    </article>
+  </section>
+  <h2>عناصر الإغلاق</h2>
+  <ul>
+    <li>مفتاح development موجود محليًا باسم <code>MAPS_ANDROID_API_KEY</code>، والحزمة الفعلية <code>com.bremo.app</code> بلا لاحقة debug.</li>
+    <li>مستورد Excel مثبت بملفات اختبار وهمية صحيحة وخاطئة مع أرقام الصفوف. الأسعار الحقيقية عائق إطلاق فقط.</li>
+    <li>فحص iOS التشغيلي مؤجل للدفعة النهائية؛ Swift Core وformat وlint والتطابق ناجحة على Linux.</li>
+  </ul>
+</main>
+</body>
+</html>

@@ -1,0 +1,194 @@
+{
+  "screen": "SCR-P08",
+  "cases": [
+    {
+      "id": "loading",
+      "input": {
+        "event": "loading"
+      },
+      "expected": {
+        "phase": "loading",
+        "can_continue": false
+      }
+    },
+    {
+      "id": "error",
+      "input": {
+        "event": "error"
+      },
+      "expected": {
+        "phase": "error",
+        "can_continue": false,
+        "message_key": "error.body"
+      }
+    },
+    {
+      "id": "unavailable_empty",
+      "input": {
+        "event": "loaded",
+        "available_now": false,
+        "available_actions": [
+          "set_availability",
+          "open_messages",
+          "open_earnings",
+          "open_provider_profile"
+        ]
+      },
+      "expected": {
+        "phase": "content",
+        "can_continue": true,
+        "available_now": false,
+        "item_count": 0,
+        "visible_actions": [
+          "set_availability",
+          "open_messages",
+          "open_earnings",
+          "open_provider_profile"
+        ]
+      }
+    },
+    {
+      "id": "available_empty",
+      "input": {
+        "event": "loaded",
+        "available_now": true,
+        "available_actions": [
+          "set_availability",
+          "open_messages",
+          "open_earnings",
+          "open_provider_profile"
+        ]
+      },
+      "expected": {
+        "phase": "content",
+        "can_continue": true,
+        "available_now": true,
+        "item_count": 0,
+        "visible_actions": [
+          "set_availability",
+          "open_messages",
+          "open_earnings",
+          "open_provider_profile"
+        ]
+      }
+    },
+    {
+      "id": "saving_on",
+      "input": {
+        "event": "saving",
+        "available_now": true,
+        "available_actions": [
+          "set_availability",
+          "open_messages",
+          "open_earnings",
+          "open_provider_profile"
+        ]
+      },
+      "expected": {
+        "phase": "content",
+        "can_continue": false,
+        "available_now": true,
+        "is_busy": true,
+        "item_count": 0,
+        "visible_actions": [
+          "set_availability",
+          "open_messages",
+          "open_earnings",
+          "open_provider_profile"
+        ]
+      }
+    },
+    {
+      "id": "availability_saved",
+      "input": {
+        "event": "availability_saved",
+        "available_now": true,
+        "available_actions": [
+          "set_availability",
+          "open_messages",
+          "open_earnings",
+          "open_provider_profile"
+        ]
+      },
+      "expected": {
+        "phase": "content",
+        "can_continue": true,
+        "available_now": true,
+        "message_key": "provider.home.availability.saved",
+        "item_count": 0,
+        "visible_actions": [
+          "set_availability",
+          "open_messages",
+          "open_earnings",
+          "open_provider_profile"
+        ]
+      }
+    },
+    {
+      "id": "assigned",
+      "input": {
+        "event": "loaded",
+        "available_now": true,
+        "active_order_id": 108,
+        "order_summary": [
+          "108",
+          "سباكة — تسريب مياه",
+          "الحي الأول",
+          "provider.home.timing.now"
+        ],
+        "display_status": "order.status.provider.CONFIRMED",
+        "available_actions": [
+          "set_availability",
+          "open_messages",
+          "open_earnings",
+          "open_provider_profile",
+          "open_assigned_order"
+        ]
+      },
+      "expected": {
+        "phase": "content",
+        "can_continue": true,
+        "available_now": true,
+        "active_order_id": 108,
+        "display_status": "order.status.provider.CONFIRMED",
+        "item_count": 4,
+        "visible_actions": [
+          "set_availability",
+          "open_messages",
+          "open_earnings",
+          "open_provider_profile",
+          "open_assigned_order"
+        ]
+      }
+    },
+    {
+      "id": "unread_notifications",
+      "input": {
+        "event": "loaded",
+        "available_now": true,
+        "unread_notifications": 3,
+        "available_actions": [
+          "set_availability",
+          "open_notifications",
+          "open_messages",
+          "open_earnings",
+          "open_provider_profile"
+        ]
+      },
+      "expected": {
+        "phase": "content",
+        "can_continue": true,
+        "available_now": true,
+        "item_count": 0,
+        "unread_count": 3,
+        "visible_actions": [
+          "set_availability",
+          "open_notifications",
+          "open_messages",
+          "open_earnings",
+          "open_provider_profile"
+        ]
+      }
+    }
+  ]
+}

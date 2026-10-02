@@ -26,7 +26,9 @@ public struct C22ElectronicPaymentView: View {
     public var body: some View {
         CustomerScreen(title: bzrString("payment.electronic.title"), state: state) {
             ScreenHeading(bzrString("payment.electronic.heading"))
-            SummaryCard(title: bzrString("payment.amount.total"), rows: [(.check, state.items[safe: 0] ?? "")], editText: nil)
+            SummaryCard(
+                title: bzrString("payment.amount.total"), rows: [(.check, state.items[safe: 0] ?? "")],
+                editText: nil)
             ScreenHeading(bzrString("payment.channel.title"))
             ForEach(state.options.indices, id: \.self) { index in
                 channelCard(index, state.options[index])
@@ -52,7 +54,9 @@ public struct C22ElectronicPaymentView: View {
         Button(
             action: { onChannelSelect(index) },
             label: {
-                RadioCard(title: title, body: bzrString("payment.option.body"), selected: state.selectedOptionIndex == index)
+                RadioCard(
+                    title: title, body: bzrString("payment.option.body"),
+                    selected: state.selectedOptionIndex == index)
             }
         )
         .buttonStyle(.plain)
@@ -63,7 +67,9 @@ public struct C22ElectronicPaymentView: View {
         switch paymentStatus {
         case "PENDING" where !(state.items[safe: 1] ?? "").isEmpty:
             InfoBanner(text: bzrString("payment.kiosk.ready"))
-            SummaryCard(title: bzrString("payment.kiosk.reference"), rows: [(.info, state.items[safe: 1] ?? "")], editText: nil)
+            SummaryCard(
+                title: bzrString("payment.kiosk.reference"), rows: [(.info, state.items[safe: 1] ?? "")],
+                editText: nil)
             SecondaryButton(text: bzrString("payment.kiosk.copy"), onClick: onCopyCode)
             Countdown(seconds: state.countdownSeconds, label: bzrString("payment.expires"))
         case "PENDING":
@@ -77,6 +83,8 @@ public struct C22ElectronicPaymentView: View {
     }
 }
 
-private extension Array {
-    subscript(safe index: Index) -> Element? { indices.contains(index) ? self[index] : nil }
+extension Array {
+    fileprivate subscript(safe index: Index) -> Element? {
+        indices.contains(index) ? self[index] : nil
+    }
 }

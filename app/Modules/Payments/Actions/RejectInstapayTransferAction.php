@@ -12,7 +12,6 @@ use App\Modules\Orders\Models\OrderEvent;
 use App\Modules\Payments\Enums\PaymentStatus;
 use App\Modules\Payments\Enums\TransferRejectionReason;
 use App\Modules\Payments\Models\Payment;
-use App\Modules\Payments\Notifications\InstapayTransferRejected;
 use App\Support\Exceptions\BusinessRuleViolationException;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Facades\DB;
@@ -63,8 +62,6 @@ final readonly class RejectInstapayTransferAction
 
             return $fresh;
         });
-
-        $rejected->order->customer->notify(new InstapayTransferRejected($rejected->order, $reason));
 
         return $rejected;
     }

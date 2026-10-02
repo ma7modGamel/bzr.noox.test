@@ -1,0 +1,10 @@
+{
+  "selection-top": {
+    "reason": "تغيير وصول معتمد بعد تجميد مرجع Compose: مساحة لمس SelectableChip صارت 48dp مع بقاء الرسم 40dp، وطُبق المدخل نفسه في SwiftUI.",
+    "approved": true
+  },
+  "selection-bottom": {
+    "reason": "تغيير وصول معتمد بعد تجميد مرجع Compose: مساحة لمس SelectableChip صارت 48dp مع بقاء الرسم 40dp، وطُبق المدخل نفسه في SwiftUI.",
+    "approved": true
+  }
+}

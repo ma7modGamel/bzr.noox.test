@@ -80,7 +80,9 @@ public enum AuthLogic {
             canSubmit: valid, emailError: emailError, passwordError: passwordError
         )
         switch input.text("event") {
-        case "submit" where valid: state.phase = .loading; state.canSubmit = false
+        case "submit" where valid:
+            state.phase = .loading
+            state.canSubmit = false
         case "api_error":
             state.phase = .error
             switch input.text("error_code") {
@@ -88,8 +90,13 @@ public enum AuthLogic {
             case "RATE_LIMITED": state.messageKey = "auth.error.rate_limited"
             default: state.messageKey = "auth.error.credentials"
             }
-        case "network_error": state.phase = .error; state.messageKey = "error.body"
-        case "login_succeeded": state.phase = .success; state.canSubmit = false; state.route = input.bool("is_verified") ? "SCR-C01" : "SCR-C12"
+        case "network_error":
+            state.phase = .error
+            state.messageKey = "error.body"
+        case "login_succeeded":
+            state.phase = .success
+            state.canSubmit = false
+            state.route = input.bool("is_verified") ? "SCR-C01" : "SCR-C12"
         default: break
         }
         return state
@@ -106,17 +113,26 @@ public enum AuthLogic {
         let passwordError = password.count < 8 ? "auth.validation.password_short" : nil
         let valid = [nameError, emailValidation, phoneError, passwordError].allSatisfy { $0 == nil }
         var state = AuthUIState(
-            screen: "SCR-C11", phase: .editing, name: name, email: email, phone: phone, password: password,
-            canSubmit: valid, nameError: nameError, emailError: emailValidation, phoneError: phoneError, passwordError: passwordError
+            screen: "SCR-C11", phase: .editing, name: name, email: email, phone: phone,
+            password: password,
+            canSubmit: valid, nameError: nameError, emailError: emailValidation, phoneError: phoneError,
+            passwordError: passwordError
         )
         switch input.text("event") {
-        case "submit" where valid: state.phase = .loading; state.canSubmit = false
+        case "submit" where valid:
+            state.phase = .loading
+            state.canSubmit = false
         case "api_error":
             state.phase = .error
             if input.text("field") == "email" { state.emailError = "auth.validation.email_used" }
             if input.text("error_code") == "RATE_LIMITED" { state.messageKey = "auth.error.rate_limited" }
-        case "network_error": state.phase = .error; state.messageKey = "error.body"
-        case "register_succeeded": state.phase = .success; state.canSubmit = false; state.route = "SCR-C12"
+        case "network_error":
+            state.phase = .error
+            state.messageKey = "error.body"
+        case "register_succeeded":
+            state.phase = .success
+            state.canSubmit = false
+            state.route = "SCR-C12"
         default: break
         }
         return state
@@ -125,13 +141,28 @@ public enum AuthLogic {
     private static func verify(_ input: [String: AuthInputValue]) -> AuthUIState {
         var state = AuthUIState(screen: "SCR-C12", phase: .waiting, email: input.text("email"))
         switch input.text("event") {
-        case "check", "resend": state.phase = .loading; state.canSubmit = false
-        case "resend_succeeded": state.phase = .success; state.messageKey = "auth.verify.resent"
-        case "verification_checked" where input.bool("is_verified"): state.phase = .success; state.canSubmit = false; state.route = "SCR-C01"
+        case "check", "resend":
+            state.phase = .loading
+            state.canSubmit = false
+        case "resend_succeeded":
+            state.phase = .success
+            state.messageKey = "auth.verify.resent"
+        case "verification_checked" where input.bool("is_verified"):
+            state.phase = .success
+            state.canSubmit = false
+            state.route = "SCR-C01"
         case "verification_checked": state.messageKey = "auth.verify.not_yet"
-        case "network_error": state.phase = .error; state.messageKey = "error.body"
-        case "api_error": state.phase = .error; state.messageKey = input.text("error_code") == "RATE_LIMITED" ? "auth.error.rate_limited" : "error.body"
-        case "session_expired": state.phase = .success; state.canSubmit = false; state.route = "SCR-C10"
+        case "network_error":
+            state.phase = .error
+            state.messageKey = "error.body"
+        case "api_error":
+            state.phase = .error
+            state.messageKey =
+                input.text("error_code") == "RATE_LIMITED" ? "auth.error.rate_limited" : "error.body"
+        case "session_expired":
+            state.phase = .success
+            state.canSubmit = false
+            state.route = "SCR-C10"
         default: break
         }
         return state
@@ -140,12 +171,23 @@ public enum AuthLogic {
     private static func forgot(_ input: [String: AuthInputValue]) -> AuthUIState {
         let email = input.text("email")
         let validation = emailError(email)
-        var state = AuthUIState(screen: "SCR-C13", phase: .editing, email: email, canSubmit: validation == nil, emailError: validation)
+        var state = AuthUIState(
+            screen: "SCR-C13", phase: .editing, email: email, canSubmit: validation == nil,
+            emailError: validation)
         switch input.text("event") {
-        case "submit" where validation == nil: state.phase = .loading; state.canSubmit = false
-        case "forgot_succeeded": state.phase = .success; state.messageKey = "auth.password.forgot.sent"
-        case "network_error": state.phase = .error; state.messageKey = "error.body"
-        case "api_error": state.phase = .error; state.messageKey = input.text("error_code") == "RATE_LIMITED" ? "auth.error.rate_limited" : "error.body"
+        case "submit" where validation == nil:
+            state.phase = .loading
+            state.canSubmit = false
+        case "forgot_succeeded":
+            state.phase = .success
+            state.messageKey = "auth.password.forgot.sent"
+        case "network_error":
+            state.phase = .error
+            state.messageKey = "error.body"
+        case "api_error":
+            state.phase = .error
+            state.messageKey =
+                input.text("error_code") == "RATE_LIMITED" ? "auth.error.rate_limited" : "error.body"
         default: break
         }
         return state
@@ -166,13 +208,13 @@ public enum AuthInputValue: Equatable, Sendable {
     case bool(Bool)
 }
 
-private extension Dictionary where Key == String, Value == AuthInputValue {
-    func text(_ key: String) -> String {
+extension Dictionary where Key == String, Value == AuthInputValue {
+    fileprivate func text(_ key: String) -> String {
         if case let .text(value) = self[key] { return value }
         return ""
     }
 
-    func bool(_ key: String) -> Bool {
+    fileprivate func bool(_ key: String) -> Bool {
         if case let .bool(value) = self[key] { return value }
         return false
     }
@@ -186,7 +228,8 @@ public struct AuthSession: Equatable, Sendable {
 
 public protocol AuthAPI: Sendable {
     func login(email: String, password: String) async throws -> AuthSession
-    func register(name: String, email: String, phone: String, password: String) async throws -> AuthSession
+    func register(name: String, email: String, phone: String, password: String) async throws
+        -> AuthSession
     func isVerified(token: String) async throws -> Bool
     func resendVerification(token: String) async throws
     func forgotPassword(email: String) async throws
@@ -203,11 +246,14 @@ public struct LiveAuthAPI: AuthAPI {
     }
 
     public func login(email: String, password: String) async throws -> AuthSession {
-        let response: AuthResponse = try await client().post("auth/login", body: LoginBody(email: email, password: password))
+        let response: AuthResponse = try await client().post(
+            "auth/login", body: LoginBody(email: email, password: password))
         return response.session
     }
 
-    public func register(name: String, email: String, phone: String, password: String) async throws -> AuthSession {
+    public func register(name: String, email: String, phone: String, password: String) async throws
+        -> AuthSession
+    {
         let body = RegisterBody(name: name, email: email, phone: phone, password: password)
         let response: AuthResponse = try await client().post("auth/register", body: body)
         return response.session
@@ -218,11 +264,19 @@ public struct LiveAuthAPI: AuthAPI {
         return response.user.isVerified
     }
 
-    public func resendVerification(token: String) async throws { try await client(token: token).postNoContent("auth/email/resend") }
-    public func forgotPassword(email: String) async throws { try await client().postNoContent("auth/password/forgot", body: EmailBody(email: email)) }
-    public func logout(token: String) async throws { try await client(token: token).postNoContent("auth/logout") }
+    public func resendVerification(token: String) async throws {
+        try await client(token: token).postNoContent("auth/email/resend")
+    }
+    public func forgotPassword(email: String) async throws {
+        try await client().postNoContent("auth/password/forgot", body: EmailBody(email: email))
+    }
+    public func logout(token: String) async throws {
+        try await client(token: token).postNoContent("auth/logout")
+    }
 
-    private func client(token: String? = nil) -> APIClient { APIClient(baseURL: baseURL, token: token, transport: transport) }
+    private func client(token: String? = nil) -> APIClient {
+        APIClient(baseURL: baseURL, token: token, transport: transport)
+    }
 }
 
 public protocol AuthSessionStoring: AnyObject {
@@ -244,21 +298,34 @@ public final class AuthViewModel {
     }
 
     public func update(field: String, value: String) {
-        state = AuthLogic.reduce(screen: state.screen, input: values().merging([field: .text(value), "event": .text("validate")]) { _, new in new })
+        state = AuthLogic.reduce(
+            screen: state.screen,
+            input: values().merging([field: .text(value), "event": .text("validate")]) { _, new in new })
     }
 
     public func open(_ screen: String) {
-        state = AuthLogic.reduce(screen: screen, input: ["event": .text("show"), "email": .text(session.email ?? "")])
+        state = AuthLogic.reduce(
+            screen: screen, input: ["event": .text("show"), "email": .text(session.email ?? "")])
     }
 
     public func submit() async {
-        state = AuthLogic.reduce(screen: state.screen, input: values().merging(["event": .text("submit")]) { _, new in new })
+        state = AuthLogic.reduce(
+            screen: state.screen, input: values().merging(["event": .text("submit")]) { _, new in new })
         guard state.phase == .loading else { return }
         do {
             switch state.screen {
-            case "SCR-C10": accept(try await api.login(email: state.email, password: state.password), event: "login_succeeded")
-            case "SCR-C11": accept(try await api.register(name: state.name, email: state.email, phone: state.phone, password: state.password), event: "register_succeeded")
-            case "SCR-C13": try await api.forgotPassword(email: state.email); transition("forgot_succeeded")
+            case "SCR-C10":
+                accept(
+                    try await api.login(email: state.email, password: state.password),
+                    event: "login_succeeded")
+            case "SCR-C11":
+                accept(
+                    try await api.register(
+                        name: state.name, email: state.email, phone: state.phone, password: state.password),
+                    event: "register_succeeded")
+            case "SCR-C13":
+                try await api.forgotPassword(email: state.email)
+                transition("forgot_succeeded")
             default: break
             }
         } catch let error as APIClientError {
@@ -282,7 +349,9 @@ public final class AuthViewModel {
     public func checkVerification() async {
         transition("check")
         do {
-            transition("verification_checked", extra: ["is_verified": .bool(try await api.isVerified(token: session.token ?? ""))])
+            transition(
+                "verification_checked",
+                extra: ["is_verified": .bool(try await api.isVerified(token: session.token ?? ""))])
         } catch let error as APIClientError {
             handleVerificationError(error)
         } catch {
@@ -298,7 +367,9 @@ public final class AuthViewModel {
         } catch let error as APIClientError {
             if error == .httpStatus(409) {
                 do {
-                    transition("verification_checked", extra: ["is_verified": .bool(try await api.isVerified(token: session.token ?? ""))])
+                    transition(
+                        "verification_checked",
+                        extra: ["is_verified": .bool(try await api.isVerified(token: session.token ?? ""))])
                 } catch let verificationError as APIClientError {
                     handleVerificationError(verificationError)
                 } catch {
@@ -329,26 +400,48 @@ public final class AuthViewModel {
             session.clear()
             transition("session_expired")
         } else {
-            transition("api_error", extra: ["error_code": .text(error == .httpStatus(429) ? "RATE_LIMITED" : "HTTP_ERROR")])
+            transition(
+                "api_error",
+                extra: ["error_code": .text(error == .httpStatus(429) ? "RATE_LIMITED" : "HTTP_ERROR")])
         }
     }
 
     private func transition(_ event: String, extra: [String: AuthInputValue] = [:]) {
-        state = AuthLogic.reduce(screen: state.screen, input: values().merging(extra.merging(["event": .text(event)]) { _, new in new }) { _, new in new })
+        state = AuthLogic.reduce(
+            screen: state.screen,
+            input: values().merging(extra.merging(["event": .text(event)]) { _, new in new }) { _, new in
+                new
+            })
     }
 
     private func values() -> [String: AuthInputValue] {
-        ["name": .text(state.name), "email": .text(state.email), "phone": .text(state.phone), "password": .text(state.password)]
+        [
+            "name": .text(state.name), "email": .text(state.email), "phone": .text(state.phone),
+            "password": .text(state.password),
+        ]
     }
 }
 
-private struct LoginBody: Encodable { let email: String; let password: String }
-private struct RegisterBody: Encodable { let name: String; let email: String; let phone: String; let password: String }
+private struct LoginBody: Encodable {
+    let email: String
+    let password: String
+}
+private struct RegisterBody: Encodable {
+    let name: String
+    let email: String
+    let phone: String
+    let password: String
+}
 private struct EmailBody: Encodable { let email: String }
-private struct AuthUser: Decodable, Sendable { let email: String; let isVerified: Bool }
+private struct AuthUser: Decodable, Sendable {
+    let email: String
+    let isVerified: Bool
+}
 private struct AuthResponse: Decodable, Sendable {
     let user: AuthUser
     let token: String
-    var session: AuthSession { AuthSession(token: token, email: user.email, isVerified: user.isVerified) }
+    var session: AuthSession {
+        AuthSession(token: token, email: user.email, isVerified: user.isVerified)
+    }
 }
 private struct MeResponse: Decodable, Sendable { let user: AuthUser }

@@ -13,7 +13,7 @@
 @source '../../../../app/Filament/**/*';
 @source '../../../../resources/views/filament/**/*';
 
-@import '../../../../design/tokens/generated/tokens.css';
+@import '../../../../design/generated/tokens.css';
 
 /* أسماء مختصرة تُستخدم داخل مكونات اللوحة — كلها تشير للتوكنات المولَّدة (DEC-043) */
 @theme {

@@ -15,9 +15,13 @@ public enum BzrFormat {
         BzrFormatter.fill(template, values: values)
     }
 
-    public static func fill(_ template: String, n: Int) -> String { fill(template, [("n", number(n))]) }
+    public static func fill(_ template: String, n: Int) -> String {
+        fill(template, [("n", number(n))])
+    }
 
-    public static func fill(_ template: String, n: Double) -> String { fill(template, [("n", number(n))]) }
+    public static func fill(_ template: String, n: Double) -> String {
+        fill(template, [("n", number(n))])
+    }
 
     /// 760 → "12:40".
     public static func countdown(_ seconds: Int) -> String {

@@ -1,12 +1,26 @@
 import Foundation
-#if canImport(FoundationNetworking)
-    import FoundationNetworking
-#endif
 import XCTest
 
 @testable import BzrCore
 
+#if canImport(FoundationNetworking)
+    import FoundationNetworking
+#endif
+
 final class APIClientTests: XCTestCase {
+    func testTrackingPayloadDecodesLaravelDecimalStrings() throws {
+        let payload = try JSONDecoder().decode(
+            CustomerTrackingPayload.self,
+            from: Data(
+                #"{"last_location":{"lat":"31.4368000","lng":"31.6670000"},"eta_minutes":12,"eta_approximate":true}"#
+                    .utf8))
+
+        XCTAssertEqual(payload.lastLocation?.latitude, 31.4368)
+        XCTAssertEqual(payload.lastLocation?.longitude, 31.667)
+        XCTAssertEqual(payload.etaMinutes, 12)
+        XCTAssertTrue(payload.etaApproximate)
+    }
+
     func testGetDecodesEnvelopeAndAddsContractHeaders() async throws {
         let json = """
             {"data":{"id":101,"number":"BZR-101","status":"OPEN",\
@@ -48,7 +62,8 @@ final class APIClientTests: XCTestCase {
     }
 
     func testPostAddsIdempotencyKey() async throws {
-        let transport = RecordingTransport(result: HTTPResult(data: Data("{\"ok\":true}".utf8), statusCode: 201))
+        let transport = RecordingTransport(
+            result: HTTPResult(data: Data("{\"ok\":true}".utf8), statusCode: 201))
         let client = APIClient(
             baseURL: try XCTUnwrap(URL(string: "https://example.test/api/v1/")),
             token: "test-token", appMode: "CUSTOMER", transport: transport)
@@ -58,6 +73,25 @@ final class APIClientTests: XCTestCase {
 
         XCTAssertTrue(response.ok)
         XCTAssertEqual(transport.request?.value(forHTTPHeaderField: "Idempotency-Key"), "request-123")
+    }
+
+    func testPutSendsAvailabilityAsJson() async throws {
+        let transport = RecordingTransport(
+            result: HTTPResult(data: Data("{\"ok\":true}".utf8), statusCode: 200))
+        let client = APIClient(
+            baseURL: try XCTUnwrap(URL(string: "https://example.test/api/v1/")),
+            token: "test-token", appMode: "PROVIDER", transport: transport)
+
+        let response: BooleanResponse = try await client.put(
+            "provider/availability", body: ProviderAvailabilityUpdate(availableNow: true))
+
+        XCTAssertTrue(response.ok)
+        let request = try XCTUnwrap(transport.request)
+        XCTAssertEqual(request.httpMethod, "PUT")
+        XCTAssertEqual(request.value(forHTTPHeaderField: "X-App-Mode"), "PROVIDER")
+        XCTAssertEqual(
+            try JSONSerialization.jsonObject(with: try XCTUnwrap(request.httpBody)) as? [String: Bool],
+            ["available_now": true])
     }
 }
 

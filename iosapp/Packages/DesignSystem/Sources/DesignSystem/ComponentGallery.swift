@@ -18,7 +18,9 @@ public struct ComponentGalleryApp: View {
                     .frame(maxHeight: .infinity)
                 HStack(spacing: DesignSpace.s) {
                     SecondaryButton(text: s("gallery.back"), enabled: page > 0) { if page > 0 { page -= 1 } }
-                    PrimaryButton(text: s("gallery.next"), state: page == galleryPageCount - 1 ? .disabled : .normal) {
+                    PrimaryButton(
+                        text: s("gallery.next"), state: page == galleryPageCount - 1 ? .disabled : .normal
+                    ) {
                         if page < galleryPageCount - 1 { page += 1 }
                     }
                 }
@@ -91,11 +93,15 @@ private struct AnchoredViewport: Layout {
         proposal.replacingUnspecifiedDimensions()
     }
 
-    func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
+    func placeSubviews(
+        in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()
+    ) {
         guard let child = subviews.first else { return }
         let size = child.sizeThatFits(ProposedViewSize(width: bounds.width, height: nil))
         let y = anchorBottom ? bounds.minY + min(0, bounds.height - size.height) : bounds.minY
-        child.place(at: CGPoint(x: bounds.minX, y: y), anchor: .topLeading, proposal: ProposedViewSize(width: bounds.width, height: size.height))
+        child.place(
+            at: CGPoint(x: bounds.minX, y: y), anchor: .topLeading,
+            proposal: ProposedViewSize(width: bounds.width, height: size.height))
     }
 }
 
@@ -130,14 +136,20 @@ private struct GalleryNavigationPage: View {
         AppTopBar(title: s("summary.title"), actionIcon: .edit, actionLabel: s("a11y.edit"))
         ComponentTitle(key: "gallery.component.navigation")
         BottomNav(
-            items: [(.home, s("nav.home")), (.orders, s("nav.orders")), (.messages, s("nav.messages")), (.account, s("nav.account"))],
+            items: [
+                (.home, s("nav.home")), (.orders, s("nav.orders")), (.messages, s("nav.messages")),
+                (.account, s("nav.account")),
+            ],
             selectedIndex: 0
         )
         DrawerMenu(
             name: s("drawer.name"),
             rating: BzrFormat.number(GalleryFixtures.offerRating),
             verifiedLabel: s("drawer.verified"),
-            rows: [(.home, s("nav.home")), (.orders, s("nav.orders")), (.messages, s("nav.messages")), (.info, s("menu.help"))],
+            rows: [
+                (.home, s("nav.home")), (.orders, s("nav.orders")), (.messages, s("nav.messages")),
+                (.info, s("menu.help")),
+            ],
             action: s("menu.provider_mode")
         )
     }
@@ -180,19 +192,24 @@ private struct GallerySelectionPage: View {
 }
 
 private func hasValue(_ state: FieldVisualState) -> Bool { state != .empty && state != .error }
-private func errorText(_ state: FieldVisualState) -> String? { state == .error ? s("field.error") : nil }
+private func errorText(_ state: FieldVisualState) -> String? {
+    state == .error ? s("field.error") : nil
+}
 
 private struct GalleryFieldsPage: View {
     var body: some View {
         ComponentTitle(key: "gallery.component.fields")
         ForEach(FieldVisualState.allCases, id: \.self) { state in
-            AppTextField(label: s("field.label"), placeholder: s("field.placeholder"), value: hasValue(state) ? s("field.value") : "", state: state, error: errorText(state))
+            AppTextField(
+                label: s("field.label"), placeholder: s("field.placeholder"),
+                value: hasValue(state) ? s("field.value") : "", state: state, error: errorText(state))
         }
         ForEach(FieldVisualState.allCases, id: \.self) { state in
             AmountField(
                 label: s("field.amount.label"), placeholder: s("field.amount.placeholder"),
                 value: hasValue(state) ? BzrFormat.number(GalleryFixtures.offerPrice) : "",
-                currency: s("common.currency.egp"), state: state, error: errorText(state), optionalLabel: s("common.optional")
+                currency: s("common.currency.egp"), state: state, error: errorText(state),
+                optionalLabel: s("common.optional")
             )
         }
     }
@@ -202,7 +219,9 @@ private struct GalleryTextAreaPage: View {
     var body: some View {
         ComponentTitle(key: "gallery.component.text_area")
         ForEach(FieldVisualState.allCases, id: \.self) { state in
-            TextAreaField(label: s("field.label"), placeholder: s("field.placeholder"), value: hasValue(state) ? s("field.value") : "", state: state, error: errorText(state))
+            TextAreaField(
+                label: s("field.label"), placeholder: s("field.placeholder"),
+                value: hasValue(state) ? s("field.value") : "", state: state, error: errorText(state))
         }
     }
 }
@@ -213,9 +232,12 @@ private struct GalleryCardsPage: View {
     private let price = BzrFormat.fill(s("format.amount"), n: GalleryFixtures.offerPrice)
     private let eta = BzrFormat.fill(s("format.eta"), n: GalleryFixtures.offerEtaMinutes)
 
-    private func offer(_ variant: OfferVariant, detail: String, priceCaption: String? = nil) -> OfferCard {
+    private func offer(_ variant: OfferVariant, detail: String, priceCaption: String? = nil)
+        -> OfferCard
+    {
         OfferCard(
-            provider: s("offer.provider"), rating: rating, services: services, price: price, detail: detail,
+            provider: s("offer.provider"), rating: rating, services: services, price: price,
+            detail: detail,
             badge: s("badge.top_rated"), button: s("offer.select"), chatLabel: s("button.chat"),
             variant: variant, priceCaption: priceCaption
         )
@@ -223,7 +245,10 @@ private struct GalleryCardsPage: View {
 
     var body: some View {
         ComponentTitle(key: "gallery.component.summary_card")
-        SummaryCard(title: s("summary.title"), rows: [(.orders, s("summary.service")), (.clock, s("summary.visit"))], editText: s("common.edit"))
+        SummaryCard(
+            title: s("summary.title"),
+            rows: [(.orders, s("summary.service")), (.clock, s("summary.visit"))],
+            editText: s("common.edit"))
         ComponentTitle(key: "gallery.component.offer_card")
         offer(.execution, detail: eta)
         offer(.inspection, detail: eta, priceCaption: s("offer.inspection_fee"))
@@ -237,7 +262,9 @@ private struct GalleryProviderPage: View {
 
     var body: some View {
         ComponentTitle(key: "gallery.component.sort_chips")
-        SortChips(title: s("sort.title"), labels: [s("sort.top_rated"), s("sort.lowest_price"), s("sort.fastest")], selectedIndex: 0)
+        SortChips(
+            title: s("sort.title"),
+            labels: [s("sort.top_rated"), s("sort.lowest_price"), s("sort.fastest")], selectedIndex: 0)
         HStack(spacing: DesignSpace.s) {
             Badge(text: s("badge.top_rated"), kind: .highlight, icon: .starFilled)
             Badge(text: s("badge.best_price"), kind: .highlight)
@@ -246,26 +273,40 @@ private struct GalleryProviderPage: View {
         }
         ComponentTitle(key: "gallery.component.provider_header")
         ProviderHeader(name: s("offer.provider"), rating: rating, services: services, size: .small)
-        ProviderHeader(name: s("offer.provider"), rating: rating, services: services, size: .medium, verifiedLabel: s("provider.verified"))
-        ProviderHeader(name: s("offer.provider"), rating: rating, services: services, size: .large, verifiedLabel: s("provider.verified"))
+        ProviderHeader(
+            name: s("offer.provider"), rating: rating, services: services, size: .medium,
+            verifiedLabel: s("provider.verified"))
+        ProviderHeader(
+            name: s("offer.provider"), rating: rating, services: services, size: .large,
+            verifiedLabel: s("provider.verified"))
         Group {
             ComponentTitle(key: "gallery.component.stats")
             StatRow(items: [
                 StatItem(icon: .star, value: rating, label: s("stat.rating")),
-                StatItem(icon: .orders, value: BzrFormat.number(GalleryFixtures.offerServices), label: s("stat.services")),
-                StatItem(icon: .clock, value: BzrFormat.number(GalleryFixtures.providerYears), label: s("stat.years")),
+                StatItem(
+                    icon: .orders, value: BzrFormat.number(GalleryFixtures.offerServices),
+                    label: s("stat.services")),
+                StatItem(
+                    icon: .clock, value: BzrFormat.number(GalleryFixtures.providerYears),
+                    label: s("stat.years")),
             ])
             RatingBars(
                 items:
-                    Array(zip([s("rating.quality"), s("rating.commitment"), s("rating.communication")], GalleryFixtures.ratingBars)),
+                    Array(
+                        zip(
+                            [s("rating.quality"), s("rating.commitment"), s("rating.communication")],
+                            GalleryFixtures.ratingBars)),
                 max: GalleryFixtures.ratingMaxStars
             )
             ReviewCard(
-                name: s("review.name"), body: s("review.body"), verified: s("review.verified"), time: s("review.time"), tag: s("review.tag"), rating: GalleryFixtures.ratingMaxStars
+                name: s("review.name"), body: s("review.body"), verified: s("review.verified"),
+                time: s("review.time"), tag: s("review.tag"), rating: GalleryFixtures.ratingMaxStars
             )
             ComponentTitle(key: "gallery.component.sticky_action_bar")
             StickyActionBar(
-                priceLabel: s("sticky.price_label"), price: BzrFormat.fill(s("format.amount"), n: GalleryFixtures.offerPrice), action: s("offer.select"),
+                priceLabel: s("sticky.price_label"),
+                price: BzrFormat.fill(s("format.amount"), n: GalleryFixtures.offerPrice),
+                action: s("offer.select"),
                 chatLabel: s("button.chat"))
         }
     }
@@ -274,11 +315,15 @@ private struct GalleryProviderPage: View {
 private struct GalleryTrackingPage: View {
     var body: some View {
         ComponentTitle(key: "gallery.component.tracking")
-        EtaCard(value: BzrFormat.number(GalleryFixtures.etaMinutes), unit: s("unit.minute"), title: s("eta.title"), subtitle: s("eta.subtitle"))
+        EtaCard(
+            value: BzrFormat.number(GalleryFixtures.etaMinutes), unit: s("unit.minute"),
+            title: s("eta.title"), subtitle: s("eta.subtitle"))
         MapCard(title: s("map.title"))
         StatusStepper(steps: [
-            (s("status.confirmed"), .done), (s("status.on_the_way"), .done), (s("status.arrived"), .onHold),
-            (s("status.in_progress"), .pending), (s("status.payment"), .pending), (s("status.closed"), .pending),
+            (s("status.confirmed"), .done), (s("status.on_the_way"), .done),
+            (s("status.arrived"), .onHold),
+            (s("status.in_progress"), .pending), (s("status.payment"), .pending),
+            (s("status.closed"), .pending),
         ])
         WarningBox(text: s("status.reviewing"))
         ComponentTitle(key: "gallery.component.order_card")
@@ -294,8 +339,10 @@ private struct GalleryFeedbackPage: View {
         OfflineBanner(text: s("offline.message"))
         ComponentTitle(key: "gallery.component.countdown")
         HStack(spacing: 0) {
-            Countdown(seconds: GalleryFixtures.countdownNormalSeconds, label: s("countdown.label")).frame(maxWidth: .infinity)
-            Countdown(seconds: GalleryFixtures.countdownUrgentSeconds, label: s("countdown.label")).frame(maxWidth: .infinity)
+            Countdown(seconds: GalleryFixtures.countdownNormalSeconds, label: s("countdown.label")).frame(
+                maxWidth: .infinity)
+            Countdown(seconds: GalleryFixtures.countdownUrgentSeconds, label: s("countdown.label")).frame(
+                maxWidth: .infinity)
         }
         ComponentTitle(key: "gallery.component.feedback")
         EmptyState(title: s("empty.title"), body: s("empty.body"), action: s("action.republish"))
@@ -318,8 +365,10 @@ private struct GalleryChatPage: View {
 private struct GalleryMediaAndSheetPage: View {
     var body: some View {
         ComponentTitle(key: "gallery.component.media")
-        MediaThumb(title: s("media.photo"), stateLabel: s("media.uploading"), kind: .photo, state: .uploading)
-        MediaThumb(title: s("media.video"), stateLabel: s("media.uploaded"), kind: .video, state: .uploaded)
+        MediaThumb(
+            title: s("media.photo"), stateLabel: s("media.uploading"), kind: .photo, state: .uploading)
+        MediaThumb(
+            title: s("media.video"), stateLabel: s("media.uploaded"), kind: .video, state: .uploaded)
         MediaThumb(title: s("media.audio"), stateLabel: s("media.failed"), kind: .audio, state: .failed)
         ComponentTitle(key: "gallery.component.bottom_sheet")
         AppBottomSheet(title: s("sheet.title"), body: s("sheet.body"), action: s("button.primary"))

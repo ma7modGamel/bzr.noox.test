@@ -6,7 +6,11 @@ namespace App\Http\Api\V1\Controllers;
 
 use App\Http\Api\V1\Resources\OrderResource;
 use App\Http\Api\V1\Resources\ProposalResource;
+use App\Http\Api\V1\Resources\ProviderOfferResource;
+use App\Http\Api\V1\Resources\ProviderRequestResource;
 use App\Modules\Offers\Actions\SubmitOfferAction;
+use App\Modules\Offers\Actions\WithdrawOfferAction;
+use App\Modules\Offers\Models\Offer;
 use App\Modules\Orders\Actions\BackOutAction;
 use App\Modules\Orders\Actions\CompleteInspectionOnlyAction;
 use App\Modules\Orders\Actions\CompleteWorkAction;
@@ -18,6 +22,7 @@ use App\Modules\Orders\Actions\StartWorkAction;
 use App\Modules\Orders\Enums\ActorType;
 use App\Modules\Orders\Enums\CancelReason;
 use App\Modules\Orders\Models\Order;
+use App\Modules\Orders\Models\OrderMedia;
 use App\Modules\Orders\Services\ProviderEligibility;
 use App\Modules\Payments\Actions\ConfirmCashReceivedAction;
 use App\Modules\Pricing\Actions\SubmitProposalAction;
@@ -28,7 +33,10 @@ use App\Support\Exceptions\BusinessRuleViolationException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 
 /** واجهات الفني — 31 §الفني. كل إجراء يتحقق من الإسناد عبر OrderPolicy::perform. */
 final class ProviderOrderController
@@ -53,6 +61,43 @@ final class ProviderOrderController
             ->paginate(20);
 
         return OrderResource::collection($orders);
+    }
+
+    /** تفاصيل طلب متاح بحدود BR-024 — وضع السوق فقط. */
+    public function availableRequest(
+        Request $request,
+        Order $order,
+        FeatureGate $features,
+        ProviderEligibility $eligibility,
+    ): ProviderRequestResource {
+        $features->requireOffers('viewAvailableRequest');
+        $profile = $this->profile($request);
+        $ownsOffer = Offer::query()
+            ->visible()
+            ->whereBelongsTo($order)
+            ->whereBelongsTo($profile, 'providerProfile')
+            ->exists();
+
+        abort_unless($ownsOffer || $eligibility->isEligible($order, $profile), 404);
+
+        $order->load([...$this->resourceRelations(), 'media']);
+
+        return new ProviderRequestResource($order);
+    }
+
+    /** كل عروض الفني وحده — SCR-P11. */
+    public function myOffers(Request $request, FeatureGate $features): AnonymousResourceCollection
+    {
+        $features->requireOffers('listProviderOffers');
+        $profile = $this->profile($request);
+        $offers = Offer::query()
+            ->visible()
+            ->whereBelongsTo($profile, 'providerProfile')
+            ->with(['order.category', 'order.problemType', 'order.area'])
+            ->latest('id')
+            ->paginate(20);
+
+        return ProviderOfferResource::collection($offers);
     }
 
     /** طلبات الفني المسنَدة إليه. */
@@ -95,10 +140,21 @@ final class ProviderOrderController
             $data['note'] ?? null,
         );
 
-        return new JsonResponse([
-            'offer' => ['id' => $offer->getKey(), 'status' => $offer->status->value, 'price' => $offer->price],
-            'net_amount' => $action->netAmount($price),   // "صافي لك" (09)
-        ], 201);
+        $offer->load(['order.category', 'order.problemType', 'order.area']);
+
+        return (new ProviderOfferResource($offer))->response()->setStatusCode(201);
+    }
+
+    /** O-02 — سحب العرض المملوك قبل الاختيار. */
+    public function withdrawOffer(
+        Request $request,
+        Offer $offer,
+        WithdrawOfferAction $action,
+    ): ProviderOfferResource {
+        $offer = $action->execute($offer, $this->profile($request));
+        $offer->load(['order.category', 'order.problemType', 'order.area']);
+
+        return new ProviderOfferResource($offer);
     }
 
     public function startTrip(Request $request, Order $order, StartTripAction $action): OrderResource
@@ -168,17 +224,41 @@ final class ProviderOrderController
             'type' => ['required', 'string', 'in:EXECUTION_QUOTE,MATERIALS,EXTRA_WORK'],
             'amount' => ['required', 'numeric', 'min:0'],
             'reason' => ['required', 'string', 'min:5', 'max:300'],
-            'photo_path' => ['nullable', 'string'],
+            'photo_media_id' => ['nullable', 'integer'],
+            'outside_price_guide_reason' => ['nullable', 'string', 'max:300'],
         ]);
 
-        $proposal = $action->execute(
-            $order,
-            $this->profile($request),
-            ProposalType::from($data['type']),
-            number_format((float) $data['amount'], 2, '.', ''),
-            $data['reason'],
-            $data['photo_path'] ?? null,
-        );
+        $proposal = DB::transaction(function () use ($request, $order, $action, $data) {
+            $media = isset($data['photo_media_id'])
+                ? OrderMedia::query()
+                    ->whereKey($data['photo_media_id'])
+                    ->whereNull('order_id')
+                    ->where('uploaded_by', $request->user()->getKey())
+                    ->where('type', 'IMAGE')
+                    ->lockForUpdate()
+                    ->first()
+                : null;
+
+            if (isset($data['photo_media_id']) && $media === null) {
+                throw ValidationException::withMessages([
+                    'photo_media_id' => 'الصورة غير صالحة أو غير مملوكة للحساب.',
+                ]);
+            }
+
+            $proposal = $action->execute(
+                $order,
+                $this->profile($request),
+                ProposalType::from($data['type']),
+                number_format((float) $data['amount'], 2, '.', ''),
+                $data['reason'],
+                $media?->path,
+                $data['outside_price_guide_reason'] ?? null,
+            );
+
+            $media?->update(['order_id' => $order->getKey(), 'expires_at' => null]);
+
+            return $proposal;
+        });
 
         return (new ProposalResource($proposal))->response()->setStatusCode(201);
     }
@@ -222,7 +302,12 @@ final class ProviderOrderController
     {
         Gate::authorize('perform', $order);
 
-        $data = $request->validate(['reason_code' => ['required', 'string']]);
+        $data = $request->validate([
+            'reason_code' => [
+                'required',
+                Rule::enum(CancelReason::class)->only(CancelReason::forActor(ActorType::Provider)),
+            ],
+        ]);
         $profile = $this->profile($request);
 
         return new OrderResource($action->execute(
@@ -240,7 +325,10 @@ final class ProviderOrderController
         Gate::authorize('perform', $order);
 
         $data = $request->validate([
-            'reason_code' => ['required', 'string'],
+            'reason_code' => [
+                'required',
+                Rule::enum(CancelReason::class)->only(CancelReason::forActor(ActorType::Provider)),
+            ],
             'note' => ['required', 'string', 'min:5', 'max:500'],
         ]);
 
@@ -278,6 +366,7 @@ final class ProviderOrderController
             'category', 'problemType', 'area', 'city', 'customer', 'providerProfile.user',
             'offers', 'pendingProposalRecord', 'latestSuccessfulPayment', 'review',
             'customerRating', 'conversations',
+            'disputes',
         ];
     }
 }

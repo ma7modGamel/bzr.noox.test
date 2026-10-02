@@ -1,4 +1,5 @@
 import BzrCore
+import CoreLocation
 import DesignSystem
 import SwiftUI
 
@@ -8,12 +9,14 @@ public struct C15AddressFormView: View {
     let onAreaSelect: (Int) -> Void
     let onFieldChange: (String, String) -> Void
     let onDefaultChange: () -> Void
+    let onLocationChange: (Double, Double) -> Void
     let onSave: () -> Void
 
     public init(
         state: CustomerUIState, editing: Bool = false,
         onAreaSelect: @escaping (Int) -> Void = { _ in },
         onFieldChange: @escaping (String, String) -> Void = { _, _ in },
+        onLocationChange: @escaping (Double, Double) -> Void = { _, _ in },
         onDefaultChange: @escaping () -> Void = {},
         onSave: @escaping () -> Void = {}
     ) {
@@ -21,6 +24,7 @@ public struct C15AddressFormView: View {
         self.editing = editing
         self.onAreaSelect = onAreaSelect
         self.onFieldChange = onFieldChange
+        self.onLocationChange = onLocationChange
         self.onDefaultChange = onDefaultChange
         self.onSave = onSave
     }
@@ -30,41 +34,38 @@ public struct C15AddressFormView: View {
     }
 
     private var areas: [String] {
-        state.options.isEmpty
-            ? [
-                bzrString("address.area.nasr_city"), bzrString("address.area.heliopolis"),
-                bzrString("address.area.maadi"),
-            ] : state.options
+        state.options
     }
 
     public var body: some View {
         CustomerScreen(
-            title: bzrString(editing || state.isEditing ? "address.form.edit_title" : "address.form.add_title"),
+            title: bzrString(
+                editing || state.isEditing ? "address.form.edit_title" : "address.form.add_title"),
             state: state
         ) {
-            MapCard(title: bzrString("address.map.title"))
+            NativeMapView(
+                selectedCoordinate: selectedCoordinate, selectable: true,
+                onSelect: onLocationChange
+            )
+            .frame(height: DesignSize.mapCardHeight)
+            .clipShape(RoundedRectangle(cornerRadius: DesignRadius.card))
+            .accessibilityLabel(bzrString("address.map.title"))
             ScreenHeading(bzrString("address.area.title"))
-            HStack(spacing: DesignSpace.m) {
-                Button(
-                    action: { onAreaSelect(0) },
-                    label: {
-                        SelectableChip(text: areas[0], state: [-1, 0].contains(state.selectedOptionIndex) ? .selected : .unselected)
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: DesignSpace.m) {
+                    ForEach(Array(areas.enumerated()), id: \.offset) { index, area in
+                        Button(
+                            action: { onAreaSelect(index) },
+                            label: {
+                                SelectableChip(
+                                    text: area,
+                                    state: state.selectedOptionIndex == index
+                                        || (state.selectedOptionIndex == -1 && index == 0)
+                                        ? .selected : .unselected)
+                            }
+                        ).buttonStyle(BzrPressStyle())
                     }
-                ).buttonStyle(BzrPressStyle())
-                Button(
-                    action: { onAreaSelect(1) },
-                    label: {
-                        SelectableChip(text: areas.indices.contains(1) ? areas[1] : "", state: state.selectedOptionIndex == 1 ? .selected : .unselected)
-                    }
-                ).buttonStyle(BzrPressStyle())
-            }
-            if areas.indices.contains(2) {
-                Button(
-                    action: { onAreaSelect(2) },
-                    label: {
-                        SelectableChip(text: areas[2], state: state.selectedOptionIndex == 2 ? .selected : .unselected)
-                    }
-                ).buttonStyle(BzrPressStyle())
+                }
             }
             AddressField(
                 label: "address.field.label", placeholder: "address.field.label_placeholder",
@@ -76,14 +77,19 @@ public struct C15AddressFormView: View {
                 onValueChange: { onFieldChange("address_text", $0) })
             HStack(spacing: DesignSpace.m) {
                 AddressField(
-                    label: "address.field.building", placeholder: "address.field.building", value: values[2], state: state, onValueChange: { onFieldChange("building", $0) })
-                AddressField(label: "address.field.floor", placeholder: "address.field.floor", value: values[3], state: state, onValueChange: { onFieldChange("floor", $0) })
+                    label: "address.field.building", placeholder: "address.field.building", value: values[2],
+                    state: state, onValueChange: { onFieldChange("building", $0) })
+                AddressField(
+                    label: "address.field.floor", placeholder: "address.field.floor", value: values[3],
+                    state: state, onValueChange: { onFieldChange("floor", $0) })
             }
             HStack(spacing: DesignSpace.m) {
                 AddressField(
-                    label: "address.field.apartment", placeholder: "address.field.apartment", value: values[4], state: state, onValueChange: { onFieldChange("apartment", $0) })
+                    label: "address.field.apartment", placeholder: "address.field.apartment",
+                    value: values[4], state: state, onValueChange: { onFieldChange("apartment", $0) })
                 AddressField(
-                    label: "address.field.landmark", placeholder: "address.field.landmark", value: values[5], state: state, onValueChange: { onFieldChange("landmark", $0) })
+                    label: "address.field.landmark", placeholder: "address.field.landmark", value: values[5],
+                    state: state, onValueChange: { onFieldChange("landmark", $0) })
             }
             Button(
                 action: onDefaultChange,
@@ -96,6 +102,11 @@ public struct C15AddressFormView: View {
                 state: state.isBusy ? .loading : (state.canContinue ? .normal : .disabled),
                 onClick: onSave)
         }
+    }
+
+    private var selectedCoordinate: CLLocationCoordinate2D? {
+        guard let latitude = state.mapLatitude, let longitude = state.mapLongitude else { return nil }
+        return CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
     }
 }
 

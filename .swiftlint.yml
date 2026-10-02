@@ -34,5 +34,8 @@ identifier_name:
     - y
 
 disabled_rules:
+  # swift-format owns brace placement and closure wrapping.
+  - closure_parameter_position
+  - opening_brace
   - todo
   - trailing_comma

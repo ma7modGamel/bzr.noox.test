@@ -103,6 +103,21 @@ final class AssignProviderTest extends TestCase
         app(AssignProviderAction::class)->execute($order, $outsider, $admin);
     }
 
+    /** DEC-057 — لا ورديات؛ available_now هو مصدر إتاحة الموظف لكل المواعيد. */
+    #[Test]
+    public function التعيين_المجدول_مرفوض_للموظف_غير_المتاح_الآن(): void
+    {
+        $order = Order::factory()->scheduled()->create();
+        $provider = ProviderProfile::factory()
+            ->servingFor($order->category_id, $order->area_id)
+            ->create(['available_now' => false]);
+        $admin = Admin::factory()->create();
+
+        $this->expectException(BusinessRuleViolationException::class);
+
+        app(AssignProviderAction::class)->execute($order, $provider, $admin);
+    }
+
     /** T-29 */
     #[Test]
     public function إعادة_التعيين_تسحب_الأول_وتثبت_البديل(): void

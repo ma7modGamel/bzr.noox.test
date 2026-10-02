@@ -24,6 +24,7 @@
 | `CONFLICT` | 409 | تعارض نسخة أو تزامن |
 | `BUSINESS_RULE_VIOLATION` | 422 | مع `rule: "BR-0xx"` |
 | `FEATURE_DISABLED` | 409 | الإجراء يخص ميزة معطّلة في الوضع الحالي (CFG-090/091) |
+| `APPLICATION_NOT_EDITABLE` | 409 | طلب انضمام الفني ليس في `REJECTED` ولا يمكن إعادة تقديمه (BR-130) |
 | `RATE_LIMITED` | 429 | — |
 
 ## الهوية والحساب
@@ -36,10 +37,11 @@
 | GET | `/auth/email/verify/{id}/{hash}` | رابط موقّع ومحدود المعدل؛ يفعّل البريد تكراريًا بأمان |
 | POST | `/auth/password/forgot` | يعيد 204 للبريد الموجود وغير الموجود حتى لا يكشف الحسابات |
 | POST | `/auth/password/reset` | بريد + token + كلمة مرور (8 أحرف على الأقل)؛ يلغي كل رموز Sanctum عند النجاح |
-| GET/PATCH | `/me` | الاسم، البريد للعرض، الهاتف، الصورة، و`available_actions` للحساب |
+| GET/PATCH | `/me` | الاسم، البريد للعرض، الهاتف، الصورة، `rating_reminders_enabled` (NTF-18، DEC-058)، و`available_actions` للحساب |
 | POST | `/me/password` | الحالية + الجديدة + التأكيد؛ يلغي الخطأ الحفظ كله |
 | DELETE | `/me` | حذف ناعم وإخفاء البيانات وإلغاء الجلسات؛ مرفوض بـ`ACTIVE_ORDER_EXISTS` مع طلب نشط |
-| POST/DELETE | `/me/devices` | رمز FCM |
+| POST | `/me/devices` | `{token, platform: ANDROID\|IOS}`؛ `app_mode` من `X-App-Mode`. يُنشئ الرمز أو ينقله للحساب الحالي ويحدّث `last_used_at`. `204` |
+| DELETE | `/me/devices` | `{token}`؛ يحذف الرمز إن كان للحساب الحالي، وإلا لا أثر. `204` |
 
 ## المراجع
 `GET /cities`, `GET /cities/{id}/areas`, `GET /catalog?city_id=`, `GET /slots?city_id=&date=`, `GET /terms/current`.
@@ -56,13 +58,16 @@
   "media_limits": {"images":5,"image_mb":10,"video_seconds":60,"video_mb":50,"audio_seconds":120,"audio_mb":5,"audio_mime":"audio/mp4","audio_channels":1,"audio_bitrate_bps":64000},
   "option_lists": {
     "customer_cancellation_reasons": [{"code":"FOUND_ANOTHER","label":"وجدت فنيًا آخر"}],
+    "provider_cancellation_reasons": [{"code":"EMERGENCY","label":"ظرف طارئ"}],
+    "proposal_types": [{"code":"EXECUTION_QUOTE","label":"عرض تنفيذ"}],
     "dispute_reasons": [{"code":"WORK_QUALITY","label":"جودة التنفيذ غير مرضية"}],
     "provider_report_reasons": [{"code":"INAPPROPRIATE_BEHAVIOR","label":"سلوك غير لائق"}],
     "timing_types": [{"code":"NOW","label":"الآن"}],
     "materials_responsibilities": [{"code":"UNSURE","label":"غير محدد"}],
     "pricing_modes": [{"code":"EXECUTION","label":"استقبال عروض تنفيذ"}],
     "payment_methods": [{"code":"CASH","label":"نقدي"}],
-    "payment_channels": [{"code":"CARD","label":"بطاقة بنكية"}]
+    "payment_channels": [{"code":"CARD","label":"بطاقة بنكية"}],
+    "provider_payout_methods": [{"code":"INSTAPAY","label":"إنستاباي","field_label":"رقم أو عنوان إنستاباي"}]
   },
   "option_defaults": {
     "timing_type": "NOW",
@@ -136,10 +141,13 @@
 ## الفني
 | الطريقة | المسار | الإجراء | الانتقال |
 |---|---|---|---|
-| POST | `/provider/application` · PATCH للتعديل وإعادة التقديم | التسجيل | — |
-| GET/PATCH | `/provider/profile` | الملف (الحقول المسموحة BR-130) | — |
+| GET | `/provider/application` | حالة طلب الانضمام والبيانات القابلة لإعادة التقديم ومؤشرات المستندات بلا روابط خاصة، مع `available_actions` | — |
+| POST | `/provider/application` | إنشاء الطلب أو إعادة تقديم `REJECTED`؛ يستهلك ثلاثة `media_id` صور مملوكة للحساب ويحفظها خاصًا | — |
+| GET | `/provider/home` | المصدر الواحد لرئيسية الفني: `operating_mode` و`available_now` و`active_order` و`available_actions`؛ وضع الموظفين لا يعرض طلبات السوق ولا حظر المستحقات | — |
+| GET/PATCH | `/provider/profile` | الملف (الحقول المسموحة BR-130)؛ القراءة تشمل `rating_avg` و`ratings_count` و`completed_orders` و`avg_response_minutes`، والفئات والتخصصات والمناطق والمعرض | — |
 | POST/DELETE | `/provider/portfolio` | | — |
-| PUT | `/provider/availability` | {available_now} | — |
+| GET | `/provider/earnings?page={page}` | الرصيد المحسوب والمتاح والمعلّق وحركات الطلبات والتحويلات والتوريدات وفق BR-062..065 | — |
+| PUT | `/provider/availability` | `{available_now}`؛ يعيد نفس حمولة `/provider/home` بعد الحفظ، ومتاح للفني النشط فقط (BR-022) | — |
 | GET | `/provider/requests` | الطلبات المتاحة (BR-022) — فارغة في وضع الموظفين | — |
 | GET | `/provider/requests/{id}` | تفاصيل محدودة (BR-024) | — |
 | POST | `/provider/requests/{id}/offers` | `submitOffer` — `FEATURE_DISABLED` في وضع الموظفين | O-01 |
@@ -150,7 +158,7 @@
 | POST | `/provider/orders/{id}/back-out` | {reason_code} | T-06/07 |
 | POST | `/provider/orders/{id}/arrived` | {lat,lng} | T-10 |
 | POST | `/provider/orders/{id}/start-work` | | T-11 |
-| POST | `/provider/orders/{id}/proposals` | {type, amount, reason, photo} | T-12 أو بدون انتقال |
+| POST | `/provider/orders/{id}/proposals` | `{type, amount, reason, photo_media_id?, outside_price_guide_reason?}`؛ الصورة رفع مملوك غير مربوط ويطبّق BR-046 في وضع الموظفين | T-12 أو بدون انتقال |
 | POST | `/provider/orders/{id}/proposals/{pid}/withdraw` | | — |
 | POST | `/provider/orders/{id}/complete-inspection-only` | تُغلق الطلب مباشرة إذا كانت المعاينة مجانية | T-13 أو T-28 |
 | POST | `/provider/orders/{id}/complete` | | T-17 |
@@ -164,7 +172,7 @@
 |---|---|---|
 | GET/POST | `/conversations` · `/conversations/{id}/messages` | BR-100..102 |
 | GET | `/support/faqs` | قائمة الأسئلة الشائعة من الخادم؛ التطبيقات لا تثبتها داخلها |
-| GET | `/notifications` | صفحة الإشعارات مع `deep_link` و`read_at` |
+| GET | `/notifications` | إشعارات الوضع الحالي (`X-App-Mode`) الأحدث أولًا، مع `code` و`title` و`body` و`deep_link` و`read_at`؛ `meta.unread_count` للوضع نفسه |
 | POST | `/notifications/read` | `{notification_ids}`؛ يحدّث إشعارات الحساب الحالي فقط |
 | POST | `/support/messages` | بريد للدعم |
 
@@ -205,9 +213,23 @@
 - **النتيجة**: `201` + العرض `SUBMITTED` + `net_amount` بعد العمولة. EVT-006، NTF-04.
 - **الأخطاء**: `BUSINESS_RULE_VIOLATION` (`BR-030` عرض قائم/تجاوز إعادة التقديم، `BR-031` النافذة مغلقة أو 10 عروض، `BR-063` ممنوع بسبب المستحقات).
 
+### طلب انضمام الفني `GET/POST /provider/application`
+- يتطلب حسابًا موثّق البريد؛ وإلا `EMAIL_NOT_VERIFIED`. `GET` يعيد `NOT_STARTED` أو حالة الملف، و`display_status`، وسبب الرفض/الإيقاف، والاختيارات السابقة، ومؤشرات وجود الصورة والبطاقة فقط دون مساراتها.
+- `available_actions`: بلا ملف `start_provider_application` و`submit_provider_application`؛ في `REJECTED` الإجراءان `resubmit_provider_application` و`submit_provider_application`؛ في `ACTIVE` الإجراء `open_provider_home`؛ ولا إجراء في `PENDING_REVIEW` أو `SUSPENDED`.
+- `POST` يرسل `experience_years` (0–50)، `bio?` (حتى 300)، `category_ids[]`، `specialty_ids[]` التابعة للفئات، `area_ids[]` المفعلة، `payout_method` و`payout_details`، ومعرّفات `profile_photo_media_id` و`id_front_media_id` و`id_back_media_id` لصور مرفوعة مسبقًا إلى `/media`.
+- القوائم من `/catalog` و`/cities/{id}/areas` و`/config.option_lists.provider_payout_methods`. لا يرسل التطبيق `employment_type` ولا يقبله الخادم؛ الطلب الذاتي الجديد يبدأ `INDEPENDENT/PENDING_REVIEW`، والإدارة وحدها تضبط الصفة التعاقدية.
+- إعادة التقديم مسموحة لـ`REJECTED` فقط وتحافظ على الملفات القديمة إذا لم تُرفع بدائل؛ أي حالة أخرى تعيد `APPLICATION_NOT_EDITABLE`. العملية ذرية، وتستهلك الرفع المؤقت، وتستبدل الملفات القديمة بعد نجاح الحفظ.
+
 ### `POST /provider/orders/{id}/complete-inspection-only`
 - **الشروط**: الحالة `ARRIVED`، `pricing_mode = INSPECTION`، ولم يُقدَّم عرض تنفيذ.
 - **النتيجة**: رسوم المعاينة > 0 ← `AWAITING_PAYMENT` بالرسوم (T-13، EVT-035). رسوم = 0 ← `CLOSED` مباشرة بمبالغ صفرية وحالة دفع `WAIVED` (T-28، EVT-036، BR-056) ويصل NTF-16 للطرفين.
+
+### دليل سعر عرض التنفيذ في وضع الموظفين (DEC-055)
+- تفاصيل الطلب المعيّن في `ARRIVED` تعيد `execution_price_guide = { "min": "300.00", "max": "550.00", "currency": "جنيه" }` من نوع المشكلة. عند `is_other=true` يجوز أن تكون `null`، ولا يعاد الدليل في وضع السوق.
+- `POST /provider/orders/{id}/proposals` عند `type = EXECUTION_QUOTE` يقبل `outside_price_guide_reason` اختياريًا داخل النطاق، وإلزاميًا (10 أحرف على الأقل) خارجه.
+- الاستجابة تعيد نسخة `price_guide` إن وُجدت و`outside_price_guide` و`price_review_reason` (`OUTSIDE_RANGE` أو `OTHER_PROBLEM`) و`outside_price_guide_reason`. السعر المعلّم يُرسل للعميل كأي عرض؛ لا توجد حالة موافقة إدارية جديدة.
+- `is_other=true` معفى من النطاق ومن سبب الخروج: كل مبلغ صالح يمر ويُعلّم `OTHER_PROBLEM`. الأخطاء: `PRICE_GUIDE_MISSING` عند غياب نطاق فعّال لنوع عادي في وضع الموظفين، و`OUTSIDE_PRICE_GUIDE_REASON_REQUIRED` عند سعر خارج نطاق عادي بلا سبب صالح.
+- عدادات BR-047 في موارد الإدارة فقط، وهي محسوبة من المقترحات والأحداث وليست مدخلًا من التطبيقات ولا سببًا لأي منع آلي.
 
 ### `POST /provider/orders/{id}/complete`
 - **الشروط**: الحالة `IN_PROGRESS`، BR-045.
@@ -225,7 +247,7 @@
 
 ### المحادثة
 - `POST /conversations` في `OPEN`: العميل فقط، ومع فني لديه عرض `SUBMITTED` على الطلب. في وضع الموظفين تُنشأ المحادثة تلقائيًا عند التعيين، وعند قبول العرض تُفتح محادثة الفني المختار وتصبح البقية للقراءة فقط.
-- `GET /conversations` يعيد محادثات الحساب مرتبة بآخر نشاط تنازليًا ثم `id`، ومع كل عنصر الفني والطلب وآخر رسالة. `GET /conversations/{id}/messages` يعيد أحدث 50 رسالة في الصفحة بترتيب زمني تصاعدي للعرض.
+- `GET /conversations` يعيد محادثات الحساب مرتبة بآخر نشاط تنازليًا ثم `id`، ومع كل عنصر الفني والعميل والطلب وآخر رسالة؛ تستخدم SCR-C19 الطرف المقابل حسب `X-App-Mode`. `GET /conversations/{id}/messages` يعيد أحدث 50 رسالة في الصفحة بترتيب زمني تصاعدي للعرض.
 - `POST /conversations/{id}/messages`: نص حتى 1000 حرف، أو حتى 5 صور بعد `CONFIRMED`. قبل الاختيار تُحجب وسائل التواصل ويحفظ الأصل مشفرًا. الحد 30 رسالة/دقيقة.
 
 ### قوائم الطلبات والتفاصيل السابقة
@@ -254,7 +276,7 @@
 | العناوين | `GET/POST /addresses`، `PATCH/DELETE /addresses/{address}` |
 | العميل | `GET /orders`، `POST /orders`، `GET /orders/{order}`، `/offers`، `/proposals`، `POST /orders/{order}/cancel`، `/offers/{offer}/accept`، `/proposals/{proposal}/decide`، `/confirm-completion` |
 | الدفع | `PATCH /orders/{order}/payment-method`، `POST /orders/{order}/payments`، و`POST /webhooks/fawry` عبر `PaymentGateway` ومحاكي staging الموقّع |
-| الفني | `GET /provider/requests`، `/provider/orders`، `POST /provider/requests/{order}/offers`، و`/provider/orders/{order}/{start-trip\|location\|arrived\|start-work\|proposals\|complete-inspection-only\|complete\|cash-received\|back-out\|unable\|customer-no-show}` |
+| الفني | `GET/POST /provider/application`، `GET /provider/requests`، `/provider/orders`، `POST /provider/requests/{order}/offers`، و`/provider/orders/{order}/{start-trip\|location\|arrived\|start-work\|proposals\|complete-inspection-only\|complete\|cash-received\|back-out\|unable\|customer-no-show}` |
 | الوسائط | `POST /media`، `GET/DELETE /media/{media}`، ربط الرفع بالطلب أو صور الرسالة، وتنظيف الرفع المنتهي |
 | المحادثة | `GET/POST /conversations`، `GET/POST /conversations/{conversation}/messages`، والحجب/القراءة فقط حسب دورة الطلب |
 | التتبع والمشاركة | `GET /orders/{order}/tracking`، `POST /orders/{order}/share-links`، `DELETE /share-links/{shareLink}` |

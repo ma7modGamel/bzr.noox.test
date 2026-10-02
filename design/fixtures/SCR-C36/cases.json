@@ -1,0 +1,6 @@
+{"screen":"SCR-C36","cases":[
+  {"id":"loading","snapshot":true,"input":{"event":"loading"},"expected":{"phase":"loading","can_continue":false}},
+  {"id":"error","snapshot":true,"input":{"event":"error"},"expected":{"phase":"error","message_key":"error.body","can_continue":false}},
+  {"id":"waiting_now","snapshot":true,"input":{"event":"loaded","order_title":"سباكة — تسريب مياه","order_rows":["#1042","المنزل · مدينة نصر","الآن"],"available_actions":["edit_request","cancel"]},"expected":{"phase":"content","can_continue":true,"item_count":3,"visible_actions":["edit_request","cancel"]}},
+  {"id":"waiting_scheduled","snapshot":true,"input":{"event":"loaded","order_title":"كهرباء — عطل بالمفتاح","order_rows":["#1047","المنزل · الحي الأول","الخميس 25 سبتمبر · 5:00–7:00 م"],"available_actions":["cancel"]},"expected":{"phase":"content","can_continue":true,"item_count":3,"visible_actions":["cancel"]}}
+]}

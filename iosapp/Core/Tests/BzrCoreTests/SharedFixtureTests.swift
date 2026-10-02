@@ -32,7 +32,8 @@ final class SharedFixtureTests: XCTestCase {
             BzrFormatter.amount(formatting.amount.input, currency: formatting.amount.currency),
             formatting.amount.expected
         )
-        XCTAssertEqual(BzrFormatter.countdown(formatting.countdown.inputSeconds), formatting.countdown.expected)
+        XCTAssertEqual(
+            BzrFormatter.countdown(formatting.countdown.inputSeconds), formatting.countdown.expected)
 
         let parser = ISO8601DateFormatter()
         let time = try XCTUnwrap(parser.date(from: formatting.time.iso8601))

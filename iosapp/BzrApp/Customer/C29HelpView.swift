@@ -30,7 +30,8 @@ public struct C29HelpView: View {
                     label: {
                         SummaryCard(
                             title: state.items[index],
-                            rows: state.selectedIndex == index ? [(.info, state.itemDetails[safe: index] ?? "")] : [],
+                            rows: state.selectedIndex == index
+                                ? [(.info, state.itemDetails[safe: index] ?? "")] : [],
                             editText: nil)
                     }
                 ).buttonStyle(.plain)
@@ -40,12 +41,14 @@ public struct C29HelpView: View {
             AppTextField(
                 label: bzrString("help.subject"), placeholder: bzrString("help.subject.placeholder"),
                 value: state.fieldValues[safe: 0] ?? "", state: fieldState("help.validation.subject"),
-                error: state.fieldErrors.contains("help.validation.subject") ? bzrString("help.validation.subject") : nil,
+                error: state.fieldErrors.contains("help.validation.subject")
+                    ? bzrString("help.validation.subject") : nil,
                 onValueChange: onSubjectChange)
             TextAreaField(
                 label: bzrString("help.message"), placeholder: bzrString("help.message.placeholder"),
                 value: state.fieldValues[safe: 1] ?? "", state: fieldState("help.validation.message"),
-                error: state.fieldErrors.contains("help.validation.message") ? bzrString("help.validation.message") : nil,
+                error: state.fieldErrors.contains("help.validation.message")
+                    ? bzrString("help.validation.message") : nil,
                 onValueChange: onMessageChange)
             PrimaryButton(text: bzrString("help.send"), state: buttonState, onClick: onSubmit)
         }
@@ -60,6 +63,8 @@ public struct C29HelpView: View {
     }
 }
 
-private extension Array {
-    subscript(safe index: Index) -> Element? { indices.contains(index) ? self[index] : nil }
+extension Array {
+    fileprivate subscript(safe index: Index) -> Element? {
+        indices.contains(index) ? self[index] : nil
+    }
 }

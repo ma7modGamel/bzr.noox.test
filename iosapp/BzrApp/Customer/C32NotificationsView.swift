@@ -5,14 +5,26 @@ import SwiftUI
 public struct C32NotificationsView: View {
     let state: CustomerUIState
     let onOpen: (Int) -> Void
+    let onOpenSettings: () -> Void
+    let onBack: (() -> Void)?
 
-    public init(state: CustomerUIState, onOpen: @escaping (Int) -> Void = { _ in }) {
+    public init(
+        state: CustomerUIState, onOpen: @escaping (Int) -> Void = { _ in },
+        onOpenSettings: @escaping () -> Void = {}, onBack: (() -> Void)? = nil
+    ) {
         self.state = state
         self.onOpen = onOpen
+        self.onOpenSettings = onOpenSettings
+        self.onBack = onBack
     }
 
     public var body: some View {
-        CustomerScreen(title: bzrString("notifications.title"), state: state) {
+        CustomerScreen(title: bzrString("notifications.title"), state: state, onBack: onBack) {
+            // DEC-058 — الإذن مرفوض على الجهاز: تنبيه ورابط الإعدادات، والقائمة تعمل كما هي.
+            if state.notificationsDenied {
+                InfoBanner(text: bzrString("notifications.permission.off"))
+                LinkButton(text: bzrString("action.open_settings"), onClick: onOpenSettings)
+            }
             if state.items.isEmpty {
                 EmptyState(
                     title: bzrString("notifications.empty.title"),
@@ -38,6 +50,8 @@ public struct C32NotificationsView: View {
     }
 }
 
-private extension Array {
-    subscript(safe index: Index) -> Element? { indices.contains(index) ? self[index] : nil }
+extension Array {
+    fileprivate subscript(safe index: Index) -> Element? {
+        indices.contains(index) ? self[index] : nil
+    }
 }

@@ -15,7 +15,9 @@ public struct C34TermsView: View {
                 InfoBanner(text: bzrString("terms.empty"))
             } else {
                 BzrText("\(versionLabel): \(state.itemDetails.first ?? "")", style: DesignType.caption)
-                BzrText("\(effectiveLabel): \(state.itemDetails.dropFirst().first ?? "")", style: DesignType.caption)
+                BzrText(
+                    "\(effectiveLabel): \(state.itemDetails.dropFirst().first ?? "")",
+                    style: DesignType.caption)
                 BzrText(state.items.first ?? "")
             }
         }
