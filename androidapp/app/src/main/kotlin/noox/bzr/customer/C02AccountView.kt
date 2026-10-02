@@ -15,12 +15,15 @@ class C02AccountView(context: Context) : CustomerScreenView(context) {
         binding.addresses.onClick = { onOpen("SCR-C14") }
         binding.notifications.onClick = { onOpen("SCR-C32") }
         binding.help.onClick = { onOpen("SCR-C29") }
+        binding.providerMode.onClick = { onOpen("SCR-P01") }
         binding.logout.onClick = { onOpen("SCR-C10") }
     }
 
     override fun title(state: CustomerUiState) = string(R.string.customer_account_title)
 
     override fun renderContent(state: CustomerUiState) {
+        binding.header.name = state.fieldValues.getOrElse(0) { "" }
+        binding.header.services = state.fieldValues.getOrNull(1)?.takeIf(String::isNotBlank)
         binding.header.verifiedLabel = string(if (state.messageKey == "account.verified") R.string.account_verified else R.string.account_unverified)
         binding.unverified.isVisible = state.messageKey == "account.unverified"
     }

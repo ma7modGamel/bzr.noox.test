@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:parentTag="android.widget.LinearLayout">
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/reasons"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:nestedScrollingEnabled="false" />
+
+    <noox.bzr.design.views.TextAreaFieldView
+        android:id="@+id/note"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:bremoLabel="@string/provider_unable_note"
+        app:bremoPlaceholder="@string/provider_unable_note" />
+
+    <noox.bzr.design.views.WarningBoxView
+        android:id="@+id/warning"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone" />
+</merge>

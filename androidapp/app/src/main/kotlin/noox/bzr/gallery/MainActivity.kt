@@ -1,6 +1,10 @@
 package noox.bzr.gallery
 
+import android.Manifest
+import android.content.Intent
+import android.os.Build
 import android.os.Bundle
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
@@ -25,6 +29,14 @@ import noox.bzr.customer.CustomerRoutes
 import noox.bzr.customer.CustomerViewModel
 import noox.bzr.customer.UrlConnectionCustomerApi
 import noox.bzr.design.R as DesignR
+import noox.bzr.links.AndroidPushDevice
+import noox.bzr.links.BremoMessagingService
+import noox.bzr.links.DeepLinkRouter
+import noox.bzr.links.DeepLinkTarget
+import noox.bzr.links.NotificationChannels
+import noox.bzr.provider.ProviderRoutes
+import noox.bzr.provider.ProviderViewModel
+import noox.bzr.provider.UrlConnectionProviderApi
 
 /**
  * The single activity (DEC-047). Screens are Fragments in nav_graph; which one is shown follows the ViewModel
@@ -34,8 +46,13 @@ class MainActivity : AppCompatActivity() {
     private val session by lazy { AndroidAuthSessionStore(getSharedPreferences("auth", MODE_PRIVATE)) }
     private val authViewModel: AuthViewModel by viewModels()
     private val customerViewModel: CustomerViewModel by viewModels()
+    private val providerViewModel: ProviderViewModel by viewModels()
     private lateinit var authenticated: MutableStateFlow<Boolean>
     private var customerFlowActive = false
+    private val push by lazy { AndroidPushDevice(applicationContext) }
+    /** A notification or link that arrived before sign-in, or before the first screen (17 §الروابط العميقة). */
+    private var pendingLink: String? = null
+    private val notificationPermission = registerForActivityResult(ActivityResultContracts.RequestPermission()) { }
 
     override val defaultViewModelProviderFactory: ViewModelProvider.Factory
         get() = object : ViewModelProvider.Factory {
@@ -44,6 +61,12 @@ class MainActivity : AppCompatActivity() {
                 AuthViewModel::class.java -> AuthViewModel(UrlConnectionAuthApi(BuildConfig.API_BASE_URL), session)
                 CustomerViewModel::class.java -> CustomerViewModel(
                     UrlConnectionCustomerApi(BuildConfig.API_BASE_URL),
+                    session,
+                    getString(DesignR.string.common_currency_egp),
+                    push,
+                )
+                ProviderViewModel::class.java -> ProviderViewModel(
+                    UrlConnectionProviderApi(BuildConfig.API_BASE_URL),
                     session,
                     getString(DesignR.string.common_currency_egp),
                 )
@@ -61,6 +84,26 @@ class MainActivity : AppCompatActivity() {
             WindowInsetsCompat.CONSUMED
         }
         authenticated = MutableStateFlow(session.token != null)
+        NotificationChannels.create(this)
+        customerViewModel.onDeepLink = ::openLink
+        providerViewModel.onDeepLink = ::openLink
+        BremoMessagingService.onTokenRefreshed = { customerViewModel.registerPushDevice(it) }
+        if (savedInstanceState == null) pendingLink = linkFrom(intent)
+        // System back follows the same history as the top bar; on customer home it leaves the app (6ب).
+        onBackPressedDispatcher.addCallback(this, object : androidx.activity.OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                val handled = when {
+                    providerViewModel.flowActive.value -> providerViewModel.goBack().let { true }
+                    authenticated.value && !customerViewModel.requiresAuthentication -> customerViewModel.goBack()
+                    else -> false
+                }
+                if (!handled) {
+                    isEnabled = false
+                    onBackPressedDispatcher.onBackPressed()
+                    isEnabled = true
+                }
+            }
+        })
         val navController = (supportFragmentManager.findFragmentById(R.id.nav_host) as NavHostFragment).navController
         navController.setGraph(
             navController.navInflater.inflate(R.navigation.nav_graph).apply { setStartDestination(destination()) },
@@ -82,23 +125,70 @@ class MainActivity : AppCompatActivity() {
         // CustomerJourneyFlow's LaunchedEffect(Unit): load home whenever the customer screens start showing.
         lifecycleScope.launch {
             showsCustomer().distinctUntilChanged().collect { customer ->
-                if (customer && !customerFlowActive) customerViewModel.loadHome()
+                if (customer && !customerFlowActive) {
+                    val link = pendingLink
+                    pendingLink = null
+                    if (link == null) customerViewModel.loadHome() else openLink(link)
+                    onSignedIn()
+                }
                 customerFlowActive = customer
             }
         }
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
-                combine(showsCustomer(), authViewModel.stateFlow, customerViewModel.stateFlow) { _, _, _ -> destination() }
+                combine(
+                    showsCustomer(), authViewModel.stateFlow, customerViewModel.stateFlow,
+                    providerViewModel.flowActive, providerViewModel.stateFlow,
+                ) { _, _, _, _, _ -> destination() }
                     .distinctUntilChanged()
                     .collect { navController.show(it) }
             }
         }
     }
 
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        val link = linkFrom(intent) ?: return
+        if (customerFlowActive) openLink(link) else pendingLink = link
+    }
+
+    /** Push extras carry `deep_link`; `bremo://` and App Links arrive as the intent data. */
+    private fun linkFrom(intent: Intent?): String? =
+        intent?.getStringExtra(AndroidPushDevice.DEEP_LINK)?.takeIf(String::isNotBlank) ?: intent?.dataString
+
+    /** 17 §الروابط العميقة: the router decides the mode; a provider link needs a provider profile. */
+    private fun openLink(link: String) {
+        providerViewModel.resolveProviderStatus { status ->
+            val target = DeepLinkRouter.route(link, status)
+            if (target.mode == DeepLinkTarget.PROVIDER) {
+                providerViewModel.openDeepLink(target, notificationsDenied = !push.notificationsAllowed())
+            } else {
+                providerViewModel.closeFlow()
+                customerViewModel.openDeepLink(target)
+            }
+        }
+    }
+
+    /** DEC-058: register this device, and ask for the notification permission once. */
+    private fun onSignedIn() {
+        runCatching {
+            com.google.firebase.messaging.FirebaseMessaging.getInstance().token.addOnSuccessListener { token ->
+                push.store(token)
+                customerViewModel.registerPushDevice(token)
+            }
+        }
+        if (push.shouldAskPermission() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            push.markPermissionAsked()
+            notificationPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
+        }
+    }
+
     private fun showsCustomer() = combine(authenticated, customerViewModel.requiresAuthenticationFlow) { signedIn, required -> signedIn && !required }
 
     private fun destination(): Int =
-        if (authenticated.value && !customerViewModel.requiresAuthentication) {
+        if (providerViewModel.flowActive.value) {
+            ProviderRoutes.destination(providerViewModel.stateFlow.value)
+        } else if (authenticated.value && !customerViewModel.requiresAuthentication) {
             CustomerRoutes.destination(customerViewModel.state)
         } else {
             when (authScreen(authViewModel.state.screen)) {

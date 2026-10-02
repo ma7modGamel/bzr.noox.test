@@ -2,81 +2,97 @@
     "buttons": {
         "percent": 0.02,
         "matches": true,
+        "approved_difference": false,
         "reason": null
     },
     "navigation": {
         "percent": 0.39,
         "matches": true,
+        "approved_difference": false,
         "reason": null
     },
     "selection-top": {
-        "percent": 0.06,
-        "matches": true,
-        "reason": null
+        "percent": 4.07,
+        "matches": false,
+        "approved_difference": true,
+        "reason": "تغيير وصول معتمد بعد تجميد مرجع Compose: مساحة لمس SelectableChip صارت 48dp مع بقاء الرسم 40dp، وطُبق المدخل نفسه في SwiftUI."
     },
     "selection-bottom": {
-        "percent": 0.06,
-        "matches": true,
-        "reason": null
+        "percent": 3.59,
+        "matches": false,
+        "approved_difference": true,
+        "reason": "تغيير وصول معتمد بعد تجميد مرجع Compose: مساحة لمس SelectableChip صارت 48dp مع بقاء الرسم 40dp، وطُبق المدخل نفسه في SwiftUI."
     },
     "fields-top": {
         "percent": 0.01,
         "matches": true,
+        "approved_difference": false,
         "reason": null
     },
     "fields-bottom": {
         "percent": 0.02,
         "matches": true,
+        "approved_difference": false,
         "reason": null
     },
     "cards-top": {
         "percent": 0.3,
         "matches": true,
+        "approved_difference": false,
         "reason": null
     },
     "cards-bottom": {
         "percent": 0.45,
         "matches": true,
+        "approved_difference": false,
         "reason": null
     },
     "provider-top": {
         "percent": 0.15,
         "matches": true,
+        "approved_difference": false,
         "reason": null
     },
     "provider-bottom": {
         "percent": 0.06,
         "matches": true,
+        "approved_difference": false,
         "reason": null
     },
     "tracking": {
         "percent": 0.02,
         "matches": true,
+        "approved_difference": false,
         "reason": null
     },
     "feedback-top": {
         "percent": 0,
         "matches": true,
+        "approved_difference": false,
         "reason": null
     },
     "feedback-bottom": {
         "percent": 0.01,
         "matches": true,
+        "approved_difference": false,
         "reason": null
     },
     "chat": {
         "percent": 0.01,
         "matches": true,
+        "approved_difference": false,
         "reason": null
     },
     "media-sheet": {
         "percent": 0,
         "matches": true,
+        "approved_difference": false,
         "reason": null
     },
     "text-area": {
         "percent": 0.01,
         "matches": true,
+        "approved_difference": false,
         "reason": null
     }
 }

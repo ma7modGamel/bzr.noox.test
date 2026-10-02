@@ -145,4 +145,32 @@
         android:id="@+id/scr_c35"
         android:name="noox.bzr.customer.C35NoOffersFragment" />
 
+    <fragment
+        android:id="@+id/scr_c36"
+        android:name="noox.bzr.customer.C36AssignmentFragment" />
+
+    <fragment android:id="@+id/scr_p01" android:name="noox.bzr.provider.P01IntroFragment" />
+    <fragment android:id="@+id/scr_p02" android:name="noox.bzr.provider.P02ProfileFragment" />
+    <fragment android:id="@+id/scr_p03" android:name="noox.bzr.provider.P03IdentityFragment" />
+    <fragment android:id="@+id/scr_p04" android:name="noox.bzr.provider.P04CatalogFragment" />
+    <fragment android:id="@+id/scr_p05" android:name="noox.bzr.provider.P05AreasFragment" />
+    <fragment android:id="@+id/scr_p06" android:name="noox.bzr.provider.P06PayoutFragment" />
+    <fragment android:id="@+id/scr_p07" android:name="noox.bzr.provider.P07StatusFragment" />
+    <fragment android:id="@+id/scr_p08" android:name="noox.bzr.provider.P08HomeFragment" />
+    <fragment android:id="@+id/scr_p09" android:name="noox.bzr.provider.P09AvailableRequestFragment" />
+    <fragment android:id="@+id/scr_p10" android:name="noox.bzr.provider.P10OfferFragment" />
+    <fragment android:id="@+id/scr_p11" android:name="noox.bzr.provider.P11OffersFragment" />
+    <fragment android:id="@+id/scr_p12" android:name="noox.bzr.provider.P12ConfirmedOrderFragment" />
+    <fragment android:id="@+id/scr_p13" android:name="noox.bzr.provider.P13OnTheWayFragment" />
+    <fragment android:id="@+id/scr_p14" android:name="noox.bzr.provider.P14ArrivedFragment" />
+    <fragment android:id="@+id/scr_p15" android:name="noox.bzr.provider.P15InProgressFragment" />
+    <fragment android:id="@+id/scr_p16" android:name="noox.bzr.provider.P16AwaitingPaymentFragment" />
+    <fragment android:id="@+id/scr_p17" android:name="noox.bzr.provider.P17CustomerRatingFragment" />
+    <fragment android:id="@+id/scr_p18" android:name="noox.bzr.provider.P18EarningsFragment" />
+    <fragment android:id="@+id/scr_p19" android:name="noox.bzr.provider.P19ProfileFragment" />
+    <fragment android:id="@+id/scr_p20" android:name="noox.bzr.provider.P20ProposalFragment" />
+    <fragment android:id="@+id/scr_p21" android:name="noox.bzr.provider.P21UnableFragment" />
+    <fragment android:id="@+id/scr_provider_chat" android:name="noox.bzr.provider.ProviderChatFragment" />
+    <fragment android:id="@+id/scr_provider_notifications" android:name="noox.bzr.provider.ProviderNotificationsFragment" />
+
 </navigation>

@@ -27,45 +27,12 @@
         android:text="@string/customer_categories_title" />
 
     <LinearLayout
+        android:id="@+id/categoryGrid"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
+        android:orientation="vertical"
         android:divider="@drawable/bremo_gap_m"
-        android:showDividers="middle">
-
-        <FrameLayout
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1">
-
-            <noox.bzr.design.views.SelectableTileView
-                android:id="@+id/tilePlumbing"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="start"
-                app:bremoText="@string/tile_plumbing"
-                app:bremoIcon="@drawable/ic_home"
-                app:selectionState="selected" />
-
-        </FrameLayout>
-
-        <FrameLayout
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1">
-
-            <noox.bzr.design.views.SelectableTileView
-                android:id="@+id/tileElectricity"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="start"
-                app:bremoText="@string/tile_electricity"
-                app:bremoIcon="@drawable/ic_warning"
-                app:selectionState="unselected" />
-
-        </FrameLayout>
-
-    </LinearLayout>
+        android:showDividers="middle" />
 
     <noox.bzr.design.views.PrimaryButtonView
         android:id="@+id/newRequest"
@@ -88,13 +55,13 @@
         app:bremoTitle="@string/empty_title"
         app:bremoBody="@string/empty_body" />
 
-    <noox.bzr.design.views.OrderCardView
-        android:id="@+id/order"
+    <LinearLayout
+        android:id="@+id/orderList"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:bremoTitle="@string/order_title"
-        app:subtitle="@string/order_subtitle"
-        app:status="@string/order_status" />
+        android:orientation="vertical"
+        android:divider="@drawable/bremo_gap_m"
+        android:showDividers="middle" />
 
     <noox.bzr.design.views.BottomNavView
         android:id="@+id/nav"

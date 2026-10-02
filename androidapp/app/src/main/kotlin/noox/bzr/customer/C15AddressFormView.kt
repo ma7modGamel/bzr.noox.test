@@ -1,12 +1,16 @@
 package noox.bzr.customer
 
 import android.content.Context
+import android.view.View
+import android.view.ViewGroup
 import androidx.core.view.isVisible
+import androidx.recyclerview.widget.RecyclerView
 import noox.bzr.design.ButtonVisualState
 import noox.bzr.design.FieldVisualState
 import noox.bzr.design.R
 import noox.bzr.design.SelectionState
 import noox.bzr.design.views.AppTextFieldView
+import noox.bzr.design.views.SelectableChipView
 import noox.bzr.gallery.databinding.ScreenC15AddressFormBinding
 
 /** SCR-C15 (DEC-047): add / edit address. */
@@ -16,6 +20,28 @@ class C15AddressFormView(context: Context, private val editing: Boolean = false)
     var onFieldChange: (String, String) -> Unit = { _, _ -> }
     var onDefaultChange: () -> Unit = {}
     var onSave: () -> Unit = {}
+    var onMapStateRender: (Double?, Double?) -> Unit = { _, _ -> }
+
+    private data class Area(val index: Int, val label: String, val selected: Boolean)
+
+    private val areas = RowAdapter<Area, SelectableChipView>(
+        create = { parent ->
+            SelectableChipView(parent.context).apply {
+                layoutParams = RecyclerView.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+            }
+        },
+        bind = { chip, area, _ ->
+            chip.text = area.label
+            chip.state = selection(area.selected)
+            chip.setOnClickListener { onAreaSelect(area.index) }
+        },
+        key = { it.index },
+    )
+
+    fun attachNativeMap(view: View, onMyLocation: () -> Unit) {
+        binding.map.setNativeContent(view)
+        binding.map.onMyLocation = onMyLocation
+    }
 
     private val fields by lazy {
         listOf(
@@ -25,7 +51,7 @@ class C15AddressFormView(context: Context, private val editing: Boolean = false)
     }
 
     init {
-        listOf(binding.area0, binding.area1, binding.area2).forEachIndexed { index, chip -> chip.setOnClickListener { onAreaSelect(index) } }
+        binding.areas.rows(areas, resources.getDimensionPixelSize(R.dimen.bremo_space_m), horizontal = true)
         fields.forEach { (field, name) -> field.onValueChange = { onFieldChange(name, it) } }
         binding.isDefault.setOnClickListener { onDefaultChange() }
         binding.save.onClick = { onSave() }
@@ -35,17 +61,13 @@ class C15AddressFormView(context: Context, private val editing: Boolean = false)
         string(if (editing || state.isEditing) R.string.address_form_edit_title else R.string.address_form_add_title)
 
     override fun renderContent(state: CustomerUiState) {
+        onMapStateRender(state.mapLatitude, state.mapLongitude)
         val values = state.fieldValues + List((6 - state.fieldValues.size).coerceAtLeast(0)) { "" }
-        val areas = state.options.ifEmpty {
-            listOf(string(R.string.address_area_nasr_city), string(R.string.address_area_heliopolis), string(R.string.address_area_maadi))
-        }
-        binding.area0.text = areas[0]
-        binding.area0.state = selection(state.selectedOptionIndex in listOf(-1, 0))
-        binding.area1.text = areas.getOrElse(1) { "" }
-        binding.area1.state = selection(state.selectedOptionIndex == 1)
-        binding.area2.isVisible = areas.size > 2
-        binding.area2.text = areas.getOrElse(2) { "" }
-        binding.area2.state = selection(state.selectedOptionIndex == 2)
+        areas.submitList(
+            state.options.mapIndexed { index, label ->
+                Area(index, label, state.selectedOptionIndex == index || (state.selectedOptionIndex == -1 && index == 0))
+            },
+        )
         fields.forEachIndexed { index, (field, _) ->
             val errorKey = when (index) {
                 0 -> "address.validation.label_required"

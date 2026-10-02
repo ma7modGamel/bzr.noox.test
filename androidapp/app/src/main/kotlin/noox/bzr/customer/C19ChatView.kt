@@ -54,6 +54,9 @@ class C19ChatView(context: Context) : CustomerScreenView(context) {
 
     override fun renderContent(state: CustomerUiState) {
         binding.header.name = state.options.firstOrNull().orEmpty()
+        binding.header.verifiedLabel = string(R.string.provider_verified).takeUnless {
+            state.options.getOrElse(3) { "CUSTOMER" } == "PROVIDER"
+        }
         binding.subtitle.text = state.options.getOrElse(1) { "" }
         binding.masking.isVisible = state.messageKey == "chat.masking.notice"
         binding.empty.isVisible = state.phase == CustomerPhase.Empty

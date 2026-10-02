@@ -124,6 +124,7 @@ $notes = is_file($config['notes']) ? json_decode((string) file_get_contents($con
 $rows = [];
 $summary = [];
 $failures = 0;
+$approvedDifferences = 0;
 foreach ($config['cases'] as $case) {
     $reference = $referenceDir.'/'.$case.'.png';
     $xml = $root.'/'.sprintf($config['xml'], $case);
@@ -157,10 +158,22 @@ foreach ($config['cases'] as $case) {
     imagepng($diff, $output.'/diff/'.$case.'.png');
     $percent = round(100 * $different / ($width * $height), 2);
     $matches = $percent <= MATCH_PERCENT;
-    $failures += $matches ? 0 : 1;
-    $reason = $notes[$case] ?? null;
-    $summary[$case] = ['percent' => $percent, 'matches' => $matches, 'reason' => $reason];
-    $status = $matches ? '<span class="ok">مطابق — يُقفل</span>' : '<span class="bad">مختلف — يرجع للمالك</span>';
+    $note = $notes[$case] ?? null;
+    $reason = is_array($note) ? ($note['reason'] ?? null) : $note;
+    $approvedDifference = ! $matches && is_array($note) && ($note['approved'] ?? false) === true;
+    $failures += $matches || $approvedDifference ? 0 : 1;
+    $approvedDifferences += $approvedDifference ? 1 : 0;
+    $summary[$case] = [
+        'percent' => $percent,
+        'matches' => $matches,
+        'approved_difference' => $approvedDifference,
+        'reason' => $reason,
+    ];
+    $status = match (true) {
+        $matches => '<span class="ok">مطابق — يُقفل</span>',
+        $approvedDifference => '<span class="ok">اختلاف معتمد — يُقفل</span>',
+        default => '<span class="bad">مختلف — يرجع للمالك</span>',
+    };
     $why = $matches ? '' : '<p class="why"><strong>سبب الاختلاف:</strong> '.htmlspecialchars($reason ?? 'لم يُكتب سبب بعد').'</p>';
     $rows[] = '<section class="pair" id="'.htmlspecialchars($case).'">'
         .'<header><strong>'.htmlspecialchars($case).'</strong><span class="pct">'.number_format($percent, 2).'٪</span>'.$status.'</header>'.$why
@@ -172,7 +185,7 @@ foreach ($config['cases'] as $case) {
 }
 
 $count = count($summary);
-$matched = $count - $failures;
+$matched = count(array_filter($summary, static fn (array $row): bool => $row['matches']));
 $tolerance = TOLERANCE;
 $shift = SHIFT;
 $threshold = MATCH_PERCENT;
@@ -207,7 +220,7 @@ $html = <<<HTML
 <main>
 <h1>{$title}</h1>
 <div class="summary">
-  <p>مطابق: <strong>{$matched}</strong> من <strong>{$count}</strong>. يُحسب البكسل مختلفًا إذا لم يوجد في الصورة الأخرى، ضمن إزاحة {$shift} بكسل، بكسل يقل فرق كل قناة لون فيه عن {$tolerance} من 255 (يستبعد تنعيم الخط وموضع النص تحت البكسل — 43 §8). اللقطة «مطابقة» إذا لم تتجاوز نسبة الاختلاف {$threshold}٪.</p>
+  <p>مطابق: <strong>{$matched}</strong>، واختلاف معتمد: <strong>{$approvedDifferences}</strong>، من <strong>{$count}</strong>. يُحسب البكسل مختلفًا إذا لم يوجد في الصورة الأخرى، ضمن إزاحة {$shift} بكسل، بكسل يقل فرق كل قناة لون فيه عن {$tolerance} من 255 (يستبعد تنعيم الخط وموضع النص تحت البكسل — 43 §8). اللقطة «مطابقة» إذا لم تتجاوز نسبة الاختلاف {$threshold}٪.</p>
 </div>
 {$body}
 </main>
@@ -218,9 +231,10 @@ file_put_contents($output.'/comparison.html', $html);
 file_put_contents($output.'/summary.json', json_encode($summary, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)."\n");
 
 foreach ($summary as $case => $result) {
-    fwrite(STDOUT, sprintf("%-20s %6.2f%%  %s\n", $case, $result['percent'], $result['matches'] ? 'match' : 'DIFFERS'));
+    $status = $result['matches'] ? 'match' : ($result['approved_difference'] ? 'APPROVED' : 'DIFFERS');
+    fwrite(STDOUT, sprintf("%-20s %6.2f%%  %s\n", $case, $result['percent'], $status));
 }
-fwrite(STDOUT, "{$matched}/".count($summary)." match. Page: reports/xml-conversion/{$set}/comparison.html\n");
+fwrite(STDOUT, "{$matched} match + {$approvedDifferences} approved / ".count($summary).". Page: reports/xml-conversion/{$set}/comparison.html\n");
 if (in_array('--strict', $argv, true) && $failures > 0) {
     exit(1);
 }
@@ -231,6 +245,7 @@ function writeIndex(string $root, array $sets): void
     $rows = [];
     $total = 0;
     $matched = 0;
+    $approved = 0;
     foreach (array_keys($sets) as $name) {
         $summaryPath = $root.'/reports/xml-conversion/'.$name.'/summary.json';
         if (! is_file($summaryPath)) {
@@ -239,13 +254,27 @@ function writeIndex(string $root, array $sets): void
         }
         $summary = json_decode((string) file_get_contents($summaryPath), true, flags: JSON_THROW_ON_ERROR);
         $count = count($summary);
-        $ok = count(array_filter($summary, static fn (array $row): bool => $row['matches']));
+        $ok = count(array_filter(
+            $summary,
+            static fn (array $row): bool => $row['matches'] || ($row['approved_difference'] ?? false),
+        ));
+        $approvedInSet = count(array_filter(
+            $summary,
+            static fn (array $row): bool => $row['approved_difference'] ?? false,
+        ));
         $total += $count;
         $matched += $ok;
+        $approved += $approvedInSet;
         $worst = $summary === [] ? 0 : max(array_column($summary, 'percent'));
-        $differs = array_keys(array_filter($summary, static fn (array $row): bool => ! $row['matches']));
+        $differs = array_keys(array_filter(
+            $summary,
+            static fn (array $row): bool => ! $row['matches'] && ! ($row['approved_difference'] ?? false),
+        ));
+        $closedStatus = $approvedInSet > 0
+            ? '<span class="ok">مطابق '.($ok - $approvedInSet).' + اختلاف معتمد '.$approvedInSet.' — تُقفل</span>'
+            : '<span class="ok">كلها مطابقة — تُقفل</span>';
         $rows[] = '<tr><td><a href="'.$name.'/comparison.html">'.$name.'</a></td><td>'.$ok.' / '.$count.'</td><td>'.number_format($worst, 2).'٪</td><td>'
-            .($differs === [] ? '<span class="ok">كلها مطابقة — تُقفل</span>' : '<span class="bad">'.htmlspecialchars(implode('، ', $differs)).'</span>').'</td></tr>';
+            .($differs === [] ? $closedStatus : '<span class="bad">'.htmlspecialchars(implode('، ', $differs)).'</span>').'</td></tr>';
     }
     $body = implode("\n", $rows);
     $html = <<<HTML
@@ -267,7 +296,7 @@ function writeIndex(string $root, array $sets): void
 <body>
 <main>
 <h1>تحويل أندرويد إلى XML — المعتمدة | XML | الفرق | نسبة الاختلاف</h1>
-<p>مطابق: <strong>{$matched}</strong> من <strong>{$total}</strong> لقطة. كل مجموعة لها صفحة تعرض المعتمدة (Compose) وXML وخريطة الفرق ونسبة الاختلاف لكل لقطة.</p>
+<p>مغلق: <strong>{$matched}</strong> من <strong>{$total}</strong> لقطة، منها <strong>{$approved}</strong> اختلاف معتمد. كل مجموعة لها صفحة تعرض المعتمدة (Compose) وXML وخريطة الفرق ونسبة الاختلاف لكل لقطة.</p>
 <table>
 <thead><tr><th>المجموعة</th><th>مطابق</th><th>أعلى اختلاف</th><th>الحالة</th></tr></thead>
 <tbody>
@@ -279,5 +308,5 @@ function writeIndex(string $root, array $sets): void
 </html>
 HTML;
     file_put_contents($root.'/reports/xml-conversion/comparison.html', $html);
-    fwrite(STDOUT, "{$matched}/{$total} match. Page: reports/xml-conversion/comparison.html\n");
+    fwrite(STDOUT, "{$matched}/{$total} closed ({$approved} approved differences). Page: reports/xml-conversion/comparison.html\n");
 }

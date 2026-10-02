@@ -15,6 +15,7 @@ class C17MediaView(context: Context) : CustomerScreenView(context) {
     var onPickVideo: () -> Unit = {}
     var onRecordAudio: () -> Unit = {}
     var onDelete: (Int) -> Unit = {}
+    var onRetry: (Int) -> Unit = {}
     var onDone: () -> Unit = {}
 
     private data class Row(val index: Int, val kind: String, val state: String)
@@ -48,6 +49,7 @@ class C17MediaView(context: Context) : CustomerScreenView(context) {
             }
             thumb.state = mediaState
             thumb.onDelete = { onDelete(row.index) }
+            thumb.setOnClickListener { if (mediaState == MediaState.Failed) onRetry(row.index) }
         },
         key = { it.index },
     )

@@ -13,6 +13,7 @@ class C33AccountSettingsView(context: Context) : CustomerScreenView(context) {
     private val sheet = AppBottomSheetView(context)
     var onAction: (String) -> Unit = {}
     var onFieldChange: (Int, String) -> Unit = { _, _ -> }
+    var onRatingRemindersChange: (Boolean) -> Unit = {}
 
     init {
         binding.editName.onValueChange = { onFieldChange(0, it) }
@@ -25,6 +26,7 @@ class C33AccountSettingsView(context: Context) : CustomerScreenView(context) {
         binding.name.onClick = { onAction("update_account") }
         binding.passwordRow.onClick = { onAction("change_password") }
         binding.terms.onClick = { onAction("open_terms") }
+        binding.ratingReminders.setOnClickListener { onRatingRemindersChange(!binding.ratingReminders.checked) }
         binding.logout.onClick = { onAction("logout") }
         binding.delete.onClick = { onAction("delete_account") }
         sheet.title = string(R.string.account_delete_title)
@@ -60,8 +62,12 @@ class C33AccountSettingsView(context: Context) : CustomerScreenView(context) {
             "password" -> {
                 binding.currentPassword.value = value(0)
                 binding.currentPassword.state = fieldState(state, "account.validation.current_password")
+                binding.currentPassword.error =
+                    if ("account.validation.current_password" in state.fieldErrors) string(R.string.account_validation_current_password) else null
                 binding.newPassword.value = value(1)
                 binding.newPassword.state = fieldState(state, "account.validation.new_password")
+                binding.newPassword.error =
+                    if ("account.validation.new_password" in state.fieldErrors) string(R.string.account_validation_new_password) else null
                 binding.confirmPassword.value = value(2)
                 binding.confirmPassword.state = fieldState(state, "account.validation.password_confirmation")
                 binding.confirmPassword.error =
@@ -73,6 +79,8 @@ class C33AccountSettingsView(context: Context) : CustomerScreenView(context) {
                 binding.email.text = state.fieldValues.getOrElse(1) { string(R.string.account_settings_email) }
                 binding.phone.text = state.fieldValues.getOrElse(2) { string(R.string.account_settings_phone) }
                 binding.passwordRow.isVisible = "change_password" in state.visibleActions
+                binding.ratingReminders.checked = state.ratingRemindersEnabled
+                binding.ratingReminders.contentDescription = string(R.string.account_rating_reminders)
                 binding.logout.isVisible = "logout" in state.visibleActions
                 binding.delete.isVisible = "delete_account" in state.visibleActions
             }

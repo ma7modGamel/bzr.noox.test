@@ -1,6 +1,7 @@
 package noox.bzr.customer
 
 import android.content.Context
+import android.widget.LinearLayout
 import androidx.core.view.isVisible
 import noox.bzr.design.OfferVariant
 import noox.bzr.design.R
@@ -10,23 +11,14 @@ import noox.bzr.gallery.databinding.ScreenC06OffersBinding
 class C06OffersView(context: Context) : CustomerScreenView(context) {
     private val binding = ScreenC06OffersBinding.inflate(inflater, content)
     var onAction: (String) -> Unit = {}
+    var onSort: (Int) -> Unit = {}
+    var onSelect: (Int) -> Unit = {}
+    var onProvider: (Int) -> Unit = {}
 
     init {
-        binding.countdown.seconds = OFFERS_COUNTDOWN_SECONDS
         binding.sort.title = string(R.string.sort_title)
         binding.sort.labels = listOf(string(R.string.sort_top_rated), string(R.string.sort_lowest_price), string(R.string.sort_fastest))
-        binding.sort.selectedIndex = 0
-        binding.execution.apply {
-            provider = string(R.string.offer_provider); rating = "4.9"; services = "86"; price = string(R.string.offer_price)
-            detail = "25 " + string(R.string.unit_minute); badge = string(R.string.badge_top_rated)
-            button = string(R.string.offer_select); chatLabel = string(R.string.action_chat); variant = OfferVariant.Execution
-        }
-        binding.inspection.apply {
-            provider = string(R.string.drawer_name); rating = "4.8"; services = "54"; price = string(R.string.offer_inspection_price)
-            detail = string(R.string.offer_scheduled); badge = string(R.string.badge_best_price)
-            button = string(R.string.offer_select); chatLabel = string(R.string.action_chat); variant = OfferVariant.Inspection
-            priceCaption = string(R.string.offer_inspection_fee)
-        }
+        binding.sort.onSelect = { onSort(it) }
         binding.actions.onAction = { onAction(it) }
     }
 
@@ -35,11 +27,52 @@ class C06OffersView(context: Context) : CustomerScreenView(context) {
     override fun renderContent(state: CustomerUiState) {
         val empty = state.phase == CustomerPhase.Empty
         binding.empty.isVisible = empty
-        listOf(binding.count, binding.countdown, binding.sort, binding.execution, binding.inspection).forEach { it.isVisible = !empty }
+        listOf(binding.count, binding.countdown, binding.sort, binding.offerList).forEach { it.isVisible = !empty }
+        binding.count.text = state.fieldValues.firstOrNull().orEmpty()
+        binding.countdown.seconds = state.countdownSeconds
+        binding.sort.selectedIndex = state.selectedIndex
+        binding.sort.labels = if (state.showEta) {
+            listOf(string(R.string.sort_top_rated), string(R.string.sort_lowest_price), string(R.string.sort_fastest))
+        } else {
+            listOf(string(R.string.sort_top_rated), string(R.string.sort_lowest_price))
+        }
+        binding.offerList.removeAllViews()
+        state.items.forEachIndexed { index, row ->
+            val values = row.split('|')
+            if (values.size < OFFER_FIELDS) return@forEachIndexed
+            binding.offerList.addView(
+                noox.bzr.design.views.OfferCardView(context).apply {
+                    provider = values[1]
+                    rating = values[2]
+                    services = values[3]
+                    price = values[4]
+                    detail = if (state.showEta && values[5].toIntOrNull() != null) {
+                        "${values[5]} ${string(R.string.unit_minute)}"
+                    } else {
+                        values[5]
+                    }
+                    badge = values[6]
+                    button = string(R.string.offer_select)
+                    chatLabel = string(R.string.action_chat)
+                    variant = when {
+                        !state.showEta -> OfferVariant.Scheduled
+                        state.pricingOptions.firstOrNull() == "inspection" -> OfferVariant.Inspection
+                        else -> OfferVariant.Execution
+                    }
+                    priceCaption = if (variant == OfferVariant.Inspection) string(R.string.offer_inspection_fee) else null
+                    showSelect = "accept_offer" in state.visibleActions
+                    showChat = "chat" in state.visibleActions
+                    onOpen = { onProvider(index) }
+                    onSelect = { this@C06OffersView.onSelect(index) }
+                    onChat = { onAction("chat") }
+                },
+                LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT),
+            )
+        }
         binding.actions.actions = if (empty) state.visibleActions else state.visibleActions.filter { it != "accept_offer" }
     }
 
     private companion object {
-        const val OFFERS_COUNTDOWN_SECONDS = 1320
+        const val OFFER_FIELDS = 8
     }
 }

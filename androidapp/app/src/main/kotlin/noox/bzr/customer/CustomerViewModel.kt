@@ -7,15 +7,19 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import noox.bzr.auth.AuthSessionStore
+import noox.bzr.links.DeepLinkTarget
+import noox.bzr.links.PushDevice
 import org.json.JSONArray
 import org.json.JSONObject
 import java.time.OffsetDateTime
+import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
 class CustomerViewModel(
     private val api: CustomerApi,
     private val session: AuthSessionStore,
     private val currencyLabel: String,
+    private val push: PushDevice = PushDevice.None,
 ) : ViewModel() {
     // DEC-047: only the state holder changed (Compose mutableStateOf → StateFlow); fragments collect [stateFlow].
     private val mutableState = MutableStateFlow(CustomerUiState("SCR-C01", CustomerPhase.Loading))
@@ -23,8 +27,27 @@ class CustomerViewModel(
     var state: CustomerUiState
         get() = mutableState.value
         private set(value) {
+            // Loading is transient; an error screen is shown but not returned to.
+            if (value.phase != CustomerPhase.Loading) history.show(value, restorable = value.phase != CustomerPhase.Error)
             mutableState.value = value
         }
+
+    /** The back stack for the top-bar and system back (6ب, `design/fixtures/navigation/history.json`). */
+    private val history = ScreenHistory<CustomerUiState>("SCR-C01") { it.screen }
+
+    /** Back: the recorded screen as it was shown, home when nothing is recorded; false on home (the system may leave). */
+    fun goBack(): Boolean {
+        val target = history.back { CustomerUiState("SCR-C01", CustomerPhase.Loading) } ?: return false
+        when (target.screen) {
+            "SCR-C01" -> loadHome()
+            "SCR-C19" -> currentConversationId?.let { loadConversation(it, showLoading = true) } ?: loadConversations()
+            else -> {
+                stopChatPolling()
+                mutableState.value = target
+            }
+        }
+        return true
+    }
     private val mutableRequiresAuthentication = MutableStateFlow(false)
     val requiresAuthenticationFlow: StateFlow<Boolean> = mutableRequiresAuthentication.asStateFlow()
     var requiresAuthentication: Boolean
@@ -63,6 +86,7 @@ class CustomerViewModel(
     private var timingType: String = ""
     private var slotStart: String? = null
     private val media = mutableListOf<MediaDraft>()
+    private var mediaRecording = false
     private var addressDraft = AddressDraft()
     private val mainHandler = Handler(Looper.getMainLooper())
     private var chatPoll: Runnable? = null
@@ -84,18 +108,128 @@ class CustomerViewModel(
     private var accountValues: MutableList<String> = mutableListOf("", "", "")
     private var accountActions: List<String> = emptyList()
     private var accountMode = "overview"
+    private var ratingRemindersEnabled = true
+    /** From `GET /config` through home: marketplace or staff (39). Never assumed. */
+    private var operatingMode = "staff"
+    private var addressLabel = ""
+    private var catalog: List<CustomerCategory> = emptyList()
+    private var categoryAvailable = true
+    private var requestDescription = ""
+    private var currentOffers: List<JSONObject> = emptyList()
+    private var currentOfferId: Int? = null
+    private var currentOfferProviderId: Int? = null
+    private var offersSortIndex = 0
+    private var selectedMaterialIndex = -1
+    private var selectedPricingIndex = -1
+    private var requestBudget = ""
+    private var serviceHoursFrom = "00:00"
+    private var serviceHoursTo = "23:59"
+    private var selectedSlotLabel = ""
+
+    /** C32 rows open through the activity, which knows the provider status and can switch modes (DEC-058). */
+    var onDeepLink: (String) -> Unit = {}
     private var editingOrderId: Int? = null
 
     fun loadHome() = request("SCR-C01") {
         val home = api.home(token())
         currentOrderId = home.firstOrderId
+        orderIds = home.orders.map { it.getInt("id") }
+        orderStatuses = home.orders.map { it.optString("status") }
         addressId = home.addressId
-        categoryId = home.categoryId
-        problemTypeId = home.problemTypeId
+        categoryId = null
+        problemTypeId = null
+        catalog = home.categories
         optionLists = home.optionLists
         optionDefaults = home.optionDefaults
         timingType = optionDefaults["timing_type"].orEmpty()
-        mapOf("event" to "loaded", "operating_mode" to home.operatingMode, "has_orders" to (home.orderCount > 0))
+        selectedMaterialIndex = options("materials_responsibilities").indexOfFirst {
+            it.code == optionDefaults["materials_responsibility"]
+        }
+        selectedPricingIndex = -1
+        requestBudget = ""
+        serviceHoursFrom = home.serviceHoursFrom
+        serviceHoursTo = home.serviceHoursTo
+        operatingMode = home.operatingMode
+        addressLabel = home.addressLabel
+        home.addressCityId?.let { cityId = it }
+        mapOf(
+            "event" to "loaded", "operating_mode" to home.operatingMode, "has_orders" to (home.orderCount > 0),
+            "customer_name" to home.customerName,
+            "category_labels" to catalog.map(CustomerCategory::name),
+            "category_icons" to catalog.map { it.iconKey.orEmpty() },
+            "selected_category_index" to -1,
+            "order_titles" to home.orders.map { orderSummary(it)[0] },
+            "order_subtitles" to home.orders.map { orderSummary(it)[1] },
+            "order_statuses" to home.orders.map { orderSummary(it)[2] },
+        )
+    }
+
+    fun openProblem() {
+        state = CustomerLogic.reduce("SCR-C03", problemInput())
+    }
+
+    fun selectCategory(index: Int) {
+        val choice = CustomerCatalogSelection.category(
+            categoryIds = catalog.map(CustomerCategory::id),
+            problemIdsByCategory = catalog.map { category -> category.problemTypes.map(CustomerProblemType::id) },
+            selectedIndex = index,
+            currentProblemId = problemTypeId,
+        ) ?: return
+        categoryId = choice.categoryId
+        problemTypeId = choice.problemTypeId
+        state = CustomerLogic.reduce("SCR-C03", problemInput())
+    }
+
+    fun selectProblem(index: Int) {
+        val choice = CustomerCatalogSelection.problem(
+            categoryId = categoryId,
+            problemIds = selectedCategory()?.problemTypes.orEmpty().map(CustomerProblemType::id),
+            selectedIndex = index,
+        ) ?: return
+        categoryId = choice.categoryId
+        problemTypeId = choice.problemTypeId
+        state = CustomerLogic.reduce("SCR-C03", problemInput())
+    }
+
+    fun updateProblemDescription(value: String) {
+        requestDescription = value.take(1001)
+        state = CustomerLogic.reduce("SCR-C03", problemInput())
+    }
+
+    private fun selectedCategory(): CustomerCategory? = catalog.firstOrNull { it.id == categoryId }
+
+    private fun selectedProblem(): CustomerProblemType? =
+        selectedCategory()?.problemTypes?.firstOrNull { it.id == problemTypeId }
+
+    private fun problemInput(): Map<String, Any?> {
+        val problems = selectedCategory()?.problemTypes.orEmpty()
+        return mapOf(
+            "event" to "validate",
+            "category_labels" to catalog.map(CustomerCategory::name),
+            "category_icons" to catalog.map { it.iconKey.orEmpty() },
+            "selected_category_index" to catalog.indexOfFirst { it.id == categoryId },
+            "problem_labels" to problems.map(CustomerProblemType::name),
+            "problem_other" to problems.map { it.isOther.toString() },
+            "selected_problem_index" to problems.indexOfFirst { it.id == problemTypeId },
+            "description" to requestDescription,
+            "media_count" to media.count { it.id != null },
+        )
+    }
+
+    /** C01 current-order card: the same title, subtitle and status as the C25 row. */
+    private fun orderSummary(order: JSONObject): List<String> = listOf(
+        "${order.optJSONObject("category")?.optString("name").orEmpty()} — ${order.optJSONObject("problem_type")?.optString("name").orEmpty()}",
+        "#${order.optString("number")} · ${order.optJSONObject("location")?.optString("area").orEmpty()} · ${order.optString("created_at").displayDateTime()}",
+        order.optString("status_label").ifBlank { order.optString("display_status") },
+    )
+
+    /** C02 header from `GET /me`, not sample text. */
+    fun loadAccountSummary() = request("SCR-C02") {
+        val user = api.account(token())
+        mapOf(
+            "event" to "loaded", "is_verified" to user.optBoolean("is_verified"),
+            "name" to user.optString("name"), "phone" to user.optString("phone"),
+        )
     }
 
     fun show(screen: String, input: Map<String, Any?>) {
@@ -103,9 +237,62 @@ class CustomerViewModel(
         state = CustomerLogic.reduce(screen, input)
     }
 
+    /** AC-NTF-07: the device token goes first, then the Sanctum token; the session clears at once either way. */
     fun logout() {
+        val auth = session.token
+        val device = push.token
         session.clear()
         requiresAuthentication = true
+        if (auth == null) return
+        Thread {
+            device?.let { runCatching { api.unregisterDevice(auth, it) } }
+            runCatching { api.logout(auth) }
+        }.start()
+    }
+
+    /** DEC-058: after sign-in and whenever Firebase rotates the token. Failures retry on the next launch. */
+    fun registerPushDevice(deviceToken: String? = push.token) {
+        val auth = session.token ?: return
+        val device = deviceToken ?: return
+        Thread { runCatching { api.registerDevice(auth, device) } }.start()
+    }
+
+    /** 17 §الروابط العميقة — customer targets only; the activity routes provider ones. */
+    fun openDeepLink(target: DeepLinkTarget) {
+        when (target.target) {
+            "ORDER" -> loadOrder(target.orderId)
+            "SCR-C06" -> loadOffers(target.orderId)
+            "SCR-C19" -> openChatForOrder(target.orderId)
+            "SCR-C24" -> openRatingFor(target.orderId)
+            "SCR-C27" -> openDisputeFor(target.orderId)
+            else -> loadNotifications()
+        }
+    }
+
+    private fun openChatForOrder(orderId: Int) = Thread {
+        val conversation = runCatching {
+            api.conversations(token(), 1).getJSONArray("data").objects()
+                .firstOrNull { it.getJSONObject("order").optInt("id") == orderId }
+        }.getOrNull()
+        mainHandler.post {
+            if (conversation == null) {
+                loadOrder(orderId)
+            } else {
+                currentConversationId = conversation.getInt("id")
+                chatDraft = ""
+                loadConversation(conversation.getInt("id"), showLoading = true)
+            }
+        }
+    }.start()
+
+    private fun openRatingFor(orderId: Int) {
+        currentOrderId = orderId
+        openRating()
+    }
+
+    private fun openDisputeFor(orderId: Int) {
+        currentOrderId = orderId
+        openDispute()
     }
 
     fun loadHelp() = request("SCR-C29") {
@@ -146,9 +333,8 @@ class CustomerViewModel(
         state = state.copy(isBusy = true)
         Thread {
             runCatching { api.markNotificationsRead(token(), listOf(id)) }
-            val orderId = Regex("orders/(\\d+)").find(notificationLinks.getOrNull(index).orEmpty())
-                ?.groupValues?.getOrNull(1)?.toIntOrNull()
-            mainHandler.post { if (orderId != null) loadOrder(orderId) else loadNotifications() }
+            val link = notificationLinks.getOrNull(index).orEmpty()
+            mainHandler.post { if (link.isBlank()) loadNotifications() else onDeepLink(link) }
         }.start()
     }
 
@@ -156,8 +342,23 @@ class CustomerViewModel(
         val user = api.account(token())
         accountValues = mutableListOf(user.optString("name"), user.optString("email"), user.optString("phone"))
         accountActions = user.optJSONArray("available_actions")?.strings().orEmpty()
+        ratingRemindersEnabled = user.optBoolean("rating_reminders_enabled", true)
         accountMode = "overview"
         accountInput("loaded")
+    }
+
+    /** NTF-18 only; saved at once, and reverted when the server refuses (C33). */
+    fun setRatingReminders(enabled: Boolean) {
+        val previous = ratingRemindersEnabled
+        ratingRemindersEnabled = enabled
+        state = CustomerLogic.reduce("SCR-C33", accountInput("loaded"))
+        Thread {
+            val saved = runCatching { api.updateRatingReminders(token(), enabled).optBoolean("rating_reminders_enabled", enabled) }
+            mainHandler.post {
+                ratingRemindersEnabled = saved.getOrDefault(previous)
+                if (state.screen == "SCR-C33") state = CustomerLogic.reduce("SCR-C33", accountInput("loaded"))
+            }
+        }.start()
     }
 
     fun accountAction(action: String) {
@@ -205,15 +406,17 @@ class CustomerViewModel(
                 addressId = order.optInt("customer_address_id").takeIf { it > 0 }
                 categoryId = order.optJSONObject("category")?.optInt("id")
                 problemTypeId = order.optJSONObject("problem_type")?.optInt("id")
+                requestDescription = order.optNullableString("description").orEmpty()
                 timingType = order.optJSONObject("timing")?.optString("type").orEmpty()
                 slotStart = order.optJSONObject("timing")?.optNullableString("slot_start")
-                show(
-                    "SCR-C03",
-                    mapOf(
-                        "event" to "validate", "problem_type_id" to problemTypeId?.toString().orEmpty(),
-                        "description" to order.optNullableString("description"),
-                    ),
-                )
+                selectedMaterialIndex = options("materials_responsibilities").indexOfFirst {
+                    it.code == order.optString("materials_responsibility")
+                }
+                selectedPricingIndex = options("pricing_modes").indexOfFirst {
+                    it.code == order.optString("pricing_mode")
+                }
+                requestBudget = order.optNullableString("budget_amount").orEmpty()
+                state = CustomerLogic.reduce("SCR-C03", problemInput())
             }
             "republish" -> {
                 val orderId = currentOrderId ?: return
@@ -362,17 +565,110 @@ class CustomerViewModel(
 
     fun confirmAddress(index: Int) {
         selectAddress(index)
-        state = CustomerLogic.reduce(
-            "SCR-C04",
-            mapOf(
-                "event" to "validate", "operating_mode" to "marketplace",
-                "timing_type" to timingType.lowercase(), "now_available" to true,
-                "timing_labels" to options("timing_types").map(CustomerOption::label),
-                "selected_timing_index" to options("timing_types").indexOfFirst { it.code == timingType },
-                "address_id" to (addressId?.toString() ?: ""),
-                "slot_id" to if (slotStart == null) "" else "selected",
-            ),
+        val address = addressPayloads.getOrNull(index)
+        address?.let { addressLabel = addressLabel(it) }
+        val city = address?.optJSONObject("city")?.optInt("id")?.takeIf { it > 0 }
+        val category = categoryId
+        if (city == null || category == null) {
+            categoryAvailable = true
+            openTiming()
+            return
+        }
+        // BR-011: the chosen service must be served in the new address's city, before publish is refused.
+        Thread {
+            val available = runCatching { category in api.catalogCategoryIds(city) }.getOrDefault(true)
+            mainHandler.post {
+                categoryAvailable = available
+                openTiming()
+            }
+        }.start()
+    }
+
+    /** C04 from the real draft: mode, address and timing (07). */
+    fun openTiming() {
+        state = CustomerLogic.reduce("SCR-C04", timingInput())
+    }
+
+    fun selectTiming(index: Int) {
+        val selected = options("timing_types").getOrNull(index) ?: return
+        timingType = selected.code
+        if (index == 0) {
+            slotStart = null
+            selectedSlotLabel = ""
+            state = CustomerLogic.reduce("SCR-C04", timingInput())
+        }
+    }
+
+    fun selectMaterial(index: Int) {
+        if (options("materials_responsibilities").getOrNull(index) == null) return
+        selectedMaterialIndex = index
+        state = CustomerLogic.reduce("SCR-C04", timingInput())
+    }
+
+    fun selectPricing(index: Int) {
+        if (options("pricing_modes").getOrNull(index) == null) return
+        selectedPricingIndex = index
+        state = CustomerLogic.reduce("SCR-C04", timingInput())
+    }
+
+    fun updateBudget(value: String) {
+        requestBudget = value.take(12)
+        state = CustomerLogic.reduce("SCR-C04", timingInput())
+    }
+
+    /** C05 before the terms are accepted; the mode decides pricing copy. */
+    fun openReview() {
+        state = CustomerLogic.reduce("SCR-C05", reviewInput(false))
+    }
+
+    fun setTermsAccepted(accepted: Boolean) {
+        state = CustomerLogic.reduce("SCR-C05", reviewInput(accepted))
+    }
+
+    private fun reviewInput(termsAccepted: Boolean): Map<String, Any?> {
+        val category = selectedCategory()
+        val problem = selectedProblem()
+        val serviceRows = listOfNotNull(
+            if (category != null && problem != null) "${category.name} — ${problem.name}" else null,
+            requestDescription.takeIf(String::isNotBlank),
         )
+        val visitRows = listOfNotNull(
+            addressLabel.takeIf(String::isNotBlank),
+            selectedSlotLabel.takeIf(String::isNotBlank)
+                ?: options("timing_types").firstOrNull { it.code == timingType }?.label,
+            options("materials_responsibilities").getOrNull(selectedMaterialIndex)?.label,
+        )
+        val pricingRows = if (operatingMode == "marketplace") listOfNotNull(
+            options("pricing_modes").getOrNull(selectedPricingIndex)?.label,
+            requestBudget.takeIf(String::isNotBlank),
+        ) else emptyList()
+        return mapOf(
+            "event" to "validate", "operating_mode" to operatingMode,
+            "terms_accepted" to termsAccepted, "service_rows" to serviceRows,
+            "visit_rows" to visitRows, "pricing_rows" to pricingRows,
+        )
+    }
+
+    private fun timingInput(): Map<String, Any?> = mapOf(
+        "event" to "validate", "operating_mode" to operatingMode,
+        "timing_type" to timingType.lowercase(), "now_available" to nowAvailable(),
+        "timing_labels" to options("timing_types").map(CustomerOption::label),
+        "selected_timing_index" to options("timing_types").indexOfFirst { it.code == timingType },
+        "address_id" to (addressId?.toString() ?: ""),
+        "address_label" to addressLabel,
+        "slot_id" to if (slotStart == null) "" else "selected", "slot_label" to selectedSlotLabel,
+        "material_labels" to options("materials_responsibilities").map(CustomerOption::label),
+        "selected_material_index" to selectedMaterialIndex,
+        "pricing_labels" to options("pricing_modes").map(CustomerOption::label),
+        "selected_pricing_index" to selectedPricingIndex, "budget" to requestBudget,
+        "category_available" to categoryAvailable,
+    )
+
+    private fun nowAvailable(): Boolean {
+        val now = java.time.LocalTime.now()
+        val from = runCatching { java.time.LocalTime.parse(serviceHoursFrom) }.getOrNull() ?: return false
+        val to = runCatching { java.time.LocalTime.parse(serviceHoursTo) }.getOrNull() ?: return false
+        return if (from <= to) now >= from && now <= to else now >= from || now <= to
     }
 
     fun openNewAddress() = request("SCR-C15") {
@@ -510,42 +806,59 @@ class CustomerViewModel(
         val selected = slotStarts.getOrNull(selectedSlotIndex) ?: return
         timingType = options("timing_types").getOrNull(1)?.code ?: return
         slotStart = selected
-        state = CustomerLogic.reduce(
-            "SCR-C04",
-            mapOf(
-                "event" to "validate", "operating_mode" to "marketplace",
-                "timing_type" to "scheduled", "address_id" to (addressId?.toString() ?: ""),
-                "timing_labels" to options("timing_types").map(CustomerOption::label),
-                "selected_timing_index" to options("timing_types").indexOfFirst { it.code == timingType },
-                "slot_id" to "selected",
-            ),
-        )
+        // The chosen day and period, e.g. «غدًا · 1:00 م–3:00 م» (6ب).
+        selectedSlotLabel = listOf(state.options.getOrElse(state.selectedOptionIndex) { "" }, state.items.getOrElse(selectedSlotIndex) { "" })
+            .filter(String::isNotBlank).joinToString(" · ")
+        openTiming()
     }
 
     fun openMedia() {
         state = CustomerLogic.reduce("SCR-C17", mediaInput())
     }
 
+    fun canAddMedia(kind: String): Boolean = when (kind) {
+        "photo" -> media.count { it.kind == kind } < 5
+        "video", "audio" -> media.none { it.kind == kind }
+        else -> false
+    }
+
     fun completeMediaSelection() {
-        state = CustomerLogic.reduce(
-            "SCR-C03",
-            mapOf(
-                "event" to "validate", "problem_type_id" to "selected",
-                "description" to "", "media_count" to media.count { it.id != null },
-            ),
-        )
+        state = CustomerLogic.reduce("SCR-C03", problemInput())
     }
 
     fun uploadMedia(upload: CustomerMediaUpload, kind: String) {
-        media += MediaDraft(null, kind, "uploading")
+        media += MediaDraft(null, kind, "uploading", upload)
+        uploadMediaAt(media.lastIndex)
+    }
+
+    fun retryMedia(index: Int) {
+        if (media.getOrNull(index)?.state != "failed" || media[index].upload == null) return
+        media[index] = media[index].copy(state = "uploading")
+        uploadMediaAt(index)
+    }
+
+    fun setMediaRecording(recording: Boolean) {
+        mediaRecording = recording
+        state = CustomerLogic.reduce("SCR-C17", mediaInput())
+    }
+
+    private fun uploadMediaAt(index: Int) {
+        val draft = media.getOrNull(index) ?: return
+        val upload = draft.upload ?: return
         state = CustomerLogic.reduce("SCR-C17", mediaInput())
         Thread {
             val next = runCatching {
                 val payload = api.uploadMedia(token(), upload)
-                media[media.lastIndex] = MediaDraft(payload.getInt("id"), kind, "uploaded")
+                val currentIndex = media.indexOfFirst { it.upload === upload }
+                if (currentIndex >= 0) {
+                    media[currentIndex] = draft.copy(id = payload.getInt("id"), state = "uploaded", upload = null)
+                }
                 mediaInput()
             }.getOrElse {
-                media[media.lastIndex] = MediaDraft(null, kind, "failed")
+                val currentIndex = media.indexOfFirst { it.upload === upload }
+                if (currentIndex >= 0) {
+                    media[currentIndex] = draft.copy(id = null, state = "failed")
+                }
                 mediaInput()
             }
             Handler(Looper.getMainLooper()).post { state = CustomerLogic.reduce("SCR-C17", next) }
@@ -554,17 +867,22 @@ class CustomerViewModel(
 
     fun deleteMedia(index: Int) {
         val item = media.getOrNull(index) ?: return
+        if (item.state == "uploading") return
         media.removeAt(index)
         state = CustomerLogic.reduce("SCR-C17", mediaInput())
         item.id?.let { id -> Thread { runCatching { api.deleteMedia(token(), id) } }.start() }
     }
 
-    fun loadOrder(orderId: Int) = request("SCR-C09") {
+    /** An OPEN order in employee mode waits for assignment on C36; every other order opens C09 (SCR-C36). */
+    fun loadOrder(orderId: Int) = requestRouted("SCR-C09") {
         val order = api.order(token(), orderId)
         currentOrderPayload = order
         currentOrderId = orderId
         currentOrderVersion = order.getInt("version")
-        mapOf(
+        if (operatingMode == "staff" && order.getString("status") == "OPEN") {
+            return@requestRouted "SCR-C36" to assignmentInput(order)
+        }
+        "SCR-C09" to mapOf(
             "event" to "loaded",
             "status" to order.getString("status"),
             "display_status" to order.getString("display_status"),
@@ -572,7 +890,27 @@ class CustomerViewModel(
             "eta_approximate" to order.optBoolean("eta_approximate"),
             "available_actions" to order.getJSONArray("available_actions").strings(),
             "step_states" to order.optJSONArray("stepper")?.objects()?.map { it.getString("state") }.orEmpty(),
+            "summary" to listOf(
+                "#${order.getString("number")}",
+                order.getJSONObject("location").optString("area"),
+            ),
         )
+    }
+
+    fun refreshTracking(onResult: (CustomerTrackingPayload, Pair<Double, Double>?) -> Unit) {
+        val orderId = currentOrderId ?: return
+        val destination = currentOrderPayload?.optJSONObject("location")?.let { location ->
+            val latitude = location.optString("lat").toDoubleOrNull()
+            val longitude = location.optString("lng").toDoubleOrNull()
+            if (latitude == null || longitude == null) null else latitude to longitude
+        }
+
+        Thread {
+            runCatching { api.tracking(token(), orderId) }
+                .onSuccess { payload ->
+                    Handler(Looper.getMainLooper()).post { onResult(payload, destination) }
+                }
+        }.start()
     }
 
     fun loadPaymentSummary() {
@@ -617,6 +955,7 @@ class CustomerViewModel(
         val orderId = currentOrderId ?: return
         val order = currentOrderPayload ?: return
         val channel = options("payment_channels").getOrNull(selectedPaymentChannel)?.code ?: return
+        history.commit()
         state = CustomerLogic.reduce("SCR-C22", paymentInput(order, null, "creating"))
         Thread {
             val next = runCatching {
@@ -641,6 +980,7 @@ class CustomerViewModel(
         val orderId = currentOrderId ?: return
         val order = currentOrderPayload ?: return
         state = CustomerLogic.reduce("SCR-C23", completionInput(order, "submitting"))
+        history.commit()
         Thread {
             val result = runCatching { api.confirmCompletion(token(), orderId, currentOrderVersion) }
             Handler(Looper.getMainLooper()).post {
@@ -674,6 +1014,7 @@ class CustomerViewModel(
         val orderId = currentOrderId ?: return
         if (!state.canContinue) return
         state = CustomerLogic.reduce("SCR-C24", ratingInput("submitting"))
+        history.commit()
         Thread {
             val success = runCatching {
                 api.submitReview(
@@ -707,6 +1048,7 @@ class CustomerViewModel(
         val orderId = currentOrderId ?: return
         val reason = options("customer_cancellation_reasons").getOrNull(cancellationReasonIndex)?.code ?: return
         state = CustomerLogic.reduce("SCR-C20", cancellationInput("submitting"))
+        history.commit()
         Thread {
             val next = runCatching {
                 val order = api.cancelOrder(token(), orderId, reason, cancellationNote.ifBlank { null }, currentOrderVersion)
@@ -737,6 +1079,7 @@ class CustomerViewModel(
         val orderId = currentOrderId ?: return
         val proposalId = currentProposalId ?: return
         val screen = state.screen
+        history.commit()
         val input = mapOf(
             "event" to "submitting", "type_label" to state.items.getOrElse(0) { "" },
             "amount" to state.items.getOrElse(1) { "" }, "reason" to state.items.getOrElse(2) { "" },
@@ -923,7 +1266,7 @@ class CustomerViewModel(
     private fun formatAmount(value: String): String = "${value.substringBefore('.')} $currencyLabel"
 
     fun openOrder() {
-        currentOrderId?.let(::loadOrder) ?: show("SCR-C01", mapOf("event" to "loaded", "operating_mode" to "marketplace", "has_orders" to false))
+        currentOrderId?.let(::loadOrder) ?: show("SCR-C01", mapOf("event" to "loaded", "operating_mode" to operatingMode, "has_orders" to false))
     }
 
     fun publishDraft() {
@@ -934,34 +1277,204 @@ class CustomerViewModel(
             state = CustomerLogic.reduce("SCR-C05", mapOf("event" to "error"))
             return
         }
-        request("SCR-C06") {
+        val target = if (operatingMode == "staff") "SCR-C36" else "SCR-C06"
+        // A refused publish stays on C05 with the server's reason (SCR-C05 §الأخطاء), never on the target screen.
+        state = CustomerLogic.reduce("SCR-C05", reviewInput(true) + ("event" to "submitting"))
+        history.commit()
+        Thread {
+            val result = runCatching { publishRequest(target, address, category, problem) }
+            mainHandler.post {
+                state = result.fold(
+                    onSuccess = { CustomerLogic.reduce(target, it) },
+                    onFailure = { CustomerLogic.reduce("SCR-C05", reviewInput(true) + ("error_message" to serverMessage(it))) },
+                )
+            }
+        }.start()
+    }
+
+    /** The server's own message for a refused request (BR-011, BR-019…), or the shared network error. */
+    private fun serverMessage(error: Throwable): String =
+        (error as? CustomerApiException)?.message
+            ?.let { runCatching { JSONObject(it).getJSONObject("error").optString("message") }.getOrNull() }
+            .orEmpty()
+
+    private fun publishRequest(target: String, address: Int, category: Int, problem: Int): Map<String, Any?> {
+        return run {
             val body = JSONObject()
                     .put("customer_address_id", address)
                     .put("category_id", category)
                     .put("problem_type_id", problem)
                     .put("timing_type", timingType)
-                    .put("materials_responsibility", optionDefaults["materials_responsibility"])
+                    .put("materials_responsibility", options("materials_responsibilities").getOrNull(selectedMaterialIndex)?.code)
                     .put("terms_accepted", true)
-                    .put("description", currentOrderPayload?.optNullableString("description"))
+                    .put("description", requestDescription.ifBlank { null })
                     .put("media_ids", JSONArray(media.mapNotNull { it.id }))
+                    .apply {
+                        if (operatingMode == "marketplace") {
+                            put("pricing_mode", options("pricing_modes").getOrNull(selectedPricingIndex)?.code)
+                            put("budget_amount", requestBudget.toBigDecimalOrNull())
+                        }
+                    }
                     .apply { slotStart?.let { put("slot_start", it) } }
             val order = editingOrderId?.let { api.updateOrder(token(), it, body) }
                 ?: api.publish(token(), body, java.util.UUID.randomUUID().toString())
             editingOrderId = null
             currentOrderId = order.getInt("id")
-            mapOf("event" to "loaded", "offer_count" to 0, "available_actions" to order.getJSONArray("available_actions").strings())
+            currentOrderPayload = order
+            currentOrderVersion = order.getInt("version")
+            if (target == "SCR-C36") {
+                assignmentInput(order)
+            } else {
+                currentOffers = emptyList()
+                offersInput(order)
+            }
         }
     }
 
     fun loadOffers(orderId: Int) = request("SCR-C06") {
         val order = api.order(token(), orderId)
-        val offers = api.offers(token(), orderId)
-        mapOf(
-            "event" to "loaded", "offer_count" to offers.length(),
-            "pricing_mode" to order.getString("pricing_mode"),
-            "timing_type" to order.getJSONObject("timing").getString("type").lowercase(),
+        currentOrderPayload = order
+        currentOrderId = orderId
+        currentOrderVersion = order.getInt("version")
+        currentOffers = api.offers(token(), orderId, offerSortCode()).objects()
+        offersInput(order)
+    }
+
+    fun selectOffersSort(index: Int) {
+        if (index !in 0..2 || (index == 2 && state.showEta.not())) return
+        offersSortIndex = index
+        currentOffers = when (index) {
+            1 -> currentOffers.sortedBy { it.optString("price").toBigDecimalOrNull() }
+            2 -> currentOffers.sortedBy { it.optInt("eta_minutes", Int.MAX_VALUE) }
+            else -> currentOffers.sortedByDescending {
+                it.optJSONObject("provider")?.optString("rating_avg")?.toBigDecimalOrNull()
+            }
+        }
+        currentOrderPayload?.let { state = CustomerLogic.reduce("SCR-C06", offersInput(it)) }
+    }
+
+    fun openOffer(index: Int) {
+        val offer = currentOffers.getOrNull(index) ?: return
+        currentOfferId = offer.getInt("id")
+        currentOfferProviderId = offer.getJSONObject("provider").getInt("id")
+        selectedPaymentChannel = options("payment_methods").indexOfFirst { it.code == optionDefaults["payment_method"] }
+            .takeIf { it >= 0 } ?: 0
+        state = CustomerLogic.reduce("SCR-C08", offerDetailsInput(offer, "loaded"))
+    }
+
+    fun openOfferProvider(index: Int) {
+        val offer = currentOffers.getOrNull(index) ?: return
+        val providerId = offer.optJSONObject("provider")?.optInt("id")?.takeIf { it > 0 } ?: return
+        currentOfferId = offer.optInt("id")
+        currentOfferProviderId = providerId
+        val orderId = currentOrderId ?: return
+        loadProvider(providerId, orderId)
+    }
+
+    fun openCurrentOffer() {
+        val offer = currentOffers.firstOrNull { it.optInt("id") == currentOfferId } ?: return
+        selectedPaymentChannel = options("payment_methods").indexOfFirst { it.code == optionDefaults["payment_method"] }
+            .takeIf { it >= 0 } ?: 0
+        state = CustomerLogic.reduce("SCR-C08", offerDetailsInput(offer, "loaded"))
+    }
+
+    fun selectOfferPayment(index: Int) {
+        if (options("payment_methods").getOrNull(index) == null) return
+        selectedPaymentChannel = index
+        val offer = currentOffers.firstOrNull { it.optInt("id") == currentOfferId } ?: return
+        state = CustomerLogic.reduce("SCR-C08", offerDetailsInput(offer, "loaded"))
+    }
+
+    fun confirmSelectedOffer() {
+        val orderId = currentOrderId ?: return
+        val offerId = currentOfferId ?: return
+        val payment = options("payment_methods").getOrNull(selectedPaymentChannel)?.code ?: return
+        val offer = currentOffers.firstOrNull { it.optInt("id") == offerId } ?: return
+        state = CustomerLogic.reduce("SCR-C08", offerDetailsInput(offer, "submitting"))
+        Thread {
+            val result = runCatching { api.acceptOffer(token(), orderId, offerId, currentOrderVersion, payment) }
+            mainHandler.post {
+                result.onSuccess { order ->
+                    currentOrderPayload = order
+                    currentOrderVersion = order.getInt("version")
+                    loadOrder(orderId)
+                }.onFailure {
+                    state = CustomerLogic.reduce("SCR-C08", mapOf("event" to "error"))
+                }
+            }
+        }.start()
+    }
+
+    private fun offerSortCode(): String = listOf("rating", "price", "eta").getOrElse(offersSortIndex) { "rating" }
+
+    private fun offersInput(order: JSONObject): Map<String, Any?> {
+        val timing = order.getJSONObject("timing")
+        val pricingMode = order.getString("pricing_mode").lowercase()
+        return mapOf(
+            "event" to "loaded",
+            "order_title" to "${order.getJSONObject("category").optString("name")} — ${order.getJSONObject("problem_type").optString("name")} · #${order.optString("number")}",
+            "display_status" to order.optString("display_status"),
+            "countdown_seconds" to deadlineSeconds(order.optJSONObject("deadlines")),
+            "sort_index" to offersSortIndex,
+            "offer_rows" to currentOffers.map { offerRow(it, timing) },
+            "pricing_mode" to pricingMode,
+            "timing_type" to timing.getString("type").lowercase(),
             "available_actions" to order.getJSONArray("available_actions").strings(),
         )
+    }
+
+    private fun offerRow(offer: JSONObject, timing: JSONObject): String {
+        val provider = offer.getJSONObject("provider")
+        val detail = offer.optInt("eta_minutes").takeIf { timing.getString("type") == "NOW" && it > 0 }
+            ?.let { "$it" }
+            ?: timing.optNullableString("slot_start").orEmpty().displayDateTime()
+        val price = formatAmount(offer.optString("price", "0.00"))
+        return listOf(
+            offer.getInt("id"), provider.optString("name"), provider.optString("rating_avg"),
+            provider.optString("completed_orders"), price, detail, "",
+            provider.optBoolean("is_verified"), provider.optInt("id"),
+        ).joinToString("|")
+    }
+
+    private fun offerDetailsInput(offer: JSONObject, event: String): Map<String, Any?> {
+        val order = currentOrderPayload ?: return mapOf("event" to "error")
+        val provider = offer.getJSONObject("provider")
+        val timing = order.getJSONObject("timing")
+        val pricingMode = order.getString("pricing_mode").lowercase()
+        val eta = offer.optInt("eta_minutes").takeIf { it > 0 }?.toString().orEmpty()
+        return mapOf(
+            "event" to event,
+            "provider_name" to provider.optString("name"),
+            "provider_rating" to provider.optString("rating_avg"),
+            "provider_services" to provider.optString("completed_orders"),
+            "provider_verified" to provider.optBoolean("is_verified"),
+            "order_rows" to listOf(
+                "${order.getJSONObject("category").optString("name")} — ${order.getJSONObject("problem_type").optString("name")}",
+                listOf(order.getJSONObject("location").optString("area"), order.getJSONObject("location").optString("city")).filter(String::isNotBlank).joinToString(" · "),
+            ),
+            "payment_labels" to options("payment_methods").map(CustomerOption::label),
+            "selected_payment_index" to selectedPaymentChannel,
+            "available_actions" to order.getJSONArray("available_actions").strings().filter { it == "accept_offer" },
+            "pricing_mode" to pricingMode,
+            "timing_type" to timing.getString("type").lowercase(),
+            "eta_minutes" to eta,
+            "offer_rows" to listOf(
+                formatAmount(offer.optString("price", "0.00")),
+                if (eta.isNotBlank()) eta else timing.optNullableString("slot_start").orEmpty().displayDateTime(),
+                offer.optString("includes_text").ifBlank {
+                    if (offer.optBoolean("inspection_fee_deductible")) "deductible" else offer.optString("note")
+                },
+            ),
+        )
+    }
+
+    private fun deadlineSeconds(deadlines: JSONObject?): Int {
+        val value = deadlines?.optNullableString("offers_close_at")
+            ?: deadlines?.optNullableString("selection_deadline_at")
+            ?: return 0
+        return runCatching {
+            java.time.Duration.between(OffsetDateTime.now(), OffsetDateTime.parse(value)).seconds.toInt().coerceAtLeast(0)
+        }.getOrDefault(0)
     }
 
     fun loadProvider(providerId: Int, orderId: Int) = request("SCR-C07") {
@@ -973,6 +1486,25 @@ class CustomerViewModel(
             "event" to "loaded",
             "provider_available" to provider.getBoolean("available_now"),
             "available_actions" to provider.getJSONArray("available_actions").strings(),
+            "provider_name" to provider.optString("name"),
+            "provider_rating" to provider.optString("rating_avg"),
+            "provider_services" to provider.optString("completed_orders"),
+            "provider_experience" to provider.optString("experience_years"),
+            "provider_about" to provider.optString("bio"),
+            "offer_price" to currentOffers.firstOrNull { it.optJSONObject("provider")?.optInt("id") == providerId }
+                ?.optString("price")?.let(::formatAmount).orEmpty(),
+            "provider_verified" to provider.optBoolean("is_verified"),
+            "specialties" to provider.optJSONArray("specialties")?.objects()?.map { it.optString("name") }.orEmpty(),
+            "rating_values" to provider.optJSONObject("rating_breakdown")?.let {
+                listOf(it.optString("quality"), it.optString("punctuality"), it.optString("conduct"))
+            }.orEmpty(),
+            "review_rows" to provider.optJSONArray("reviews")?.objects()?.map { review ->
+                listOf(
+                    review.optString("customer_name"),
+                    listOf(review.optInt("quality"), review.optInt("punctuality"), review.optInt("conduct")).average().toInt(),
+                    review.optString("comment"), review.optString("created_at").displayDateTime(),
+                ).joinToString("|")
+            }.orEmpty(),
         )
     }
 
@@ -1024,6 +1556,7 @@ class CustomerViewModel(
         val orderId = currentOrderId ?: return
         val reason = options("dispute_reasons").getOrNull(supportReasonIndex)?.code ?: return
         if (!state.canContinue) return
+        history.commit()
         state = CustomerLogic.reduce("SCR-C27", disputeInput("submitting"))
         Thread {
             val next = runCatching {
@@ -1047,6 +1580,7 @@ class CustomerViewModel(
         val orderId = currentOrderId ?: return
         val reason = options("provider_report_reasons").getOrNull(supportReasonIndex)?.code ?: return
         if (!state.canContinue) return
+        history.commit()
         state = CustomerLogic.reduce("SCR-C28", providerReportInput("submitting"))
         Thread {
             val success = runCatching {
@@ -1058,7 +1592,12 @@ class CustomerViewModel(
         }.start()
     }
 
-    fun acceptOffer(orderId: Int, offerId: Int, expectedVersion: Int) = request("SCR-C09") {
+    fun acceptOffer(orderId: Int, offerId: Int, expectedVersion: Int) {
+        history.commit()
+        acceptOfferRequest(orderId, offerId, expectedVersion)
+    }
+
+    private fun acceptOfferRequest(orderId: Int, offerId: Int, expectedVersion: Int) = request("SCR-C09") {
         val paymentMethod = optionDefaults["payment_method"] ?: return@request mapOf("event" to "error")
         val order = api.acceptOffer(token(), orderId, offerId, expectedVersion, paymentMethod)
         mapOf(
@@ -1079,7 +1618,7 @@ class CustomerViewModel(
         val slots = api.slots(activeCity, date).objects()
         slotStarts = slots.map { it.getString("start") }
         mapOf(
-            "event" to "loaded", "day_labels" to dayLabels,
+            "event" to "loaded", "day_labels" to CustomerLogic.slotDayLabels(dayDates, dayLabels),
             "slot_labels" to slots.map { "${it.getString("start").timeLabel(morning, evening)}–${it.getString("end").timeLabel(morning, evening)}" },
             "selected_day_index" to index, "selected_slot_index" to -1,
         )
@@ -1098,7 +1637,7 @@ class CustomerViewModel(
     private fun mediaInput(): Map<String, Any?> = mapOf(
         "event" to "validate", "media_kinds" to media.map { it.kind }, "media_states" to media.map { it.state },
         "photo_count" to media.count { it.kind == "photo" }, "video_count" to media.count { it.kind == "video" },
-        "audio_count" to media.count { it.kind == "audio" },
+        "audio_count" to media.count { it.kind == "audio" }, "recording" to mediaRecording,
     )
 
     private fun disputeInput(event: String, dispute: JSONObject? = null): Map<String, Any?> = mapOf(
@@ -1137,10 +1676,12 @@ class CustomerViewModel(
         "notification_states" to values.map { if (it.isNull("read_at")) "unread" else "read" },
         "deep_links" to notificationLinks,
         "notification_times" to values.map { it.optString("created_at").displayDateTime() },
+        "notifications_denied" to !push.notificationsAllowed(),
     )
 
     private fun accountInput(event: String, mode: String = accountMode): Map<String, Any?> = mapOf(
         "event" to event, "mode" to mode, "field_values" to accountValues, "available_actions" to accountActions,
+        "rating_reminders_enabled" to ratingRemindersEnabled,
     )
 
     private fun submitAccountUpdate() {
@@ -1188,6 +1729,34 @@ class CustomerViewModel(
 
     private fun options(key: String): List<CustomerOption> = optionLists[key].orEmpty()
 
+    /** C36: number, area, and the timing (now, or the chosen slot) of an order waiting for assignment. */
+    private fun assignmentInput(order: JSONObject): Map<String, Any?> {
+        val timing = order.optJSONObject("timing")
+        val slot = timing?.optNullableString("slot_start").orEmpty()
+        val timingLabel = if (slot.isNotBlank()) {
+            slot.displayDateTime()
+        } else {
+            options("timing_types").firstOrNull { it.code == timing?.optString("type") }?.label.orEmpty()
+        }
+        return mapOf(
+            "event" to "loaded",
+            "order_title" to "${order.optJSONObject("category")?.optString("name").orEmpty()} — ${order.optJSONObject("problem_type")?.optString("name").orEmpty()}",
+            "order_rows" to listOf("#${order.optString("number")}", order.optJSONObject("location")?.optString("area").orEmpty(), timingLabel)
+                .filter(String::isNotBlank),
+            "available_actions" to order.getJSONArray("available_actions").strings(),
+        )
+    }
+
+    /** Like [request], but the loaded data decides which screen shows it. */
+    private fun requestRouted(loadingScreen: String, block: () -> Pair<String, Map<String, Any?>>) {
+        stopChatPolling()
+        state = CustomerLogic.reduce(loadingScreen, mapOf("event" to "loading"))
+        Thread {
+            val (screen, next) = runCatching(block).getOrElse { loadingScreen to mapOf("event" to "error") }
+            Handler(Looper.getMainLooper()).post { state = CustomerLogic.reduce(screen, next) }
+        }.start()
+    }
+
     private fun request(screen: String, loadingEvent: String = "loading", block: () -> Map<String, Any?>) {
         if (screen != "SCR-C19") stopChatPolling()
         state = CustomerLogic.reduce(screen, mapOf("event" to loadingEvent))
@@ -1203,12 +1772,12 @@ class CustomerViewModel(
     private fun JSONObject.optNullableString(key: String): String = if (isNull(key)) "" else optString(key)
 
     private fun String.timeLabel(morning: String, evening: String): String = runCatching {
-        OffsetDateTime.parse(this).format(DateTimeFormatter.ofPattern("h:mm a"))
+        OffsetDateTime.parse(this).atZoneSameInstant(ZoneId.systemDefault()).format(DateTimeFormatter.ofPattern("h:mm a"))
             .replace("AM", morning).replace("PM", evening)
     }.getOrDefault(this)
 
     private fun String.displayDateTime(): String = ifBlank { "" }.let { value ->
-        runCatching { OffsetDateTime.parse(value).format(DateTimeFormatter.ofPattern("yyyy-MM-dd · h:mm a")) }.getOrDefault(value)
+        runCatching { OffsetDateTime.parse(value).atZoneSameInstant(ZoneId.systemDefault()).format(DateTimeFormatter.ofPattern("yyyy-MM-dd · h:mm a")) }.getOrDefault(value)
     }
 
     override fun onCleared() {
@@ -1233,4 +1802,9 @@ private data class AddressDraft(
     val isDefault: Boolean = false,
 )
 
-private data class MediaDraft(val id: Int?, val kind: String, val state: String)
+private data class MediaDraft(
+    val id: Int?,
+    val kind: String,
+    val state: String,
+    val upload: CustomerMediaUpload? = null,
+)

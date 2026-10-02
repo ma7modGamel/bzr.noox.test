@@ -41,6 +41,7 @@ class OfferCardView @JvmOverloads constructor(context: Context, attrs: Attribute
         set(value) {
             field = value
             binding.badge.text = value
+            binding.badge.showIf(value.isNotBlank())
         }
     var button: String = ""
         set(value) {
@@ -62,6 +63,17 @@ class OfferCardView @JvmOverloads constructor(context: Context, attrs: Attribute
             field = value
             render()
         }
+    var showSelect: Boolean = true
+        set(value) {
+            field = value
+            render()
+        }
+    var showChat: Boolean = true
+        set(value) {
+            field = value
+            render()
+        }
+    var onOpen: () -> Unit = {}
     var onSelect: () -> Unit = {}
     var onChat: () -> Unit = {}
 
@@ -70,12 +82,18 @@ class OfferCardView @JvmOverloads constructor(context: Context, attrs: Attribute
         setContentPadding(padding, padding, padding, padding)
         binding.select.onClick = { onSelect() }
         binding.chat.onClick = { onChat() }
+        setOnClickListener { onOpen() }
         render()
     }
 
     private fun render() {
         binding.priceCaption.text = priceCaption.orEmpty()
+        binding.badge.showIf(badge.isNotBlank())
         binding.priceCaption.showIf(variant == OfferVariant.Inspection && priceCaption != null)
         binding.detailIcon.icon(if (variant == OfferVariant.Scheduled) R.drawable.ic_calendar else R.drawable.ic_clock, R.color.bremo_slate500)
+        binding.select.showIf(showSelect)
+        binding.chat.showIf(showChat)
+        binding.actionRow.showIf(showSelect || showChat)
+        binding.actionDivider.showIf(showSelect || showChat)
     }
 }

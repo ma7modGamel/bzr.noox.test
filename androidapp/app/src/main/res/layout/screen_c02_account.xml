@@ -9,8 +9,6 @@
         android:id="@+id/header"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:name="@string/drawer_name"
-        app:services="@string/customer_account_phone"
         app:avatarSize="large" />
 
     <noox.bzr.design.views.InfoBannerView
@@ -54,6 +52,13 @@
         android:layout_height="wrap_content"
         app:bremoIcon="@drawable/ic_info"
         app:bremoText="@string/customer_account_help" />
+
+    <noox.bzr.design.views.MenuRowView
+        android:id="@+id/providerMode"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:bremoIcon="@drawable/ic_account"
+        app:bremoText="@string/menu_provider_mode" />
 
     <noox.bzr.design.views.MenuRowView
         android:id="@+id/logout"

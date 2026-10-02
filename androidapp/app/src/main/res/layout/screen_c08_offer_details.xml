@@ -32,6 +32,14 @@
         android:layout_height="wrap_content"
         app:bremoText="@string/offer_warning" />
 
+    <LinearLayout
+        android:id="@+id/paymentMethods"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:divider="@drawable/bremo_gap_m"
+        android:showDividers="middle" />
+
     <noox.bzr.customer.ActionButtonsView
         android:id="@+id/actions"
         android:layout_width="match_parent"

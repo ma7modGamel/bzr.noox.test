@@ -8,7 +8,7 @@ import noox.bzr.design.MediaState
 import noox.bzr.design.R
 import noox.bzr.design.databinding.ViewMediaThumbBinding
 
-/** 43 §3 MediaThumb: photo/video/audio with uploading, uploaded, failed, and delete. */
+/** 43 §3 MediaThumb: photo/video/audio with uploading, uploaded, failed, and delete; read-only for media owned by the other party. */
 class MediaThumbView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) :
     MaterialCardView(context, attrs, com.google.android.material.R.attr.materialCardViewStyle) {
     private val binding = ViewMediaThumbBinding.inflate(inflater, this)
@@ -29,6 +29,11 @@ class MediaThumbView @JvmOverloads constructor(context: Context, attrs: Attribut
             render()
         }
     var state: MediaState = MediaState.Uploading
+        set(value) {
+            field = value
+            render()
+        }
+    var readOnly: Boolean = false
         set(value) {
             field = value
             render()
@@ -59,5 +64,8 @@ class MediaThumbView @JvmOverloads constructor(context: Context, attrs: Attribut
             MediaState.Failed -> binding.status.icon(R.drawable.ic_error, R.color.bremo_danger)
         }
         binding.status.contentDescription = stateLabel
+        binding.stateLabel.visibility = if (stateLabel.isBlank()) GONE else VISIBLE
+        binding.status.visibility = if (readOnly) GONE else VISIBLE
+        binding.delete.visibility = if (readOnly) GONE else VISIBLE
     }
 }

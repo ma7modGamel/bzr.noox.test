@@ -1,12 +1,28 @@
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("app.cash.paparazzi")
+    id("com.google.gms.google-services")
+    id("com.google.firebase.crashlytics")
+}
+
+val localProperties = Properties().apply {
+    rootProject.file("local.properties").takeIf { it.isFile }?.inputStream()?.use(::load)
 }
 
 val mobileApiBaseUrl = providers.gradleProperty("BZR_API_BASE_URL")
     .orElse(providers.environmentVariable("BZR_API_BASE_URL"))
-    .orElse("http://10.0.2.2:8000/api/v1/")
+    .orElse("https://dg.dnbscy.com/api/v1/")
+val mapsAndroidApiKey = providers.gradleProperty("MAPS_ANDROID_API_KEY")
+    .orElse(providers.environmentVariable("MAPS_ANDROID_API_KEY"))
+    .orElse(providers.provider { localProperties.getProperty("MAPS_ANDROID_API_KEY", "") })
+    .orElse("")
+// DEC-058 — App Links host for `https://{APP_DOMAIN}/app/*`. Set per environment once DEP-ID-01 fixes the domain.
+val appLinkHost = providers.gradleProperty("BZR_APP_LINK_HOST")
+    .orElse(providers.environmentVariable("BZR_APP_LINK_HOST"))
+    .orElse("dg.dnbscy.com")
 
 android {
     namespace = "noox.bzr.gallery"
@@ -19,6 +35,8 @@ android {
         versionCode = 1
         versionName = "1.0"
         buildConfigField("String", "API_BASE_URL", "\"${mobileApiBaseUrl.get()}\"")
+        manifestPlaceholders["MAPS_ANDROID_API_KEY"] = mapsAndroidApiKey.get()
+        manifestPlaceholders["APP_LINK_HOST"] = appLinkHost.get()
     }
 
     buildFeatures {
@@ -51,7 +69,10 @@ dependencies {
     implementation("androidx.navigation:navigation-ui-ktx:2.8.9")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.7")
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.7")
+    implementation("com.google.firebase:firebase-crashlytics:20.1.1")
+    implementation("com.google.firebase:firebase-messaging:25.0.1") // DEC-058
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1")
+    implementation("com.google.android.gms:play-services-maps:20.0.0")
     testImplementation("junit:junit:4.13.2")
 }
 

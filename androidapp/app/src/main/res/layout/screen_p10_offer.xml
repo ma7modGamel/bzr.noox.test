@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:parentTag="android.widget.LinearLayout">
+
+    <noox.bzr.design.views.SummaryCardView
+        android:id="@+id/summary"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <noox.bzr.design.views.InfoBannerView
+        android:id="@+id/success"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone" />
+
+    <noox.bzr.design.views.WarningBoxView
+        android:id="@+id/warning"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone" />
+
+    <noox.bzr.design.views.AmountFieldView
+        android:id="@+id/price"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:bremoCurrency="@string/common_currency_egp"
+        app:bremoLabel="@string/provider_offer_price"
+        app:bremoPlaceholder="@string/provider_offer_price" />
+
+    <TextView
+        android:id="@+id/etaTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/provider_offer_eta"
+        android:textAppearance="@style/TextAppearance.Bremo.SectionTitle" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/eta"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:nestedScrollingEnabled="false" />
+
+    <TextView
+        android:id="@+id/deductibleTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/provider_offer_deductible"
+        android:textAppearance="@style/TextAppearance.Bremo.SectionTitle" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/deductible"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:nestedScrollingEnabled="false" />
+
+    <noox.bzr.design.views.AppTextFieldView
+        android:id="@+id/includes"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:bremoLabel="@string/provider_offer_includes"
+        app:bremoPlaceholder="@string/provider_offer_includes" />
+
+    <noox.bzr.design.views.TextAreaFieldView
+        android:id="@+id/note"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:bremoLabel="@string/provider_offer_note"
+        app:bremoPlaceholder="@string/provider_offer_note" />
+
+    <noox.bzr.design.views.InfoBannerView
+        android:id="@+id/masking"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:bremoText="@string/provider_offer_note_masking" />
+
+    <noox.bzr.design.views.InfoBannerView
+        android:id="@+id/net"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <noox.bzr.design.views.PrimaryButtonView
+        android:id="@+id/submit"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:bremoText="@string/provider_offer_submit" />
+</merge>

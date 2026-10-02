@@ -25,3 +25,8 @@ yarn-error.log
 /.nova
 /.vscode
 /.zed
+
+# Local links to the primary application repository.
+/design
+/iosapp
+/public/design

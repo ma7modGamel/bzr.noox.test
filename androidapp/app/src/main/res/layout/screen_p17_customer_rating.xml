@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:parentTag="android.widget.LinearLayout">
+
+    <noox.bzr.design.views.SummaryCardView
+        android:id="@+id/order"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:bremoTitle="@string/provider_rating_title" />
+
+    <include
+        android:id="@+id/rating"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        layout="@layout/item_rating_row" />
+
+    <noox.bzr.design.views.InfoBannerView
+        android:id="@+id/notice"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:bremoText="@string/provider_rating_notice" />
+
+    <noox.bzr.design.views.InfoBannerView
+        android:id="@+id/success"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:bremoText="@string/provider_rating_success" />
+
+    <noox.bzr.design.views.WarningBoxView
+        android:id="@+id/warning"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone" />
+
+    <noox.bzr.design.views.PrimaryButtonView
+        android:id="@+id/submit"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:bremoText="@string/provider_rating_submit" />
+</merge>

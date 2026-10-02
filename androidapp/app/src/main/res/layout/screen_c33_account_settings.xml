@@ -122,6 +122,21 @@
             app:bremoIcon="@drawable/ic_shield"
             app:bremoText="@string/account_settings_password" />
 
+        <noox.bzr.design.views.CheckRowView
+            android:id="@+id/ratingReminders"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:clickable="true"
+            android:focusable="true"
+            android:minHeight="@dimen/bremo_size_touch_target_min"
+            app:bremoText="@string/account_rating_reminders" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/account_rating_reminders_body"
+            android:textAppearance="@style/TextAppearance.Bremo.Secondary" />
+
         <noox.bzr.design.views.MenuRowView
             android:id="@+id/terms"
             android:layout_width="match_parent"

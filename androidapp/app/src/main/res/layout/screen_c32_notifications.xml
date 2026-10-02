@@ -5,6 +5,19 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:parentTag="android.widget.LinearLayout">
 
+    <noox.bzr.design.views.InfoBannerView
+        android:id="@+id/permissionOff"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone" />
+
+    <noox.bzr.design.views.LinkButtonView
+        android:id="@+id/openSettings"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:bremoText="@string/action_open_settings" />
+
     <noox.bzr.design.views.EmptyStateView
         android:id="@+id/empty"
         android:layout_width="match_parent"

@@ -6,86 +6,20 @@
     tools:parentTag="android.widget.LinearLayout">
 
     <LinearLayout
+        android:id="@+id/categoryGrid"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
+        android:orientation="vertical"
         android:divider="@drawable/bremo_gap_m"
-        android:showDividers="middle">
-
-        <FrameLayout
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1">
-
-            <noox.bzr.design.views.SelectableTileView
-                android:id="@+id/leak"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="start"
-                app:bremoText="@string/request_problem_leak"
-                app:bremoIcon="@drawable/ic_home"
-                app:selectionState="selected" />
-
-        </FrameLayout>
-
-        <FrameLayout
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1">
-
-            <noox.bzr.design.views.SelectableTileView
-                android:id="@+id/blockage"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="start"
-                app:bremoText="@string/request_problem_blockage"
-                app:bremoIcon="@drawable/ic_warning"
-                app:selectionState="unselected" />
-
-        </FrameLayout>
-
-    </LinearLayout>
+        android:showDividers="middle" />
 
     <LinearLayout
+        android:id="@+id/problemList"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
+        android:orientation="vertical"
         android:divider="@drawable/bremo_gap_m"
-        android:showDividers="middle">
-
-        <FrameLayout
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1">
-
-            <noox.bzr.design.views.SelectableTileView
-                android:id="@+id/installation"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="start"
-                app:bremoText="@string/request_problem_installation"
-                app:bremoIcon="@drawable/ic_edit"
-                app:selectionState="unselected" />
-
-        </FrameLayout>
-
-        <FrameLayout
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1">
-
-            <noox.bzr.design.views.SelectableTileView
-                android:id="@+id/other"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="start"
-                app:bremoText="@string/request_problem_other"
-                app:bremoIcon="@drawable/ic_more"
-                app:selectionState="unselected" />
-
-        </FrameLayout>
-
-    </LinearLayout>
+        android:showDividers="middle" />
 
     <noox.bzr.design.views.TextAreaFieldView
         android:id="@+id/description"

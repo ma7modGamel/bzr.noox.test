@@ -20,7 +20,7 @@ class C26OrderHistoryView(context: Context) : CustomerScreenView(context) {
     override fun title(state: CustomerUiState) = string(R.string.order_details_title)
 
     override fun renderContent(state: CustomerUiState) {
-        binding.status.text = state.displayStatus
+        binding.status.text = displayStatus(state.displayStatus)
         val serviceLabels = listOf(R.string.receipt_number, R.string.receipt_category, R.string.receipt_problem, R.string.receipt_area, R.string.receipt_visit).map(::string)
         val receiptLabels = listOf(R.string.receipt_labor, R.string.receipt_materials, R.string.receipt_total, R.string.receipt_payment_method, R.string.receipt_payment_status).map(::string)
         binding.service.rows = historyRows(state.items.take(5), serviceLabels)

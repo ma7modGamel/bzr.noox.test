@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:parentTag="android.widget.LinearLayout">
+
+    <noox.bzr.design.views.CheckRowView
+        android:id="@+id/availability"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:clickable="true"
+        android:focusable="true"
+        android:minHeight="@dimen/bremo_size_touch_target_min"
+        app:bremoText="@string/provider_home_available_title" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/provider_home_available_body"
+        android:textAppearance="@style/TextAppearance.Bremo.Secondary" />
+
+    <noox.bzr.design.views.InfoBannerView
+        android:id="@+id/saved"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:bremoText="@string/provider_home_availability_saved" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/provider_home_assigned_title"
+        android:textAppearance="@style/TextAppearance.Bremo.SectionTitle" />
+
+    <noox.bzr.design.views.OrderCardView
+        android:id="@+id/order"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone" />
+
+    <noox.bzr.design.views.EmptyStateView
+        android:id="@+id/empty"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <noox.bzr.design.views.PrimaryButtonView
+        android:id="@+id/openOrder"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:bremoText="@string/action_open_assigned_order" />
+
+    <TextView
+        android:id="@+id/marketTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/provider_market_requests_title"
+        android:textAppearance="@style/TextAppearance.Bremo.SectionTitle"
+        android:visibility="gone" />
+
+    <noox.bzr.design.views.EmptyStateView
+        android:id="@+id/marketEmpty"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/marketRequests"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:nestedScrollingEnabled="false"
+        android:visibility="gone" />
+
+    <noox.bzr.design.views.SecondaryButtonView
+        android:id="@+id/myOffers"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:bremoText="@string/action_open_my_offers" />
+
+    <noox.bzr.design.views.SecondaryButtonView
+        android:id="@+id/notifications"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:bremoText="@string/action_open_notifications" />
+
+    <noox.bzr.design.views.SecondaryButtonView
+        android:id="@+id/messages"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:bremoText="@string/action_open_messages" />
+
+    <noox.bzr.design.views.SecondaryButtonView
+        android:id="@+id/earnings"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:bremoText="@string/action_open_earnings" />
+
+    <noox.bzr.design.views.SecondaryButtonView
+        android:id="@+id/profile"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:bremoText="@string/action_open_provider_profile" />
+</merge>

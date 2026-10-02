@@ -6,11 +6,13 @@ import android.view.Gravity
 import android.widget.LinearLayout
 import androidx.annotation.DrawableRes
 import androidx.core.content.withStyledAttributes
+import androidx.core.widget.ImageViewCompat
 import noox.bzr.design.R
 import noox.bzr.design.SelectionState
 import noox.bzr.design.databinding.ViewSelectableTileBinding
+import noox.bzr.design.generated.CategoryIcons
 
-/** 43 §3 SelectableTile: category tile; selected, unselected, disabled. */
+/** 43 §3 SelectableTile: category tile; selected, unselected, disabled; a two-tone catalog icon when `categoryIcon` is set (DEC-059). */
 class SelectableTileView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) : LinearLayout(context, attrs) {
     private val binding: ViewSelectableTileBinding
 
@@ -27,6 +29,13 @@ class SelectableTileView @JvmOverloads constructor(context: Context, attrs: Attr
             render()
         }
     var state: SelectionState = SelectionState.Unselected
+        set(value) {
+            field = value
+            render()
+        }
+
+    /** The `icon_path` file name from `/catalog`; drawn untinted in its own two tones. */
+    var categoryIcon: String? = null
         set(value) {
             field = value
             render()
@@ -55,6 +64,12 @@ class SelectableTileView @JvmOverloads constructor(context: Context, attrs: Attr
         isSelected = state == SelectionState.Selected
         isEnabled = state != SelectionState.Disabled
         applyEnabledAlpha(state != SelectionState.Disabled)
-        binding.icon.icon(icon, if (isSelected) R.color.bremo_primary600 else R.color.bremo_navy800)
+        val category = categoryIcon
+        if (category == null) {
+            binding.icon.icon(icon, if (isSelected) R.color.bremo_primary600 else R.color.bremo_navy800)
+        } else {
+            binding.icon.setImageResource(CategoryIcons.drawable(category))
+            ImageViewCompat.setImageTintList(binding.icon, null)
+        }
     }
 }

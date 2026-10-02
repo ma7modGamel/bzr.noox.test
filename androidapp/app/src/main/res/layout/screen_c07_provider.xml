@@ -38,8 +38,15 @@
         android:id="@+id/aboutBody"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textAppearance="@style/TextAppearance.Bremo.Secondary"
-        android:text="@string/provider_about_body" />
+        android:textAppearance="@style/TextAppearance.Bremo.Secondary" />
+
+    <LinearLayout
+        android:id="@+id/specialties"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:divider="@drawable/bremo_gap_s"
+        android:showDividers="middle" />
 
     <noox.bzr.design.views.RatingBarsView
         android:id="@+id/bars"
@@ -53,10 +60,13 @@
         android:textAppearance="@style/TextAppearance.Bremo.SectionTitle"
         android:text="@string/provider_reviews_title" />
 
-    <noox.bzr.design.views.ReviewCardView
-        android:id="@+id/review"
+    <LinearLayout
+        android:id="@+id/reviewList"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:divider="@drawable/bremo_gap_m"
+        android:showDividers="middle" />
 
     <noox.bzr.customer.ActionButtonsView
         android:id="@+id/actions"

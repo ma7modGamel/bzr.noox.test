@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:tools="http://schemas.android.com/tools" tools:parentTag="android.widget.LinearLayout">
+    <noox.bzr.design.views.EmptyStateView android:id="@+id/status" android:layout_width="match_parent" android:layout_height="wrap_content" />
+    <noox.bzr.design.views.WarningBoxView android:id="@+id/reason" android:layout_width="match_parent" android:layout_height="wrap_content" android:visibility="gone" />
+    <LinearLayout android:id="@+id/actions" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:divider="@drawable/bremo_gap_m" android:showDividers="middle" />
+</merge>

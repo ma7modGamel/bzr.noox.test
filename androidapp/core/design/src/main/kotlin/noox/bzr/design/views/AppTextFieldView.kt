@@ -2,6 +2,8 @@ package noox.bzr.design.views
 
 import android.content.Context
 import android.util.AttributeSet
+import android.view.inputmethod.EditorInfo
+import noox.bzr.design.FieldImeAction
 import noox.bzr.design.FieldVisualState
 import noox.bzr.design.databinding.ViewAppTextFieldBinding
 
@@ -45,6 +47,11 @@ class AppTextFieldView @JvmOverloads constructor(context: Context, attrs: Attrib
             field = value
             render()
         }
+    var imeAction: FieldImeAction = FieldImeAction.Next
+        set(value) {
+            field = value
+            render()
+        }
     var onValueChange: ((String) -> Unit)? = null
         set(value) {
             field = value
@@ -73,5 +80,9 @@ class AppTextFieldView @JvmOverloads constructor(context: Context, attrs: Attrib
     private fun render() {
         if (!ready) return
         renderShell(label, placeholder, value, state, error, optionalLabel, onValueChange != null)
+        editText.imeOptions = when (imeAction) {
+            FieldImeAction.Next -> EditorInfo.IME_ACTION_NEXT
+            FieldImeAction.Done -> EditorInfo.IME_ACTION_DONE
+        }
     }
 }

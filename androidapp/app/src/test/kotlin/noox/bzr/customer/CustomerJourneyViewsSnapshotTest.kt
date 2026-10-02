@@ -13,7 +13,7 @@ class CustomerJourneyViewsSnapshotTest {
     fun xml_screen_cases_match_shared_fixture() {
         ScreenSnapshots.prepare(paparazzi)
         val only = System.getProperty("bzr.screens")?.split(",")?.toSet()
-        ((1..9) + (14..35)).map { "SCR-C%02d".format(it) }.filter { only == null || it in only }.forEach { screen ->
+        ((1..9) + (14..36)).map { "SCR-C%02d".format(it) }.filter { only == null || it in only }.forEach { screen ->
             ScreenSnapshots.cases(screen).forEach { (id, input) ->
                 val state = CustomerLogic.reduce(screen, input)
                 val view = customerScreenView(paparazzi.context, screen).apply { render(state) }

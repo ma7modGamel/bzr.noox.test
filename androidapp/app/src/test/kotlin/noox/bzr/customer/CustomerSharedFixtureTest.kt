@@ -27,6 +27,7 @@ class CustomerSharedFixtureTest {
             "design/fixtures/SCR-C30/cases.json", "design/fixtures/SCR-C31/cases.json",
             "design/fixtures/SCR-C32/cases.json", "design/fixtures/SCR-C33/cases.json",
             "design/fixtures/SCR-C34/cases.json", "design/fixtures/SCR-C35/cases.json",
+            "design/fixtures/SCR-C36/cases.json",
         )
         fixturePaths.forEach { path ->
             val fixture = JSONObject(repositoryFile(path).readText())
@@ -59,11 +60,18 @@ class CustomerSharedFixtureTest {
                 assertOptional(label, expected, "pending_index", actual.pendingIndex)
                 assertOptional(label, expected, "countdown_seconds", actual.countdownSeconds)
                 assertOptional(label, expected, "has_photo", actual.hasPhoto)
+                assertOptional(label, expected, "map_latitude", actual.mapLatitude)
+                assertOptional(label, expected, "map_longitude", actual.mapLongitude)
+                assertOptional(label, expected, "notifications_denied", actual.notificationsDenied)
+                assertOptional(label, expected, "rating_reminders_enabled", actual.ratingRemindersEnabled)
+                assertOptional(label, expected, "selected_material_index", actual.selectedMaterialIndex)
+                assertOptional(label, expected, "selected_pricing_index", actual.selectedPricingIndex)
+                assertOptional(label, expected, "provider_verified", actual.providerVerified)
                 if (expected.has("visible_actions")) assertEquals(label, expected.getJSONArray("visible_actions").strings(), actual.visibleActions)
                 count++
             }
         }
-        assertEquals(206, count)
+        assertEquals(227, count)
     }
 
     private fun assertOptional(label: String, expected: JSONObject, key: String, actual: Any?) {

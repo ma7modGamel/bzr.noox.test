@@ -7,6 +7,7 @@ import androidx.annotation.DrawableRes
 enum class ButtonVisualState { Normal, Pressed, Disabled, Loading }
 enum class SelectionState { Selected, Unselected, Disabled }
 enum class FieldVisualState { Empty, Filled, Focused, Error, Disabled }
+enum class FieldImeAction { Next, Done }
 enum class OfferVariant { Execution, Inspection, Scheduled }
 enum class StepState { Done, Active, Pending, OnHold }
 enum class MediaState { Uploading, Uploaded, Failed }

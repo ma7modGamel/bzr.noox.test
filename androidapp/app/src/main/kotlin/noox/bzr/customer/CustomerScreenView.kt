@@ -53,6 +53,26 @@ abstract class CustomerScreenView(context: Context) : FrameLayout(context) {
     protected open fun renderOverlay(state: CustomerUiState) = Unit
 
     protected fun string(id: Int): String = context.getString(id)
+
+    /** `display_status` is a shared localization key from the API, not display-ready copy. */
+    protected fun displayStatus(key: String): String =
+        when (key) {
+            "order.status.customer.OPEN" -> string(R.string.order_status_customer_open)
+            "order.status.customer.CONFIRMED" -> string(R.string.order_status_customer_confirmed)
+            "order.status.customer.ON_THE_WAY" -> string(R.string.order_status_customer_on_the_way)
+            "order.status.customer.ARRIVED" -> string(R.string.order_status_customer_arrived)
+            "order.status.customer.AWAITING_QUOTE_APPROVAL" -> string(R.string.order_status_customer_awaiting_quote_approval)
+            "order.status.customer.IN_PROGRESS" -> string(R.string.order_status_customer_in_progress)
+            "order.status.customer.AWAITING_PAYMENT" -> string(R.string.order_status_customer_awaiting_payment)
+            "order.status.customer.AWAITING_TRANSFER_VERIFICATION" -> string(R.string.order_status_customer_awaiting_transfer_verification)
+            "order.status.customer.AWAITING_CONFIRMATION" -> string(R.string.order_status_customer_awaiting_confirmation)
+            "order.status.customer.DISPUTED" -> string(R.string.order_status_customer_disputed)
+            "order.status.customer.CLOSED" -> string(R.string.order_status_customer_closed)
+            "order.status.customer.CANCELLED" -> string(R.string.order_status_customer_cancelled)
+            "order.status.customer.EXPIRED" -> string(R.string.order_status_customer_expired)
+            // A status the app has no key for is shown as the server sent it, never as sample text.
+            else -> key
+        }
 }
 
 /** ActionButtons: the visible order actions, primary / danger / secondary by kind. */

@@ -12,7 +12,7 @@ object CustomerRoutes {
         "SCR-C21" to R.id.scr_c21, "SCR-C22" to R.id.scr_c22, "SCR-C23" to R.id.scr_c23, "SCR-C24" to R.id.scr_c24,
         "SCR-C25" to R.id.scr_c25, "SCR-C26" to R.id.scr_c26, "SCR-C27" to R.id.scr_c27, "SCR-C28" to R.id.scr_c28,
         "SCR-C29" to R.id.scr_c29, "SCR-C30" to R.id.scr_c30, "SCR-C31" to R.id.scr_c31, "SCR-C32" to R.id.scr_c32,
-        "SCR-C33" to R.id.scr_c33, "SCR-C34" to R.id.scr_c34, "SCR-C35" to R.id.scr_c35,
+        "SCR-C33" to R.id.scr_c33, "SCR-C34" to R.id.scr_c34, "SCR-C35" to R.id.scr_c35, "SCR-C36" to R.id.scr_c36,
     )
 
     fun destination(state: CustomerUiState): Int = when {

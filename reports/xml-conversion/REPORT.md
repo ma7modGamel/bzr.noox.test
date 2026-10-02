@@ -1,6 +1,6 @@
 # تقرير تحويل أندرويد إلى XML Views — DEC-047 (الخطوات 1 إلى 4)
 
-**الحالة:** اكتمل التحويل وحذف Compose. كل فحوص الإثبات (أ–هـ) ناجحة. **233 لقطة شاشة + 16 صفحة معرض = 249 من 249 مطابقة** للقطات Compose المعتمدة. اختبارات المنطق المشتركة كما هي: نفس الملفات ونفس الحالات، وكلها ناجحة.
+**الحالة:** ✅ معتمد من المالك بتاريخ 2026-09-25. اكتمل التحويل وحذف Compose. كل فحوص الإثبات (أ–هـ) ناجحة. بعد شروط الوصول المعتمدة: **233 لقطة شاشة مطابقة + 14 من 16 صفحة معرض مطابقة**؛ صفحتا الاختيار تختلفان عمدًا عن مرجع Compose القديم لأن مساحة لمس `SelectableChip` أصبحت 48dp. اختبارات المنطق المشتركة كما هي: نفس الملفات ونفس الحالات، وكلها ناجحة.
 
 - الفرع: `android/xml-conversion` في worktree منفصل: `/home/tro/bzr-android-xml`. لم يُدمج شيء في `main`.
 - `androidapp/` وتقارير التحويل وأدوات أندرويد انتقلت إلى الـ worktree، وفي مجلد العمل الرئيسي روابط (symlinks) إليها، فالجلسات الأخرى تعمل كما هي.
@@ -18,7 +18,7 @@
 
 | المجموعة | الشاشات | اللقطات | الصفحة |
 |---|---|---|---|
-| المعرض | 11 صفحة | 16/16 | [gallery](gallery/comparison.html) |
+| المعرض | 11 صفحة | 14/16 مطابقة + اختلافان معتمدان للوصول | [gallery](gallery/comparison.html) |
 | 3أ | C10–C13 (الدخول والتسجيل) | 28/28 | [3a](3a/comparison.html) |
 | 3ب | C01–C08 | 41/41 | [3b](3b/comparison.html) |
 | 3ج | C14–C17 | 28/28 | [3c](3c/comparison.html) |
@@ -27,7 +27,7 @@
 | 4ج | C18، C19، C25–C28 | 46/46 | [4c](4c/comparison.html) |
 | 4د | C29، C32–C35 | 30/30 | [4d](4d/comparison.html) |
 
-المقياس نفسه المستخدم في المعرض: فرق القناة ≤ 24 من 255، مع إزاحة بكسل واحد، و«مطابق» إذا لم يتجاوز الاختلاف 0.5٪. أعلى فرق في الشاشات **0.38٪** (C01، عناوين الشريط السفلي، وهي الملاحظة التي اعتمدتَها في المعرض). لا توجد لقطة مختلفة ترجع للمالك.
+المقياس نفسه المستخدم في المعرض: فرق القناة ≤ 24 من 255، مع إزاحة بكسل واحد، و«مطابق» إذا لم يتجاوز الاختلاف 0.5٪. أعلى فرق في الشاشات **0.38٪** (C01، عناوين الشريط السفلي، وهي الملاحظة التي اعتمدتَها في المعرض). اختلافا المعرض الوحيدان هما `selection-top` و`selection-bottom` بسبب زيادة مساحة لمس `SelectableChip` المعتمدة بعد تجميد المرجع، وليس بسبب اختلاف رسم غير مفسر.
 
 **الهدف:** لقطات Compose المعتمدة للشاشات (233) جُمّدت قبل أي تعديل في `reports/xml-conversion/reference/compose-screens/`، وهو مجلد يملكه أندرويد لأن `design/` مشترك. لقطات المعرض المعتمدة في `design/reference/android-compose/gallery/` كما كانت.
 
@@ -40,12 +40,15 @@
 - الـ Fragment يجمع `StateFlow` بـ `repeatOnLifecycle(STARTED)` ويعرض فقط. كل شاشة View بـ layout مستقل (`screen_cXX_*.xml`) ودالة `render(state)`.
 - القوائم: `RecyclerView` + `ListAdapter` و`DiffUtil` (`RowAdapter`) للعناوين، والأيام والفترات (أفقي وعمودان)، والوسائط، والمحادثات، والرسائل، والطلبات، والأسئلة الشائعة، والإشعارات، وخيارات الراديو.
 - Material Components: `MaterialButton` و`MaterialCardView` و`BottomNavigationView` و`Chip`/`ChipGroup` داخل المكونات. الانحرافان المعتمدان في المعرض (الحقول بـ `EditText`، و`SelectableChip`) كما هما.
+- `AppTextField` مكوّن واحد: عنوان فوق `EditText` + الحقل + رسالة الخطأ، مع `labelFor` وحالتي لوحة المفاتيح `next`/`done`. SwiftUI يحمل المدخل نفسه ويضع تسمية الوصول و`submitLabel` المطابقين.
+- `SelectableChip` يعلن `selected` كحالة قابلة للفحص لقارئ الشاشة، ومساحة اللمس 48dp على الأقل بينما يظل الرسم 40dp؛ SwiftUI يطابق الخاصيتين.
+- جُرّب ضبط فرق شريط التنقل عبر خصائص `BottomNavigationView`: حشو أعلى/أسفل العنصر مضبوط أصلًا ليُوسّط مجموعة الأيقونة والنص، والأيقونة 24dp تطابق موضع المرجع. تغيير فجوة العنوان لم يحسن القياس (بقي 0.39٪)، وتغيير الحشو أو حجم الأيقونة كان سيحرك أيقونة مطابقة؛ لذلك بقي الشريط الأصلي بلا مكوّن مخصص.
 - RTL إجباري: جذر كل شاشة `layoutDirection = RTL`، و`supportsRtl="true"`، و`start`/`end` فقط (يتأكد منها `tools/lint-design` وAndroid Lint).
 - لا WebView لأي شاشة. الدفع الإلكتروني (C22) يفتح رابط البوابة في المتصفح كما كان في Compose.
 - لا لون hex ولا dp/sp ولا نص مكتوب مباشرة خارج الملفات المولّدة (`tools/lint-design --no-compose` ✅).
 
 ### ما تغيّر في الـ ViewModels
-**حاوية الحالة فقط:** `mutableStateOf` (Compose) صار `MutableStateFlow` + `stateFlow`، في `CustomerViewModel` (+ `requiresAuthenticationFlow`) و`AuthViewModel`. لا تغيير في أي دالة أو قرار. `CustomerLogic` و`AuthLogic` و`BzrFormat` والـ API واختبارات المنطق كلها **بدون أي فرق** عن نقطة البداية (`git diff ab79ae6` فارغ لها).
+**حاوية الحالة فقط:** `mutableStateOf` (Compose) صار `MutableStateFlow` + `stateFlow`، في `CustomerViewModel` (+ `requiresAuthenticationFlow`) و`AuthViewModel`. لا تغيير في أي دالة أو قرار. `CustomerLogic` و`AuthLogic` و`BzrFormat` والـ API واختبارات المنطق كلها **بدون أي فرق** عن نقطة البداية (`git diff ab79ae6` فارغ لها). ملفات الحالات المشتركة لم تُعدّل: 29 حالة دخول و206 حالات عميل اجتازت في Android وSwift Core كما هي.
 
 منطق كان داخل Composables واتنقل:
 - التوجيه (`CustomerJourneyFlow`/`CustomerAuthFlow`) انتقل إلى `CustomerRoutes` و`MainActivity` و`AuthFragment`، بنفس الشروط: C06 الفارغة تفتح C35، والشاشة غير المعروفة تفتح C01، و`route` في الدخول يفتح C12/C10 أو يدخل التطبيق.
@@ -119,10 +122,10 @@
 | `DrawerMenu` | `DrawerMenuView` | `view_drawer_menu.xml` | مطابق — ضمن صفحات المعرض |
 | `StepIndicator` | `StepIndicatorView` | `view_step_indicator.xml` | مطابق — ضمن صفحات المعرض |
 | `SelectableTile` | `SelectableTileView` | `view_selectable_tile.xml` | مطابق — ضمن صفحات المعرض |
-| `SelectableChip` | `SelectableChipView` | `view_selectable_chip.xml` | مطابق — ضمن صفحات المعرض |
+| `SelectableChip` | `SelectableChipView` | `view_selectable_chip.xml` | اختلاف مقصود عن المرجع القديم: مساحة لمس 48dp؛ الرسم 40dp |
 | `RadioCard` | `RadioCardView` | `view_radio_card.xml` | مطابق — ضمن صفحات المعرض |
 | `CheckRow` | `CheckRowView` | `view_check_row.xml` | مطابق — ضمن صفحات المعرض |
-| `AppTextField` | `AppTextFieldView` | `view_app_text_field.xml` | مطابق — ضمن صفحات المعرض |
+| `AppTextField` | `AppTextFieldView` | `view_app_text_field.xml` | مطابق؛ `labelFor` + خطأ + `imeAction` التالي/تم |
 | `SecureTextField` | `SecureTextFieldView` | `view_secure_text_field.xml` | مطابق — ضمن صفحات المعرض |
 | `AmountField` | `AmountFieldView` | `view_amount_field.xml` | مطابق — ضمن صفحات المعرض |
 | `TextAreaField` | `TextAreaFieldView` | `view_text_area_field.xml` | مطابق — ضمن صفحات المعرض |
@@ -209,23 +212,34 @@ OK: no Compose and no cross-platform UI framework in the Android app.
 
 وأيضًا: `assembleDebug` و`verifyPaparazziDebug` و`lintDebug` (أخطاء RTL توقف البناء) و`tools/gen-design --check` و`tools/check-parity` (42 مكوّنًا، 58 شاشة، 471 مفتاح نص): كلها ✅.
 
+## متابعة الانحرافات المعتمدة
+
+| البند | Android | iOS | التحقق |
+|---|---|---|---|
+| `AppTextField` | عنوان + `EditText` + خطأ في مكوّن واحد؛ `labelFor`؛ `imeAction` التالي/تم | نفس الحالات؛ `accessibilityLabel` و`submitLabel` التالي/تم | اختبار Android مركّز + تطابق المدخلات + swift-format/SwiftLint |
+| `SelectableChip` | حالة `checkable/checked` لقارئ الشاشة؛ مساحة لمس 48dp؛ رسم 40dp | `isSelected` لقارئ الشاشة؛ مساحة لمس 48pt؛ رسم 40pt | اختبار Android مركّز + فحص مصدر Swift على Linux |
+| ViewModels | `StateFlow` بدل `mutableStateOf` فقط | Core بلا تغيير | 29 حالة دخول + 206 حالات عميل من الملفات المشتركة، بلا تعديل |
+| `BottomNav` | بقي `BottomNavigationView` الأصلي؛ تجربة الخصائص لم تحسن 0.39٪ | بلا تعديل | لا شريط مخصص |
+
+الجديد: مدخل `FieldImeAction` (`next`/`done`) والرمز `size.touchTargetMin = 48`. لا نص ولا أيقونة ولا مكوّن جديد. لم يُضف أي متغير بيئة، ولم يُعدّل `.env` أو `.env.example`.
+
+**iOS غير المتحقق منه آليًا:** SwiftUI اجتاز swift-format وSwiftLint وفحص التطابق على Linux، لكن لا يمكن بناء أو رسم SwiftUI بأطر Apple هنا؛ تحقق VoiceOver الفعلي ومساحة اللمس و`submitLabel` واللقطات مؤجل لدفعة «تحقق iOS». Swift Core بُني واختُبر على Linux (8 اختبارات ناجحة).
+
 ## قرارات صغيرة للعلم
 
 - **الأوراق السفلية** (C14 تأكيد الحذف، وC20 تأكيد الإلغاء، وC28 إرسال البلاغ، وC33 حذف الحساب): ثابتة أسفل الشاشة داخل الـ layout، زي Compose بالظبط. `BottomSheetDialogFragment` (`AppBottomSheetFragment`) جاهز في المكتبة، لكن استخدامه كان هيغيّر السلوك (نافذة تُغلق بالسحب) واللقطات، فما استخدمتهوش.
-- **C17:** زرار «صورة» و«فيديو» و«تسجيل صوتي» ما كانوش موصولين بحاجة في Compose. `CustomerJourneyFlow` كان بيمرّر الحذف والإنهاء بس. سبتهم زي ما هم، لأن توصيلهم ميزة جديدة.
-- **الخرائط:** `MapCard` بطاقة ثابتة في Compose وفي XML، ومفيش خريطة حية في أي شاشة حاليًا. فمحتاجناش `SupportMapFragment`، ومفيش `maps-compose`.
+- **C17 والخرائط:** ثُبت أن الصورة الصحيحة كانت واجهة مؤقتة لا وظيفة حقيقية. حسم DEC-056 أن الخريطة واختيار الموقع والصور والفيديو والكاميرا والتسجيل والرفع تُنفذ في بوابة 4هـ قبل أي شاشة فني؛ اعتماد اللقطة لا يغلق الوظيفة.
 - **الصور:** مفيش تحميل صور من الشبكة في الشاشات الحالية، فما اتضافتش مكتبة صور.
 
 ## الملفات المشتركة — [`SHARED-CHANGES.md`](SHARED-CHANGES.md)
 
 - `tools/gen-design`: شلت سطر توليد `DesignTokens.kt` (جزء أندرويد الخاص بـ Compose)، ولا حاجة تانية. وبناءً عليه اتحدّث `design/generated/manifest.json` بسطر واحد، وده ملف مولّد.
-- `design/parity.json`: عمود أندرويد بس للشاشات C01–C35 (`file` و`symbol` بقوا بيشاوروا على الـ XML Views). أعمدة iOS متلمستش.
+- `design/parity.json`: عمود أندرويد للشاشات C01–C35 يشير إلى XML Views؛ وفي المتابعة أُضيف `AppTextField.imeAction` للمنصتين بالاسم نفسه.
+- شروط `AppTextField` و`SelectableChip` المعتمدة موثقة الآن في 43، وتفاصيل الملفات المشتركة في [`SHARED-CHANGES.md`](SHARED-CHANGES.md).
 - **مطلوب منك:** حذف `design/reference/android-compose/screens/` (212 ملفًا كتبتهم بالغلط، والحذف اتمنع عليّ).
-- **مطلوب قرارك:** تحديث fixtures دمياط، وتوثيق انحراف الحقول/الشرائح في `docs/43`.
 
 ## الأسئلة المفتوحة
 
 1. **الدمج:** الفرع فيه `androidapp/` كامل، بس `design/` و`tools/gen-design` و`tools/check-parity` و`tools/lint-design` و`iosapp/` مش في `main` ولا في الفرع (لسه untracked في المجلد الرئيسي). فـ CI على الفرع لوحده مش هيلاقي المدخلات المشتركة لحد ما تتعمل commit في `main`. تحب مين يعمل commit للملفات المشتركة، وإمتى ندمج الفرع؟
 2. **fixtures دمياط** (من خطة الخطوة 3): ملف مشترك، فما اتعدّلش. لو اتحدّث، لقطات الشاشات المتأثرة هتتغير في المنصتين، وهتحتاج إعادة اعتماد مرة واحدة.
 3. **الـ worktree:** `/home/tro/bzr-android-xml`. المجلد الرئيسي فيه روابط `androidapp` و`reports/xml-conversion` وأدوات أندرويد الثلاث بتشاور عليه. تحب يفضل كده لحد الدمج؟
-4. **C17:** نوصل أزرار اختيار الوسائط؟ ميزة جديدة، فمستنية قرارك.

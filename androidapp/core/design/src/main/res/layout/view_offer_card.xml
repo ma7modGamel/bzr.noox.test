@@ -93,11 +93,13 @@
         </LinearLayout>
 
         <View
+            android:id="@+id/actionDivider"
             android:layout_width="match_parent"
             android:layout_height="@dimen/bremo_border_width"
             android:background="@color/bremo_border" />
 
         <LinearLayout
+            android:id="@+id/actionRow"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:divider="@drawable/bremo_gap_s"

@@ -11,17 +11,41 @@ data class CustomerHomePayload(
     val orderCount: Int,
     val firstOrderId: Int?,
     val addressId: Int?,
-    val categoryId: Int?,
-    val problemTypeId: Int?,
+    val categories: List<CustomerCategory>,
     val optionLists: Map<String, List<CustomerOption>>,
     val optionDefaults: Map<String, String>,
+    val serviceHoursFrom: String,
+    val serviceHoursTo: String,
+    val customerName: String = "",
+    val addressLabel: String = "",
+    /** The default address's city: C16 slots and the category check need it without opening C14 (6ب). */
+    val addressCityId: Int? = null,
+    val orders: List<JSONObject> = emptyList(),
 )
 
 data class CustomerOption(val code: String, val label: String)
 
+data class CustomerProblemType(val id: Int, val name: String, val isOther: Boolean)
+
+data class CustomerCategory(
+    val id: Int,
+    val name: String,
+    val iconKey: String?,
+    val problemTypes: List<CustomerProblemType>,
+)
+
+data class CustomerTrackingPayload(
+    val latitude: Double?,
+    val longitude: Double?,
+    val etaMinutes: Int?,
+    val etaApproximate: Boolean,
+)
+
 interface CustomerApi {
     fun home(token: String): CustomerHomePayload
+    fun catalogCategoryIds(cityId: Int): Set<Int>
     fun order(token: String, orderId: Int): JSONObject
+    fun tracking(token: String, orderId: Int): CustomerTrackingPayload
     fun orders(token: String, scope: String, page: Int = 1): JSONObject
     fun conversations(token: String, page: Int = 1): JSONObject
     fun conversationMessages(token: String, conversationId: Int, page: Int = 1): JSONObject
@@ -53,6 +77,10 @@ interface CustomerApi {
     fun sendSupportMessage(token: String, subject: String, message: String)
     fun notifications(token: String): JSONObject
     fun markNotificationsRead(token: String, ids: List<String>)
+    fun registerDevice(token: String, deviceToken: String)
+    fun unregisterDevice(token: String, deviceToken: String)
+    fun logout(token: String)
+    fun updateRatingReminders(token: String, enabled: Boolean): JSONObject
     fun account(token: String): JSONObject
     fun updateAccount(token: String, name: String, phone: String): JSONObject
     fun changePassword(token: String, currentPassword: String, password: String, confirmation: String)
@@ -64,12 +92,37 @@ interface CustomerApi {
 data class CustomerMediaUpload(val fileName: String, val mimeType: String, val bytes: ByteArray)
 
 class UrlConnectionCustomerApi(private val baseUrl: String) : CustomerApi {
+    override fun catalogCategoryIds(cityId: Int): Set<Int> {
+        val categories = request("catalog?city_id=$cityId", method = "GET").getJSONArray("data")
+        return (0 until categories.length()).map { categories.getJSONObject(it).getInt("id") }.toSet()
+    }
+
     override fun home(token: String): CustomerHomePayload {
         val config = request("config", method = "GET")
         val orders = request("orders?scope=current", token = token, method = "GET").getJSONArray("data")
         val addresses = request("addresses", token = token, method = "GET").getJSONArray("data")
-        val categories = request("catalog", method = "GET").getJSONArray("data")
-        val category = categories.optJSONObject(0)
+        val address = (0 until addresses.length()).map(addresses::getJSONObject)
+            .let { list -> list.firstOrNull { it.optBoolean("is_default") } ?: list.firstOrNull() }
+        val cityId = address?.optJSONObject("city")?.optInt("id")?.takeIf { it > 0 }
+        val categories = request("catalog${cityId?.let { "?city_id=$it" }.orEmpty()}", method = "GET").getJSONArray("data")
+        val user = request("me", token = token, method = "GET").getJSONObject("user")
+        val categoryItems = (0 until categories.length()).map(categories::getJSONObject).map { category ->
+            CustomerCategory(
+                id = category.getInt("id"),
+                name = category.getString("name"),
+                iconKey = category.optString("icon_path").takeIf { it.isNotBlank() }
+                    ?.substringAfterLast('/')?.substringBeforeLast('.'),
+                problemTypes = category.getJSONArray("problem_types").let { problems ->
+                    (0 until problems.length()).map(problems::getJSONObject)
+                }.map { problem ->
+                    CustomerProblemType(
+                        id = problem.getInt("id"),
+                        name = problem.getString("name"),
+                        isOther = problem.optBoolean("is_other"),
+                    )
+                },
+            )
+        }
         val optionPayload = config.getJSONObject("option_lists")
         val optionLists = optionPayload.keys().asSequence().associateWith { key ->
             val items = optionPayload.getJSONArray(key)
@@ -79,20 +132,38 @@ class UrlConnectionCustomerApi(private val baseUrl: String) : CustomerApi {
             }
         }
         return CustomerHomePayload(
-            config.getString("operating_mode").lowercase(),
+            // The app vocabulary is marketplace/staff; the server sends MARKETPLACE/EMPLOYEE (39).
+            if (config.getString("operating_mode") == "MARKETPLACE") "marketplace" else "staff",
             orders.length(),
             orders.optJSONObject(0)?.optInt("id")?.takeIf { it > 0 },
             addresses.firstId(preferDefault = true),
-            category?.optInt("id")?.takeIf { it > 0 },
-            category?.optJSONArray("problem_types")?.optJSONObject(0)?.optInt("id")?.takeIf { it > 0 },
+            categoryItems,
             optionLists,
             config.getJSONObject("option_defaults").keys().asSequence().associateWith {
                 config.getJSONObject("option_defaults").getString(it)
             },
+            config.getJSONObject("service_hours").getString("from"),
+            config.getJSONObject("service_hours").getString("to"),
+            customerName = user.optString("name"),
+            addressLabel = address?.let(::addressLabel).orEmpty(),
+            addressCityId = cityId,
+            orders = (0 until orders.length()).map(orders::getJSONObject),
         )
     }
 
     override fun order(token: String, orderId: Int): JSONObject = request("orders/$orderId", token = token, method = "GET").getJSONObject("data")
+
+    override fun tracking(token: String, orderId: Int): CustomerTrackingPayload {
+        val payload = request("orders/$orderId/tracking", token = token, method = "GET")
+        val location = payload.optJSONObject("last_location")
+
+        return CustomerTrackingPayload(
+            latitude = location?.optString("lat")?.toDoubleOrNull(),
+            longitude = location?.optString("lng")?.toDoubleOrNull(),
+            etaMinutes = payload.optInt("eta_minutes").takeIf { !payload.isNull("eta_minutes") },
+            etaApproximate = payload.optBoolean("eta_approximate"),
+        )
+    }
 
     override fun orders(token: String, scope: String, page: Int): JSONObject =
         request("orders?scope=$scope&page=$page", token = token, method = "GET")
@@ -246,6 +317,23 @@ class UrlConnectionCustomerApi(private val baseUrl: String) : CustomerApi {
         request("notifications/read", JSONObject().put("notification_ids", JSONArray(ids)), token)
     }
 
+    // DEC-058 — رمز FCM للجهاز؛ Push يصل لكل رموز الحساب أيًّا كان الوضع.
+    override fun registerDevice(token: String, deviceToken: String) {
+        request("me/devices", JSONObject().put("token", deviceToken).put("platform", "ANDROID"), token)
+    }
+
+    override fun unregisterDevice(token: String, deviceToken: String) {
+        request("me/devices", JSONObject().put("token", deviceToken), token, method = "DELETE")
+    }
+
+    override fun logout(token: String) {
+        request("auth/logout", JSONObject(), token)
+    }
+
+    override fun updateRatingReminders(token: String, enabled: Boolean): JSONObject = request(
+        "me", JSONObject().put("rating_reminders_enabled", enabled), token, method = "PATCH",
+    ).getJSONObject("user")
+
     override fun account(token: String): JSONObject = request("me", token = token, method = "GET").getJSONObject("user")
 
     override fun updateAccount(token: String, name: String, phone: String): JSONObject = request(
@@ -321,6 +409,11 @@ class UrlConnectionCustomerApi(private val baseUrl: String) : CustomerApi {
 }
 
 class CustomerApiException(val status: Int, message: String) : RuntimeException(message)
+
+/** C04 address row: the saved label and area, as the C14 row shows them. */
+internal fun addressLabel(address: JSONObject): String =
+    listOf(address.optString("label"), address.optJSONObject("area")?.optString("name").orEmpty())
+        .filter(String::isNotBlank).joinToString(" · ")
 
 private fun JSONArray.firstId(preferDefault: Boolean): Int? {
     if (length() == 0) return null

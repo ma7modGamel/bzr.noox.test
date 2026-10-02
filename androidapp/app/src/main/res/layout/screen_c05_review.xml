@@ -32,6 +32,12 @@
         android:visibility="gone"
         app:bremoText="@string/request_terms_required" />
 
+    <noox.bzr.design.views.WarningBoxView
+        android:id="@+id/refused"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone" />
+
     <noox.bzr.design.views.PrimaryButtonView
         android:id="@+id/publish"
         android:layout_width="match_parent"

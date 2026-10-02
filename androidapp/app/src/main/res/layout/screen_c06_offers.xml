@@ -17,8 +17,7 @@
         android:id="@+id/count"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textAppearance="@style/TextAppearance.Bremo.SectionTitle"
-        android:text="@string/offers_count" />
+        android:textAppearance="@style/TextAppearance.Bremo.SectionTitle" />
 
     <noox.bzr.design.views.CountdownView
         android:id="@+id/countdown"
@@ -31,15 +30,13 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 
-    <noox.bzr.design.views.OfferCardView
-        android:id="@+id/execution"
+    <LinearLayout
+        android:id="@+id/offerList"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
-
-    <noox.bzr.design.views.OfferCardView
-        android:id="@+id/inspection"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:divider="@drawable/bremo_gap_m"
+        android:showDividers="middle" />
 
     <noox.bzr.customer.ActionButtonsView
         android:id="@+id/actions"
