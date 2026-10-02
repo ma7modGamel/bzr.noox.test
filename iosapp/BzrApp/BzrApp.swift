@@ -18,7 +18,8 @@ struct BzrApp: App {
     init() {
         let configuredValue = Bundle.main.object(forInfoDictionaryKey: "BZRApiBaseURL") as? String
         let configured =
-            configuredValue.flatMap { $0.isEmpty ? nil : $0 } ?? "http://localhost:8000/api/v1/"
+            configuredValue.flatMap { $0.isEmpty ? nil : $0 }
+                ?? "https://dg.dnbscy.com/api/v1/"
         guard let url = URL(string: configured) else { fatalError("Invalid BZRApiBaseURL") }
         let session = AppAuthSessionStore()
         self.session = session

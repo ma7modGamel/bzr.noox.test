@@ -15,7 +15,9 @@ let package = Package(
     targets: [
         .target(
             name: "DesignSystem",
-            dependencies: ["BzrCore"],
+            dependencies: [
+                .product(name: "BzrCore", package: "Core"),
+            ],
             resources: [.process("Resources")]
         ),
         .testTarget(

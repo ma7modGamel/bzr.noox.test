@@ -44,7 +44,8 @@ targets:
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.bremo.app # DEC-048
-        BZR_APP_LINK_HOST: app-domain.invalid # DEP-LINK-01 / DEP-ID-01
+        BZR_API_BASE_URL: https://dg.dnbscy.com/api/v1/
+        BZR_APP_LINK_HOST: dg.dnbscy.com # DEP-LINK-01 / DEP-ID-01
         DEVELOPMENT_TEAM: ""
         CODE_SIGNING_ALLOWED: NO
         SWIFT_VERSION: 5.10
