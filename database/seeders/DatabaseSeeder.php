@@ -17,5 +17,7 @@ final class DatabaseSeeder extends Seeder
             LegalPagesSeeder::class, // DEC-051 — مسودات حتى ينشرها المدير العام
             SupportReasonSeeder::class,
         ]);
+
+        $this->call(DemoSeeder::class);
     }
 }
