@@ -8,6 +8,8 @@ import java.net.SocketTimeoutException
 import java.net.UnknownHostException
 import java.util.concurrent.TimeUnit
 import javax.net.ssl.SSLException
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
 import noox.bzr.gallery.BuildConfig
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.MultipartBody
@@ -19,7 +21,9 @@ import okhttp3.logging.HttpLoggingInterceptor
 import okhttp3.logging.LoggingEventListener
 import org.json.JSONObject
 import retrofit2.Call
+import retrofit2.Response
 import retrofit2.Retrofit
+import retrofit2.converter.kotlinx.serialization.asConverterFactory
 import retrofit2.http.Body
 import retrofit2.http.HTTP
 import retrofit2.http.HeaderMap
@@ -59,7 +63,11 @@ object BremoHttp {
             .build()
     }
 
+    /** DEC-061: one decoder for every typed model. Extra server fields are ignored; a missing required field fails the decode. */
+    val json = Json { ignoreUnknownKeys = true }
+
     private val services = mutableMapOf<String, BremoService>()
+    private val typedServices = mutableMapOf<Triple<String, Class<*>, String?>, Any>()
 
     @Synchronized
     fun service(baseUrl: String): BremoService {
@@ -68,6 +76,90 @@ object BremoHttp {
             Retrofit.Builder().baseUrl(normalized).client(client).build().create(BremoService::class.java)
         }
     }
+
+    /**
+     * A typed Retrofit interface (DEC-061) on the shared client, decoding with [json]. [appMode] is sent as
+     * `X-App-Mode` on every call, as [BremoApiClient] does for its surface.
+     */
+    @Synchronized
+    fun <T : Any> typed(baseUrl: String, service: Class<T>, appMode: String? = null): T {
+        val normalized = baseUrl.trimEnd('/') + "/"
+        return service.cast(
+            typedServices.getOrPut(Triple(normalized, service, appMode)) {
+                val modeClient = appMode?.let { mode ->
+                    client.newBuilder()
+                        .addInterceptor { chain -> chain.proceed(chain.request().newBuilder().header("X-App-Mode", mode).build()) }
+                        .build()
+                } ?: client
+                Retrofit.Builder()
+                    .baseUrl(normalized)
+                    .client(modeClient)
+                    .addConverterFactory(json.asConverterFactory("application/json; charset=utf-8".toMediaType()))
+                    .build()
+                    .create(service)
+            },
+        )!!
+    }
+}
+
+/** The server's error envelope (`Error` in openapi.json). `fields` comes with VALIDATION_FAILED. */
+@Serializable
+data class ApiError(
+    val code: String,
+    val message: String,
+    val rule: String? = null,
+    val fields: Map<String, List<String>> = emptyMap(),
+)
+
+@Serializable
+private data class ApiErrorEnvelope(val error: ApiError)
+
+/** A non-2xx answer from a typed call. [error] is null when the body is not the error envelope. */
+class ApiException(val status: Int, val error: ApiError?) :
+    RuntimeException("HTTP $status ${error?.code.orEmpty()} ${error?.message.orEmpty()}".trim()) {
+    /** The server's code, or `HTTP_<status>` when it sent none (the same fallback the JSONObject code used). */
+    val code: String get() = error?.code ?: "HTTP_$status"
+}
+
+/** [bremoCall] for code that still runs on worker threads: executes the call and returns the decoded body. */
+fun <T> bremoExecute(call: Call<T>): T {
+    val request = call.request()
+    val method = request.method
+    val path = request.url.encodedPath.substringAfter("/api/v1/") + (request.url.encodedQuery?.let { "?$it" } ?: "")
+    val response = try {
+        call.execute()
+    } catch (exception: IOException) {
+        val failure = NetworkException(exception.failureKind(), request.url.toString(), exception)
+        log(Log.ERROR, BremoHttp.TAG, "$method $path ✗ ${failure.message}", exception)
+        throw failure
+    }
+    return bodyOrThrow(method, path, response)
+}
+
+/**
+ * Runs one typed call: a transport failure becomes [NetworkException] (as [BremoApiClient] does), a non-2xx
+ * answer becomes [ApiException], and both are logged under [BremoHttp.TAG].
+ */
+suspend fun <T> bremoCall(method: String, path: String, call: suspend () -> Response<T>): T {
+    val response = try {
+        call()
+    } catch (exception: IOException) {
+        val failure = NetworkException(exception.failureKind(), path, exception)
+        log(Log.ERROR, BremoHttp.TAG, "$method $path ✗ ${failure.message}", exception)
+        throw failure
+    }
+    return bodyOrThrow(method, path, response)
+}
+
+private fun <T> bodyOrThrow(method: String, path: String, response: Response<T>): T {
+    if (!response.isSuccessful) {
+        val text = response.errorBody()?.use { it.string() }.orEmpty()
+        val error = runCatching { BremoHttp.json.decodeFromString(ApiErrorEnvelope.serializer(), text).error }.getOrNull()
+        log(Log.WARN, BremoHttp.TAG, "$method $path ← HTTP ${response.code()} ${error?.let { "${it.code}: ${it.message}" } ?: text.take(300)}")
+        throw ApiException(response.code(), error)
+    }
+    @Suppress("UNCHECKED_CAST")
+    return response.body() ?: Unit as T
 }
 
 /** Untyped Retrofit endpoints: each API keeps parsing its own JSON (org.json), the transport is shared. */
@@ -88,14 +180,14 @@ interface BremoService {
     fun put(@Url path: String, @HeaderMap headers: Map<String, String>, @Body body: RequestBody): Call<ResponseBody>
 }
 
-/** What went wrong before any HTTP status existed. The message names the cause in Logcat. */
+/** What went wrong before any HTTP status existed. The message names the cause in Logcat (logs only, never shown). */
 enum class NetworkFailureKind(val description: String) {
-    DNS("تعذّر تحويل اسم الخادم إلى عنوان (DNS)"),
-    UNREACHABLE("الخادم غير قابل للوصول من هذه الشبكة (لا يوجد مسار)"),
-    REFUSED("الخادم رفض الاتصال أو لا يعمل على هذا المنفذ"),
-    TIMEOUT("انتهت مهلة الاتصال بالخادم"),
-    TLS("فشل الاتصال الآمن (شهادة SSL)"),
-    OTHER("خطأ شبكة غير متوقع"),
+    DNS("Could not resolve the server name (DNS)"),
+    UNREACHABLE("Server unreachable from this network (no route)"),
+    REFUSED("Server refused the connection or is not listening on this port"),
+    TIMEOUT("Connection to the server timed out"),
+    TLS("Secure connection failed (SSL certificate)"),
+    OTHER("Unexpected network error"),
 }
 
 class NetworkException(val kind: NetworkFailureKind, val url: String, cause: IOException) :

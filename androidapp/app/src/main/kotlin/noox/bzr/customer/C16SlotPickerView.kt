@@ -38,6 +38,7 @@ class C16SlotPickerView(context: Context) : CustomerScreenView(context) {
     )
 
     init {
+        pinAction(binding.confirm)
         binding.days.rows(days, resources.getDimensionPixelSize(R.dimen.bremo_space_s), horizontal = true)
         binding.slots.rows(slots, resources.getDimensionPixelSize(R.dimen.bremo_space_m), columns = 2)
         binding.confirm.onClick = { onConfirm() }

@@ -42,6 +42,10 @@ class C19ChatView(context: Context) : CustomerScreenView(context) {
     )
 
     init {
+        listOf(binding.input, binding.addPhoto).forEach { view ->
+            (view.parent as android.view.ViewGroup).removeView(view)
+            bottomBar.addView(view)
+        }
         binding.header.rating = ""
         binding.header.services = null
         binding.messages.rows(adapter, resources.getDimensionPixelSize(R.dimen.bremo_space_m))
@@ -54,9 +58,7 @@ class C19ChatView(context: Context) : CustomerScreenView(context) {
 
     override fun renderContent(state: CustomerUiState) {
         binding.header.name = state.options.firstOrNull().orEmpty()
-        binding.header.verifiedLabel = string(R.string.provider_verified).takeUnless {
-            state.options.getOrElse(3) { "CUSTOMER" } == "PROVIDER"
-        }
+        binding.header.verifiedLabel = string(R.string.provider_verified).takeIf { state.providerVerified }
         binding.subtitle.text = state.options.getOrElse(1) { "" }
         binding.masking.isVisible = state.messageKey == "chat.masking.notice"
         binding.empty.isVisible = state.phase == CustomerPhase.Empty
@@ -67,6 +69,7 @@ class C19ChatView(context: Context) : CustomerScreenView(context) {
             },
         )
         val readOnly = state.options.getOrElse(2) { "" } == "READ_ONLY"
+        bottomBar.isVisible = !readOnly
         binding.readOnly.isVisible = readOnly
         binding.input.isVisible = !readOnly
         binding.addPhoto.isVisible = !readOnly

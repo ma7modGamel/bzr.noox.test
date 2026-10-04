@@ -8,10 +8,14 @@ import noox.bzr.gallery.databinding.ScreenC05ReviewBinding
 /** SCR-C05 (DEC-047): request summary, terms, publish. */
 class C05ReviewView(context: Context) : CustomerScreenView(context) {
     private val binding = ScreenC05ReviewBinding.inflate(inflater, content)
+    var onEdit: () -> Unit = {}
     var onTermsChange: () -> Unit = {}
     var onPublish: () -> Unit = {}
 
     init {
+        pinAction(binding.publish)
+        addRequestProgress(3)
+        binding.summary.onEdit = { onEdit() }
         binding.terms.setOnClickListener { onTermsChange() }
         binding.publish.onClick = { onPublish() }
     }

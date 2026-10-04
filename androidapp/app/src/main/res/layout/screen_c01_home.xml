@@ -5,11 +5,21 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:parentTag="android.widget.LinearLayout">
 
+    <com.google.android.material.card.MaterialCardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        style="@style/Widget.Bremo.Card">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:divider="@drawable/bremo_gap_m"
+            android:showDividers="middle">
     <TextView
         android:id="@+id/greeting"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textAppearance="@style/TextAppearance.Bremo.SectionTitle"
+        android:textAppearance="@style/TextAppearance.Bremo.HeroTitle"
         android:text="@string/customer_greeting" />
 
     <TextView
@@ -19,8 +29,19 @@
         android:textAppearance="@style/TextAppearance.Bremo.Secondary"
         android:text="@string/customer_home_subtitle" />
 
+    <noox.bzr.design.views.PrimaryButtonView
+        android:id="@+id/newRequest"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:bremoText="@string/customer_new_request" />
+
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+
     <TextView
         android:id="@+id/categories"
+        android:layout_marginTop="@dimen/bremo_space_s"
+        android:accessibilityHeading="true"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="@style/TextAppearance.Bremo.SectionTitle"
@@ -34,14 +55,10 @@
         android:divider="@drawable/bremo_gap_m"
         android:showDividers="middle" />
 
-    <noox.bzr.design.views.PrimaryButtonView
-        android:id="@+id/newRequest"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:bremoText="@string/customer_new_request" />
-
     <TextView
         android:id="@+id/currentOrders"
+        android:layout_marginTop="@dimen/bremo_space_s"
+        android:accessibilityHeading="true"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="@style/TextAppearance.Bremo.SectionTitle"
@@ -62,9 +79,4 @@
         android:orientation="vertical"
         android:divider="@drawable/bremo_gap_m"
         android:showDividers="middle" />
-
-    <noox.bzr.design.views.BottomNavView
-        android:id="@+id/nav"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
 </merge>

@@ -7,7 +7,19 @@
         android:id="@+id/button"
         style="@style/Widget.Bremo.Button.Primary"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:maxLines="1"
+        android:layout_height="wrap_content"
+        android:gravity="center"
         app:iconSize="@dimen/bremo_size_icon" />
+    <com.google.android.material.progressindicator.CircularProgressIndicator
+        android:id="@+id/progress"
+        android:layout_width="@dimen/bremo_size_icon"
+        android:layout_height="@dimen/bremo_size_icon"
+        android:layout_gravity="center"
+        android:importantForAccessibility="no"
+        android:indeterminate="true"
+        android:visibility="gone"
+        app:indicatorColor="@color/bremo_on_primary"
+        app:indicatorSize="@dimen/bremo_size_icon"
+        app:indicatorInset="0dp"
+        app:trackThickness="@dimen/bremo_size_progress_stroke" />
 </merge>

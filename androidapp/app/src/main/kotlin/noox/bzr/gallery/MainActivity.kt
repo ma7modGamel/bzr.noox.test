@@ -4,10 +4,12 @@ import android.Manifest
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
+import androidx.core.view.isVisible
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModel
@@ -23,12 +25,13 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import noox.bzr.auth.AndroidAuthSessionStore
 import noox.bzr.auth.AuthViewModel
-import noox.bzr.auth.UrlConnectionAuthApi
+import noox.bzr.auth.RetrofitAuthApi
 import noox.bzr.auth.authScreen
 import noox.bzr.customer.CustomerRoutes
 import noox.bzr.customer.CustomerViewModel
 import noox.bzr.customer.UrlConnectionCustomerApi
 import noox.bzr.design.R as DesignR
+import noox.bzr.design.views.BottomNavView
 import noox.bzr.links.AndroidPushDevice
 import noox.bzr.links.BremoMessagingService
 import noox.bzr.links.DeepLinkRouter
@@ -52,13 +55,14 @@ class MainActivity : AppCompatActivity() {
     private val push by lazy { AndroidPushDevice(applicationContext) }
     /** A notification or link that arrived before sign-in, or before the first screen (17 §الروابط العميقة). */
     private var pendingLink: String? = null
+    private val bottomNav by lazy { findViewById<BottomNavView>(R.id.bottom_nav) }
     private val notificationPermission = registerForActivityResult(ActivityResultContracts.RequestPermission()) { }
 
     override val defaultViewModelProviderFactory: ViewModelProvider.Factory
         get() = object : ViewModelProvider.Factory {
             @Suppress("UNCHECKED_CAST")
             override fun <T : ViewModel> create(modelClass: Class<T>): T = when (modelClass) {
-                AuthViewModel::class.java -> AuthViewModel(UrlConnectionAuthApi(BuildConfig.API_BASE_URL), session)
+                AuthViewModel::class.java -> AuthViewModel(RetrofitAuthApi(BuildConfig.API_BASE_URL), session)
                 CustomerViewModel::class.java -> CustomerViewModel(
                     UrlConnectionCustomerApi(BuildConfig.API_BASE_URL),
                     session,
@@ -76,13 +80,15 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
         setContentView(R.layout.activity_main)
         // targetSdk 35 draws edge to edge: keep the screens clear of the status and navigation bars.
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.nav_host)) { view, insets ->
-            val bars = insets.getInsets(WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.ime())
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.root)) { view, insets ->
+            val bars = insets.getInsets(WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.displayCutout() or WindowInsetsCompat.Type.ime())
             view.setPadding(bars.left, bars.top, bars.right, bars.bottom)
             WindowInsetsCompat.CONSUMED
         }
+        setUpBottomNav()
         authenticated = MutableStateFlow(session.token != null)
         NotificationChannels.create(this)
         customerViewModel.onDeepLink = ::openLink
@@ -141,7 +147,10 @@ class MainActivity : AppCompatActivity() {
                     providerViewModel.flowActive, providerViewModel.stateFlow,
                 ) { _, _, _, _, _ -> destination() }
                     .distinctUntilChanged()
-                    .collect { navController.show(it) }
+                    .collect {
+                        navController.show(it)
+                        showTab(it)
+                    }
             }
         }
     }
@@ -150,6 +159,33 @@ class MainActivity : AppCompatActivity() {
         super.onNewIntent(intent)
         val link = linkFrom(intent) ?: return
         if (customerFlowActive) openLink(link) else pendingLink = link
+    }
+
+    /** DEC-062: the bottom navigation under the customer tab screens; the selection animates between them. */
+    private fun setUpBottomNav() {
+        bottomNav.items = listOf(
+            DesignR.drawable.ic_home to getString(DesignR.string.nav_home),
+            DesignR.drawable.ic_orders to getString(DesignR.string.nav_orders),
+            DesignR.drawable.ic_chat to getString(DesignR.string.nav_messages),
+            DesignR.drawable.ic_account to getString(DesignR.string.nav_account),
+        )
+        bottomNav.onSelect = { index ->
+            if (index != CUSTOMER_TABS.indexOf(destination())) {
+                bottomNav.selectedIndex = index
+                when (index) {
+                    0 -> customerViewModel.loadHome()
+                    1 -> customerViewModel.loadOrders()
+                    2 -> customerViewModel.loadConversations()
+                    3 -> customerViewModel.loadAccountSummary()
+                }
+            }
+        }
+    }
+
+    private fun showTab(destination: Int) {
+        val tab = CUSTOMER_TABS.indexOf(destination)
+        bottomNav.isVisible = tab >= 0
+        if (tab >= 0 && bottomNav.selectedIndex != tab) bottomNav.selectedIndex = tab
     }
 
     /** Push extras carry `deep_link`; `bremo://` and App Links arrive as the intent data. */
@@ -206,5 +242,10 @@ class MainActivity : AppCompatActivity() {
             popUpTo(graph.id) { inclusive = true }
             launchSingleTop = true
         })
+    }
+
+    private companion object {
+        /** C01, C25, C18, C02: the bottom navigation order (43 §3). */
+        val CUSTOMER_TABS = listOf(R.id.scr_c01, R.id.scr_c25, R.id.scr_c18, R.id.scr_c02)
     }
 }

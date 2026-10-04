@@ -59,7 +59,7 @@ class CustomerViewModel(
     private var currentOrderId: Int? = null
     private var currentOrderVersion: Int = 0
     private var currentProposalId: Int? = null
-    private var currentOrderPayload: JSONObject? = null
+    private var currentOrderPayload: CustomerOrder? = null
     private var selectedPaymentChannel = -1
     private var ratingValues = mutableListOf(0, 0, 0)
     private var ratingComment = ""
@@ -134,8 +134,8 @@ class CustomerViewModel(
     fun loadHome() = request("SCR-C01") {
         val home = api.home(token())
         currentOrderId = home.firstOrderId
-        orderIds = home.orders.map { it.getInt("id") }
-        orderStatuses = home.orders.map { it.optString("status") }
+        orderIds = home.orders.map(CustomerOrder::id)
+        orderStatuses = home.orders.map(CustomerOrder::status)
         addressId = home.addressId
         categoryId = null
         problemTypeId = null
@@ -218,10 +218,10 @@ class CustomerViewModel(
     }
 
     /** C01 current-order card: the same title, subtitle and status as the C25 row. */
-    private fun orderSummary(order: JSONObject): List<String> = listOf(
-        "${order.optJSONObject("category")?.optString("name").orEmpty()} — ${order.optJSONObject("problem_type")?.optString("name").orEmpty()}",
-        "#${order.optString("number")} · ${order.optJSONObject("location")?.optString("area").orEmpty()} · ${order.optString("created_at").displayDateTime()}",
-        order.optString("status_label").ifBlank { order.optString("display_status") },
+    private fun orderSummary(order: CustomerOrder): List<String> = listOf(
+        "${order.category.name.orEmpty()} — ${order.problemType.name.orEmpty()}",
+        "#${order.number} · ${order.location.area.orEmpty()} · ${order.createdAt.orEmpty().displayDateTime()}",
+        order.statusLabel.ifBlank { order.displayStatus },
     )
 
     /** C02 header from `GET /me`, not sample text. */
@@ -404,19 +404,19 @@ class CustomerViewModel(
             "edit_request" -> {
                 val order = currentOrderPayload ?: return
                 editingOrderId = currentOrderId
-                addressId = order.optInt("customer_address_id").takeIf { it > 0 }
-                categoryId = order.optJSONObject("category")?.optInt("id")
-                problemTypeId = order.optJSONObject("problem_type")?.optInt("id")
-                requestDescription = order.optNullableString("description").orEmpty()
-                timingType = order.optJSONObject("timing")?.optString("type").orEmpty()
-                slotStart = order.optJSONObject("timing")?.optNullableString("slot_start")
+                addressId = order.customerAddressId?.takeIf { it > 0 }
+                categoryId = order.category.id
+                problemTypeId = order.problemType.id
+                requestDescription = order.description.orEmpty()
+                timingType = order.timing.type
+                slotStart = order.timing.slotStart
                 selectedMaterialIndex = options("materials_responsibilities").indexOfFirst {
-                    it.code == order.optString("materials_responsibility")
+                    it.code == order.materialsResponsibility
                 }
                 selectedPricingIndex = options("pricing_modes").indexOfFirst {
-                    it.code == order.optString("pricing_mode")
+                    it.code == order.pricingMode
                 }
-                requestBudget = order.optNullableString("budget_amount").orEmpty()
+                requestBudget = order.budgetAmount.orEmpty()
                 state = CustomerLogic.reduce("SCR-C03", problemInput())
             }
             "republish" -> {
@@ -427,7 +427,7 @@ class CustomerViewModel(
                     mainHandler.post {
                         if (order == null) state = CustomerLogic.reduce("SCR-C35", mapOf("event" to "error"))
                         else {
-                            currentOrderId = order.getInt("id")
+                            currentOrderId = order.id
                             currentOrderPayload = order
                             loadOrder(currentOrderId!!)
                         }
@@ -508,19 +508,16 @@ class CustomerViewModel(
 
     fun loadOrders(tabIndex: Int = 0, page: Int = 1) = request("SCR-C25") {
         ordersTab = if (tabIndex == 1) "past" else "current"
-        val response = api.orders(token(), ordersTab, page)
-        val orders = response.getJSONArray("data").objects()
-        orderIds = orders.map { it.getInt("id") }
-        orderStatuses = orders.map { it.getString("status") }
+        val orders = api.orders(token(), ordersTab, page).data
+        orderIds = orders.map(CustomerOrder::id)
+        orderStatuses = orders.map(CustomerOrder::status)
         mapOf(
             "event" to "loaded", "tab" to ordersTab,
-            "order_titles" to orders.map {
-                "${it.getJSONObject("category").optString("name")} — ${it.getJSONObject("problem_type").optString("name")}" 
-            },
+            "order_titles" to orders.map { "${it.category.name.orEmpty()} — ${it.problemType.name.orEmpty()}" },
             "order_subtitles" to orders.map {
-                "#${it.optString("number")} · ${it.getJSONObject("location").optString("area")} · ${it.optString("created_at").displayDateTime()}"
+                "#${it.number} · ${it.location.area.orEmpty()} · ${it.createdAt.orEmpty().displayDateTime()}"
             },
-            "order_statuses" to orders.map { it.getString("status_label") },
+            "order_statuses" to orders.map(CustomerOrder::statusLabel),
         )
     }
 
@@ -534,7 +531,7 @@ class CustomerViewModel(
         val proposals = api.proposals(token(), orderId).objects().filter { it.optString("status") == "APPROVED" }
         currentOrderId = orderId
         currentOrderPayload = order
-        currentOrderVersion = order.optInt("version")
+        currentOrderVersion = order.version
         orderHistoryInput(order, proposals)
     }
 
@@ -879,30 +876,18 @@ class CustomerViewModel(
         val order = api.order(token(), orderId)
         currentOrderPayload = order
         currentOrderId = orderId
-        currentOrderVersion = order.getInt("version")
-        if (operatingMode == "staff" && order.getString("status") == "OPEN") {
+        currentOrderVersion = order.version
+        if (operatingMode == "staff" && order.status == "OPEN") {
             return@requestRouted "SCR-C36" to assignmentInput(order)
         }
-        "SCR-C09" to mapOf(
-            "event" to "loaded",
-            "status" to order.getString("status"),
-            "display_status" to order.getString("display_status"),
-            "stepper" to !order.isNull("stepper"),
-            "eta_approximate" to order.optBoolean("eta_approximate"),
-            "available_actions" to order.getJSONArray("available_actions").strings(),
-            "step_states" to order.optJSONArray("stepper")?.objects()?.map { it.getString("state") }.orEmpty(),
-            "summary" to listOf(
-                "#${order.getString("number")}",
-                order.getJSONObject("location").optString("area"),
-            ),
-        )
+        "SCR-C09" to trackingInput(order) + ("summary" to listOf("#${order.number}", order.location.area.orEmpty()))
     }
 
     fun refreshTracking(onResult: (CustomerTrackingPayload, Pair<Double, Double>?) -> Unit) {
         val orderId = currentOrderId ?: return
-        val destination = currentOrderPayload?.optJSONObject("location")?.let { location ->
-            val latitude = location.optString("lat").toDoubleOrNull()
-            val longitude = location.optString("lng").toDoubleOrNull()
+        val destination = currentOrderPayload?.location?.let { location ->
+            val latitude = location.lat?.toDoubleOrNull()
+            val longitude = location.lng?.toDoubleOrNull()
             if (latitude == null || longitude == null) null else latitude to longitude
         }
 
@@ -919,7 +904,7 @@ class CustomerViewModel(
         request("SCR-C21") {
             val order = api.order(token(), orderId)
             currentOrderPayload = order
-            currentOrderVersion = order.getInt("version")
+            currentOrderVersion = order.version
             paymentSummaryInput(order, "loaded")
         }
     }
@@ -933,7 +918,7 @@ class CustomerViewModel(
             val next = runCatching {
                 val order = api.changePaymentMethod(token(), orderId, method, currentOrderVersion)
                 currentOrderPayload = order
-                currentOrderVersion = order.getInt("version")
+                currentOrderVersion = order.version
                 paymentSummaryInput(order, "loaded")
             }.getOrElse { mapOf("event" to "error") }
             Handler(Looper.getMainLooper()).post { state = CustomerLogic.reduce("SCR-C21", next) }
@@ -972,7 +957,7 @@ class CustomerViewModel(
         request("SCR-C23") {
             val order = api.order(token(), orderId)
             currentOrderPayload = order
-            currentOrderVersion = order.getInt("version")
+            currentOrderVersion = order.version
             completionInput(order, "loaded")
         }
     }
@@ -987,7 +972,7 @@ class CustomerViewModel(
             Handler(Looper.getMainLooper()).post {
                 result.onSuccess {
                     currentOrderPayload = it
-                    currentOrderVersion = it.getInt("version")
+                    currentOrderVersion = it.version
                     openRating()
                 }.onFailure { state = CustomerLogic.reduce("SCR-C23", mapOf("event" to "error")) }
             }
@@ -1053,7 +1038,7 @@ class CustomerViewModel(
         Thread {
             val next = runCatching {
                 val order = api.cancelOrder(token(), orderId, reason, cancellationNote.ifBlank { null }, currentOrderVersion)
-                currentOrderVersion = order.getInt("version")
+                currentOrderVersion = order.version
                 trackingInput(order)
             }.getOrElse { mapOf("event" to "error") }
             Handler(Looper.getMainLooper()).post { state = CustomerLogic.reduce(if (next["event"] == "error") "SCR-C20" else "SCR-C09", next) }
@@ -1066,7 +1051,7 @@ class CustomerViewModel(
         Thread {
             val result = runCatching {
                 val order = api.order(token(), orderId)
-                currentOrderVersion = order.getInt("version")
+                currentOrderVersion = order.version
                 val proposal = api.proposals(token(), orderId).objects().last { it.getString("status") == "PENDING" }
                 currentProposalId = proposal.getInt("id")
                 val screen = if (proposal.getString("type") == "EXECUTION_QUOTE") "SCR-C30" else "SCR-C31"
@@ -1091,7 +1076,7 @@ class CustomerViewModel(
         Thread {
             val next = runCatching {
                 val order = api.decideProposal(token(), orderId, proposalId, action == "approve_proposal", currentOrderVersion)
-                currentOrderVersion = order.getInt("version")
+                currentOrderVersion = order.version
                 trackingInput(order)
             }.getOrElse { mapOf("event" to "error") }
             Handler(Looper.getMainLooper()).post { state = CustomerLogic.reduce(if (next["event"] == "error") screen else "SCR-C09", next) }
@@ -1157,88 +1142,85 @@ class CustomerViewModel(
         )
     }
 
-    private fun orderHistoryInput(order: JSONObject, proposals: List<JSONObject>): Map<String, Any?> {
-        val amounts = order.getJSONObject("amounts")
-        val timing = order.getJSONObject("timing")
+    private fun orderHistoryInput(order: CustomerOrder, proposals: List<JSONObject>): Map<String, Any?> {
+        val amounts = order.amounts
         val summary = mutableListOf(
-            "#${order.optString("number")}", order.getJSONObject("category").optString("name"),
-            order.getJSONObject("problem_type").optString("name"), order.getJSONObject("location").optString("area"),
-            (timing.optString("slot_start").ifBlank { order.optString("created_at") }).displayDateTime(),
+            "#${order.number}", order.category.name.orEmpty(), order.problemType.name.orEmpty(), order.location.area.orEmpty(),
+            (order.timing.slotStart ?: order.createdAt).orEmpty().displayDateTime(),
         )
-        if (order.optString("status") == "CLOSED") {
+        if (order.status == "CLOSED") {
             summary += listOf(
-                formatAmount(amounts.optString("labor_total", "0.00")),
-                formatAmount(amounts.optString("materials_total", "0.00")),
-                formatAmount(amounts.optString("final_amount", "0.00")),
-                amounts.optString("payment_method"), amounts.optString("payment_status"),
+                formatAmount(amounts.laborTotal ?: ZERO_AMOUNT),
+                formatAmount(amounts.materialsTotal ?: ZERO_AMOUNT),
+                formatAmount(amounts.finalAmount ?: ZERO_AMOUNT),
+                amounts.paymentMethod.orEmpty(), amounts.paymentStatus,
             )
         }
         return mapOf(
-            "event" to "loaded", "status" to order.optString("status"),
-            "display_status" to order.optString("status_label"), "summary" to summary,
-            "provider_name" to order.optJSONObject("provider")?.optString("name").orEmpty(),
-            "termination_reason" to order.optJSONObject("termination")?.let {
-                it.optString("note").ifBlank { it.optString("reason_label") }
-            }.orEmpty(),
+            "event" to "loaded", "status" to order.status,
+            "display_status" to order.statusLabel, "summary" to summary,
+            "provider_name" to order.provider?.name.orEmpty(),
+            "termination_reason" to (order.termination.note?.takeIf(String::isNotBlank) ?: order.termination.reasonLabel.orEmpty()),
             "proposal_summaries" to proposals.map { "${it.optString("type_label")} · ${formatAmount(it.optString("amount"))}" },
-            "available_actions" to order.getJSONArray("available_actions").strings(),
+            "available_actions" to order.availableActions,
         )
     }
 
-    private fun trackingInput(order: JSONObject): Map<String, Any?> = mapOf(
-        "event" to "loaded", "status" to order.getString("status"),
-        "display_status" to order.getString("display_status"), "stepper" to !order.isNull("stepper"),
-        "eta_approximate" to order.optBoolean("eta_approximate"),
-        "available_actions" to order.getJSONArray("available_actions").strings(),
-        "step_states" to order.optJSONArray("stepper")?.objects()?.map { it.getString("state") }.orEmpty(),
+    private fun trackingInput(order: CustomerOrder): Map<String, Any?> = mapOf(
+        "event" to "loaded", "status" to order.status,
+        "display_status" to order.displayStatus, "stepper" to (order.stepper != null),
+        // The order carries no ETA; C09 reads it from the tracking call.
+        "eta_approximate" to false,
+        "available_actions" to order.availableActions,
+        "step_states" to order.stepper.orEmpty().map(StepperStep::state),
     )
 
-    private fun paymentSummaryInput(order: JSONObject, event: String): Map<String, Any?> {
-        val amounts = order.getJSONObject("amounts")
+    private fun paymentSummaryInput(order: CustomerOrder, event: String): Map<String, Any?> {
+        val amounts = order.amounts
         return mapOf(
             "event" to event,
             "amounts" to listOf(
-                formatAmount(amounts.optString("labor_total", "0.00")),
-                formatAmount(amounts.optString("materials_total", "0.00")),
-                formatAmount(amounts.optString("final_amount", "0.00")),
+                formatAmount(amounts.laborTotal ?: ZERO_AMOUNT),
+                formatAmount(amounts.materialsTotal ?: ZERO_AMOUNT),
+                formatAmount(amounts.finalAmount ?: ZERO_AMOUNT),
             ),
             "method_labels" to options("payment_methods").map(CustomerOption::label),
-            "selected_method_index" to options("payment_methods").indexOfFirst { it.code == amounts.optString("payment_method") },
-            "payment_method" to amounts.optString("payment_method"),
-            "available_actions" to order.getJSONArray("available_actions").strings(),
+            "selected_method_index" to options("payment_methods").indexOfFirst { it.code == amounts.paymentMethod },
+            "payment_method" to amounts.paymentMethod.orEmpty(),
+            "available_actions" to order.availableActions,
         )
     }
 
-    private fun paymentInput(order: JSONObject, payment: JSONObject?, event: String): Map<String, Any?> {
+    private fun paymentInput(order: CustomerOrder, payment: JSONObject?, event: String): Map<String, Any?> {
         val expiresAt = payment?.optString("expires_at")?.takeIf(String::isNotBlank)
         val seconds = expiresAt?.let {
             runCatching { java.time.Duration.between(OffsetDateTime.now(), OffsetDateTime.parse(it)).seconds.toInt().coerceAtLeast(0) }.getOrDefault(0)
         } ?: 0
         return mapOf(
             "event" to event,
-            "total" to formatAmount(order.getJSONObject("amounts").optString("final_amount", "0.00")),
+            "total" to formatAmount(order.amounts.finalAmount ?: ZERO_AMOUNT),
             "channel_labels" to options("payment_channels").map(CustomerOption::label),
             "selected_channel_index" to selectedPaymentChannel,
             "payment_status" to (payment?.optString("status") ?: ""),
             "reference_number" to (payment?.optString("reference_number") ?: ""),
             "checkout_url" to (payment?.optString("checkout_url") ?: ""),
             "countdown_seconds" to seconds,
-            "available_actions" to order.getJSONArray("available_actions").strings(),
+            "available_actions" to order.availableActions,
         )
     }
 
-    private fun completionInput(order: JSONObject, event: String): Map<String, Any?> {
-        val amounts = order.getJSONObject("amounts")
+    private fun completionInput(order: CustomerOrder, event: String): Map<String, Any?> {
+        val amounts = order.amounts
         return mapOf(
             "event" to event,
             "summary" to listOf(
-                order.optJSONObject("provider")?.optString("name").orEmpty(),
-                formatAmount(amounts.optString("labor_total", "0.00")),
-                formatAmount(amounts.optString("materials_total", "0.00")),
-                formatAmount(amounts.optString("final_amount", "0.00")),
-                amounts.optString("payment_method"),
+                order.provider?.name.orEmpty(),
+                formatAmount(amounts.laborTotal ?: ZERO_AMOUNT),
+                formatAmount(amounts.materialsTotal ?: ZERO_AMOUNT),
+                formatAmount(amounts.finalAmount ?: ZERO_AMOUNT),
+                amounts.paymentMethod.orEmpty(),
             ),
-            "available_actions" to order.getJSONArray("available_actions").strings(),
+            "available_actions" to order.availableActions,
         )
     }
 
@@ -1250,7 +1232,7 @@ class CustomerViewModel(
         "available_actions" to if (event == "success") emptyList<String>() else listOf("rate"),
     )
 
-    private fun proposalInput(order: JSONObject, proposal: JSONObject, event: String): Map<String, Any?> {
+    private fun proposalInput(order: CustomerOrder, proposal: JSONObject, event: String): Map<String, Any?> {
         val expires = proposal.optString("expires_at").takeIf { it.isNotBlank() }
         val seconds = expires?.let { runCatching { java.time.Duration.between(OffsetDateTime.now(), OffsetDateTime.parse(it)).seconds.toInt().coerceAtLeast(0) }.getOrDefault(0) } ?: 0
         return mapOf(
@@ -1260,7 +1242,7 @@ class CustomerViewModel(
             "total" to formatAmount(proposal.getString("projected_total")),
             "countdown_seconds" to seconds, "expired" to (seconds == 0),
             "has_photo" to !proposal.isNull("photo_path"),
-            "available_actions" to order.getJSONArray("available_actions").strings(),
+            "available_actions" to order.availableActions,
         )
     }
 
@@ -1294,10 +1276,10 @@ class CustomerViewModel(
     }
 
     /** The server's own message for a refused request (BR-011, BR-019…), or the shared network error. */
-    private fun serverMessage(error: Throwable): String =
-        (error as? CustomerApiException)?.message
-            ?.let { runCatching { JSONObject(it).getJSONObject("error").optString("message") }.getOrNull() }
-            .orEmpty()
+    private fun serverMessage(error: Throwable): String = (error as? CustomerApiException)?.let { failure ->
+        failure.error?.message
+            ?: failure.message?.let { runCatching { JSONObject(it).getJSONObject("error").optString("message") }.getOrNull() }
+    }.orEmpty()
 
     private fun publishRequest(target: String, address: Int, category: Int, problem: Int): Map<String, Any?> {
         return run {
@@ -1320,9 +1302,9 @@ class CustomerViewModel(
             val order = editingOrderId?.let { api.updateOrder(token(), it, body) }
                 ?: api.publish(token(), body, java.util.UUID.randomUUID().toString())
             editingOrderId = null
-            currentOrderId = order.getInt("id")
+            currentOrderId = order.id
             currentOrderPayload = order
-            currentOrderVersion = order.getInt("version")
+            currentOrderVersion = order.version
             if (target == "SCR-C36") {
                 assignmentInput(order)
             } else {
@@ -1336,7 +1318,7 @@ class CustomerViewModel(
         val order = api.order(token(), orderId)
         currentOrderPayload = order
         currentOrderId = orderId
-        currentOrderVersion = order.getInt("version")
+        currentOrderVersion = order.version
         currentOffers = api.offers(token(), orderId, offerSortCode()).objects()
         offersInput(order)
     }
@@ -1397,7 +1379,7 @@ class CustomerViewModel(
             mainHandler.post {
                 result.onSuccess { order ->
                     currentOrderPayload = order
-                    currentOrderVersion = order.getInt("version")
+                    currentOrderVersion = order.version
                     loadOrder(orderId)
                 }.onFailure {
                     state = CustomerLogic.reduce("SCR-C08", mapOf("event" to "error"))
@@ -1408,27 +1390,23 @@ class CustomerViewModel(
 
     private fun offerSortCode(): String = listOf("rating", "price", "eta").getOrElse(offersSortIndex) { "rating" }
 
-    private fun offersInput(order: JSONObject): Map<String, Any?> {
-        val timing = order.getJSONObject("timing")
-        val pricingMode = order.getString("pricing_mode").lowercase()
-        return mapOf(
-            "event" to "loaded",
-            "order_title" to "${order.getJSONObject("category").optString("name")} — ${order.getJSONObject("problem_type").optString("name")} · #${order.optString("number")}",
-            "display_status" to order.optString("display_status"),
-            "countdown_seconds" to deadlineSeconds(order.optJSONObject("deadlines")),
-            "sort_index" to offersSortIndex,
-            "offer_rows" to currentOffers.map { offerRow(it, timing) },
-            "pricing_mode" to pricingMode,
-            "timing_type" to timing.getString("type").lowercase(),
-            "available_actions" to order.getJSONArray("available_actions").strings(),
-        )
-    }
+    private fun offersInput(order: CustomerOrder): Map<String, Any?> = mapOf(
+        "event" to "loaded",
+        "order_title" to "${order.category.name.orEmpty()} — ${order.problemType.name.orEmpty()} · #${order.number}",
+        "display_status" to order.displayStatus,
+        "countdown_seconds" to deadlineSeconds(order.deadlines),
+        "sort_index" to offersSortIndex,
+        "offer_rows" to currentOffers.map { offerRow(it, order.timing) },
+        "pricing_mode" to order.pricingMode.lowercase(),
+        "timing_type" to order.timing.type.lowercase(),
+        "available_actions" to order.availableActions,
+    )
 
-    private fun offerRow(offer: JSONObject, timing: JSONObject): String {
+    private fun offerRow(offer: JSONObject, timing: OrderTiming): String {
         val provider = offer.getJSONObject("provider")
-        val detail = offer.optInt("eta_minutes").takeIf { timing.getString("type") == "NOW" && it > 0 }
+        val detail = offer.optInt("eta_minutes").takeIf { timing.type == "NOW" && it > 0 }
             ?.let { "$it" }
-            ?: timing.optNullableString("slot_start").orEmpty().displayDateTime()
+            ?: timing.slotStart.orEmpty().displayDateTime()
         val price = formatAmount(offer.optString("price", "0.00"))
         return listOf(
             offer.getInt("id"), provider.optString("name"), provider.optString("rating_avg"),
@@ -1440,8 +1418,8 @@ class CustomerViewModel(
     private fun offerDetailsInput(offer: JSONObject, event: String): Map<String, Any?> {
         val order = currentOrderPayload ?: return mapOf("event" to "error")
         val provider = offer.getJSONObject("provider")
-        val timing = order.getJSONObject("timing")
-        val pricingMode = order.getString("pricing_mode").lowercase()
+        val timing = order.timing
+        val pricingMode = order.pricingMode.lowercase()
         val eta = offer.optInt("eta_minutes").takeIf { it > 0 }?.toString().orEmpty()
         return mapOf(
             "event" to event,
@@ -1450,18 +1428,18 @@ class CustomerViewModel(
             "provider_services" to provider.optString("completed_orders"),
             "provider_verified" to provider.optBoolean("is_verified"),
             "order_rows" to listOf(
-                "${order.getJSONObject("category").optString("name")} — ${order.getJSONObject("problem_type").optString("name")}",
-                listOf(order.getJSONObject("location").optString("area"), order.getJSONObject("location").optString("city")).filter(String::isNotBlank).joinToString(" · "),
+                "${order.category.name.orEmpty()} — ${order.problemType.name.orEmpty()}",
+                listOf(order.location.area.orEmpty(), order.location.city.orEmpty()).filter(String::isNotBlank).joinToString(" · "),
             ),
             "payment_labels" to options("payment_methods").map(CustomerOption::label),
             "selected_payment_index" to selectedPaymentChannel,
-            "available_actions" to order.getJSONArray("available_actions").strings().filter { it == "accept_offer" },
+            "available_actions" to order.availableActions.filter { it == "accept_offer" },
             "pricing_mode" to pricingMode,
-            "timing_type" to timing.getString("type").lowercase(),
+            "timing_type" to timing.type.lowercase(),
             "eta_minutes" to eta,
             "offer_rows" to listOf(
                 formatAmount(offer.optString("price", "0.00")),
-                if (eta.isNotBlank()) eta else timing.optNullableString("slot_start").orEmpty().displayDateTime(),
+                if (eta.isNotBlank()) eta else timing.slotStart.orEmpty().displayDateTime(),
                 offer.optString("includes_text").ifBlank {
                     if (offer.optBoolean("inspection_fee_deductible")) "deductible" else offer.optString("note")
                 },
@@ -1469,10 +1447,8 @@ class CustomerViewModel(
         )
     }
 
-    private fun deadlineSeconds(deadlines: JSONObject?): Int {
-        val value = deadlines?.optNullableString("offers_close_at")
-            ?: deadlines?.optNullableString("selection_deadline_at")
-            ?: return 0
+    private fun deadlineSeconds(deadlines: OrderDeadlines): Int {
+        val value = deadlines.offersCloseAt ?: deadlines.selectionDeadlineAt ?: return 0
         return runCatching {
             java.time.Duration.between(OffsetDateTime.now(), OffsetDateTime.parse(value)).seconds.toInt().coerceAtLeast(0)
         }.getOrDefault(0)
@@ -1602,9 +1578,9 @@ class CustomerViewModel(
         val paymentMethod = optionDefaults["payment_method"] ?: return@request mapOf("event" to "error")
         val order = api.acceptOffer(token(), orderId, offerId, expectedVersion, paymentMethod)
         mapOf(
-            "event" to "loaded", "status" to order.getString("status"),
-            "display_status" to order.getString("display_status"), "stepper" to !order.isNull("stepper"),
-            "available_actions" to order.getJSONArray("available_actions").strings(),
+            "event" to "loaded", "status" to order.status,
+            "display_status" to order.displayStatus, "stepper" to (order.stepper != null),
+            "available_actions" to order.availableActions,
         )
     }
 
@@ -1654,8 +1630,7 @@ class CustomerViewModel(
         "status_details" to if (dispute == null) emptyList<String>() else listOf(
             dispute.optString("status_label", dispute.optString("status")), dispute.optString("resolution_note"),
         ),
-        "available_actions" to if (dispute == null) currentOrderPayload
-            ?.optJSONArray("available_actions")?.strings().orEmpty() else emptyList<String>(),
+        "available_actions" to if (dispute == null) currentOrderPayload?.availableActions.orEmpty() else emptyList<String>(),
     )
 
     private fun providerReportInput(event: String): Map<String, Any?> = mapOf(
@@ -1731,20 +1706,18 @@ class CustomerViewModel(
     private fun options(key: String): List<CustomerOption> = optionLists[key].orEmpty()
 
     /** C36: number, area, and the timing (now, or the chosen slot) of an order waiting for assignment. */
-    private fun assignmentInput(order: JSONObject): Map<String, Any?> {
-        val timing = order.optJSONObject("timing")
-        val slot = timing?.optNullableString("slot_start").orEmpty()
+    private fun assignmentInput(order: CustomerOrder): Map<String, Any?> {
+        val slot = order.timing.slotStart.orEmpty()
         val timingLabel = if (slot.isNotBlank()) {
             slot.displayDateTime()
         } else {
-            options("timing_types").firstOrNull { it.code == timing?.optString("type") }?.label.orEmpty()
+            options("timing_types").firstOrNull { it.code == order.timing.type }?.label.orEmpty()
         }
         return mapOf(
             "event" to "loaded",
-            "order_title" to "${order.optJSONObject("category")?.optString("name").orEmpty()} — ${order.optJSONObject("problem_type")?.optString("name").orEmpty()}",
-            "order_rows" to listOf("#${order.optString("number")}", order.optJSONObject("location")?.optString("area").orEmpty(), timingLabel)
-                .filter(String::isNotBlank),
-            "available_actions" to order.getJSONArray("available_actions").strings(),
+            "order_title" to "${order.category.name.orEmpty()} — ${order.problemType.name.orEmpty()}",
+            "order_rows" to listOf("#${order.number}", order.location.area.orEmpty(), timingLabel).filter(String::isNotBlank),
+            "available_actions" to order.availableActions,
         )
     }
 
@@ -1787,6 +1760,11 @@ class CustomerViewModel(
     override fun onCleared() {
         stopChatPolling()
         super.onCleared()
+    }
+
+    private companion object {
+        /** An amount the server has not set yet (null before pricing) shows as zero. */
+        const val ZERO_AMOUNT = "0.00"
     }
 }
 

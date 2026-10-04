@@ -33,13 +33,6 @@
         app:bremoText="@string/customer_account_addresses" />
 
     <noox.bzr.design.views.MenuRowView
-        android:id="@+id/payments"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:bremoIcon="@drawable/ic_orders"
-        app:bremoText="@string/customer_account_payments" />
-
-    <noox.bzr.design.views.MenuRowView
         android:id="@+id/notifications"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

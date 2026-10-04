@@ -22,14 +22,12 @@
             android:id="@+id/rating"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:maxLines="1"
-            android:textAppearance="@style/TextAppearance.Bremo.Body" />
+                android:textAppearance="@style/TextAppearance.Bremo.Body" />
     </LinearLayout>
 
     <TextView
         android:id="@+id/services"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:maxLines="1"
         android:textAppearance="@style/TextAppearance.Bremo.Secondary" />
 </merge>

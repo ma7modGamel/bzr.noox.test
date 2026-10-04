@@ -1,7 +1,10 @@
 package noox.bzr.auth
 
 import android.content.Context
+import android.text.InputType
+import android.view.View
 import android.view.LayoutInflater
+import android.widget.EditText
 import android.view.ViewGroup
 import android.widget.FrameLayout
 import androidx.core.view.isVisible
@@ -38,8 +41,8 @@ abstract class AuthScreenView(context: Context) : FrameLayout(context) {
 
     init {
         layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
-        // RTL is mandatory (43 §13), whatever the device locale — as BzrTheme did for Compose.
-        layoutDirection = LAYOUT_DIRECTION_RTL
+        // Follow the selected resource language, including Arabic RTL and English LTR.
+        layoutDirection = resources.configuration.layoutDirection
     }
 
     abstract fun render(state: AuthUiState)
@@ -57,6 +60,25 @@ abstract class AuthScreenView(context: Context) : FrameLayout(context) {
     }
 
     protected fun field(view: FieldShellView, value: String, error: String?, name: String) {
+        val edit = view.findViewById<EditText>(R.id.edit)
+        val inputType = when (name) {
+            "email" -> InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS
+            "phone" -> InputType.TYPE_CLASS_PHONE
+            "password" -> InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD
+            else -> InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_CAP_WORDS
+        }
+        if (edit.inputType != inputType) {
+            val typeface = edit.typeface
+            edit.inputType = inputType
+            edit.typeface = typeface
+        }
+        if (name == "email" || name == "phone") edit.textDirection = View.TEXT_DIRECTION_LTR
+        edit.setAutofillHints(when (name) {
+            "email" -> View.AUTOFILL_HINT_EMAIL_ADDRESS
+            "phone" -> View.AUTOFILL_HINT_PHONE
+            "password" -> View.AUTOFILL_HINT_PASSWORD
+            else -> View.AUTOFILL_HINT_NAME
+        })
         val text = error?.let { context.getString(authTextRes(it)) }
         val state = authFieldState(value, error)
         when (view) {

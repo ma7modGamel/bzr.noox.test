@@ -22,9 +22,10 @@ class C02AccountView(context: Context) : CustomerScreenView(context) {
     override fun title(state: CustomerUiState) = string(R.string.customer_account_title)
 
     override fun renderContent(state: CustomerUiState) {
+        binding.header.rating = ""
         binding.header.name = state.fieldValues.getOrElse(0) { "" }
         binding.header.services = state.fieldValues.getOrNull(1)?.takeIf(String::isNotBlank)
-        binding.header.verifiedLabel = string(if (state.messageKey == "account.verified") R.string.account_verified else R.string.account_unverified)
+        binding.header.verifiedLabel = string(R.string.account_verified).takeIf { state.messageKey == "account.verified" }
         binding.unverified.isVisible = state.messageKey == "account.unverified"
     }
 }

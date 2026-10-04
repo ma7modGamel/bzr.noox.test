@@ -46,6 +46,18 @@ abstract class CustomerFragment<V : CustomerScreenView>(private val destination:
     override fun onViewCreated(view: android.view.View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         screenView.onBack = { viewModel.goBack() }
+        screenView.onReload = when (viewModel.state.screen) {
+            "SCR-C01" -> { { viewModel.loadHome(); Unit } }
+            "SCR-C02" -> { { viewModel.loadAccountSummary(); Unit } }
+            "SCR-C09" -> { { viewModel.openOrder(); Unit } }
+            "SCR-C18" -> { { viewModel.loadConversations(); Unit } }
+            "SCR-C25" -> { { viewModel.loadOrders(viewModel.state.selectedOptionIndex); Unit } }
+            "SCR-C29" -> { { viewModel.loadHelp(); Unit } }
+            "SCR-C32" -> { { viewModel.loadNotifications(); Unit } }
+            "SCR-C33" -> { { viewModel.loadAccount(); Unit } }
+            "SCR-C34" -> { { viewModel.loadTerms(); Unit } }
+            else -> null
+        }
     }
 
     /** Today, tomorrow, then Monday…Sunday; the ViewModel names each date from these (6ب). */
@@ -167,6 +179,7 @@ class C04TimingFragment : CustomerFragment<C04TimingView>(R.id.scr_c04) {
 class C05ReviewFragment : CustomerFragment<C05ReviewView>(R.id.scr_c05) {
     override fun create() = C05ReviewView(requireContext())
     override fun C05ReviewView.bind() {
+        onEdit = viewModel::openProblem
         onTermsChange = {
             viewModel.setTermsAccepted(viewModel.state.termsError != null)
         }

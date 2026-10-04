@@ -13,6 +13,7 @@ class C08OfferDetailsView(context: Context) : CustomerScreenView(context) {
     var onPaymentSelect: (Int) -> Unit = {}
 
     init {
+        pinAction(binding.actions)
         binding.actions.onAction = { onAction(it) }
     }
 

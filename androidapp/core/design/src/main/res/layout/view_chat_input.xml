@@ -6,13 +6,13 @@
     <EditText
         android:id="@+id/edit"
         android:layout_width="0dp"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:layout_weight="1"
         android:background="@null"
         android:importantForAutofill="no"
-        android:includeFontPadding="false"
+        android:includeFontPadding="true"
         android:inputType="textMultiLine|textCapSentences"
-        android:maxLines="1"
+        android:maxLines="4"
         android:padding="0dp"
         android:textAlignment="viewStart"
         android:textAppearance="@style/TextAppearance.Bremo.Body"
@@ -20,8 +20,10 @@
 
     <ImageView
         android:id="@+id/send"
-        android:layout_width="@dimen/bremo_size_icon"
-        android:layout_height="@dimen/bremo_size_icon"
+        android:layout_width="@dimen/bremo_size_touch_target_min"
+        android:layout_height="@dimen/bremo_size_touch_target_min"
+        android:scaleType="center"
+        android:background="?android:attr/selectableItemBackgroundBorderless"
         android:contentDescription="@string/a11y_send"
         app:srcCompat="@drawable/ic_send"
         app:tint="@color/bremo_primary600" />

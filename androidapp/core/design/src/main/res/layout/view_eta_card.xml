@@ -24,15 +24,13 @@
                 android:id="@+id/value"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:maxLines="1"
-                android:textAppearance="@style/TextAppearance.Bremo.DisplayNumber" />
+                        android:textAppearance="@style/TextAppearance.Bremo.DisplayNumber" />
 
             <TextView
                 android:id="@+id/unit"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:maxLines="1"
-                android:textAppearance="@style/TextAppearance.Bremo.CardTitle"
+                        android:textAppearance="@style/TextAppearance.Bremo.CardTitle"
                 android:textColor="@color/bremo_primary700" />
         </LinearLayout>
 
@@ -53,17 +51,13 @@
                 android:id="@+id/title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:ellipsize="end"
-                android:maxLines="1"
-                android:textAppearance="@style/TextAppearance.Bremo.CardTitle" />
+                                android:textAppearance="@style/TextAppearance.Bremo.CardTitle" />
 
             <TextView
                 android:id="@+id/subtitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:ellipsize="end"
-                android:maxLines="1"
-                android:textAppearance="@style/TextAppearance.Bremo.Secondary" />
+                                android:textAppearance="@style/TextAppearance.Bremo.Secondary" />
         </LinearLayout>
 
         <FrameLayout

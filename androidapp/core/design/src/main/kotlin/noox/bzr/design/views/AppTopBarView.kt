@@ -29,10 +29,16 @@ class AppTopBarView @JvmOverloads constructor(context: Context, attrs: Attribute
             field = value
             renderAction()
         }
+    var showsBack: Boolean = true
+        set(value) {
+            field = value
+            binding.back.showIf(value)
+        }
     var onBack: () -> Unit = {}
     var onAction: () -> Unit = {}
 
     init {
+        minimumHeight = px(R.dimen.bremo_size_top_bar_height)
         setBackgroundResource(R.color.bremo_surface)
         val horizontal = px(R.dimen.bremo_space_screen_horizontal)
         setPaddingRelative(horizontal, 0, horizontal, 0)
@@ -46,7 +52,7 @@ class AppTopBarView @JvmOverloads constructor(context: Context, attrs: Attribute
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) =
-        super.onMeasure(widthMeasureSpec, fixedHeight(px(R.dimen.bremo_size_top_bar_height)))
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec)
 
     private fun renderAction() {
         binding.action.showIf(actionIcon != null)

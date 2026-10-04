@@ -4,10 +4,13 @@
     <item name="bremo_opacity_disabled" format="float" type="dimen">0.4</item>
     <item name="bremo_ratio_skeleton_short_line" format="float" type="dimen">0.6</item>
     <item name="bremo_ratio_progress_arc" format="float" type="dimen">0.75</item>
+    <item name="bremo_ratio_press_feedback" format="float" type="dimen">0.88</item>
+    <item name="bremo_ratio_loading_dim" format="float" type="dimen">0.55</item>
     <item name="bremo_a11y_max_font_scale" format="float" type="dimen">1.3</item>
     <integer name="bremo_threshold_countdown_urgent_seconds">300</integer>
     <integer name="bremo_motion_screen_transition_ms">250</integer>
     <integer name="bremo_motion_sheet_ms">250</integer>
+    <integer name="bremo_motion_nav_bar_ms">180</integer>
     <integer name="bremo_size_category_tile_columns">3</integer>
     <integer name="bremo_size_home_service_tile_columns">3</integer>
     <item name="bremo_opacity_scrim" format="float" type="dimen">0.7</item>

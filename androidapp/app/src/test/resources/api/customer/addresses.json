@@ -1,0 +1,24 @@
+{
+    "data": [
+        {
+            "id": 1000,
+            "label": "البيت",
+            "city": {
+                "id": 1000,
+                "name": "دمياط الجديدة"
+            },
+            "area": {
+                "id": 1000,
+                "name": "الحي الأول"
+            },
+            "address_text": "شارع الطيران، عمارة 12",
+            "building": "12",
+            "floor": "3",
+            "apartment": "9",
+            "landmark": null,
+            "lat": "30.0600000",
+            "lng": "31.3400000",
+            "is_default": true
+        }
+    ]
+}

@@ -18,6 +18,8 @@ class C04TimingView(context: Context) : CustomerScreenView(context) {
     var onBudgetChange: (String) -> Unit = {}
 
     init {
+        pinAction(binding.next)
+        addRequestProgress(2)
         binding.address.onEdit = { onOpen("SCR-C14") }
         binding.now.setOnClickListener { onTimingSelect(0) }
         binding.slot.setOnClickListener { onOpen("SCR-C16") }

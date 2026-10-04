@@ -44,10 +44,11 @@ class ProviderHeaderView @JvmOverloads constructor(context: Context, attrs: Attr
             field = value
             binding.verifiedLabel.text = value.orEmpty()
             binding.verified.showIf(value != null)
+            binding.avatar.verified = value != null
         }
 
     init {
-        orientation = HORIZONTAL
+        orientation = if (resources.configuration.fontScale > 1.3f) VERTICAL else HORIZONTAL
         gravity = Gravity.CENTER_VERTICAL
         gap(R.drawable.bremo_gap_m)
         binding = ViewProviderHeaderBinding.inflate(inflater, this)

@@ -265,17 +265,19 @@ foreach ($tokens['type'] as $name => $value) {
 }
 
 $style('Widget.Bremo.TextView', 'Widget.MaterialComponents.TextView', [
-    'android:includeFontPadding' => 'false',
+    'android:includeFontPadding' => 'true',
     'android:textAppearance' => '@style/'.$typeStyleName('body'),
 ]);
 $buttonBase = [
     'android:insetTop' => '0dp',
     'android:insetBottom' => '0dp',
     'android:minWidth' => '0dp',
-    'android:minHeight' => '0dp',
+    'android:minHeight' => $dimen('size', 'touch_target_min'),
     'android:paddingStart' => $dimen('space', 'm'),
     'android:paddingEnd' => $dimen('space', 'm'),
-    'android:includeFontPadding' => 'false',
+    'android:paddingTop' => $dimen('space', 's'),
+    'android:paddingBottom' => $dimen('space', 's'),
+    'android:includeFontPadding' => 'true',
     'android:stateListAnimator' => '@null',
     'elevation' => '0dp',
     'cornerRadius' => $dimen('radius', 'button'),
@@ -287,7 +289,7 @@ $style('Widget.Bremo.Button.Primary', 'Widget.MaterialComponents.Button.Unelevat
     'android:textAppearance' => '@style/'.$typeStyleName('button'),
     'android:textColor' => $color('onPrimary'),
     'iconTint' => $color('onPrimary'),
-    'rippleColor' => '@android:color/transparent',
+    'rippleColor' => $color('primary50'),
 ]);
 $style('Widget.Bremo.Button.Secondary', 'Widget.MaterialComponents.Button.OutlinedButton', $buttonBase + [
     'backgroundTint' => $color('surface'),
@@ -296,7 +298,7 @@ $style('Widget.Bremo.Button.Secondary', 'Widget.MaterialComponents.Button.Outlin
     'android:textAppearance' => '@style/'.$typeStyleName('button'),
     'android:textColor' => $color('primary700'),
     'iconTint' => $color('primary600'),
-    'rippleColor' => '@android:color/transparent',
+    'rippleColor' => $color('primary50'),
 ]);
 $style('Widget.Bremo.Button.IconSquare', 'Widget.Bremo.Button.Secondary', [
     'android:paddingStart' => '0dp',
@@ -307,7 +309,7 @@ $style('Widget.Bremo.Button.Text', 'Widget.MaterialComponents.Button.TextButton'
     'backgroundTint' => '@android:color/transparent',
     'android:textAppearance' => '@style/'.$typeStyleName('body'),
     'android:textColor' => $color('primary700'),
-    'rippleColor' => '@android:color/transparent',
+    'rippleColor' => $color('primary50'),
 ]);
 $style('Widget.Bremo.Button.Danger', 'Widget.Bremo.Button.Text', [
     'android:textColor' => $color('danger'),
@@ -327,7 +329,7 @@ $style('Widget.Bremo.Card.Selectable', 'Widget.Bremo.Card', [
     'checkedIcon' => '@null',
     'android:checkable' => 'true',
     'cardForegroundColor' => '@android:color/transparent',
-    'rippleColor' => '@android:color/transparent',
+    'rippleColor' => $color('primary50'),
 ]);
 $style('Widget.Bremo.Chip', 'Widget.MaterialComponents.Chip.Choice', [
     'chipBackgroundColor' => '@color/bremo_selectable_fill',
@@ -343,10 +345,10 @@ $style('Widget.Bremo.Chip', 'Widget.MaterialComponents.Chip.Choice', [
     'chipIconVisible' => 'false',
     'closeIconVisible' => 'false',
     'ensureMinTouchTargetSize' => 'false',
-    'rippleColor' => '@android:color/transparent',
+    'rippleColor' => $color('primary50'),
     'android:textAppearance' => '@style/'.$typeStyleName('body'),
     'android:textColor' => $color('navy800'),
-    'android:includeFontPadding' => 'false',
+    'android:includeFontPadding' => 'true',
     'android:gravity' => 'center',
 ]);
 $style('Widget.Bremo.Chip.Sort', 'Widget.Bremo.Chip', [
@@ -354,16 +356,16 @@ $style('Widget.Bremo.Chip.Sort', 'Widget.Bremo.Chip', [
 ]);
 $style('Widget.Bremo.EditText', 'Widget.AppCompat.EditText', [
     'android:background' => '@null',
-    'android:importantForAutofill' => 'no',
+    'android:importantForAutofill' => 'auto',
     'android:textAppearance' => '@style/'.$typeStyleName('body'),
     'android:textColor' => $color('navy800'),
     'android:textColorHint' => $color('slate300'),
-    'android:includeFontPadding' => 'false',
+    'android:includeFontPadding' => 'true',
     'android:paddingStart' => $dimen('space', 'm'),
     'android:paddingEnd' => $dimen('space', 'm'),
-    'android:paddingTop' => '0dp',
-    'android:paddingBottom' => '0dp',
-    'android:minHeight' => '0dp',
+    'android:paddingTop' => $dimen('space', 's'),
+    'android:paddingBottom' => $dimen('space', 's'),
+    'android:minHeight' => $dimen('size', 'touch_target_min'),
     'android:textCursorDrawable' => '@null',
     'android:gravity' => 'center_vertical|start',
     'android:textAlignment' => 'viewStart',

@@ -8,7 +8,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/bremo_surface"
+        android:background="@color/bremo_surface_alt"
         android:orientation="vertical">
 
         <noox.bzr.design.views.AppTopBarView
@@ -19,20 +19,23 @@
         <androidx.core.widget.NestedScrollView
             android:id="@+id/scroll"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:fillViewport="true">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:paddingHorizontal="@dimen/bremo_space_screen_horizontal"
-                android:paddingVertical="@dimen/bremo_space_m">
+                android:paddingTop="@dimen/bremo_space_screen_vertical"
+                android:paddingBottom="@dimen/bremo_space_content_bottom">
 
                 <LinearLayout
                     android:id="@+id/loading"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:divider="@drawable/bremo_gap_m"
+                    android:divider="@drawable/bremo_gap_l"
                     android:orientation="vertical"
                     android:showDividers="middle">
 
@@ -61,11 +64,23 @@
                     android:id="@+id/content"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:divider="@drawable/bremo_gap_m"
+                    android:divider="@drawable/bremo_gap_l"
                     android:orientation="vertical"
                     android:showDividers="middle" />
             </LinearLayout>
         </androidx.core.widget.NestedScrollView>
+
+        <LinearLayout
+            android:id="@+id/bottomBar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingHorizontal="@dimen/bremo_space_screen_horizontal"
+            android:paddingVertical="@dimen/bremo_space_s"
+            android:divider="@drawable/bremo_gap_s"
+            android:showDividers="middle"
+            android:background="@color/bremo_surface"
+            android:visibility="gone" />
     </LinearLayout>
 
     <FrameLayout

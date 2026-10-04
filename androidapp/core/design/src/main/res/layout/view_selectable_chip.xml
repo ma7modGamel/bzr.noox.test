@@ -5,12 +5,12 @@
     <TextView
         android:id="@+id/chip"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/bremo_size_chip_height"
+        android:layout_height="wrap_content"
+        android:minHeight="@dimen/bremo_size_touch_target_min"
+        android:paddingVertical="@dimen/bremo_space_s"
         android:layout_gravity="center_vertical"
         android:background="@drawable/bremo_bg_selectable_chip"
-        android:ellipsize="end"
         android:gravity="center"
-        android:maxLines="1"
         android:paddingStart="@dimen/bremo_space_m"
         android:paddingEnd="@dimen/bremo_space_m"
         android:textAppearance="@style/TextAppearance.Bremo.Body" />

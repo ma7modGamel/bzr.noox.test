@@ -1,0 +1,22 @@
+{
+    "user": {
+        "id": 1,
+        "name": "سارة",
+        "email": "unverified@test.local",
+        "phone": "01033333333",
+        "avatar_url": null,
+        "is_verified": false,
+        "rating_reminders_enabled": true,
+        "terms": {
+            "current_version": 1,
+            "accepted_version": null,
+            "acceptance_required": true
+        },
+        "available_actions": [
+            "update_account",
+            "change_password",
+            "delete_account",
+            "logout"
+        ]
+    }
+}

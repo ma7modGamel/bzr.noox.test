@@ -3,6 +3,7 @@ import java.util.Properties
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
+    id("org.jetbrains.kotlin.plugin.serialization")
     id("app.cash.paparazzi")
     id("com.google.gms.google-services")
     id("com.google.firebase.crashlytics")
@@ -37,6 +38,15 @@ android {
         buildConfigField("String", "API_BASE_URL", "\"${mobileApiBaseUrl.get()}\"")
         manifestPlaceholders["MAPS_ANDROID_API_KEY"] = mapsAndroidApiKey.get()
         manifestPlaceholders["APP_LINK_HOST"] = appLinkHost.get()
+    }
+
+    buildTypes {
+        release {
+            // R8: shrink, optimize and obfuscate; Crashlytics uploads the mapping file to de-obfuscate traces.
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+        }
     }
 
     buildFeatures {
@@ -77,8 +87,12 @@ dependencies {
     implementation("com.squareup.retrofit2:retrofit:2.11.0")
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
     implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
+    // DEC-061: typed response models.
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
+    implementation("com.squareup.retrofit2:converter-kotlinx-serialization:2.11.0")
     testImplementation("junit:junit:4.13.2")
     testImplementation("com.squareup.okhttp3:mockwebserver:4.12.0")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.8.1")
 }
 
 // Optional filter while converting screens: -Pbzr.screens=SCR-C01,SCR-C02 (all screens when absent).

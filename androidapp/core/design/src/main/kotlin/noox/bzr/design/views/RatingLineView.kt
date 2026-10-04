@@ -19,8 +19,9 @@ class RatingLineView @JvmOverloads constructor(context: Context, attrs: Attribut
     }
 
     fun bind(rating: String, services: String?) {
+        (binding.rating.parent as android.view.View).showIf(rating.isNotBlank())
         binding.rating.text = rating
         binding.services.text = services.orEmpty()
-        binding.services.showIf(services != null)
+        binding.services.showIf(!services.isNullOrBlank())
     }
 }

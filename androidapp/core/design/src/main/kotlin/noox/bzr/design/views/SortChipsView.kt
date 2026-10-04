@@ -51,9 +51,10 @@ class SortChipsView @JvmOverloads constructor(context: Context, attrs: Attribute
                 text = label
                 isCheckable = true
                 maxLines = 1
-                chipMinHeight = resources.getDimension(R.dimen.bremo_size_sort_chip_height)
+                chipMinHeight = resources.getDimension(R.dimen.bremo_size_touch_target_min)
+                minimumHeight = px(R.dimen.bremo_size_touch_target_min)
             }
-            group.addView(chip, ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, px(R.dimen.bremo_size_sort_chip_height)))
+            group.addView(chip, ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT))
             styleSelectable(chip, index == selectedIndex)
             if (index == selectedIndex) group.check(chip.id)
         }

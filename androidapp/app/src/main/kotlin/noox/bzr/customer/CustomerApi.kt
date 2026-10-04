@@ -1,8 +1,13 @@
 package noox.bzr.customer
 
+import noox.bzr.network.ApiError
+import noox.bzr.network.ApiException
 import noox.bzr.network.BremoApiClient
+import noox.bzr.network.BremoHttp
+import noox.bzr.network.bremoExecute
 import org.json.JSONArray
 import org.json.JSONObject
+import retrofit2.Call
 
 data class CustomerHomePayload(
     val operatingMode: String,
@@ -18,7 +23,7 @@ data class CustomerHomePayload(
     val addressLabel: String = "",
     /** The default address's city: C16 slots and the category check need it without opening C14 (6ب). */
     val addressCityId: Int? = null,
-    val orders: List<JSONObject> = emptyList(),
+    val orders: List<CustomerOrder> = emptyList(),
 )
 
 data class CustomerOption(val code: String, val label: String)
@@ -42,23 +47,23 @@ data class CustomerTrackingPayload(
 interface CustomerApi {
     fun home(token: String): CustomerHomePayload
     fun catalogCategoryIds(cityId: Int): Set<Int>
-    fun order(token: String, orderId: Int): JSONObject
+    fun order(token: String, orderId: Int): CustomerOrder
     fun tracking(token: String, orderId: Int): CustomerTrackingPayload
-    fun orders(token: String, scope: String, page: Int = 1): JSONObject
+    fun orders(token: String, scope: String, page: Int = 1): OrdersPage
     fun conversations(token: String, page: Int = 1): JSONObject
     fun conversationMessages(token: String, conversationId: Int, page: Int = 1): JSONObject
     fun sendMessage(token: String, conversationId: Int, body: String, mediaIds: List<Int> = emptyList()): JSONObject
     fun offers(token: String, orderId: Int, sort: String = "rating"): JSONArray
     fun provider(token: String, providerId: Int, orderId: Int): JSONObject
-    fun publish(token: String, body: JSONObject, idempotencyKey: String): JSONObject
-    fun updateOrder(token: String, orderId: Int, body: JSONObject): JSONObject
-    fun acceptOffer(token: String, orderId: Int, offerId: Int, expectedVersion: Int, paymentMethod: String): JSONObject
-    fun cancelOrder(token: String, orderId: Int, reasonCode: String, note: String?, expectedVersion: Int): JSONObject
+    fun publish(token: String, body: JSONObject, idempotencyKey: String): CustomerOrder
+    fun updateOrder(token: String, orderId: Int, body: JSONObject): CustomerOrder
+    fun acceptOffer(token: String, orderId: Int, offerId: Int, expectedVersion: Int, paymentMethod: String): CustomerOrder
+    fun cancelOrder(token: String, orderId: Int, reasonCode: String, note: String?, expectedVersion: Int): CustomerOrder
     fun proposals(token: String, orderId: Int): JSONArray
-    fun decideProposal(token: String, orderId: Int, proposalId: Int, approve: Boolean, expectedVersion: Int): JSONObject
-    fun changePaymentMethod(token: String, orderId: Int, method: String, expectedVersion: Int): JSONObject
+    fun decideProposal(token: String, orderId: Int, proposalId: Int, approve: Boolean, expectedVersion: Int): CustomerOrder
+    fun changePaymentMethod(token: String, orderId: Int, method: String, expectedVersion: Int): CustomerOrder
     fun createPayment(token: String, orderId: Int, channel: String, expectedVersion: Int): JSONObject
-    fun confirmCompletion(token: String, orderId: Int, expectedVersion: Int): JSONObject
+    fun confirmCompletion(token: String, orderId: Int, expectedVersion: Int): CustomerOrder
     fun submitReview(token: String, orderId: Int, quality: Int, punctuality: Int, conduct: Int, comment: String?): JSONObject
     fun addresses(token: String): JSONArray
     fun cities(): JSONArray
@@ -84,87 +89,63 @@ interface CustomerApi {
     fun changePassword(token: String, currentPassword: String, password: String, confirmation: String)
     fun deleteAccount(token: String)
     fun terms(): JSONObject
-    fun republish(token: String, orderId: Int): JSONObject
+    fun republish(token: String, orderId: Int): CustomerOrder
 }
 
 data class CustomerMediaUpload(val fileName: String, val mimeType: String, val bytes: ByteArray)
 
 class UrlConnectionCustomerApi(private val baseUrl: String) : CustomerApi {
-    override fun catalogCategoryIds(cityId: Int): Set<Int> {
-        val categories = request("catalog?city_id=$cityId", method = "GET").getJSONArray("data")
-        return (0 until categories.length()).map { categories.getJSONObject(it).getInt("id") }.toSet()
-    }
+    private val service = BremoHttp.typed(baseUrl, CustomerService::class.java, appMode = "CUSTOMER")
+
+    override fun catalogCategoryIds(cityId: Int): Set<Int> = typed { service.catalog(cityId) }.data.map(CatalogCategory::id).toSet()
 
     override fun home(token: String): CustomerHomePayload {
-        val config = request("config", method = "GET")
-        val orders = request("orders?scope=current", token = token, method = "GET").getJSONArray("data")
-        val addresses = request("addresses", token = token, method = "GET").getJSONArray("data")
-        val address = (0 until addresses.length()).map(addresses::getJSONObject)
-            .let { list -> list.firstOrNull { it.optBoolean("is_default") } ?: list.firstOrNull() }
-        val cityId = address?.optJSONObject("city")?.optInt("id")?.takeIf { it > 0 }
-        val categories = request("catalog${cityId?.let { "?city_id=$it" }.orEmpty()}", method = "GET").getJSONArray("data")
-        val user = request("me", token = token, method = "GET").getJSONObject("user")
-        val categoryItems = (0 until categories.length()).map(categories::getJSONObject).map { category ->
-            CustomerCategory(
-                id = category.getInt("id"),
-                name = category.getString("name"),
-                iconKey = category.optString("icon_path").takeIf { it.isNotBlank() }
-                    ?.substringAfterLast('/')?.substringBeforeLast('.'),
-                problemTypes = category.getJSONArray("problem_types").let { problems ->
-                    (0 until problems.length()).map(problems::getJSONObject)
-                }.map { problem ->
-                    CustomerProblemType(
-                        id = problem.getInt("id"),
-                        name = problem.getString("name"),
-                        isOther = problem.optBoolean("is_other"),
-                    )
-                },
-            )
-        }
-        val optionPayload = config.getJSONObject("option_lists")
-        val optionLists = optionPayload.keys().asSequence().associateWith { key ->
-            val items = optionPayload.getJSONArray(key)
-            (0 until items.length()).map { index ->
-                val item = items.getJSONObject(index)
-                CustomerOption(item.getString("code"), item.getString("label"))
-            }
-        }
+        val bearer = bearer(token)
+        val config = typed { service.config() }
+        val orders = typed { service.orders(bearer, "current", 1) }.data
+        val addresses = typed { service.addresses(bearer) }.data
+        val address = addresses.firstOrNull(CustomerAddress::isDefault) ?: addresses.firstOrNull()
+        val cityId = address?.city?.id?.takeIf { it > 0 }
+        val categories = typed { service.catalog(cityId) }.data
+        val user = typed { service.me(bearer) }.user
         return CustomerHomePayload(
             // The app vocabulary is marketplace/staff; the server sends MARKETPLACE/EMPLOYEE (39).
-            if (config.getString("operating_mode") == "MARKETPLACE") "marketplace" else "staff",
-            orders.length(),
-            orders.optJSONObject(0)?.optInt("id")?.takeIf { it > 0 },
-            addresses.firstId(preferDefault = true),
-            categoryItems,
-            optionLists,
-            config.getJSONObject("option_defaults").keys().asSequence().associateWith {
-                config.getJSONObject("option_defaults").getString(it)
+            if (config.operatingMode == "MARKETPLACE") "marketplace" else "staff",
+            orders.size,
+            orders.firstOrNull()?.id,
+            address?.id,
+            categories.map { category ->
+                CustomerCategory(
+                    id = category.id,
+                    name = category.name,
+                    iconKey = category.iconPath?.takeIf(String::isNotBlank)?.substringAfterLast('/')?.substringBeforeLast('.'),
+                    problemTypes = category.problemTypes.map { CustomerProblemType(it.id, it.name, it.isOther) },
+                )
             },
-            config.getJSONObject("service_hours").getString("from"),
-            config.getJSONObject("service_hours").getString("to"),
-            customerName = user.optString("name"),
+            config.optionLists.mapValues { (_, items) -> items.map { CustomerOption(it.code, it.label) } },
+            config.optionDefaults,
+            config.serviceHours.from,
+            config.serviceHours.to,
+            customerName = user.name,
             addressLabel = address?.let(::addressLabel).orEmpty(),
             addressCityId = cityId,
-            orders = (0 until orders.length()).map(orders::getJSONObject),
+            orders = orders,
         )
     }
 
-    override fun order(token: String, orderId: Int): JSONObject = request("orders/$orderId", token = token, method = "GET").getJSONObject("data")
+    override fun order(token: String, orderId: Int): CustomerOrder = typed { service.order(bearer(token), orderId) }.data
 
     override fun tracking(token: String, orderId: Int): CustomerTrackingPayload {
-        val payload = request("orders/$orderId/tracking", token = token, method = "GET")
-        val location = payload.optJSONObject("last_location")
-
+        val payload = typed { service.tracking(bearer(token), orderId) }
         return CustomerTrackingPayload(
-            latitude = location?.optString("lat")?.toDoubleOrNull(),
-            longitude = location?.optString("lng")?.toDoubleOrNull(),
-            etaMinutes = payload.optInt("eta_minutes").takeIf { !payload.isNull("eta_minutes") },
-            etaApproximate = payload.optBoolean("eta_approximate"),
+            latitude = payload.lastLocation?.lat?.toDoubleOrNull(),
+            longitude = payload.lastLocation?.lng?.toDoubleOrNull(),
+            etaMinutes = payload.etaMinutes,
+            etaApproximate = payload.etaApproximate,
         )
     }
 
-    override fun orders(token: String, scope: String, page: Int): JSONObject =
-        request("orders?scope=$scope&page=$page", token = token, method = "GET")
+    override fun orders(token: String, scope: String, page: Int): OrdersPage = typed { service.orders(bearer(token), scope, page) }
 
     override fun conversations(token: String, page: Int): JSONObject =
         request("conversations?page=$page", token = token, method = "GET")
@@ -185,41 +166,26 @@ class UrlConnectionCustomerApi(private val baseUrl: String) : CustomerApi {
     override fun provider(token: String, providerId: Int, orderId: Int): JSONObject =
         request("providers/$providerId?order_id=$orderId", token = token, method = "GET").getJSONObject("data")
 
-    override fun publish(token: String, body: JSONObject, idempotencyKey: String): JSONObject =
-        request("orders", body, token, idempotencyKey = idempotencyKey).getJSONObject("data")
+    override fun publish(token: String, body: JSONObject, idempotencyKey: String): CustomerOrder =
+        typed { service.publish(bearer(token), idempotencyKey, body.toJsonElement()) }.data
 
-    override fun updateOrder(token: String, orderId: Int, body: JSONObject): JSONObject =
-        request("orders/$orderId", body, token, method = "PATCH").getJSONObject("data")
+    override fun updateOrder(token: String, orderId: Int, body: JSONObject): CustomerOrder =
+        typed { service.updateOrder(bearer(token), orderId, body.toJsonElement()) }.data
 
-    override fun acceptOffer(token: String, orderId: Int, offerId: Int, expectedVersion: Int, paymentMethod: String): JSONObject =
-        request(
-            "orders/$orderId/offers/$offerId/accept",
-            JSONObject().put("expected_version", expectedVersion).put("payment_method", paymentMethod),
-            token,
-        ).getJSONObject("data")
+    override fun acceptOffer(token: String, orderId: Int, offerId: Int, expectedVersion: Int, paymentMethod: String): CustomerOrder =
+        typed { service.acceptOffer(bearer(token), orderId, offerId, AcceptOfferRequest(expectedVersion, paymentMethod)) }.data
 
-    override fun cancelOrder(token: String, orderId: Int, reasonCode: String, note: String?, expectedVersion: Int): JSONObject =
-        request(
-            "orders/$orderId/cancel",
-            JSONObject().put("reason_code", reasonCode).put("note", note).put("expected_version", expectedVersion), token,
-        ).getJSONObject("data")
+    override fun cancelOrder(token: String, orderId: Int, reasonCode: String, note: String?, expectedVersion: Int): CustomerOrder =
+        typed { service.cancelOrder(bearer(token), orderId, CancelOrderRequest(reasonCode, note, expectedVersion)) }.data
 
     override fun proposals(token: String, orderId: Int): JSONArray =
         request("orders/$orderId/proposals", token = token, method = "GET").getJSONArray("data")
 
-    override fun decideProposal(token: String, orderId: Int, proposalId: Int, approve: Boolean, expectedVersion: Int): JSONObject =
-        request(
-            "orders/$orderId/proposals/$proposalId/decide",
-            JSONObject().put("approve", approve).put("expected_version", expectedVersion), token,
-        ).getJSONObject("data")
+    override fun decideProposal(token: String, orderId: Int, proposalId: Int, approve: Boolean, expectedVersion: Int): CustomerOrder =
+        typed { service.decideProposal(bearer(token), orderId, proposalId, DecideProposalRequest(approve, expectedVersion)) }.data
 
-    override fun changePaymentMethod(token: String, orderId: Int, method: String, expectedVersion: Int): JSONObject =
-        request(
-            "orders/$orderId/payment-method",
-            JSONObject().put("payment_method", method).put("expected_version", expectedVersion),
-            token,
-            method = "PATCH",
-        ).getJSONObject("data")
+    override fun changePaymentMethod(token: String, orderId: Int, method: String, expectedVersion: Int): CustomerOrder =
+        typed { service.changePaymentMethod(bearer(token), orderId, PaymentMethodRequest(method, expectedVersion)) }.data
 
     override fun createPayment(token: String, orderId: Int, channel: String, expectedVersion: Int): JSONObject =
         request(
@@ -228,12 +194,8 @@ class UrlConnectionCustomerApi(private val baseUrl: String) : CustomerApi {
             token,
         ).getJSONObject("data")
 
-    override fun confirmCompletion(token: String, orderId: Int, expectedVersion: Int): JSONObject =
-        request(
-            "orders/$orderId/confirm-completion",
-            JSONObject().put("expected_version", expectedVersion),
-            token,
-        ).getJSONObject("data")
+    override fun confirmCompletion(token: String, orderId: Int, expectedVersion: Int): CustomerOrder =
+        typed { service.confirmCompletion(bearer(token), orderId, ExpectedVersionRequest(expectedVersion)) }.data
 
     override fun submitReview(
         token: String,
@@ -353,10 +315,21 @@ class UrlConnectionCustomerApi(private val baseUrl: String) : CustomerApi {
 
     override fun terms(): JSONObject = request("terms/current", method = "GET").getJSONObject("data")
 
-    override fun republish(token: String, orderId: Int): JSONObject =
-        request("orders/$orderId/republish", JSONObject(), token).getJSONObject("data")
+    override fun republish(token: String, orderId: Int): CustomerOrder = typed { service.republish(bearer(token), orderId) }.data
 
     private val client = BremoApiClient(baseUrl, appMode = "CUSTOMER")
+
+    private fun bearer(token: String) = "Bearer $token"
+
+    /** A typed call (DEC-061); a refused request keeps the [CustomerApiException] the screens already handle. */
+    private fun <T> typed(call: () -> Call<T>): T = try {
+        bremoExecute(call())
+    } catch (exception: ApiException) {
+        throw CustomerApiException(exception.status, exception.message.orEmpty(), exception.error)
+    }
+
+    /** Stage 3 types the C03–C05 request body; until then it is passed through as built. */
+    private fun JSONObject.toJsonElement() = BremoHttp.json.parseToJsonElement(toString())
 
     private fun request(
         path: String,
@@ -377,18 +350,13 @@ class UrlConnectionCustomerApi(private val baseUrl: String) : CustomerApi {
     }
 }
 
-class CustomerApiException(val status: Int, message: String) : RuntimeException(message)
+/** [error] is the decoded server error of a typed call; legacy calls keep the raw body in the message. */
+class CustomerApiException(val status: Int, message: String, val error: ApiError? = null) : RuntimeException(message)
 
 /** C04 address row: the saved label and area, as the C14 row shows them. */
 internal fun addressLabel(address: JSONObject): String =
     listOf(address.optString("label"), address.optJSONObject("area")?.optString("name").orEmpty())
         .filter(String::isNotBlank).joinToString(" · ")
 
-private fun JSONArray.firstId(preferDefault: Boolean): Int? {
-    if (length() == 0) return null
-    if (preferDefault) {
-        (0 until length()).firstOrNull { optJSONObject(it)?.optBoolean("is_default") == true }
-            ?.let { return getJSONObject(it).getInt("id") }
-    }
-    return getJSONObject(0).getInt("id")
-}
+internal fun addressLabel(address: CustomerAddress): String =
+    listOf(address.label, address.area.name.orEmpty()).filter(String::isNotBlank).joinToString(" · ")

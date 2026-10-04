@@ -36,7 +36,8 @@ class SelectableChipView @JvmOverloads constructor(context: Context, attrs: Attr
     var height: Int = px(R.dimen.bremo_size_chip_height)
         set(value) {
             field = value
-            binding.chip.layoutParams = binding.chip.layoutParams.apply { this.height = value }
+            binding.chip.minimumHeight = maxOf(value, px(R.dimen.bremo_size_touch_target_min))
+            binding.chip.layoutParams = binding.chip.layoutParams.apply { this.height = LayoutParams.WRAP_CONTENT }
             requestLayout()
         }
 
@@ -53,7 +54,8 @@ class SelectableChipView @JvmOverloads constructor(context: Context, attrs: Attr
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
-        super.onMeasure(widthMeasureSpec, fixedHeight(maxOf(height, px(R.dimen.bremo_size_touch_target_min))))
+        minimumHeight = maxOf(height, px(R.dimen.bremo_size_touch_target_min))
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec)
     }
 
     override fun onInitializeAccessibilityNodeInfo(info: AccessibilityNodeInfo) {

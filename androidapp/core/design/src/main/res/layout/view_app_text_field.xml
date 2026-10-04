@@ -36,7 +36,8 @@
             android:id="@+id/edit"
             style="@style/Widget.Bremo.EditText"
             android:layout_width="match_parent"
-            android:layout_height="@dimen/bremo_size_field_height"
+            android:layout_height="wrap_content"
+            android:minHeight="@dimen/bremo_size_field_height"
             android:inputType="text"
             android:maxLines="1" />
     </FrameLayout>

@@ -18,8 +18,10 @@ abstract class ProviderScreenView(context: Context) : FrameLayout(context) {
 
     init {
         layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
-        layoutDirection = LAYOUT_DIRECTION_RTL
+        layoutDirection = resources.configuration.layoutDirection
         scaffold.topBar.onBack = { onBack() }
+        scaffold.error.retry = string(noox.bzr.design.R.string.common_cancel)
+        scaffold.error.onRetry = { onBack() }
     }
 
     fun render(state: ProviderUiState) {

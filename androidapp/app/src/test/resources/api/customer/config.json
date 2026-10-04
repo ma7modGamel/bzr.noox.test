@@ -1,0 +1,227 @@
+{
+    "tokens_version": "1",
+    "operating_mode": "EMPLOYEE",
+    "offers_enabled": false,
+    "inspection_fee_enabled": false,
+    "service_hours": {
+        "from": "08:00",
+        "to": "22:00"
+    },
+    "slots": {
+        "duration_minutes": 120,
+        "minimum_lead_minutes": 90,
+        "booking_horizon_days": 7
+    },
+    "service_slots": [
+        {
+            "to": "11:00",
+            "from": "09:00"
+        },
+        {
+            "to": "13:00",
+            "from": "11:00"
+        },
+        {
+            "to": "15:00",
+            "from": "13:00"
+        },
+        {
+            "to": "17:00",
+            "from": "15:00"
+        },
+        {
+            "to": "19:00",
+            "from": "17:00"
+        },
+        {
+            "to": "21:00",
+            "from": "19:00"
+        }
+    ],
+    "limits": {
+        "max_offers": 10,
+        "min_offer_amount": "50.00",
+        "offer_window_minutes": 30,
+        "max_open_orders": 3
+    },
+    "proposal_timeout_minutes": 60,
+    "location_update_seconds": 30,
+    "rating_window_days": 7,
+    "media_limits": {
+        "images": 5,
+        "image_mb": 10,
+        "video_seconds": 60,
+        "video_mb": 50,
+        "audio_seconds": 120,
+        "audio_mb": 5,
+        "audio_mime": "audio/mp4",
+        "audio_channels": 1,
+        "audio_bitrate_bps": 64000
+    },
+    "option_lists": {
+        "customer_cancellation_reasons": [
+            {
+                "code": "FOUND_ANOTHER",
+                "label": "وجدت فنيًا آخر"
+            },
+            {
+                "code": "NO_LONGER_NEEDED",
+                "label": "لم أعد بحاجة للخدمة"
+            },
+            {
+                "code": "PRICE_TOO_HIGH",
+                "label": "السعر مرتفع"
+            },
+            {
+                "code": "PROVIDER_LATE",
+                "label": "تأخر الفني"
+            },
+            {
+                "code": "WRONG_DETAILS",
+                "label": "بيانات الطلب غير صحيحة"
+            },
+            {
+                "code": "OTHER",
+                "label": "سبب آخر"
+            }
+        ],
+        "provider_cancellation_reasons": [
+            {
+                "code": "EMERGENCY",
+                "label": "ظرف طارئ"
+            },
+            {
+                "code": "CANNOT_REACH",
+                "label": "تعذّر الوصول"
+            },
+            {
+                "code": "OUT_OF_SCOPE",
+                "label": "العمل خارج تخصصي"
+            },
+            {
+                "code": "UNSAFE_SITE",
+                "label": "الموقع غير آمن"
+            },
+            {
+                "code": "CUSTOMER_NO_SHOW",
+                "label": "العميل غير موجود"
+            },
+            {
+                "code": "WRONG_ADDRESS",
+                "label": "عنوان خاطئ"
+            },
+            {
+                "code": "OTHER",
+                "label": "سبب آخر"
+            }
+        ],
+        "proposal_types": [
+            {
+                "code": "EXECUTION_QUOTE",
+                "label": "عرض تنفيذ"
+            },
+            {
+                "code": "MATERIALS",
+                "label": "خامات"
+            },
+            {
+                "code": "EXTRA_WORK",
+                "label": "أعمال إضافية"
+            }
+        ],
+        "dispute_reasons": [],
+        "provider_report_reasons": [],
+        "timing_types": [
+            {
+                "code": "NOW",
+                "label": "الآن"
+            },
+            {
+                "code": "SCHEDULED",
+                "label": "موعد محدد"
+            }
+        ],
+        "materials_responsibilities": [
+            {
+                "code": "CUSTOMER_HAS",
+                "label": "عندي الخامات"
+            },
+            {
+                "code": "PROVIDER_SUPPLIES",
+                "label": "الفني يوفر الخامات"
+            },
+            {
+                "code": "UNSURE",
+                "label": "غير محدد"
+            }
+        ],
+        "pricing_modes": [
+            {
+                "code": "EXECUTION",
+                "label": "استقبال عروض تنفيذ"
+            },
+            {
+                "code": "INSPECTION",
+                "label": "معاينة أولًا"
+            }
+        ],
+        "payment_methods": [
+            {
+                "code": "CASH",
+                "label": "نقدي"
+            },
+            {
+                "code": "ELECTRONIC",
+                "label": "إلكتروني (فوري)"
+            }
+        ],
+        "payment_channels": [
+            {
+                "code": "CARD",
+                "label": "بطاقة بنكية"
+            },
+            {
+                "code": "WALLET",
+                "label": "محفظة إلكترونية"
+            },
+            {
+                "code": "KIOSK",
+                "label": "كود دفع من منفذ فوري"
+            }
+        ],
+        "payment_gateways": [
+            {
+                "code": "CASH",
+                "label": "نقدي للفني"
+            }
+        ],
+        "provider_payout_methods": [
+            {
+                "code": "INSTAPAY",
+                "label": "إنستاباي",
+                "field_label": "رقم أو عنوان إنستاباي"
+            },
+            {
+                "code": "WALLET",
+                "label": "محفظة إلكترونية",
+                "field_label": "رقم المحفظة"
+            },
+            {
+                "code": "BANK",
+                "label": "حساب بنكي",
+                "field_label": "رقم IBAN"
+            }
+        ]
+    },
+    "option_defaults": {
+        "timing_type": "NOW",
+        "materials_responsibility": "UNSURE",
+        "payment_method": "CASH"
+    },
+    "instapay": null,
+    "terms_version": 1,
+    "minimum_supported_app_version": {
+        "android": "1.0.0",
+        "ios": "1.0.0"
+    }
+}

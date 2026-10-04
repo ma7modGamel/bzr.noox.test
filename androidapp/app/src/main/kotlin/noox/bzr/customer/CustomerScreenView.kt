@@ -25,24 +25,45 @@ abstract class CustomerScreenView(context: Context) : FrameLayout(context) {
     protected val inflater: LayoutInflater = LayoutInflater.from(context)
     protected val scaffold = ViewCustomerScreenBinding.inflate(inflater, this)
     protected val content: LinearLayout get() = scaffold.content
+    protected val bottomBar: LinearLayout get() = scaffold.bottomBar
     protected val overlay: FrameLayout get() = scaffold.overlay
 
     var onBack: () -> Unit = {}
+    var onReload: (() -> Unit)? = null
 
     init {
         layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
-        // RTL is mandatory (43 §13), whatever the device locale — as BzrTheme did for Compose.
-        layoutDirection = LAYOUT_DIRECTION_RTL
+        // Follow the selected resource language, including Arabic RTL and English LTR.
+        layoutDirection = resources.configuration.layoutDirection
         scaffold.topBar.onBack = { onBack() }
+        scaffold.error.onRetry = { (onReload ?: onBack)() }
     }
 
     fun render(state: CustomerUiState) {
         scaffold.topBar.title = title(state)
+        scaffold.topBar.showsBack = state.screen !in setOf("SCR-C01", "SCR-C25", "SCR-C18", "SCR-C02")
+        scaffold.error.retry = string(if (onReload == null) R.string.common_cancel else R.string.common_retry)
         scaffold.loading.isVisible = state.phase == CustomerPhase.Loading
         scaffold.error.isVisible = state.phase == CustomerPhase.Error
         content.isVisible = state.phase != CustomerPhase.Loading && state.phase != CustomerPhase.Error
+        bottomBar.isVisible = content.isVisible && bottomBar.childCount > 0
         if (content.isVisible) renderContent(state)
         renderOverlay(state)
+    }
+
+    protected fun pinAction(view: View) {
+        (view.parent as ViewGroup).removeView(view)
+        bottomBar.addView(view, LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT))
+    }
+
+    protected fun addRequestProgress(current: Int) {
+        content.addView(noox.bzr.design.views.StepIndicatorView(context).apply {
+            this.current = current
+            total = 3
+            label = noox.bzr.design.BzrFormat.fill(string(R.string.format_step), "current" to current.toString(), "total" to "3")
+            importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_YES
+            contentDescription = label
+        }, 0)
     }
 
     protected abstract fun title(state: CustomerUiState): String

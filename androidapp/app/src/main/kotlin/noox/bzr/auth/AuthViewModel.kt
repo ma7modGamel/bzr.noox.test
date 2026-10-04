@@ -1,8 +1,8 @@
 package noox.bzr.auth
 
-import android.os.Handler
-import android.os.Looper
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -61,7 +61,7 @@ class AuthViewModel(private val api: AuthApi, private val session: AuthSessionSt
 
     fun resendVerification() {
         state = AuthLogic.reduce("SCR-C12", values() + ("event" to "resend"))
-        Thread {
+        viewModelScope.launch {
             try {
                 api.resendVerification(requireNotNull(session.token))
                 transition("resend_succeeded")
@@ -75,7 +75,7 @@ class AuthViewModel(private val api: AuthApi, private val session: AuthSessionSt
                 logFailure(state.screen, exception)
                 transition("network_error")
             }
-        }.start()
+        }
     }
 
     fun logout() {
@@ -90,14 +90,13 @@ class AuthViewModel(private val api: AuthApi, private val session: AuthSessionSt
         transition(event, mapOf("is_verified" to authSession.isVerified))
     }
 
+    /** Runs on the main thread: requests suspend on OkHttp's threads, so state changes stay in order. */
     private fun transition(event: String, extra: Map<String, Any?> = emptyMap()) {
-        Handler(Looper.getMainLooper()).post {
-            state = AuthLogic.reduce(state.screen, values() + extra + ("event" to event))
-        }
+        state = AuthLogic.reduce(state.screen, values() + extra + ("event" to event))
     }
 
-    private fun runRequest(block: () -> Unit) {
-        Thread {
+    private fun runRequest(block: suspend () -> Unit) {
+        viewModelScope.launch {
             try {
                 block()
             } catch (exception: AuthApiException) {
@@ -106,10 +105,10 @@ class AuthViewModel(private val api: AuthApi, private val session: AuthSessionSt
                 logFailure(state.screen, exception)
                 transition("network_error")
             }
-        }.start()
+        }
     }
 
-    private fun checkVerificationAfterConflict() {
+    private suspend fun checkVerificationAfterConflict() {
         try {
             transition("verification_checked", mapOf("is_verified" to api.me(requireNotNull(session.token))))
         } catch (exception: AuthApiException) {

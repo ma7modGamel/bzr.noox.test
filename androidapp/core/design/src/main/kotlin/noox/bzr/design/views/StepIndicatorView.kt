@@ -54,7 +54,7 @@ class StepIndicatorView @JvmOverloads constructor(context: Context, attrs: Attri
                 step == current -> StepState.Active
                 else -> StepState.Pending
             }
-            steps.addView(stepCircle(step, state), LayoutParams(px(R.dimen.bremo_size_step_circle), px(R.dimen.bremo_size_step_circle)))
+            steps.addView(stepCircle(step, state), LayoutParams(stepSize(), stepSize()))
             if (step < total) {
                 val line = View(context)
                 line.setBackgroundResource(if (step < current) R.color.bremo_primary600 else R.color.bremo_border)
@@ -62,6 +62,8 @@ class StepIndicatorView @JvmOverloads constructor(context: Context, attrs: Attri
             }
         }
     }
+
+    private fun stepSize() = (px(R.dimen.bremo_size_step_circle) * resources.configuration.fontScale.coerceAtLeast(1f)).toInt()
 
     private fun stepCircle(step: Int, state: StepState): View {
         val circle = FrameLayout(context)

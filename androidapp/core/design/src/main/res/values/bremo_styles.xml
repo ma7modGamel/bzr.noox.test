@@ -69,22 +69,30 @@
     </style>
     <style name="TextAppearance.Bremo.Placeholder" parent="TextAppearance.Bremo">
         <item name="android:textSize">@dimen/bremo_text_placeholder</item>
-        <item name="android:textColor">@color/bremo_slate300</item>
+        <item name="android:textColor">@color/bremo_slate400</item>
         <item name="android:fontFamily">@font/cairo_regular</item>
         <item name="fontFamily">@font/cairo_regular</item>
     </style>
+    <style name="TextAppearance.Bremo.HeroTitle" parent="TextAppearance.Bremo">
+        <item name="android:textSize">@dimen/bremo_text_hero_title</item>
+        <item name="android:textColor">@color/bremo_navy900</item>
+        <item name="android:fontFamily">@font/cairo_bold</item>
+        <item name="fontFamily">@font/cairo_bold</item>
+    </style>
     <style name="Widget.Bremo.TextView" parent="Widget.MaterialComponents.TextView">
-        <item name="android:includeFontPadding">false</item>
+        <item name="android:includeFontPadding">true</item>
         <item name="android:textAppearance">@style/TextAppearance.Bremo.Body</item>
     </style>
     <style name="Widget.Bremo.Button.Primary" parent="Widget.MaterialComponents.Button.UnelevatedButton">
         <item name="android:insetTop">0dp</item>
         <item name="android:insetBottom">0dp</item>
         <item name="android:minWidth">0dp</item>
-        <item name="android:minHeight">0dp</item>
+        <item name="android:minHeight">@dimen/bremo_size_touch_target_min</item>
         <item name="android:paddingStart">@dimen/bremo_space_m</item>
         <item name="android:paddingEnd">@dimen/bremo_space_m</item>
-        <item name="android:includeFontPadding">false</item>
+        <item name="android:paddingTop">@dimen/bremo_space_s</item>
+        <item name="android:paddingBottom">@dimen/bremo_space_s</item>
+        <item name="android:includeFontPadding">true</item>
         <item name="android:stateListAnimator">@null</item>
         <item name="elevation">0dp</item>
         <item name="cornerRadius">@dimen/bremo_radius_button</item>
@@ -94,16 +102,18 @@
         <item name="android:textAppearance">@style/TextAppearance.Bremo.Button</item>
         <item name="android:textColor">@color/bremo_on_primary</item>
         <item name="iconTint">@color/bremo_on_primary</item>
-        <item name="rippleColor">@android:color/transparent</item>
+        <item name="rippleColor">@color/bremo_primary50</item>
     </style>
     <style name="Widget.Bremo.Button.Secondary" parent="Widget.MaterialComponents.Button.OutlinedButton">
         <item name="android:insetTop">0dp</item>
         <item name="android:insetBottom">0dp</item>
         <item name="android:minWidth">0dp</item>
-        <item name="android:minHeight">0dp</item>
+        <item name="android:minHeight">@dimen/bremo_size_touch_target_min</item>
         <item name="android:paddingStart">@dimen/bremo_space_m</item>
         <item name="android:paddingEnd">@dimen/bremo_space_m</item>
-        <item name="android:includeFontPadding">false</item>
+        <item name="android:paddingTop">@dimen/bremo_space_s</item>
+        <item name="android:paddingBottom">@dimen/bremo_space_s</item>
+        <item name="android:includeFontPadding">true</item>
         <item name="android:stateListAnimator">@null</item>
         <item name="elevation">0dp</item>
         <item name="cornerRadius">@dimen/bremo_radius_button</item>
@@ -115,7 +125,7 @@
         <item name="android:textAppearance">@style/TextAppearance.Bremo.Button</item>
         <item name="android:textColor">@color/bremo_primary700</item>
         <item name="iconTint">@color/bremo_primary600</item>
-        <item name="rippleColor">@android:color/transparent</item>
+        <item name="rippleColor">@color/bremo_primary50</item>
     </style>
     <style name="Widget.Bremo.Button.IconSquare" parent="Widget.Bremo.Button.Secondary">
         <item name="android:paddingStart">0dp</item>
@@ -126,10 +136,12 @@
         <item name="android:insetTop">0dp</item>
         <item name="android:insetBottom">0dp</item>
         <item name="android:minWidth">0dp</item>
-        <item name="android:minHeight">0dp</item>
+        <item name="android:minHeight">@dimen/bremo_size_touch_target_min</item>
         <item name="android:paddingStart">@dimen/bremo_space_m</item>
         <item name="android:paddingEnd">@dimen/bremo_space_m</item>
-        <item name="android:includeFontPadding">false</item>
+        <item name="android:paddingTop">@dimen/bremo_space_s</item>
+        <item name="android:paddingBottom">@dimen/bremo_space_s</item>
+        <item name="android:includeFontPadding">true</item>
         <item name="android:stateListAnimator">@null</item>
         <item name="elevation">0dp</item>
         <item name="cornerRadius">@dimen/bremo_radius_button</item>
@@ -138,7 +150,7 @@
         <item name="backgroundTint">@android:color/transparent</item>
         <item name="android:textAppearance">@style/TextAppearance.Bremo.Body</item>
         <item name="android:textColor">@color/bremo_primary700</item>
-        <item name="rippleColor">@android:color/transparent</item>
+        <item name="rippleColor">@color/bremo_primary50</item>
     </style>
     <style name="Widget.Bremo.Button.Danger" parent="Widget.Bremo.Button.Text">
         <item name="android:textColor">@color/bremo_danger</item>
@@ -158,7 +170,7 @@
         <item name="checkedIcon">@null</item>
         <item name="android:checkable">true</item>
         <item name="cardForegroundColor">@android:color/transparent</item>
-        <item name="rippleColor">@android:color/transparent</item>
+        <item name="rippleColor">@color/bremo_primary50</item>
     </style>
     <style name="Widget.Bremo.Chip" parent="Widget.MaterialComponents.Chip.Choice">
         <item name="chipBackgroundColor">@color/bremo_selectable_fill</item>
@@ -174,10 +186,10 @@
         <item name="chipIconVisible">false</item>
         <item name="closeIconVisible">false</item>
         <item name="ensureMinTouchTargetSize">false</item>
-        <item name="rippleColor">@android:color/transparent</item>
+        <item name="rippleColor">@color/bremo_primary50</item>
         <item name="android:textAppearance">@style/TextAppearance.Bremo.Body</item>
         <item name="android:textColor">@color/bremo_navy800</item>
-        <item name="android:includeFontPadding">false</item>
+        <item name="android:includeFontPadding">true</item>
         <item name="android:gravity">center</item>
     </style>
     <style name="Widget.Bremo.Chip.Sort" parent="Widget.Bremo.Chip">
@@ -185,16 +197,16 @@
     </style>
     <style name="Widget.Bremo.EditText" parent="Widget.AppCompat.EditText">
         <item name="android:background">@null</item>
-        <item name="android:importantForAutofill">no</item>
+        <item name="android:importantForAutofill">auto</item>
         <item name="android:textAppearance">@style/TextAppearance.Bremo.Body</item>
         <item name="android:textColor">@color/bremo_navy800</item>
         <item name="android:textColorHint">@color/bremo_slate300</item>
-        <item name="android:includeFontPadding">false</item>
+        <item name="android:includeFontPadding">true</item>
         <item name="android:paddingStart">@dimen/bremo_space_m</item>
         <item name="android:paddingEnd">@dimen/bremo_space_m</item>
-        <item name="android:paddingTop">0dp</item>
-        <item name="android:paddingBottom">0dp</item>
-        <item name="android:minHeight">0dp</item>
+        <item name="android:paddingTop">@dimen/bremo_space_s</item>
+        <item name="android:paddingBottom">@dimen/bremo_space_s</item>
+        <item name="android:minHeight">@dimen/bremo_size_touch_target_min</item>
         <item name="android:textCursorDrawable">@null</item>
         <item name="android:gravity">center_vertical|start</item>
         <item name="android:textAlignment">viewStart</item>

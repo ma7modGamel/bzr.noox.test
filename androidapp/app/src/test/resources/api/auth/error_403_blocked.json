@@ -1,0 +1,6 @@
+{
+    "error": {
+        "code": "ACCOUNT_BLOCKED",
+        "message": "الحساب محظور."
+    }
+}

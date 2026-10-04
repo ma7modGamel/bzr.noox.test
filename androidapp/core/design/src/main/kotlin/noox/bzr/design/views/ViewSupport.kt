@@ -36,7 +36,7 @@ internal fun View.applyEnabledAlpha(enabled: Boolean) {
 
 internal fun TextView.appearance(@StyleRes id: Int, @ColorRes colorOverride: Int? = null) {
     TextViewCompat.setTextAppearance(this, id)
-    includeFontPadding = false
+    includeFontPadding = true
     colorOverride?.let { setTextColor(color(it)) }
 }
 

@@ -23,6 +23,8 @@ class ChatInputView @JvmOverloads constructor(context: Context, attrs: Attribute
     var value: String = ""
         set(value) {
             field = value
+            binding.send.isEnabled = value.isNotBlank()
+            binding.send.applyEnabledAlpha(value.isNotBlank())
             if (binding.edit.text.toString() != value) {
                 syncing = true
                 binding.edit.setText(value)
@@ -41,16 +43,19 @@ class ChatInputView @JvmOverloads constructor(context: Context, attrs: Attribute
     init {
         orientation = HORIZONTAL
         gravity = Gravity.CENTER_VERTICAL
+        minimumHeight = px(R.dimen.bremo_size_field_height)
         gap(R.drawable.bremo_gap_s)
         setBackgroundResource(R.drawable.bremo_bg_field)
         val horizontal = px(R.dimen.bremo_space_m)
         setPaddingRelative(horizontal, 0, horizontal, 0)
         binding = ViewChatInputBinding.inflate(inflater, this)
-        binding.send.setOnClickListener { onSend() }
+        binding.send.setOnClickListener { if (binding.edit.text.isNotBlank()) onSend() }
         binding.edit.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) = Unit
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) = Unit
             override fun afterTextChanged(s: Editable?) {
+                binding.send.isEnabled = !s.isNullOrBlank()
+                binding.send.applyEnabledAlpha(!s.isNullOrBlank())
                 if (!syncing) onValueChange?.invoke(s?.toString().orEmpty())
             }
         })
@@ -62,5 +67,5 @@ class ChatInputView @JvmOverloads constructor(context: Context, attrs: Attribute
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) =
-        super.onMeasure(widthMeasureSpec, fixedHeight(px(R.dimen.bremo_size_field_height)))
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec)
 }

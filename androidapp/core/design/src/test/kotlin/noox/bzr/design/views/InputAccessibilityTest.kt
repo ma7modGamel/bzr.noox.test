@@ -54,7 +54,7 @@ class InputAccessibilityTest {
         val node = AccessibilityNodeInfo.obtain()
         chip.onInitializeAccessibilityNodeInfo(node)
 
-        assertEquals(chip.resources.getDimensionPixelSize(R.dimen.bremo_size_touch_target_min), chip.measuredHeight)
+        assertTrue(chip.measuredHeight >= chip.resources.getDimensionPixelSize(R.dimen.bremo_size_touch_target_min))
         assertTrue(chip.isSelected)
         assertTrue(node.isCheckable)
         assertTrue(node.isChecked)

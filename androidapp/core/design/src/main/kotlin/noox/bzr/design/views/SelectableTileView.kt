@@ -20,6 +20,7 @@ class SelectableTileView @JvmOverloads constructor(context: Context, attrs: Attr
         set(value) {
             field = value
             binding.text.text = value
+            contentDescription = value
         }
 
     @DrawableRes
@@ -44,6 +45,11 @@ class SelectableTileView @JvmOverloads constructor(context: Context, attrs: Attr
     init {
         orientation = VERTICAL
         gravity = Gravity.CENTER
+        minimumHeight = px(R.dimen.bremo_size_category_tile_h)
+        isFocusable = true
+        foreground = context.obtainStyledAttributes(intArrayOf(android.R.attr.selectableItemBackground)).let { attributes ->
+            try { attributes.getDrawable(0) } finally { attributes.recycle() }
+        }
         gap(R.drawable.bremo_gap_s)
         setBackgroundResource(R.drawable.bremo_bg_selectable_card)
         val padding = px(R.dimen.bremo_space_s)
@@ -58,7 +64,7 @@ class SelectableTileView @JvmOverloads constructor(context: Context, attrs: Attr
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) =
-        super.onMeasure(widthMeasureSpec, fixedHeight(px(R.dimen.bremo_size_category_tile_h)))
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec)
 
     private fun render() {
         isSelected = state == SelectionState.Selected

@@ -18,7 +18,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:bremoTitle="@string/offer_details_title"
-        app:editText="@string/common_edit" />
+        />
 
     <noox.bzr.design.views.EtaCardView
         android:id="@+id/eta"

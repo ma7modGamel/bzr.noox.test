@@ -1,0 +1,17 @@
+{
+    "user": {
+        "id": 1,
+        "name": "كريم",
+        "email": "provider@test.local",
+        "phone": "01022222222",
+        "is_verified": true,
+        "rating_avg": null,
+        "provider": {
+            "id": 1,
+            "status": "ACTIVE",
+            "available_now": true,
+            "is_verified": true
+        }
+    },
+    "token": "1|recorded-token"
+}

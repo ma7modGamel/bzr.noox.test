@@ -70,6 +70,8 @@ abstract class FieldShellView internal constructor(context: Context, attrs: Attr
             editText.setText(value)
             syncing = false
         }
+        editText.includeFontPadding = true
+        errorView.accessibilityLiveRegion = View.ACCESSIBILITY_LIVE_REGION_POLITE
         errorView.text = error.orEmpty()
         errorView.showIf(error != null)
         val enabled = state != FieldVisualState.Disabled

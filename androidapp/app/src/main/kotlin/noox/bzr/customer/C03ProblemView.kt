@@ -21,6 +21,8 @@ class C03ProblemView(context: Context) : CustomerScreenView(context) {
     var onOpen: (String) -> Unit = {}
 
     init {
+        pinAction(binding.next)
+        addRequestProgress(1)
         binding.description.onValueChange = { onDescriptionChange(it) }
         binding.addMedia.onClick = { onOpen("SCR-C17") }
         binding.next.onClick = { onOpen("SCR-C04") }
@@ -62,10 +64,14 @@ class C03ProblemView(context: Context) : CustomerScreenView(context) {
 
     private fun renderCategories(state: CustomerUiState) {
         binding.categoryGrid.removeAllViews()
-        state.options.chunked(CATEGORY_COLUMNS).forEachIndexed { rowIndex, labels ->
-            val row = LinearLayout(context).apply { orientation = LinearLayout.HORIZONTAL }
+        state.options.chunked(categoryColumns()).forEachIndexed { rowIndex, labels ->
+            val row = LinearLayout(context).apply {
+                orientation = LinearLayout.HORIZONTAL
+                dividerDrawable = androidx.core.content.ContextCompat.getDrawable(context, R.drawable.bremo_gap_m)
+                showDividers = LinearLayout.SHOW_DIVIDER_MIDDLE
+            }
             labels.forEachIndexed { columnIndex, label ->
-                val index = rowIndex * CATEGORY_COLUMNS + columnIndex
+                val index = rowIndex * categoryColumns() + columnIndex
                 row.addView(
                     SelectableTileView(context).apply {
                         text = label
@@ -76,12 +82,19 @@ class C03ProblemView(context: Context) : CustomerScreenView(context) {
                     LinearLayout.LayoutParams(0, LayoutParams.WRAP_CONTENT, 1f),
                 )
             }
-            repeat(CATEGORY_COLUMNS - labels.size) {
+            repeat(categoryColumns() - labels.size) {
                 row.addView(android.widget.Space(context), LinearLayout.LayoutParams(0, 0, 1f))
             }
             binding.categoryGrid.addView(row, LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT))
         }
     }
 
-    private companion object { const val CATEGORY_COLUMNS = 3 }
+    private fun categoryColumns(): Int {
+        val configuration = resources.configuration
+        val available = configuration.screenWidthDp * resources.displayMetrics.density -
+            resources.getDimension(R.dimen.bremo_space_screen_horizontal) * 2
+        val cell = resources.getDimension(R.dimen.bremo_size_category_column_min_width) * configuration.fontScale
+        val gap = resources.getDimension(R.dimen.bremo_space_m)
+        return ((available + gap) / (cell + gap)).toInt().coerceIn(1, 3)
+    }
 }
