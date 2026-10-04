@@ -33,7 +33,7 @@ extension BzrTextStyle {
     }
 }
 
-/// Text in a token style. Dynamic Type follows the environment and is capped at DesignA11y.maxFontScale.
+/// Text in a token style. The layout grows with the user's Dynamic Type preference.
 public struct BzrText: View {
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     private let value: String
@@ -55,7 +55,7 @@ public struct BzrText: View {
         let traits = UITraitCollection(
             preferredContentSizeCategory: UIContentSizeCategory(dynamicTypeSize))
         let scaled = UIFontMetrics.default.scaledValue(for: style.size, compatibleWith: traits)
-        return min(scaled, style.size * DesignA11y.maxFontScale)
+        return scaled
     }
 
     public var body: some View {
@@ -64,10 +64,12 @@ public struct BzrText: View {
             .foregroundStyle(style.color)
             .multilineTextAlignment(alignment)
             .lineLimit(lineLimit)
+            .fixedSize(horizontal: false, vertical: true)
     }
 }
 
 public struct BzrIcon: View {
+    @Environment(\.layoutDirection) private var layoutDirection
     private let key: BzrIconKey
     private let label: String?
     private let tint: Color
@@ -89,9 +91,12 @@ public struct BzrIcon: View {
             .resizable()
             .foregroundStyle(tint)
             .frame(width: size, height: size)
+            .scaleEffect(x: isDirectional && layoutDirection == .rightToLeft ? -1 : 1, y: 1)
             .accessibilityLabel(label ?? "")
             .accessibilityHidden(label == nil)
     }
+
+    private var isDirectional: Bool { key == .arrowBack || key == .chevron }
 }
 
 public struct BzrCard<Content: View>: View {
@@ -113,11 +118,17 @@ public struct BzrCard<Content: View>: View {
     }
 }
 
-/// Renders a button's label untouched, so disabled / pressed looks come only from the tokens (no system dimming).
+/// Quiet press feedback without moving the hit target or surrounding layout.
 public struct BzrPressStyle: ButtonStyle {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     public init() {}
     public func makeBody(configuration: Configuration) -> some View {
-        configuration.label.contentShape(Rectangle())
+        configuration.label
+            .contentShape(Rectangle())
+            .opacity(configuration.isPressed ? DesignRatio.pressFeedback : 1)
+            .animation(
+                reduceMotion ? nil : .easeOut(duration: Double(DesignMotion.navBarMs) / 1000),
+                value: configuration.isPressed)
     }
 }
 
@@ -131,7 +142,7 @@ extension View {
     }
 }
 
-/// RTL always, light always (43 §2).
+/// Layout follows the selected localization; Arabic remains the source language.
 public struct BzrTheme<Content: View>: View {
     private let content: Content
 
@@ -142,9 +153,31 @@ public struct BzrTheme<Content: View>: View {
 
     public var body: some View {
         content
-            .environment(\.layoutDirection, .rightToLeft)
             .environment(\.colorScheme, .light)
             .preferredColorScheme(.light)
             .tint(DesignColors.primary600)
+    }
+}
+
+/// Content-sized service tiles reflow for narrow phones and larger accessibility text.
+public struct BzrServiceGrid<Content: View>: View {
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    private let content: Content
+
+    public init(@ViewBuilder content: () -> Content) { self.content = content() }
+
+    private var minimumWidth: CGFloat {
+        let traits = UITraitCollection(
+            preferredContentSizeCategory: UIContentSizeCategory(dynamicTypeSize))
+        let width = UIFontMetrics.default.scaledValue(
+            for: DesignSize.categoryColumnMinWidth, compatibleWith: traits)
+        return min(width, DesignSize.mobileContentWidth - DesignSpace.screenHorizontal * 2)
+    }
+
+    public var body: some View {
+        LazyVGrid(
+            columns: [GridItem(.adaptive(minimum: minimumWidth), spacing: DesignSpace.m)],
+            alignment: .leading, spacing: DesignSpace.m
+        ) { content }
     }
 }

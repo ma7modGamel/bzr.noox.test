@@ -17,7 +17,7 @@ public struct C08OfferDetailsView: View {
     }
 
     public var body: some View {
-        CustomerScreen(title: bzrString("offer.details.title"), state: state) {
+        CustomerScreen(title: bzrString("offer.details.title"), state: state, bottomBar: AnyView(ActionButtons(actions: state.visibleActions, onAction: onAction))) {
             ProviderHeader(
                 name: field(0), rating: field(1), services: field(2), size: .medium,
                 verifiedLabel: state.providerVerified ? bzrString("provider.verified") : nil)
@@ -47,7 +47,6 @@ public struct C08OfferDetailsView: View {
                 )
                 .buttonStyle(BzrPressStyle())
             }
-            ActionButtons(actions: state.visibleActions, onAction: onAction)
         }
     }
 

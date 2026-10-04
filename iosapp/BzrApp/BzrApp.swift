@@ -19,7 +19,7 @@ struct BzrApp: App {
         let configuredValue = Bundle.main.object(forInfoDictionaryKey: "BZRApiBaseURL") as? String
         let configured =
             configuredValue.flatMap { $0.isEmpty ? nil : $0 }
-                ?? "https://dg.dnbscy.com/api/v1/"
+            ?? "https://dg.dnbscy.com/api/v1/"
         guard let url = URL(string: configured) else { fatalError("Invalid BZRApiBaseURL") }
         let session = AppAuthSessionStore()
         self.session = session
@@ -36,7 +36,9 @@ struct BzrApp: App {
 
     var body: some Scene {
         WindowGroup {
-            Group {
+            // Register Cairo and apply the shared theme on signed-in launches as well.
+            // Layout direction follows the selected app language.
+            BzrTheme {
                 if let providerViewModel {
                     ProviderJourneyRoot(
                         viewModel: providerViewModel,
@@ -67,12 +69,12 @@ struct BzrApp: App {
             }
             // 17 §الروابط العميقة — `bremo://` and Universal Links for email links.
             .onOpenURL { open(link: $0.absoluteString) }
-            .onChange(of: push.pendingLink) { link in
+            .onChange(of: push.pendingLink) { _, link in
                 guard let link, customerViewModel != nil else { return }
                 push.pendingLink = nil
                 open(link: link)
             }
-            .onChange(of: scenePhase) { phase in
+            .onChange(of: scenePhase) { _, phase in
                 if phase == .active { push.refreshAuthorization() }
             }
         }

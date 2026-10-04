@@ -7,10 +7,19 @@ private struct CustomerBackKey: EnvironmentKey {
     static let defaultValue: () -> Void = {}
 }
 
+private struct CustomerRetryKey: EnvironmentKey {
+    static let defaultValue: (() -> Void)? = nil
+}
+
 extension EnvironmentValues {
     var customerBack: () -> Void {
         get { self[CustomerBackKey.self] }
         set { self[CustomerBackKey.self] = newValue }
+    }
+
+    var customerRetry: (() -> Void)? {
+        get { self[CustomerRetryKey.self] }
+        set { self[CustomerRetryKey.self] = newValue }
     }
 }
 
@@ -19,39 +28,57 @@ struct CustomerScreen<Content: View>: View {
     let state: CustomerUIState
     let onBack: (() -> Void)?
     let content: Content
+    let bottomBar: AnyView?
     @Environment(\.customerBack) private var customerBack
+    @Environment(\.customerRetry) private var customerRetry
 
     init(
-        title: String, state: CustomerUIState, onBack: (() -> Void)? = nil,
+        title: String, state: CustomerUIState, onBack: (() -> Void)? = nil, bottomBar: AnyView? = nil,
         @ViewBuilder content: () -> Content
     ) {
         self.title = title
         self.state = state
         self.onBack = onBack
+        self.bottomBar = bottomBar
         self.content = content()
     }
 
     var body: some View {
         VStack(spacing: 0) {
-            AppTopBar(title: title, onBack: onBack ?? customerBack)
+            AppTopBar(
+                title: title, showsBack: !["SCR-C01", "SCR-C25", "SCR-C18", "SCR-C02"].contains(state.screen),
+                onBack: onBack ?? customerBack)
             ScrollView {
-                VStack(alignment: .leading, spacing: DesignSpace.m) {
+                VStack(alignment: .leading, spacing: DesignSpace.l) {
                     switch state.phase {
                     case .loading:
                         ForEach(0..<3, id: \.self) { _ in LoadingSkeleton() }
                     case .error:
                         ErrorState(
                             title: bzrString("error.title"), body: bzrString("error.body"),
-                            retry: bzrString("common.retry"))
+                            retry: bzrString(customerRetry == nil ? "common.cancel" : "common.retry"),
+                            onRetry: customerRetry ?? onBack ?? customerBack)
                     default:
                         content
                     }
                 }
+                .frame(maxWidth: DesignSize.contentMaxWidth, alignment: .leading)
+                .frame(maxWidth: .infinity)
                 .padding(.horizontal, DesignSpace.screenHorizontal)
-                .padding(.vertical, DesignSpace.m)
+                .padding(.top, DesignSpace.screenVertical)
+                .padding(.bottom, DesignSpace.contentBottom)
+            }
+            .scrollDismissesKeyboard(.interactively)
+        }
+        .background(DesignColors.surfaceAlt)
+        .safeAreaInset(edge: .bottom, spacing: 0) {
+            if state.phase != .loading && state.phase != .error, let bottomBar {
+                bottomBar
+                    .padding(.horizontal, DesignSpace.screenHorizontal)
+                    .padding(.vertical, DesignSpace.s)
+                    .background(DesignColors.surface)
             }
         }
-        .background(DesignColors.surface)
     }
 }
 
@@ -65,8 +92,11 @@ struct ScreenHeading: View {
     }
 
     var body: some View {
-        BzrText(title, style: DesignType.sectionTitle)
-        if let detail { BzrText(detail, style: DesignType.secondary) }
+        VStack(alignment: .leading, spacing: DesignSpace.s) {
+            BzrText(title, style: DesignType.sectionTitle).accessibilityAddTraits(.isHeader)
+            if let detail { BzrText(detail, style: DesignType.secondary) }
+        }
+        .padding(.top, DesignSpace.s)
     }
 }
 

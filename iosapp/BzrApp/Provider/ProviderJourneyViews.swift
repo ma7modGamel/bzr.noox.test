@@ -42,23 +42,26 @@ private struct ProviderScreen<Content: View>: View {
         VStack(spacing: 0) {
             AppTopBar(title: title, onBack: onBack)
             ScrollView {
-                VStack(alignment: .leading, spacing: DesignSpace.m) {
+                VStack(alignment: .leading, spacing: DesignSpace.l) {
                     switch state.phase {
                     case .loading:
                         ForEach(0..<3, id: \.self) { _ in LoadingSkeleton() }
                     case .error:
                         ErrorState(
                             title: bzrString("error.title"), body: bzrString("error.body"),
-                            retry: bzrString("common.retry"))
+                            retry: bzrString("common.cancel"), onRetry: onBack)
                     default: content
                     }
                 }
+                .frame(maxWidth: DesignSize.contentMaxWidth, alignment: .leading)
+                .frame(maxWidth: .infinity)
                 .padding(.horizontal, DesignSpace.screenHorizontal)
-                .padding(.vertical, DesignSpace.m)
+                .padding(.top, DesignSpace.screenVertical)
+                .padding(.bottom, DesignSpace.contentBottom)
             }
         }
-        .background(DesignColors.surface)
-        .environment(\.layoutDirection, .rightToLeft)
+        .background(DesignColors.surfaceAlt)
+        .scrollDismissesKeyboard(.interactively)
     }
 }
 

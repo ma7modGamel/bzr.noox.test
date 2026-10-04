@@ -14,22 +14,22 @@ public struct BzrTextStyle {
 }
 
 public enum DesignColors {
-    public static let primary600 = Color(red: 0.0784, green: 0.6118, blue: 0.5804, opacity: 1.0000)
-    public static let primary500 = Color(red: 0.0000, green: 0.6745, blue: 0.7137, opacity: 1.0000)
-    public static let primary400 = Color(red: 0.1490, green: 0.7098, blue: 0.6667, opacity: 1.0000)
-    public static let primary700 = Color(red: 0.1176, green: 0.5490, blue: 0.5490, opacity: 1.0000)
-    public static let primary50 = Color(red: 0.9098, green: 0.9569, blue: 0.9569, opacity: 1.0000)
-    public static let primary50Info = Color(red: 0.8941, green: 0.9725, blue: 0.9647, opacity: 1.0000)
-    public static let primary50Available = Color(red: 0.8745, green: 0.9686, blue: 0.9843, opacity: 1.0000)
-    public static let navy900 = Color(red: 0.0275, green: 0.1098, blue: 0.2549, opacity: 1.0000)
-    public static let navy800 = Color(red: 0.0627, green: 0.1137, blue: 0.2353, opacity: 1.0000)
-    public static let slate500 = Color(red: 0.3412, green: 0.3804, blue: 0.4824, opacity: 1.0000)
-    public static let slate400 = Color(red: 0.4275, green: 0.4706, blue: 0.5843, opacity: 1.0000)
-    public static let slate300 = Color(red: 0.5569, green: 0.5725, blue: 0.6157, opacity: 1.0000)
-    public static let border = Color(red: 0.8784, green: 0.8941, blue: 0.9098, opacity: 1.0000)
+    public static let primary600 = Color(red: 0.0314, green: 0.4980, blue: 0.4706, opacity: 1.0000)
+    public static let primary500 = Color(red: 0.0667, green: 0.5490, blue: 0.5176, opacity: 1.0000)
+    public static let primary400 = Color(red: 0.1490, green: 0.6627, blue: 0.6157, opacity: 1.0000)
+    public static let primary700 = Color(red: 0.0235, green: 0.4000, blue: 0.3725, opacity: 1.0000)
+    public static let primary50 = Color(red: 0.9176, green: 0.9647, blue: 0.9529, opacity: 1.0000)
+    public static let primary50Info = Color(red: 0.9176, green: 0.9647, blue: 0.9529, opacity: 1.0000)
+    public static let primary50Available = Color(red: 0.9176, green: 0.9647, blue: 0.9529, opacity: 1.0000)
+    public static let navy900 = Color(red: 0.0784, green: 0.1804, blue: 0.1961, opacity: 1.0000)
+    public static let navy800 = Color(red: 0.1255, green: 0.2275, blue: 0.2431, opacity: 1.0000)
+    public static let slate500 = Color(red: 0.3255, green: 0.4039, blue: 0.4157, opacity: 1.0000)
+    public static let slate400 = Color(red: 0.3686, green: 0.4510, blue: 0.4627, opacity: 1.0000)
+    public static let slate300 = Color(red: 0.4000, green: 0.4784, blue: 0.4902, opacity: 1.0000)
+    public static let border = Color(red: 0.8627, green: 0.9020, blue: 0.8902, opacity: 1.0000)
     public static let surface = Color(red: 1.0000, green: 1.0000, blue: 1.0000, opacity: 1.0000)
-    public static let surfaceAlt = Color(red: 0.9569, green: 0.9569, blue: 0.9725, opacity: 1.0000)
-    public static let surfaceAlt2 = Color(red: 0.9608, green: 0.9765, blue: 1.0000, opacity: 1.0000)
+    public static let surfaceAlt = Color(red: 0.9529, green: 0.9686, blue: 0.9608, opacity: 1.0000)
+    public static let surfaceAlt2 = Color(red: 0.9294, green: 0.9569, blue: 0.9451, opacity: 1.0000)
     public static let scrim = Color(red: 0.0431, green: 0.0706, blue: 0.1255, opacity: 0.7020)
     public static let onPrimary = Color(red: 1.0000, green: 1.0000, blue: 1.0000, opacity: 1.0000)
     public static let star = Color(red: 0.9412, green: 0.6745, blue: 0.1725, opacity: 1.0000)
@@ -38,8 +38,8 @@ public enum DesignColors {
     public static let warningBg = Color(red: 0.9882, green: 0.9412, blue: 0.8314, opacity: 1.0000)
     public static let warningText = Color(red: 0.4157, green: 0.2863, blue: 0.0824, opacity: 1.0000)
     public static let badgeBg = Color(red: 0.9882, green: 0.9255, blue: 0.8000, opacity: 1.0000)
-    public static let badgeText = Color(red: 0.6275, green: 0.4745, blue: 0.2314, opacity: 1.0000)
-    public static let danger = Color(red: 0.7765, green: 0.3098, blue: 0.3255, opacity: 1.0000)
+    public static let badgeText = Color(red: 0.4627, green: 0.3255, blue: 0.1020, opacity: 1.0000)
+    public static let danger = Color(red: 0.7059, green: 0.2392, blue: 0.2784, opacity: 1.0000)
 }
 
 public enum DesignType {
@@ -50,17 +50,18 @@ public enum DesignType {
     public static let cardTitle = BzrTextStyle(size: 18, fontName: DesignFont.bold, color: DesignColors.navy900)
     public static let body = BzrTextStyle(size: 16, fontName: DesignFont.medium, color: DesignColors.navy800)
     public static let button = BzrTextStyle(size: 17, fontName: DesignFont.bold, color: DesignColors.onPrimary)
-    public static let secondary = BzrTextStyle(size: 14, fontName: DesignFont.regular, color: DesignColors.slate500)
+    public static let secondary = BzrTextStyle(size: 15, fontName: DesignFont.regular, color: DesignColors.slate500)
     public static let caption = BzrTextStyle(size: 13, fontName: DesignFont.medium, color: DesignColors.slate500)
     public static let badge = BzrTextStyle(size: 12, fontName: DesignFont.medium, color: DesignColors.badgeText)
-    public static let placeholder = BzrTextStyle(size: 16, fontName: DesignFont.regular, color: DesignColors.slate300)
+    public static let placeholder = BzrTextStyle(size: 16, fontName: DesignFont.regular, color: DesignColors.slate400)
+    public static let heroTitle = BzrTextStyle(size: 28, fontName: DesignFont.bold, color: DesignColors.navy900)
 }
 
 public enum DesignSpace {
-    public static let screenHorizontal: CGFloat = 18
-    public static let cardGap: CGFloat = 8
+    public static let screenHorizontal: CGFloat = 20
+    public static let cardGap: CGFloat = 12
     public static let sectionGap: CGFloat = 24
-    public static let sectionGapLarge: CGFloat = 28
+    public static let sectionGapLarge: CGFloat = 32
     public static let cardPadding: CGFloat = 16
     public static let rowGap: CGFloat = 12
     public static let xs: CGFloat = 4
@@ -69,18 +70,25 @@ public enum DesignSpace {
     public static let l: CGFloat = 16
     public static let xl: CGFloat = 24
     public static let xxl: CGFloat = 32
+    public static let screenVertical: CGFloat = 24
+    public static let contentBottom: CGFloat = 32
+    public static let xxs: CGFloat = 4
+    public static let compactGutter: CGFloat = 16
+    public static let comfortableGutter: CGFloat = 24
+    public static let xxxl: CGFloat = 40
+    public static let xxxxl: CGFloat = 48
 }
 
 public enum DesignRadius {
-    public static let button: CGFloat = 10
-    public static let card: CGFloat = 12
-    public static let field: CGFloat = 10
-    public static let chip: CGFloat = 10
+    public static let button: CGFloat = 16
+    public static let card: CGFloat = 20
+    public static let field: CGFloat = 16
+    public static let chip: CGFloat = 12
     public static let badge: CGFloat = 8
     public static let checkbox: CGFloat = 4
-    public static let heroCard: CGFloat = 16
-    public static let sheetTop: CGFloat = 16
-    public static let menuIconBox: CGFloat = 12
+    public static let heroCard: CGFloat = 24
+    public static let sheetTop: CGFloat = 24
+    public static let menuIconBox: CGFloat = 16
     public static let full: CGFloat = 999
 }
 
@@ -88,12 +96,12 @@ public enum DesignSize {
     public static let mobileContentWidth: CGFloat = 400
     public static let topBarHeight: CGFloat = 56
     public static let primaryButtonHeight: CGFloat = 52
-    public static let secondaryButtonHeight: CGFloat = 44
-    public static let compactButtonHeight: CGFloat = 36
-    public static let chatSquareButtonW: CGFloat = 62
-    public static let chatSquareButtonH: CGFloat = 36
+    public static let secondaryButtonHeight: CGFloat = 48
+    public static let compactButtonHeight: CGFloat = 48
+    public static let chatSquareButtonW: CGFloat = 56
+    public static let chatSquareButtonH: CGFloat = 48
     public static let categoryTileW: CGFloat = 118
-    public static let categoryTileH: CGFloat = 104
+    public static let categoryTileH: CGFloat = 112
     public static let categoryTileColumns: Int = 3
     public static let homeServiceTileW: CGFloat = 118
     public static let homeServiceTileH: CGFloat = 86
@@ -102,9 +110,9 @@ public enum DesignSize {
     public static let chipHeight: CGFloat = 40
     public static let sortChipHeight: CGFloat = 36
     public static let touchTargetMin: CGFloat = 48
-    public static let fieldHeight: CGFloat = 48
+    public static let fieldHeight: CGFloat = 56
     public static let currencyBoxWidth: CGFloat = 50
-    public static let textAreaHeight: CGFloat = 90
+    public static let textAreaHeight: CGFloat = 112
     public static let checkbox: CGFloat = 20
     public static let radio: CGFloat = 20
     public static let radioDot: CGFloat = 10
@@ -127,7 +135,7 @@ public enum DesignSize {
     public static let ratingBarHeight: CGFloat = 8
     public static let ratingLabelWidth: CGFloat = 110
     public static let mapCardHeight: CGFloat = 185
-    public static let myLocationButton: CGFloat = 40
+    public static let myLocationButton: CGFloat = 48
     public static let etaIconCircle: CGFloat = 52
     public static let chatBubbleMaxWidth: CGFloat = 280
     public static let sheetHandleW: CGFloat = 32
@@ -138,7 +146,10 @@ public enum DesignSize {
     public static let icon: CGFloat = 24
     public static let iconSmall: CGFloat = 16
     public static let iconXs: CGFloat = 12
-    public static let menuIconBox: CGFloat = 44
+    public static let menuIconBox: CGFloat = 48
+    public static let contentMaxWidth: CGFloat = 600
+    public static let compactBreakpoint: CGFloat = 360
+    public static let categoryColumnMinWidth: CGFloat = 104
 }
 
 public enum DesignBorder {
@@ -156,6 +167,8 @@ public enum DesignIcon {
 public enum DesignRatio {
     public static let skeletonShortLine: CGFloat = 0.6
     public static let progressArc: CGFloat = 0.75
+    public static let pressFeedback: CGFloat = 0.88
+    public static let loadingDim: CGFloat = 0.55
 }
 
 public enum DesignThreshold {
@@ -163,7 +176,7 @@ public enum DesignThreshold {
 }
 
 public enum DesignOpacity { public static let disabled: CGFloat = 0.4 }
-public enum DesignMotion { public static let screenTransitionMs = 250; public static let sheetMs = 250 }
+public enum DesignMotion { public static let screenTransitionMs = 250; public static let sheetMs = 250; public static let navBarMs = 180 }
 public enum DesignA11y { public static let maxFontScale: CGFloat = 1.3 }
 public enum DesignFont {
     public static let family = "Cairo"
@@ -173,4 +186,4 @@ public enum DesignFont {
     public static let bold = "Cairo-Bold"
     public static let files = ["Cairo-Regular", "Cairo-Medium", "Cairo-SemiBold", "Cairo-Bold"]
 }
-public enum DesignMeta { public static let tokensSha256 = "a7b2a986144c2f52fdcc748399f7bb18be95b980bc55c0abc1362f84e1281a89" }
+public enum DesignMeta { public static let tokensSha256 = "d49628e0dda171e8f68cf471e4560763d8b10b71d6ba514ed78de5fd46103d80" }

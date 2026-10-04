@@ -41,17 +41,14 @@ private struct VerticalLine: View {
     }
 }
 
-/// Deterministic arc instead of an animated spinner, so snapshots always show the loading state.
+/// Native indeterminate progress is visible for the entire asynchronous action.
 private struct ProgressArc: View {
     let color: Color
     let label: String
 
     var body: some View {
-        Circle()
-            .trim(from: 0, to: DesignRatio.progressArc)
-            .stroke(color, style: StrokeStyle(lineWidth: DesignSize.progressStroke, lineCap: .round))
-            .rotationEffect(.degrees(-90))
-            .padding(DesignSize.progressStroke / 2)
+        ProgressView()
+            .tint(color)
             .frame(width: DesignSize.icon, height: DesignSize.icon)
             .accessibilityLabel(label)
     }
@@ -79,13 +76,15 @@ public struct AppTopBar: View {
     private let actionIcon: BzrIconKey?
     private let actionLabel: String?
     private let onBack: () -> Void
+    private let showsBack: Bool
     private let onAction: () -> Void
 
     public init(
         title: String, actionIcon: BzrIconKey? = nil, actionLabel: String? = nil,
-        onBack: @escaping () -> Void = {}, onAction: @escaping () -> Void = {}
+        showsBack: Bool = true, onBack: @escaping () -> Void = {}, onAction: @escaping () -> Void = {}
     ) {
         self.title = title
+        self.showsBack = showsBack
         self.actionIcon = actionIcon
         self.actionLabel = actionLabel
         self.onBack = onBack
@@ -93,19 +92,20 @@ public struct AppTopBar: View {
     }
 
     public var body: some View {
-        ZStack {
-            BzrText(title, style: DesignType.screenTitle, lineLimit: 1)
-            HStack(spacing: 0) {
-                if let actionIcon {
-                    iconButton(actionIcon, label: actionLabel, action: onAction)
-                }
-                Spacer(minLength: 0)
+        HStack(spacing: DesignSpace.s) {
+            if showsBack {
                 iconButton(.arrowBack, label: bzrString("a11y.back"), action: onBack)
             }
+            BzrText(title, style: DesignType.screenTitle)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .accessibilityAddTraits(.isHeader)
+            if let actionIcon {
+                iconButton(actionIcon, label: actionLabel, action: onAction)
+            }
         }
-        .frame(maxWidth: .infinity)
-        .frame(height: DesignSize.topBarHeight)
+        .frame(minHeight: DesignSize.topBarHeight)
         .padding(.horizontal, DesignSpace.screenHorizontal)
+        .padding(.vertical, DesignSpace.xs)
         .background(DesignColors.surface)
     }
 
@@ -142,17 +142,21 @@ public struct PrimaryButton: View {
                 if state == .loading {
                     ProgressArc(color: DesignColors.onPrimary, label: bzrString("a11y.loading"))
                 } else {
-                    BzrText(text, style: DesignType.button, lineLimit: 1)
+                    BzrText(text, style: DesignType.button, alignment: .center)
                 }
             }
             .frame(maxWidth: .infinity)
-            .frame(height: height)
+            .padding(.horizontal, DesignSpace.l)
+            .padding(.vertical, DesignSpace.m)
+            .frame(minHeight: height)
             .background(state == .pressed ? DesignColors.primary700 : DesignColors.primary600)
             .clipShape(RoundedRectangle(cornerRadius: DesignRadius.button))
         }
         .buttonStyle(BzrPressStyle())
         .disabled(!(state == .normal || state == .pressed))
         .opacity(state == .disabled ? DesignOpacity.disabled : 1)
+        .accessibilityLabel(text)
+        .accessibilityValue(state == .loading ? bzrString("a11y.loading") : "")
     }
 }
 
@@ -169,9 +173,10 @@ public struct SecondaryButton: View {
 
     public var body: some View {
         Button(action: onClick) {
-            BzrText(text, style: DesignType.button.colored(DesignColors.primary700), lineLimit: 1)
+            BzrText(text, style: DesignType.button.colored(DesignColors.primary700), alignment: .center)
                 .frame(maxWidth: .infinity)
-                .frame(height: DesignSize.secondaryButtonHeight)
+                .padding(.vertical, DesignSpace.s)
+                .frame(minHeight: DesignSize.secondaryButtonHeight)
                 .bzrFrame(
                     radius: DesignRadius.button, fill: DesignColors.surface, border: DesignColors.primary600,
                     width: DesignBorder.width)
@@ -195,7 +200,8 @@ public struct DangerTextButton: View {
         Button(action: onClick) {
             BzrText(text, style: DesignType.body.colored(DesignColors.danger))
                 .padding(.horizontal, DesignSpace.m)
-                .frame(height: DesignSize.secondaryButtonHeight)
+                .padding(.vertical, DesignSpace.s)
+                .frame(minHeight: DesignSize.secondaryButtonHeight)
         }
         .buttonStyle(BzrPressStyle())
     }
@@ -213,7 +219,8 @@ public struct LinkButton: View {
     public var body: some View {
         Button(action: onClick) {
             BzrText(text, style: DesignType.body.colored(DesignColors.primary700))
-                .frame(height: DesignSize.secondaryButtonHeight)
+                .padding(.vertical, DesignSpace.s)
+                .frame(minHeight: DesignSize.secondaryButtonHeight)
                 .padding(.horizontal, DesignSpace.m)
         }
         .buttonStyle(BzrPressStyle())
@@ -243,10 +250,12 @@ public struct IconSquareButton: View {
     }
 }
 
+/// Stable tab destinations with a restrained selection capsule and native button feedback.
 public struct BottomNav: View {
     private let items: [(BzrIconKey, String)]
     private let selectedIndex: Int
     private let onSelect: (Int) -> Void
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     public init(
         items: [(BzrIconKey, String)], selectedIndex: Int, onSelect: @escaping (Int) -> Void = { _ in }
@@ -256,30 +265,45 @@ public struct BottomNav: View {
         self.onSelect = onSelect
     }
 
-    private func color(_ index: Int) -> Color {
-        index == selectedIndex ? DesignColors.primary500 : DesignColors.slate400
-    }
-
     public var body: some View {
-        VStack(spacing: 0) {
-            HorizontalLine()
-            HStack(spacing: 0) {
-                ForEach(items.indices, id: \.self) { index in
-                    Button {
-                        onSelect(index)
-                    } label: {
-                        VStack(spacing: DesignSpace.xs) {
-                            BzrIcon(items[index].0, tint: color(index))
-                            BzrText(items[index].1, style: DesignType.caption.colored(color(index)), lineLimit: 1)
-                        }
-                        .frame(maxWidth: .infinity)
+        HStack(alignment: .top, spacing: DesignSpace.xs) {
+            ForEach(items.indices, id: \.self) { index in
+                Button {
+                    onSelect(index)
+                } label: {
+                    VStack(spacing: DesignSpace.xs) {
+                        BzrIcon(
+                            items[index].0,
+                            tint: index == selectedIndex ? DesignColors.primary700 : DesignColors.slate400
+                        )
+                        .padding(.horizontal, DesignSpace.l)
+                        .padding(.vertical, DesignSpace.xs)
+                        .background(index == selectedIndex ? DesignColors.primary50 : .clear)
+                        .clipShape(Capsule())
+                        BzrText(
+                            items[index].1,
+                            style: DesignType.caption.colored(
+                                index == selectedIndex ? DesignColors.primary700 : DesignColors.slate400),
+                            alignment: .center)
                     }
-                    .buttonStyle(BzrPressStyle())
+                    .frame(maxWidth: .infinity)
+                    .frame(minHeight: DesignSize.touchTargetMin)
+                    .contentShape(Rectangle())
                 }
+                .buttonStyle(BzrPressStyle())
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel(items[index].1)
+                .accessibilityAddTraits(index == selectedIndex ? [.isSelected] : [])
             }
-            .frame(height: DesignSize.bottomNavHeight)
         }
+        .padding(.horizontal, DesignSpace.s)
+        .padding(.vertical, DesignSpace.s)
+        .frame(minHeight: DesignSize.bottomNavHeight)
         .background(DesignColors.surface)
+        .overlay(alignment: .top) { HorizontalLine() }
+        .animation(
+            reduceMotion ? nil : .easeOut(duration: Double(DesignMotion.navBarMs) / 1000),
+            value: selectedIndex)
     }
 }
 
@@ -316,7 +340,6 @@ public struct DrawerMenu: View {
     private let verifiedLabel: String
     private let rows: [(BzrIconKey, String)]
     private let action: String
-    private let actionState: ButtonVisualState
     private let onAction: () -> Void
 
     public init(
@@ -383,6 +406,7 @@ public struct StepIndicator: View {
 }
 
 private struct StepCircle: View {
+    @ScaledMetric private var circleSize = DesignSize.stepCircle
     let step: Int
     let state: StepState
 
@@ -404,7 +428,7 @@ private struct StepCircle: View {
                 BzrText(BzrFormat.number(step), style: DesignType.caption)
             }
         }
-        .frame(width: DesignSize.stepCircle, height: DesignSize.stepCircle)
+        .frame(width: circleSize, height: circleSize)
     }
 }
 
@@ -434,11 +458,11 @@ public struct SelectableTile: View {
                     icon, tint: state == .selected ? DesignColors.primary600 : DesignColors.navy800,
                     size: DesignSize.tileIcon)
             }
-            BzrText(text, alignment: .center, lineLimit: 1)
+            BzrText(text, style: DesignType.secondary.weighted(DesignFont.semibold), alignment: .center)
         }
         .padding(DesignSpace.s)
         .frame(maxWidth: .infinity)
-        .frame(height: DesignSize.categoryTileH)
+        .frame(minHeight: DesignSize.categoryTileH)
         .selectionFrame(state, radius: DesignRadius.card)
     }
 }
@@ -455,9 +479,10 @@ public struct SelectableChip: View {
     }
 
     public var body: some View {
-        BzrText(text, lineLimit: 1)
+        BzrText(text, alignment: .center)
             .padding(.horizontal, DesignSpace.m)
-            .frame(height: height)
+            .padding(.vertical, DesignSpace.s)
+            .frame(minHeight: max(height, DesignSize.touchTargetMin))
             .selectionFrame(state, radius: DesignRadius.chip)
             .frame(minHeight: DesignSize.touchTargetMin)
             .contentShape(Rectangle())
@@ -587,7 +612,7 @@ private struct FieldShell<Content: View>: View {
             }
             .padding(padding)
             .frame(maxWidth: .infinity, alignment: topAligned ? .topLeading : .leading)
-            .frame(height: height, alignment: topAligned ? .top : .center)
+            .frame(minHeight: height, alignment: topAligned ? .top : .center)
             .bzrFrame(
                 radius: DesignRadius.field,
                 fill: DesignColors.surface,
@@ -596,7 +621,10 @@ private struct FieldShell<Content: View>: View {
                     ? DesignBorder.selectedWidth : DesignBorder.width
             )
             if let error {
-                BzrText(error, style: DesignType.caption.colored(DesignColors.danger))
+                HStack(alignment: .top, spacing: DesignSpace.xs) {
+                    BzrIcon(.error, tint: DesignColors.danger, size: DesignSize.iconSmall)
+                    BzrText(error, style: DesignType.caption.colored(DesignColors.danger))
+                }
             }
         }
         .opacity(state == .disabled ? DesignOpacity.disabled : 1)
@@ -776,7 +804,7 @@ public struct AmountField: View {
             .focused($focused)
             BzrText(currency)
                 .frame(width: DesignSize.currencyBoxWidth)
-                .frame(maxHeight: .infinity)
+                .padding(.vertical, DesignSpace.s)
                 .background(DesignColors.surfaceAlt2)
                 .clipShape(RoundedRectangle(cornerRadius: DesignRadius.badge))
         }
@@ -851,6 +879,7 @@ public struct SummaryCard: View {
                             .padding(.vertical, DesignSpace.xs)
                             .background(DesignColors.primary50)
                             .clipShape(RoundedRectangle(cornerRadius: DesignRadius.badge))
+                            .frame(minWidth: DesignSize.touchTargetMin, minHeight: DesignSize.touchTargetMin)
                     }
                     .buttonStyle(BzrPressStyle())
                 }
@@ -885,7 +914,7 @@ public struct Badge: View {
             BzrText(
                 text,
                 style: DesignType.badge.colored(
-                    kind == .highlight ? DesignColors.badgeText : DesignColors.primary700), lineLimit: 1)
+                    kind == .highlight ? DesignColors.badgeText : DesignColors.primary700))
         }
         .padding(.horizontal, DesignSpace.s)
         .padding(.vertical, DesignSpace.xs)
@@ -907,18 +936,21 @@ private struct Avatar: View {
 
 private struct VerifiedAvatar: View {
     let size: CGFloat
+    var verified = false
 
     var body: some View {
         ZStack(alignment: .bottomLeading) {
             Avatar(size: size)
-            ZStack {
-                Circle().fill(DesignColors.primary500)
-                Circle().strokeBorder(DesignColors.surface, lineWidth: DesignSize.controlStroke)
-                BzrIcon(
-                    .shield, label: bzrString("a11y.verified"), tint: DesignColors.onPrimary,
-                    size: DesignSize.iconSmall)
+            if verified {
+                ZStack {
+                    Circle().fill(DesignColors.primary500)
+                    Circle().strokeBorder(DesignColors.surface, lineWidth: DesignSize.controlStroke)
+                    BzrIcon(
+                        .shield, label: bzrString("a11y.verified"), tint: DesignColors.onPrimary,
+                        size: DesignSize.iconSmall)
+                }
+                .frame(width: DesignSize.verifiedShield, height: DesignSize.verifiedShield)
             }
-            .frame(width: DesignSize.verifiedShield, height: DesignSize.verifiedShield)
         }
         .frame(width: size, height: size)
     }
@@ -930,18 +962,21 @@ private struct RatingLine: View {
 
     var body: some View {
         HStack(spacing: DesignSpace.s) {
-            HStack(spacing: DesignSpace.xs) {
-                BzrIcon(.starFilled, tint: DesignColors.star, size: DesignSize.iconSmall)
-                BzrText(rating, lineLimit: 1)
+            if !rating.isEmpty {
+                HStack(spacing: DesignSpace.xs) {
+                    BzrIcon(.starFilled, tint: DesignColors.star, size: DesignSize.iconSmall)
+                    BzrText(rating)
+                }
             }
             if let services {
-                BzrText(services, style: DesignType.secondary, lineLimit: 1)
+                BzrText(services, style: DesignType.secondary)
             }
         }
     }
 }
 
 public struct ProviderHeader: View {
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     private let name: String
     private let rating: String
     private let services: String?
@@ -959,8 +994,8 @@ public struct ProviderHeader: View {
     }
 
     public var body: some View {
-        HStack(spacing: DesignSpace.m) {
-            VerifiedAvatar(size: size.value)
+        headerLayout {
+            VerifiedAvatar(size: size.value, verified: verifiedLabel != nil)
             VStack(alignment: .leading, spacing: DesignSpace.xs) {
                 BzrText(name, style: DesignType.cardTitle)
                 if let verifiedLabel {
@@ -972,7 +1007,14 @@ public struct ProviderHeader: View {
                 }
                 RatingLine(rating: rating, services: services)
             }
+            .frame(maxWidth: .infinity, alignment: .leading)
         }
+    }
+
+    private var headerLayout: AnyLayout {
+        dynamicTypeSize.isAccessibilitySize
+            ? AnyLayout(VStackLayout(alignment: .leading, spacing: DesignSpace.m))
+            : AnyLayout(HStackLayout(spacing: DesignSpace.m))
     }
 }
 
@@ -1119,7 +1161,7 @@ public struct StatRow: View {
                         BzrIcon(items[index].icon, tint: DesignColors.primary500)
                         BzrText(items[index].value, style: DesignType.cardTitle)
                         BzrText(
-                            items[index].label, style: DesignType.secondary, alignment: .center, lineLimit: 1)
+                            items[index].label, style: DesignType.secondary, alignment: .center)
                     }
                     .frame(maxWidth: .infinity)
                     if index != items.count - 1 {
@@ -1144,7 +1186,7 @@ public struct RatingBars: View {
         VStack(alignment: .leading, spacing: DesignSpace.s) {
             ForEach(items.indices, id: \.self) { index in
                 HStack(spacing: DesignSpace.m) {
-                    BzrText(items[index].0, style: DesignType.secondary, lineLimit: 1)
+                    BzrText(items[index].0, style: DesignType.secondary)
                         .frame(width: DesignSize.ratingLabelWidth, alignment: .leading)
                     GeometryReader { geometry in
                         HStack(spacing: 0) {
@@ -1223,6 +1265,7 @@ public struct ReviewCard: View {
 }
 
 public struct StickyActionBar: View {
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     private let priceLabel: String
     private let price: String
     private let action: String
@@ -1245,10 +1288,10 @@ public struct StickyActionBar: View {
     public var body: some View {
         VStack(spacing: 0) {
             HorizontalLine()
-            HStack(spacing: DesignSpace.m) {
+            actionLayout {
                 VStack(alignment: .leading, spacing: 0) {
                     BzrText(priceLabel, style: DesignType.caption)
-                    BzrText(price, style: DesignType.price, lineLimit: 1)
+                    BzrText(price, style: DesignType.price)
                 }
                 PrimaryButton(text: action, onClick: onAction)
                 IconSquareButton(label: chatLabel, onClick: onChat)
@@ -1256,6 +1299,12 @@ public struct StickyActionBar: View {
             .padding(.vertical, DesignSpace.m)
         }
         .background(DesignColors.surface)
+    }
+
+    private var actionLayout: AnyLayout {
+        dynamicTypeSize.isAccessibilitySize
+            ? AnyLayout(VStackLayout(alignment: .leading, spacing: DesignSpace.m))
+            : AnyLayout(HStackLayout(spacing: DesignSpace.m))
     }
 }
 
@@ -1328,12 +1377,12 @@ public struct EtaCard: View {
             HStack(spacing: DesignSpace.m) {
                 HStack(alignment: .bottom, spacing: DesignSpace.xs) {
                     BzrText(value, style: DesignType.displayNumber, lineLimit: 1)
-                    BzrText(unit, style: DesignType.cardTitle.colored(DesignColors.primary700), lineLimit: 1)
+                    BzrText(unit, style: DesignType.cardTitle.colored(DesignColors.primary700))
                 }
                 VerticalLine(height: DesignSize.statDivider)
                 VStack(alignment: .leading, spacing: DesignSpace.xs) {
-                    BzrText(title, style: DesignType.cardTitle, lineLimit: 1)
-                    BzrText(subtitle, style: DesignType.secondary, lineLimit: 1)
+                    BzrText(title, style: DesignType.cardTitle)
+                    BzrText(subtitle, style: DesignType.secondary)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 ZStack {
@@ -1757,16 +1806,19 @@ public struct ChatInput: View {
     public var body: some View {
         HStack(spacing: DesignSpace.s) {
             FieldValue(
-                value: value, placeholder: placeholder, enabled: true, singleLine: true,
+                value: value, placeholder: placeholder, enabled: true, singleLine: false,
                 onValueChange: onValueChange, accessibilityLabel: placeholder, imeAction: .done
             )
             Button(action: onSend) {
                 BzrIcon(.send, label: bzrString("a11y.send"), tint: DesignColors.primary600)
+                    .frame(width: DesignSize.touchTargetMin, height: DesignSize.touchTargetMin)
             }
             .buttonStyle(BzrPressStyle())
+            .disabled(value.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
         }
         .padding(.horizontal, DesignSpace.m)
-        .frame(height: DesignSize.fieldHeight)
+        .padding(.vertical, DesignSpace.xs)
+        .frame(minHeight: DesignSize.fieldHeight)
         .bzrFrame(
             radius: DesignRadius.field, fill: DesignColors.surface, border: DesignColors.border,
             width: DesignBorder.width)

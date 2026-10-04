@@ -9,7 +9,38 @@ struct CustomerJourneyRoot: View {
     let onOpenProvider: () -> Void
     @Environment(\.openURL) private var openURL
 
+    /// DEC-062: C01, C25, C18, C02 share one bottom navigation under the screen, so its selection animates.
+    private static let tabs = ["SCR-C01", "SCR-C25", "SCR-C18", "SCR-C02"]
+
     var body: some View {
+        VStack(spacing: 0) {
+            screen.frame(maxHeight: .infinity)
+            if let tab = Self.tabs.firstIndex(of: viewModel.state.screen) {
+                BottomNav(
+                    items: [
+                        (.home, bzrString("nav.home")), (.orders, bzrString("nav.orders")),
+                        (.chat, bzrString("nav.messages")), (.account, bzrString("nav.account")),
+                    ], selectedIndex: tab,
+                    onSelect: { index in
+                        if index != tab { open(Self.tabs[index]) }
+                    })
+            }
+        }
+        .environment(\.customerRetry, retryAction)
+        .task { await viewModel.loadHome() }
+    }
+
+    private var retryAction: (() -> Void)? {
+        switch viewModel.state.screen {
+        case "SCR-C01", "SCR-C02", "SCR-C09", "SCR-C18", "SCR-C29", "SCR-C32", "SCR-C33", "SCR-C34":
+            return { open(viewModel.state.screen) }
+        case "SCR-C25":
+            return { Task { await viewModel.loadOrders(tabIndex: viewModel.state.selectedOptionIndex) } }
+        default: return nil
+        }
+    }
+
+    @ViewBuilder private var screen: some View {
         Group {
             switch viewModel.state.screen {
             case "SCR-C02": C02AccountView(state: viewModel.state, onOpen: open)
@@ -29,7 +60,7 @@ struct CustomerJourneyRoot: View {
                     onBudgetChange: viewModel.updateBudget)
             case "SCR-C05":
                 C05ReviewView(
-                    state: viewModel.state,
+                    state: viewModel.state, onEdit: viewModel.openProblem,
                     onTermsChange: {
                         viewModel.setTermsAccepted(viewModel.state.termsError != nil)
                     },
@@ -231,7 +262,6 @@ struct CustomerJourneyRoot: View {
             }
         }
         .environment(\.customerBack) { Task { await viewModel.goBack() } }
-        .task { await viewModel.loadHome() }
     }
 
     private var tracking: some View {
@@ -296,6 +326,7 @@ struct CustomerJourneyRoot: View {
         case "SCR-C32": Task { await viewModel.loadNotifications() }
         case "SCR-C33": Task { await viewModel.loadAccount() }
         case "SCR-C02": Task { await viewModel.loadAccountSummary() }
+        case "SCR-C01": Task { await viewModel.loadHome() }
         case "SCR-C04": viewModel.openTiming()
         case "SCR-C05": viewModel.openReview()
         case "SCR-C34": Task { await viewModel.loadTerms() }

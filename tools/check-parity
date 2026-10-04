@@ -227,7 +227,10 @@ function validatePair(array $entry, string $kind, string $root, array &$errors):
     if ($kind === 'component') {
         $androidSource = (string) file_get_contents($root.'/'.$android['file']);
         $iosSource = (string) file_get_contents($root.'/'.$ios['file']);
-        $actualAndroid = isset($android['layout'])
+        // A View class without a layout draws itself (BottomNavView, DEC-062); its inputs are still its `var`s.
+        $isView = isset($android['layout'])
+            || preg_match('/\bclass\s+'.preg_quote($android['symbol'], '/').'\b/', $androidSource) === 1;
+        $actualAndroid = $isView
             ? kotlinViewParameters($androidSource, $android['symbol'])
             : kotlinParameters($androidSource, $android['symbol']);
         if (isset($android['layout'])) {

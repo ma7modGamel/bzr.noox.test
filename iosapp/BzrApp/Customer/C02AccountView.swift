@@ -17,7 +17,7 @@ public struct C02AccountView: View {
                 name: state.fieldValues.first ?? "", rating: "",
                 services: (state.fieldValues.count > 1 && !state.fieldValues[1].isEmpty) ? state.fieldValues[1] : nil,
                 size: .large,
-                verifiedLabel: bzrString(state.messageKey ?? "account.unverified"))
+                verifiedLabel: state.messageKey == "account.verified" ? bzrString("account.verified") : nil)
             if state.messageKey == "account.unverified" {
                 InfoBanner(text: bzrString("account.unverified"))
             }
@@ -27,7 +27,6 @@ public struct C02AccountView: View {
             MenuRow(
                 icon: .location, text: bzrString("customer.account.addresses"),
                 onClick: { onOpen("SCR-C14") })
-            MenuRow(icon: .orders, text: bzrString("customer.account.payments"))
             MenuRow(
                 icon: .messages, text: bzrString("notifications.title"), onClick: { onOpen("SCR-C32") })
             MenuRow(icon: .info, text: bzrString("customer.account.help"), onClick: { onOpen("SCR-C29") })

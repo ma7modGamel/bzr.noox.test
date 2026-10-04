@@ -275,14 +275,14 @@ Xcode وSimulator ولقطات iOS ليست بوابة للدفعات 1–7. م�
 
 ### التقنية
 - Activity واحدة + Fragments + Navigation Component (`nav_graph.xml`) + ViewBinding.
-- Material Components بأنماط مولّدة: `MaterialButton`، `MaterialCardView`، `Chip`/`ChipGroup`، `BottomSheetDialogFragment`، `BottomNavigationView`، `DrawerLayout`/`NavigationView`.
+- Material Components بأنماط مولّدة: `MaterialButton`، `MaterialCardView`، `Chip`/`ChipGroup`، `BottomSheetDialogFragment`، `DrawerLayout`/`NavigationView`.
 - **انحرافان معتمدان عن قائمة المالك (يُعرضان في تقرير الاعتماد):**
   - الحقول الأربعة تستخدم `EditText` داخل إطار مولّد (`bremo_bg_field_*`) بدل `TextInputLayout`، لأن تسمية 38 فوق الصندوق بينما `TextInputLayout` يضعها داخل الحد، ولأن محرّك اللقطات لا يرسم نص الحقل داخله. `AppTextField` مكوّن واحد يملك العنوان فوق الحقل ورسالة الخطأ، ويعرض حالة الخطأ، ويربط العنوان بالحقل عبر `labelFor`، ومدخله `imeAction` يساوي `next` أو `done`. SwiftUI يطابق الحالات ومدخل `imeAction` ويعطي الحقل تسمية وصول مطابقة.
   - `SelectableChip`: `TextView` بإطار اختيار مولّد، لأن `Chip` يفرض محاذاة النص للبداية ولا يسمح بتوسيطه في الشرائح متساوية العرض. حالته المختارة تُعلن لقارئ الشاشة، ومساحة لمسه لا تقل عن `size.touchTargetMin = 48` مع بقاء الرسم بارتفاع 40. SwiftUI يطابق حالة الوصول ومساحة اللمس. `SortChips` يستخدم `Chip`/`ChipGroup`.
 - القوائم: `RecyclerView` + `ListAdapter` + `DiffUtil`.
 - الخرائط: `SupportMapFragment` أو `MapView`.
 - ViewModels والطبقة المشتركة وحالات الاختبار بلا تعديل منطق. الحالة تُعرض كـ `StateFlow`، والـ Fragment يجمعها بـ `repeatOnLifecycle` ويعرض فقط.
-- `BottomNav` يظل `BottomNavigationView` الأصلي. يُسمح بضبط حشو العنصر أعلى/أسفل وحجم الأيقونة فقط؛ إن لم تُزل هذه الخصائص فرق القياس فلا يُبنى شريط مخصص.
+- `BottomNav` شريط مخصص متحرك (DEC-062): `BottomNavView` يرسم الانبعاج والكرة والقطرة بنفسه بلا layout، وهو ثابت أسفل C01 وC25 وC18 وC02 في `MainActivity`. يلغي هذا البند الالتزام السابق بـ `BottomNavigationView`.
 
 ### الموارد المولّدة (`tools/gen-design`)
 | الملف | المحتوى |

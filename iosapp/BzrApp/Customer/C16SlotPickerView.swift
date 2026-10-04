@@ -19,7 +19,7 @@ public struct C16SlotPickerView: View {
     }
 
     public var body: some View {
-        CustomerScreen(title: bzrString("slot.title"), state: state) {
+        CustomerScreen(title: bzrString("slot.title"), state: state, bottomBar: AnyView(primaryAction)) {
             ScreenHeading(bzrString("slot.day.title"))
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: DesignSpace.s) {
@@ -52,9 +52,7 @@ public struct C16SlotPickerView: View {
                     }
                 }
             }
-            PrimaryButton(
-                text: bzrString("slot.confirm"), state: state.canContinue ? .normal : .disabled,
-                onClick: onConfirm)
+
         }
     }
 }
@@ -74,4 +72,10 @@ private struct SlotChip: View {
         )
         .buttonStyle(BzrPressStyle())
     }
+    private var primaryAction: some View {
+        PrimaryButton(
+            text: bzrString("slot.confirm"), state: state.canContinue ? .normal : .disabled,
+            onClick: onConfirm)
+    }
+
 }

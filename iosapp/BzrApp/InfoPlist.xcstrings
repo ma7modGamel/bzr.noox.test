@@ -8,6 +8,12 @@
                         "state": "translated",
                         "value": "بريمو"
                     }
+                },
+                "en": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "Bremo"
+                    }
                 }
             }
         },
@@ -17,6 +23,76 @@
                     "stringUnit": {
                         "state": "translated",
                         "value": "بريمو"
+                    }
+                },
+                "en": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "Bremo"
+                    }
+                }
+            }
+        },
+        "NSLocationWhenInUseUsageDescription": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "نستخدم موقعك لتحديد عنوان الخدمة ولمتابعة وصول الفني إليك."
+                    }
+                },
+                "en": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "We use your location to set your service address and track your technician’s arrival."
+                    }
+                }
+            }
+        },
+        "NSCameraUsageDescription": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "نستخدم الكاميرا لتصوير المشكلة وإرفاق الصورة بطلبك."
+                    }
+                },
+                "en": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "We use your camera to take a photo of the problem and attach it to your request."
+                    }
+                }
+            }
+        },
+        "NSPhotoLibraryUsageDescription": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "نستخدم معرض الصور لإرفاق صور أو فيديو للمشكلة بطلبك أو في المحادثة."
+                    }
+                },
+                "en": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "We use your photo library to attach photos or videos to your request or conversation."
+                    }
+                }
+            }
+        },
+        "NSMicrophoneUsageDescription": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "نستخدم الميكروفون لتسجيل وصف صوتي للمشكلة."
+                    }
+                },
+                "en": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "We use your microphone to record a description of the problem."
                     }
                 }
             }

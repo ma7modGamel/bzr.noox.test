@@ -4,20 +4,26 @@ import SwiftUI
 
 public struct C05ReviewView: View {
     let state: CustomerUIState
+    let onEdit: () -> Void
     let onTermsChange: () -> Void
     let onPublish: () -> Void
 
     public init(
-        state: CustomerUIState, onTermsChange: @escaping () -> Void = {},
+        state: CustomerUIState, onEdit: @escaping () -> Void = {}, onTermsChange: @escaping () -> Void = {},
         onPublish: @escaping () -> Void = {}
     ) {
         self.state = state
+        self.onEdit = onEdit
         self.onTermsChange = onTermsChange
         self.onPublish = onPublish
     }
 
     public var body: some View {
-        CustomerScreen(title: bzrString("request.review.title"), state: state) {
+        CustomerScreen(title: bzrString("request.review.title"), state: state, bottomBar: AnyView(primaryAction)) {
+            StepIndicator(
+                current: 3, total: 3,
+                label: BzrFormatter.fill(
+                    bzrString("format.step"), values: [("current", "3"), ("total", "3")]))
             SummaryCard(
                 title: bzrString("summary.title"),
                 rows: state.items.enumerated().map { index, value in
@@ -26,7 +32,7 @@ public struct C05ReviewView: View {
                     + state.itemDetails.enumerated().map { index, value in
                         (index == 0 ? .location : .calendar, value)
                     } + state.itemStates.map { (.orders, $0) },
-                editText: bzrString("common.edit"))
+                editText: bzrString("common.edit"), onEdit: onEdit)
             if !state.showPricing { InfoBanner(text: bzrString("request.staff.pricing")) }
             Button(action: onTermsChange) {
                 CheckRow(text: bzrString("request.review.terms"), checked: state.termsError == nil)
@@ -37,10 +43,14 @@ public struct C05ReviewView: View {
             if state.messageKey == "request.publish.error" {
                 WarningBox(text: (state.fieldValues.first ?? "").isEmpty ? bzrString("error.body") : state.fieldValues[0])
             }
-            PrimaryButton(
-                text: bzrString("request.publish"),
-                state: state.isBusy ? .loading : (state.canContinue ? .normal : .disabled),
-                onClick: onPublish)
+
         }
     }
+    private var primaryAction: some View {
+        PrimaryButton(
+            text: bzrString("request.publish"),
+            state: state.isBusy ? .loading : (state.canContinue ? .normal : .disabled),
+            onClick: onPublish)
+    }
+
 }

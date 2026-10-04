@@ -4,7 +4,7 @@ import PackageDescription
 let package = Package(
     name: "DesignSystem",
     defaultLocalization: "ar",
-    platforms: [.iOS(.v16)],
+    platforms: [.iOS(.v17)],
     products: [
         .library(name: "DesignSystem", targets: ["DesignSystem"])
     ],
@@ -16,7 +16,7 @@ let package = Package(
         .target(
             name: "DesignSystem",
             dependencies: [
-                .product(name: "BzrCore", package: "Core"),
+                .product(name: "BzrCore", package: "Core")
             ],
             resources: [.process("Resources")]
         ),

@@ -43,7 +43,7 @@ public struct CustomerAuthFlow: View {
                     )
                 }
             }
-            .onChange(of: viewModel.state.route) { route in
+            .onChange(of: viewModel.state.route) { _, route in
                 if route == "SCR-C12" { viewModel.open("SCR-C12") }
                 if route == "SCR-C10" { viewModel.open("SCR-C10") }
                 if route == "SCR-C01" { onAuthenticated() }
@@ -86,6 +86,10 @@ public struct CustomerLoginScreen: View {
                 state: fieldState(state.email, error: state.emailError), error: localized(state.emailError),
                 onValueChange: fieldHandler("email", onFieldChange)
             )
+            .keyboardType(.emailAddress)
+            .textContentType(.emailAddress)
+            .textInputAutocapitalization(.never)
+            .autocorrectionDisabled()
             SecureTextField(
                 label: bzrString("auth.password.label"),
                 placeholder: bzrString("auth.password.placeholder"), value: state.password,
@@ -93,6 +97,7 @@ public struct CustomerLoginScreen: View {
                 error: localized(state.passwordError),
                 onValueChange: fieldHandler("password", onFieldChange)
             )
+            .textContentType(.password)
             PrimaryButton(
                 text: bzrString("auth.login.action"), state: buttonState(state), onClick: onSubmit)
             SecondaryButton(
@@ -137,24 +142,35 @@ public struct CustomerRegisterScreen: View {
                     label: bzrString("auth.email.label"), placeholder: bzrString("auth.email.placeholder"),
                     value: state.email,
                     state: fieldState(state.email, error: state.emailError),
-                    error: localized(state.emailError), onValueChange: fieldHandler("email", onFieldChange))
+                    error: localized(state.emailError), onValueChange: fieldHandler("email", onFieldChange)
+                )
+                .keyboardType(.emailAddress)
+                .textContentType(.emailAddress)
+                .textInputAutocapitalization(.never)
+                .autocorrectionDisabled()
                 AppTextField(
                     label: bzrString("auth.phone.label"), placeholder: bzrString("auth.phone.placeholder"),
                     value: state.phone,
                     state: fieldState(state.phone, error: state.phoneError),
-                    error: localized(state.phoneError), onValueChange: fieldHandler("phone", onFieldChange))
+                    error: localized(state.phoneError), onValueChange: fieldHandler("phone", onFieldChange)
+                )
+                .keyboardType(.phonePad)
+                .textContentType(.telephoneNumber)
                 SecureTextField(
                     label: bzrString("auth.password.label"), placeholder: bzrString("auth.password.hint"),
                     value: state.password,
                     state: fieldState(state.password, error: state.passwordError),
                     error: localized(state.passwordError),
-                    onValueChange: fieldHandler("password", onFieldChange))
+                    onValueChange: fieldHandler("password", onFieldChange)
+                )
+                .textContentType(.newPassword)
                 PrimaryButton(
                     text: bzrString("auth.register.action"), state: buttonState(state), onClick: onSubmit)
                 LinkButton(text: bzrString("auth.login.open"), onClick: onLogin)
             }
         }
-        .background(DesignColors.surface)
+        .background(DesignColors.surfaceAlt)
+        .scrollDismissesKeyboard(.interactively)
     }
 }
 
@@ -190,7 +206,8 @@ public struct CustomerEmailVerificationScreen: View {
                 LinkButton(text: bzrString("auth.logout.action"), onClick: onLogout)
             }
         }
-        .background(DesignColors.surface)
+        .background(DesignColors.surfaceAlt)
+        .scrollDismissesKeyboard(.interactively)
     }
 }
 
@@ -228,13 +245,18 @@ public struct CustomerPasswordRecoveryScreen: View {
                     error: localized(state.emailError),
                     onValueChange: fieldHandler("email", onFieldChange)
                 )
+                .keyboardType(.emailAddress)
+                .textContentType(.emailAddress)
+                .textInputAutocapitalization(.never)
+                .autocorrectionDisabled()
                 PrimaryButton(
                     text: bzrString("auth.password.forgot.action"), state: buttonState(state),
                     onClick: onSubmit)
                 LinkButton(text: bzrString("auth.login.open"), onClick: onLogin)
             }
         }
-        .background(DesignColors.surface)
+        .background(DesignColors.surfaceAlt)
+        .scrollDismissesKeyboard(.interactively)
     }
 }
 
@@ -245,12 +267,15 @@ private struct AuthBody<Content: View>: View {
 
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: DesignSpace.m) { content }
+            VStack(alignment: .leading, spacing: DesignSpace.l) { content }
+                .frame(maxWidth: DesignSize.contentMaxWidth, alignment: .leading)
+                .frame(maxWidth: .infinity)
                 .padding(.horizontal, DesignSpace.screenHorizontal)
                 .padding(.vertical, DesignSpace.l)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(DesignColors.surface)
+        .background(DesignColors.surfaceAlt)
+        .scrollDismissesKeyboard(.interactively)
     }
 }
 

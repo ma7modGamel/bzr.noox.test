@@ -29,11 +29,11 @@ public struct C19ChatView: View {
     public var body: some View {
         CustomerScreen(
             title: providerName.isEmpty ? bzrString("messages.title") : providerName,
-            state: state, onBack: onBack
+            state: state, onBack: onBack, bottomBar: AnyView(composer)
         ) {
             ProviderHeader(
                 name: providerName, rating: "", services: nil, size: .small,
-                verifiedLabel: viewerRole == "PROVIDER" ? nil : bzrString("provider.verified"))
+                verifiedLabel: state.providerVerified ? bzrString("provider.verified") : nil)
             BzrText(value(state.options, 1), style: DesignType.secondary)
             if state.messageKey == "chat.masking.notice" {
                 InfoBanner(text: bzrString("chat.masking.notice"))
@@ -54,6 +54,12 @@ public struct C19ChatView: View {
                     BzrText(value(state.itemDetails, index), style: DesignType.caption)
                 }
             }
+
+        }
+    }
+
+    @ViewBuilder private var composer: some View {
+        VStack(spacing: DesignSpace.s) {
             if value(state.options, 2) == "READ_ONLY" {
                 InfoBanner(text: bzrString("chat.read_only"))
             } else {
@@ -80,7 +86,6 @@ public struct C19ChatView: View {
     }
 
     private var providerName: String { state.options.first ?? "" }
-    private var viewerRole: String { value(state.options, 3) }
     private func value(_ values: [String], _ index: Int) -> String {
         values.indices.contains(index) ? values[index] : ""
     }

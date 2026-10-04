@@ -23,8 +23,12 @@ public struct C03ProblemView: View {
     }
 
     public var body: some View {
-        CustomerScreen(title: bzrString("request.problem.title"), state: state) {
-            LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 3), spacing: DesignSpace.m) {
+        CustomerScreen(title: bzrString("request.problem.title"), state: state, bottomBar: AnyView(primaryAction)) {
+            StepIndicator(
+                current: 1, total: 3,
+                label: BzrFormatter.fill(
+                    bzrString("format.step"), values: [("current", "1"), ("total", "3")]))
+            BzrServiceGrid {
                 ForEach(Array(state.options.enumerated()), id: \.offset) { index, label in
                     Button(
                         action: { onCategorySelect(index) },
@@ -65,9 +69,13 @@ public struct C03ProblemView: View {
                     title: bzrString("media.photo"), stateLabel: bzrString("media.uploaded"), kind: .photo,
                     state: .uploaded)
             }
-            PrimaryButton(
-                text: bzrString("common.next"), state: state.canContinue ? .normal : .disabled,
-                onClick: { onOpen("SCR-C04") })
+
         }
     }
+    private var primaryAction: some View {
+        PrimaryButton(
+            text: bzrString("common.next"), state: state.canContinue ? .normal : .disabled,
+            onClick: { onOpen("SCR-C04") })
+    }
+
 }

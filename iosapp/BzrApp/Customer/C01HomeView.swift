@@ -27,9 +27,14 @@ public struct C01HomeView: View {
 
     public var body: some View {
         CustomerScreen(title: bzrString("nav.home"), state: state) {
-            ScreenHeading(greeting, detail: bzrString("customer.home.subtitle"))
+            BzrCard {
+                BzrText(greeting, style: DesignType.heroTitle)
+                    .accessibilityAddTraits(.isHeader)
+                BzrText(bzrString("customer.home.subtitle"), style: DesignType.secondary)
+                PrimaryButton(text: bzrString("customer.new_request"), onClick: { onOpen("SCR-C03") })
+            }
             ScreenHeading(bzrString("customer.categories.title"))
-            LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 3), spacing: DesignSpace.m) {
+            BzrServiceGrid {
                 ForEach(Array(state.options.enumerated()), id: \.offset) { index, label in
                     Button(
                         action: { onCategorySelect(index) },
@@ -44,7 +49,6 @@ public struct C01HomeView: View {
                     .buttonStyle(BzrPressStyle())
                 }
             }
-            PrimaryButton(text: bzrString("customer.new_request"), onClick: { onOpen("SCR-C03") })
             ScreenHeading(bzrString("customer.current_orders.title"))
             if state.phase == .empty {
                 EmptyState(title: bzrString("empty.title"), body: bzrString("empty.body"))
@@ -57,15 +61,6 @@ public struct C01HomeView: View {
                         onClick: { onOrderSelect(index) })
                 }
             }
-            BottomNav(
-                items: [
-                    (.home, bzrString("nav.home")), (.orders, bzrString("nav.orders")),
-                    (.chat, bzrString("nav.messages")), (.account, bzrString("nav.account")),
-                ], selectedIndex: 0,
-                onSelect: { index in
-                    let routes = ["SCR-C01", "SCR-C25", "SCR-C18", "SCR-C02"]
-                    if routes.indices.contains(index) { onOpen(routes[index]) }
-                })
         }
     }
 }

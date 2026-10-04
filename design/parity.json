@@ -22,6 +22,7 @@
           "title",
           "actionIcon",
           "actionLabel",
+          "showsBack",
           "onBack",
           "onAction"
         ],
@@ -37,6 +38,7 @@
           "title",
           "actionIcon",
           "actionLabel",
+          "showsBack",
           "onBack",
           "onAction"
         ],
@@ -208,7 +210,6 @@
       "spec": "docs/43-UI-BUILD-CONTRACT.md",
       "android": {
         "file": "androidapp/core/design/src/main/kotlin/noox/bzr/design/views/BottomNavView.kt",
-        "layout": "androidapp/core/design/src/main/res/layout/view_bottom_nav.xml",
         "symbol": "BottomNavView",
         "parameters": [
           "items",

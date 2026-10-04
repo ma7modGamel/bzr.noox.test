@@ -26,7 +26,11 @@ public struct C04TimingView: View {
     }
 
     public var body: some View {
-        CustomerScreen(title: bzrString("request.timing.title"), state: state) {
+        CustomerScreen(title: bzrString("request.timing.title"), state: state, bottomBar: AnyView(primaryAction)) {
+            StepIndicator(
+                current: 2, total: 3,
+                label: BzrFormatter.fill(
+                    bzrString("format.step"), values: [("current", "2"), ("total", "3")]))
             SummaryCard(
                 title: bzrString("request.address.title"),
                 rows: (state.fieldValues.first ?? "").isEmpty ? [] : [(.location, state.fieldValues[0])],
@@ -83,13 +87,17 @@ public struct C04TimingView: View {
             } else {
                 InfoBanner(text: bzrString("request.staff.pricing"))
             }
-            PrimaryButton(
-                text: bzrString("common.next"), state: state.canContinue ? .normal : .disabled,
-                onClick: { onOpen("SCR-C05") })
+
         }
     }
 
     /// The chosen slot, or a prompt — never a sample date (6ب).
+    private var primaryAction: some View {
+        PrimaryButton(
+            text: bzrString("common.next"), state: state.canContinue ? .normal : .disabled,
+            onClick: { onOpen("SCR-C05") })
+    }
+
     private var slotBody: String {
         let label = state.fieldValues.count > 2 ? state.fieldValues[2] : ""
         return label.isEmpty ? bzrString("request.slot.choose") : label

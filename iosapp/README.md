@@ -53,6 +53,27 @@ php tools/gen-gallery-report && php tools/gen-auth-report
 
 الاختبار يصدّر كل الحالات دائمًا، ويقارنها بمراجع Android المعتمدة عبر صفحة المقارنة. مهمة `Final iOS validation` يدوية فقط ولا تُشغّل قبل الدفعة 8؛ تبني الصفحة وترفع artifact باسم `final-ios-comparison`.
 
+## الرفع إلى App Store من الـ Mac
+
+الكود جاهز للرفع. المطلوب من المالك فقط ما يخص حسابه:
+
+1. ضع `GoogleService-Info.plist` في `iosapp/BzrApp/`، وارفع مفتاح APNs (`.p8`) على Firebase (DEP-PUSH-02).
+2. في Apple Developer: فعّل Push Notifications وAssociated Domains على `com.bremo.app`.
+3. استبدل `BzrApp/Assets.xcassets/AppIcon.appiconset/AppIcon-1024.png` بلوجو بريمو النهائي (1024×1024، بلا شفافية). الأيقونة الحالية مؤقتة.
+4. ابنِ النسخة وارفعها:
+
+```bash
+cd iosapp
+xcodegen generate
+xcodebuild -project BzrApp.xcodeproj -scheme BzrApp -configuration Release \
+  -destination 'generic/platform=iOS' -archivePath build/Bremo.xcarchive \
+  BZR_TEAM_ID=<Team ID> -allowProvisioningUpdates archive
+```
+
+ثم ارفعها من Xcode › Organizer › Distribute App › App Store Connect. نسخة Release توقّع تلقائيًا، وتستخدم `aps-environment = production`، وترفع رموز dSYM إلى Crashlytics.
+
+الجاهز في الكود: iOS 17، وiPhone فقط بالوضع الرأسي، و`PrivacyInfo.xcprivacy`، ونصوص الأذونات بالعربي في `InfoPlist.xcstrings` (المصدر `design/strings.ar.json`)، و`ITSAppUsesNonExemptEncryption = NO`، وحذف الحساب من C33، والإصدار `1.0.0 (1)`.
+
 ## ترتيب البناء
 
 كل شاشة تُكتب في Compose وSwiftUI في الدفعة نفسها. اعتماد لقطة Android يفتح الدفعة التالية؛ Xcode ولقطات iOS في الدفعة 8 وفق DEC-045 و43 §11.
