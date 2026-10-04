@@ -74,9 +74,40 @@ final class OperatingSettings extends Page
     {
         $settings = app(SettingsRepository::class);
 
-        $this->data = collect(Cfg::cases())
-            ->mapWithKeys(fn (Cfg $cfg): array => [$cfg->value => $settings->get($cfg)])
-            ->all();
+        $this->form->fill(collect(Cfg::cases())
+            ->mapWithKeys(fn (Cfg $cfg): array => [self::fieldName($cfg) => self::toFormValue($cfg, $settings->get($cfg))])
+            ->all());
+    }
+
+    /** مفاتيح الإعدادات فيها نقاط، والنقطة في Filament مسار متداخل؛ فيُستبدل بها `__` في اسم الحقل. */
+    private static function fieldName(Cfg $cfg): string
+    {
+        return str_replace('.', '__', $cfg->value);
+    }
+
+    /** الفترات تُخزَّن قائمة {from, to} وتُعرض أزواج «من ← إلى». */
+    private static function toFormValue(Cfg $cfg, mixed $value): mixed
+    {
+        if ($cfg->type() === CfgType::Json && is_array($value)) {
+            return collect($value)->mapWithKeys(fn (array $slot): array => [$slot['from'] => $slot['to']])->all();
+        }
+
+        return $value;
+    }
+
+    private static function fromFormValue(Cfg $cfg, mixed $value): mixed
+    {
+        if ($value === null || $value === '') {
+            return null;
+        }
+
+        return match ($cfg->type()) {
+            CfgType::Json => collect($value)->map(fn (string $to, string $from): array => ['from' => $from, 'to' => $to])->sortBy('from')->values()->all(),
+            CfgType::Int => (int) $value,
+            CfgType::Bool => (bool) $value,
+            CfgType::Time => substr((string) $value, 0, 5),
+            default => $value,
+        };
     }
 
     public function form(Schema $schema): Schema
@@ -120,17 +151,19 @@ final class OperatingSettings extends Page
     {
         $label = $cfg->label();
         $hint = $cfg->id();
+        $name = self::fieldName($cfg);
 
         return match ($cfg->type()) {
-            CfgType::Bool => Toggle::make($cfg->value)->label($label)->hint($hint)->inline(false),
-            CfgType::Time => TimePicker::make($cfg->value)->label($label)->hint($hint)->seconds(false),
-            CfgType::Json => KeyValue::make($cfg->value)->label($label)->hint($hint)
+            CfgType::Bool => Toggle::make($name)->label($label)->hint($hint)->inline(false),
+            CfgType::Time => TimePicker::make($name)->label($label)->hint($hint)->seconds(false),
+            CfgType::Json => KeyValue::make($name)->label($label)->hint($hint)
                 ->keyLabel('من')->valueLabel('إلى'),
-            CfgType::Decimal => TextInput::make($cfg->value)->label($label)->hint($hint)
+            CfgType::Decimal => TextInput::make($name)->label($label)->hint($hint)
                 ->numeric()->step('0.0001')
                 ->placeholder('غير محدد — قرار مفتوح'),
-            CfgType::Int => TextInput::make($cfg->value)->label($label)->hint($hint)->numeric()->integer(),
-            CfgType::String => TextInput::make($cfg->value)->label($label)->hint($hint),
+            CfgType::Int => TextInput::make($name)->label($label)->hint($hint)->numeric()->integer(),
+            CfgType::String => TextInput::make($name)->label($label)->hint($hint)
+                ->placeholder('غير محدد — يُدخله المدير العام'),
         };
     }
 
@@ -149,7 +182,10 @@ final class OperatingSettings extends Page
         $admin = auth('admin')->user();
         $features = app(FeatureGate::class);
 
-        $values = $this->form->getState();
+        $state = $this->form->getState();
+        $values = collect(Cfg::cases())
+            ->mapWithKeys(fn (Cfg $cfg): array => [$cfg->value => self::fromFormValue($cfg, $state[self::fieldName($cfg)] ?? null)])
+            ->all();
 
         try {
             // BR-009 — لا يُفعَّل CFG-091 إلا مع CFG-090
