@@ -18,6 +18,7 @@ import java.time.OffsetDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale
+import noox.bzr.network.logFailure
 
 class ProviderViewModel(
     private val api: ProviderApi,
@@ -1230,6 +1231,7 @@ class ProviderViewModel(
         }
         viewModelScope.launch(Dispatchers.IO) {
             runCatching(block).onFailure { error ->
+                logFailure(screen, error)
                 val event = if (error is ProviderApiException && error.code == "APPLICATION_NOT_EDITABLE") "not_editable" else "error"
                 mutableState.value = ProviderLogic.reduce(screen, mapOf("event" to event))
             }

@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import noox.bzr.network.logFailure
 
 interface AuthSessionStore {
     var token: String?
@@ -70,7 +71,8 @@ class AuthViewModel(private val api: AuthApi, private val session: AuthSessionSt
                 } else {
                     handleApiException(exception)
                 }
-            } catch (_: Exception) {
+            } catch (exception: Exception) {
+                logFailure(state.screen, exception)
                 transition("network_error")
             }
         }.start()
@@ -100,7 +102,8 @@ class AuthViewModel(private val api: AuthApi, private val session: AuthSessionSt
                 block()
             } catch (exception: AuthApiException) {
                 handleApiException(exception)
-            } catch (_: Exception) {
+            } catch (exception: Exception) {
+                logFailure(state.screen, exception)
                 transition("network_error")
             }
         }.start()
@@ -111,7 +114,8 @@ class AuthViewModel(private val api: AuthApi, private val session: AuthSessionSt
             transition("verification_checked", mapOf("is_verified" to api.me(requireNotNull(session.token))))
         } catch (exception: AuthApiException) {
             handleApiException(exception)
-        } catch (_: Exception) {
+        } catch (exception: Exception) {
+            logFailure(state.screen, exception)
             transition("network_error")
         }
     }

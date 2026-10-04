@@ -14,6 +14,7 @@ import org.json.JSONObject
 import java.time.OffsetDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
+import noox.bzr.network.logFailure
 
 class CustomerViewModel(
     private val api: CustomerApi,
@@ -1761,7 +1762,10 @@ class CustomerViewModel(
         if (screen != "SCR-C19") stopChatPolling()
         state = CustomerLogic.reduce(screen, mapOf("event" to loadingEvent))
         Thread {
-            val next = runCatching(block).getOrElse { mapOf("event" to "error") }
+            val next = runCatching(block).getOrElse { error ->
+                logFailure(screen, error)
+                mapOf("event" to "error")
+            }
             Handler(Looper.getMainLooper()).post { state = CustomerLogic.reduce(screen, next) }
         }.start()
     }

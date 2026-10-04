@@ -1,8 +1,6 @@
 package noox.bzr.customer
 
-import java.net.HttpURLConnection
-import java.net.URL
-import java.io.ByteArrayOutputStream
+import noox.bzr.network.BremoApiClient
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -358,6 +356,8 @@ class UrlConnectionCustomerApi(private val baseUrl: String) : CustomerApi {
     override fun republish(token: String, orderId: Int): JSONObject =
         request("orders/$orderId/republish", JSONObject(), token).getJSONObject("data")
 
+    private val client = BremoApiClient(baseUrl, appMode = "CUSTOMER")
+
     private fun request(
         path: String,
         body: JSONObject? = null,
@@ -365,46 +365,15 @@ class UrlConnectionCustomerApi(private val baseUrl: String) : CustomerApi {
         method: String = "POST",
         idempotencyKey: String? = null,
     ): JSONObject {
-        val connection = URL(baseUrl.trimEnd('/') + "/" + path).openConnection() as HttpURLConnection
-        connection.requestMethod = method
-        connection.setRequestProperty("Accept", "application/json")
-        connection.setRequestProperty("Content-Type", "application/json")
-        connection.setRequestProperty("X-App-Mode", "CUSTOMER")
-        token?.let { connection.setRequestProperty("Authorization", "Bearer $it") }
-        idempotencyKey?.let { connection.setRequestProperty("Idempotency-Key", it) }
-        if (method != "GET" && body != null) {
-            connection.doOutput = true
-            connection.outputStream.use { it.write(body.toString().toByteArray()) }
-        }
-        val status = connection.responseCode
-        val stream = if (status in 200..299) connection.inputStream else connection.errorStream
-        val text = stream?.bufferedReader()?.use { it.readText() }.orEmpty()
-        if (status !in 200..299) throw CustomerApiException(status, text)
-        return if (text.isBlank()) JSONObject() else JSONObject(text)
+        val response = client.send(path, method, body, token, idempotencyKey)
+        if (!response.isSuccessful) throw CustomerApiException(response.status, response.text)
+        return response.json()
     }
 
     private fun multipart(path: String, token: String, upload: CustomerMediaUpload): JSONObject {
-        val boundary = "BzrBoundary${java.util.UUID.randomUUID()}"
-        val connection = URL(baseUrl.trimEnd('/') + "/" + path).openConnection() as HttpURLConnection
-        connection.requestMethod = "POST"
-        connection.doOutput = true
-        connection.setRequestProperty("Accept", "application/json")
-        connection.setRequestProperty("Authorization", "Bearer $token")
-        connection.setRequestProperty("X-App-Mode", "CUSTOMER")
-        connection.setRequestProperty("Content-Type", "multipart/form-data; boundary=$boundary")
-        val body = ByteArrayOutputStream().apply {
-            write("--$boundary\r\n".toByteArray())
-            write("Content-Disposition: form-data; name=\"file\"; filename=\"${upload.fileName}\"\r\n".toByteArray())
-            write("Content-Type: ${upload.mimeType}\r\n\r\n".toByteArray())
-            write(upload.bytes)
-            write("\r\n--$boundary--\r\n".toByteArray())
-        }.toByteArray()
-        connection.outputStream.use { it.write(body) }
-        val status = connection.responseCode
-        val stream = if (status in 200..299) connection.inputStream else connection.errorStream
-        val text = stream?.bufferedReader()?.use { it.readText() }.orEmpty()
-        if (status !in 200..299) throw CustomerApiException(status, text)
-        return JSONObject(text)
+        val response = client.upload(path, token, upload.fileName, upload.mimeType, upload.bytes)
+        if (!response.isSuccessful) throw CustomerApiException(response.status, response.text)
+        return JSONObject(response.text)
     }
 }
 

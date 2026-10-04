@@ -1,7 +1,6 @@
 package noox.bzr.auth
 
-import java.net.HttpURLConnection
-import java.net.URL
+import noox.bzr.network.BremoApiClient
 import org.json.JSONObject
 
 data class AuthSession(val token: String, val email: String, val isVerified: Boolean)
@@ -47,23 +46,14 @@ class UrlConnectionAuthApi(private val baseUrl: String) : AuthApi {
         return AuthSession(json.getString("token"), user.getString("email"), user.getBoolean("is_verified"))
     }
 
+    private val client = BremoApiClient(baseUrl)
+
     private fun request(path: String, body: JSONObject? = JSONObject(), token: String? = null, method: String = "POST"): JSONObject {
-        val connection = URL(baseUrl.trimEnd('/') + "/" + path).openConnection() as HttpURLConnection
-        connection.requestMethod = method
-        connection.setRequestProperty("Accept", "application/json")
-        connection.setRequestProperty("Content-Type", "application/json")
-        token?.let { connection.setRequestProperty("Authorization", "Bearer $it") }
-        if (method != "GET" && body != null) {
-            connection.doOutput = true
-            connection.outputStream.use { it.write(body.toString().toByteArray()) }
+        val response = client.send(path, method, body, token)
+        if (!response.isSuccessful) {
+            val error = response.text.takeIf { it.isNotBlank() }?.let { runCatching { JSONObject(it) }.getOrNull() }?.optJSONObject("error")
+            throw AuthApiException(error?.optString("code").orEmpty().ifEmpty { "HTTP_${response.status}" })
         }
-        val status = connection.responseCode
-        val stream = if (status in 200..299) connection.inputStream else connection.errorStream
-        val text = stream?.bufferedReader()?.use { it.readText() }.orEmpty()
-        if (status !in 200..299) {
-            val error = text.takeIf { it.isNotBlank() }?.let(::JSONObject)?.optJSONObject("error")
-            throw AuthApiException(error?.optString("code").orEmpty().ifEmpty { "HTTP_$status" })
-        }
-        return if (text.isBlank()) JSONObject() else JSONObject(text)
+        return response.json()
     }
 }

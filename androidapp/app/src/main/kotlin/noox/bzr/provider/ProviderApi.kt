@@ -1,10 +1,8 @@
 package noox.bzr.provider
 
-import java.io.ByteArrayOutputStream
-import java.net.HttpURLConnection
-import java.net.URL
-import java.util.UUID
 import noox.bzr.customer.CustomerMediaUpload
+import noox.bzr.network.ApiResponse
+import noox.bzr.network.BremoApiClient
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -326,49 +324,20 @@ class UrlConnectionProviderApi(private val baseUrl: String) : ProviderApi {
         )
     }
 
-    private fun request(path: String, body: JSONObject? = null, token: String? = null, method: String = "POST"): JSONObject {
-        val connection = URL(baseUrl.trimEnd('/') + "/" + path).openConnection() as HttpURLConnection
-        connection.requestMethod = method
-        connection.setRequestProperty("Accept", "application/json")
-        connection.setRequestProperty("Content-Type", "application/json")
-        connection.setRequestProperty("X-App-Mode", "PROVIDER")
-        token?.let { connection.setRequestProperty("Authorization", "Bearer $it") }
-        if (method != "GET" && body != null) {
-            connection.doOutput = true
-            connection.outputStream.use { it.write(body.toString().toByteArray()) }
-        }
-        return connection.json()
-    }
+    private val client = BremoApiClient(baseUrl, appMode = "PROVIDER")
 
-    private fun multipart(path: String, token: String, upload: CustomerMediaUpload): JSONObject {
-        val boundary = "BremoBoundary${UUID.randomUUID()}"
-        val connection = URL(baseUrl.trimEnd('/') + "/" + path).openConnection() as HttpURLConnection
-        connection.requestMethod = "POST"
-        connection.doOutput = true
-        connection.setRequestProperty("Accept", "application/json")
-        connection.setRequestProperty("Authorization", "Bearer $token")
-        connection.setRequestProperty("X-App-Mode", "PROVIDER")
-        connection.setRequestProperty("Content-Type", "multipart/form-data; boundary=$boundary")
-        val body = ByteArrayOutputStream().apply {
-            write("--$boundary\r\n".toByteArray())
-            write("Content-Disposition: form-data; name=\"file\"; filename=\"${upload.fileName}\"\r\n".toByteArray())
-            write("Content-Type: ${upload.mimeType}\r\n\r\n".toByteArray())
-            write(upload.bytes)
-            write("\r\n--$boundary--\r\n".toByteArray())
-        }.toByteArray()
-        connection.outputStream.use { it.write(body) }
-        return connection.json()
-    }
+    private fun request(path: String, body: JSONObject? = null, token: String? = null, method: String = "POST"): JSONObject =
+        client.send(path, method, body, token).checked()
+
+    private fun multipart(path: String, token: String, upload: CustomerMediaUpload): JSONObject =
+        client.upload(path, token, upload.fileName, upload.mimeType, upload.bytes).checked()
 }
 
 class ProviderApiException(val status: Int, val code: String, val fields: Map<String, List<String>>) : RuntimeException(code)
 
-private fun HttpURLConnection.json(): JSONObject {
-    val status = responseCode
-    val stream = if (status in 200..299) inputStream else errorStream
-    val text = stream?.bufferedReader()?.use { it.readText() }.orEmpty()
+private fun ApiResponse.checked(): JSONObject {
     val payload = if (text.isBlank()) JSONObject() else JSONObject(text)
-    if (status !in 200..299) {
+    if (!isSuccessful) {
         val error = payload.optJSONObject("error")
         val fields = error?.optJSONObject("fields")?.let { objectValue ->
             objectValue.keys().asSequence().associateWith { key -> objectValue.getJSONArray(key).strings() }

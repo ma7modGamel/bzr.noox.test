@@ -73,7 +73,12 @@ dependencies {
     implementation("com.google.firebase:firebase-messaging:25.0.1") // DEC-058
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1")
     implementation("com.google.android.gms:play-services-maps:20.0.0")
+    // Network: Retrofit over OkHttp, with request/response and connection logging in debug builds.
+    implementation("com.squareup.retrofit2:retrofit:2.11.0")
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
+    implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
     testImplementation("junit:junit:4.13.2")
+    testImplementation("com.squareup.okhttp3:mockwebserver:4.12.0")
 }
 
 // Optional filter while converting screens: -Pbzr.screens=SCR-C01,SCR-C02 (all screens when absent).
