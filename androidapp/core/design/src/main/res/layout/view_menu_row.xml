@@ -3,19 +3,17 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     tools:parentTag="android.widget.LinearLayout">
+    <!-- DEC-063: gradient icon in a soft gradient well; red for destructive rows. -->
     <FrameLayout
+        android:id="@+id/iconBox"
         android:layout_width="@dimen/bremo_size_menu_icon_box"
         android:layout_height="@dimen/bremo_size_menu_icon_box"
-        android:background="@drawable/bremo_bg_menu_icon_box">
+        android:background="@drawable/bremo_bg_icon_well">
 
-        <ImageView
+        <noox.bzr.design.views.GradientIconView
             android:id="@+id/icon"
             android:layout_width="@dimen/bremo_size_icon"
             android:layout_height="@dimen/bremo_size_icon"
-            android:importantForAccessibility="no"
-            android:scaleType="fitCenter"
-            app:srcCompat="@drawable/ic_home"
-            app:tint="@color/bremo_navy800"
             android:layout_gravity="center" />
     </FrameLayout>
 
@@ -25,7 +23,8 @@
         android:layout_height="wrap_content"
         android:layout_weight="1"
         android:ellipsize="end"
-        android:textAppearance="@style/TextAppearance.Bremo.Body" />
+        android:textAppearance="@style/TextAppearance.Bremo.Body"
+        android:textColor="@color/bremo_navy900" />
 
     <ImageView
         android:id="@+id/chevron"

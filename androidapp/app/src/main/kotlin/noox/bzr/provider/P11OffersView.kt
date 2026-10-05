@@ -1,5 +1,7 @@
 package noox.bzr.provider
 
+import noox.bzr.design.views.BremoLinearLayout
+
 import android.content.Context
 import android.view.ViewGroup
 import android.widget.LinearLayout
@@ -62,7 +64,7 @@ class P11OffersView(context: Context) : ProviderScreenView(context) {
         sheet.actionState = if (state.isBusy) ButtonVisualState.Loading else ButtonVisualState.Normal
     }
 
-    private inner class OfferRowView(context: Context) : LinearLayout(context) {
+    private inner class OfferRowView(context: Context) : BremoLinearLayout(context) {
         private val card = OrderCardView(context)
         private val action = SecondaryButtonView(context)
 

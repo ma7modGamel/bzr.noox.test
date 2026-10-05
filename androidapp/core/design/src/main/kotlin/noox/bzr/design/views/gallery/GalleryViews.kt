@@ -1,5 +1,7 @@
 package noox.bzr.design.views.gallery
 
+import noox.bzr.design.views.BremoLinearLayout
+
 import android.content.Context
 import android.util.AttributeSet
 import android.view.LayoutInflater
@@ -44,7 +46,7 @@ class GalleryScrollView @JvmOverloads constructor(context: Context, attrs: Attri
 }
 
 /** ComponentGalleryApp: one page at a time with back / next, as ComponentGallery.swift. */
-class ComponentGalleryAppView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) : LinearLayout(context, attrs) {
+class ComponentGalleryAppView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) : BremoLinearLayout(context, attrs) {
     private var page = 0
     private val binding = ViewGalleryAppBinding.inflate(LayoutInflater.from(context), this)
 

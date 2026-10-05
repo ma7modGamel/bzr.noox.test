@@ -1,82 +1,241 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- SCR-C01 C01HomeScreen content (DEC-047). -->
+<!-- SCR-C01 home (DEC-047, DEC-063): location and notifications, greeting, gradient request card, urgent card,
+     service tiles, current requests. -->
 <merge xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     tools:parentTag="android.widget.LinearLayout">
 
-    <com.google.android.material.card.MaterialCardView
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        style="@style/Widget.Bremo.Card">
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
         <LinearLayout
-            android:layout_width="match_parent"
+            android:id="@+id/location"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:divider="@drawable/bremo_gap_m"
-            android:showDividers="middle">
-    <TextView
-        android:id="@+id/greeting"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="@style/TextAppearance.Bremo.HeroTitle"
-        android:text="@string/customer_greeting" />
+            android:layout_weight="1"
+            android:background="?attr/selectableItemBackground"
+            android:gravity="center_vertical"
+            android:minHeight="@dimen/bremo_size_touch_target_min"
+            android:orientation="horizontal">
 
-    <TextView
-        android:id="@+id/subtitle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="@style/TextAppearance.Bremo.Secondary"
-        android:text="@string/customer_home_subtitle" />
+            <noox.bzr.design.views.GradientIconView
+                android:id="@+id/locationIcon"
+                android:layout_width="@dimen/bremo_size_icon"
+                android:layout_height="@dimen/bremo_size_icon" />
 
-    <noox.bzr.design.views.PrimaryButtonView
+            <TextView
+                android:id="@+id/locationLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/bremo_space_xs"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:textAppearance="@style/TextAppearance.Bremo.Body"
+                android:textColor="@color/bremo_navy900"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <FrameLayout
+            android:id="@+id/bell"
+            android:layout_width="@dimen/bremo_size_touch_target_min"
+            android:layout_height="@dimen/bremo_size_touch_target_min"
+            android:background="@drawable/bremo_bg_icon_well_round"
+            android:foreground="?attr/selectableItemBackgroundBorderless">
+
+            <noox.bzr.design.views.GradientIconView
+                android:id="@+id/bellIcon"
+                android:layout_width="@dimen/bremo_size_icon"
+                android:layout_height="@dimen/bremo_size_icon"
+                android:layout_gravity="center" />
+        </FrameLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/avatar"
+            android:layout_width="@dimen/bremo_size_hero_icon"
+            android:layout_height="@dimen/bremo_size_hero_icon"
+            android:background="@drawable/bremo_bg_brand_round"
+            android:gravity="center"
+            android:importantForAccessibility="no"
+            android:textAppearance="@style/TextAppearance.Bremo.ScreenTitle"
+            android:textColor="@color/bremo_on_primary" />
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/bremo_space_m"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/greeting"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:accessibilityHeading="true"
+                android:textAppearance="@style/TextAppearance.Bremo.ScreenTitle"
+                android:text="@string/customer_greeting" />
+
+            <TextView
+                android:id="@+id/subtitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="@style/TextAppearance.Bremo.Secondary"
+                android:text="@string/customer_home_subtitle" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <LinearLayout
         android:id="@+id/newRequest"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:bremoText="@string/customer_new_request" />
+        android:background="@drawable/bremo_bg_hero"
+        android:foreground="?attr/selectableItemBackground"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:padding="@dimen/bremo_space_l">
 
+        <FrameLayout
+            android:layout_width="@dimen/bremo_size_hero_icon"
+            android:layout_height="@dimen/bremo_size_hero_icon"
+            android:background="@drawable/bremo_bg_hero_well">
+
+            <ImageView
+                android:layout_width="@dimen/bremo_size_tile_icon"
+                android:layout_height="@dimen/bremo_size_tile_icon"
+                android:layout_gravity="center"
+                android:importantForAccessibility="no"
+                app:srcCompat="@drawable/ic_clipboard_plus"
+                app:tint="@color/bremo_on_primary" />
+        </FrameLayout>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/bremo_space_m"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/heroTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/customer_home_hero_title"
+                android:textAppearance="@style/TextAppearance.Bremo.ScreenTitle"
+                android:textColor="@color/bremo_on_primary" />
+
+            <TextView
+                android:id="@+id/heroBody"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="@style/TextAppearance.Bremo.Secondary"
+                android:textColor="@color/bremo_on_hero_body" />
         </LinearLayout>
-    </com.google.android.material.card.MaterialCardView>
+
+        <ImageView
+            android:layout_width="@dimen/bremo_size_icon"
+            android:layout_height="@dimen/bremo_size_icon"
+            android:importantForAccessibility="no"
+            app:srcCompat="@drawable/ic_chevron"
+            app:tint="@color/bremo_on_primary" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/urgent"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/bremo_bg_urgent"
+        android:foreground="?attr/selectableItemBackground"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:padding="@dimen/bremo_space_l">
+
+        <noox.bzr.design.views.GradientIconView
+            android:id="@+id/urgentIcon"
+            android:layout_width="@dimen/bremo_size_tile_icon"
+            android:layout_height="@dimen/bremo_size_tile_icon" />
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/bremo_space_m"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/customer_home_urgent_title"
+                android:textAppearance="@style/TextAppearance.Bremo.CardTitle"
+                android:textColor="@color/bremo_urgent_text" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/customer_home_urgent_body"
+                android:textAppearance="@style/TextAppearance.Bremo.Caption"
+                android:textColor="@color/bremo_urgent_text" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/urgentAction"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bremo_bg_urgent_button"
+            android:gravity="center"
+            android:minHeight="@dimen/bremo_size_touch_target_min"
+            android:paddingHorizontal="@dimen/bremo_space_l"
+            android:text="@string/customer_home_urgent_action"
+            android:textAppearance="@style/TextAppearance.Bremo.Body"
+            android:textColor="@color/bremo_urgent_text"
+            android:textStyle="bold" />
+    </LinearLayout>
 
     <TextView
         android:id="@+id/categories"
-        android:layout_marginTop="@dimen/bremo_space_s"
-        android:accessibilityHeading="true"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textAppearance="@style/TextAppearance.Bremo.SectionTitle"
-        android:text="@string/customer_categories_title" />
+        android:layout_marginTop="@dimen/bremo_space_s"
+        android:accessibilityHeading="true"
+        android:text="@string/customer_categories_title"
+        android:textAppearance="@style/TextAppearance.Bremo.SectionTitle" />
 
-    <LinearLayout
+    <noox.bzr.design.views.TileGridLayout
         android:id="@+id/categoryGrid"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:divider="@drawable/bremo_gap_m"
-        android:showDividers="middle" />
+        android:layout_height="wrap_content" />
 
     <TextView
         android:id="@+id/currentOrders"
-        android:layout_marginTop="@dimen/bremo_space_s"
-        android:accessibilityHeading="true"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textAppearance="@style/TextAppearance.Bremo.SectionTitle"
-        android:text="@string/customer_current_orders_title" />
+        android:layout_marginTop="@dimen/bremo_space_s"
+        android:accessibilityHeading="true"
+        android:text="@string/customer_current_orders_title"
+        android:textAppearance="@style/TextAppearance.Bremo.SectionTitle" />
 
     <noox.bzr.design.views.EmptyStateView
         android:id="@+id/empty"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:visibility="gone"
-        app:bremoTitle="@string/empty_title"
-        app:bremoBody="@string/empty_body" />
+        app:bremoBody="@string/empty_body"
+        app:bremoTitle="@string/empty_title" />
 
     <LinearLayout
         android:id="@+id/orderList"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
         android:divider="@drawable/bremo_gap_m"
+        android:orientation="vertical"
         android:showDividers="middle" />
 </merge>

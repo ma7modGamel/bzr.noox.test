@@ -36,13 +36,11 @@
         android:text="@string/request_materials_title"
         android:textAppearance="@style/TextAppearance.Bremo.SectionTitle" />
 
-    <LinearLayout
+    <!-- DEC-063: options in equal columns, like the category tiles. -->
+    <noox.bzr.design.views.TileGridLayout
         android:id="@+id/materials"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:divider="@drawable/bremo_gap_s"
-        android:showDividers="middle" />
+        android:layout_height="wrap_content" />
 
     <TextView
         android:id="@+id/pricingTitle"

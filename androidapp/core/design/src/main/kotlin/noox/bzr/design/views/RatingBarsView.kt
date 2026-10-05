@@ -10,7 +10,7 @@ import noox.bzr.design.R
 import noox.bzr.design.databinding.ViewRatingBarRowBinding
 
 /** 43 §3 RatingBars: label, proportional bar, value. */
-class RatingBarsView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) : LinearLayout(context, attrs) {
+class RatingBarsView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) : BremoLinearLayout(context, attrs) {
     var items: List<Pair<String, Double>> = emptyList()
         set(value) {
             field = value
@@ -30,7 +30,7 @@ class RatingBarsView @JvmOverloads constructor(context: Context, attrs: Attribut
     private fun render() {
         removeAllViews()
         items.forEach { (label, value) ->
-            val row = LinearLayout(context).apply {
+            val row = BremoLinearLayout(context).apply {
                 orientation = HORIZONTAL
                 gravity = Gravity.CENTER_VERTICAL
                 gap(R.drawable.bremo_gap_m)

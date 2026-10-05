@@ -7,7 +7,7 @@ import noox.bzr.design.R
 import noox.bzr.design.databinding.ViewStickyActionBarBinding
 
 /** 43 §3 StickyActionBar: price, primary action, chat square (C07). */
-class StickyActionBarView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) : LinearLayout(context, attrs) {
+class StickyActionBarView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) : BremoLinearLayout(context, attrs) {
     private val binding: ViewStickyActionBarBinding
 
     var priceLabel: String = ""

@@ -55,13 +55,13 @@ class SummaryCardView @JvmOverloads constructor(context: Context, attrs: Attribu
                 binding.content.addView(line, LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, px(R.dimen.bremo_border_width)))
                 rowViews += line
             }
-            val row = LinearLayout(context).apply {
+            val row = BremoLinearLayout(context).apply {
                 orientation = LinearLayout.HORIZONTAL
                 gravity = Gravity.CENTER_VERTICAL
                 gap(R.drawable.bremo_gap_m)
             }
             val rowBinding = ViewSummaryRowBinding.inflate(inflater, row)
-            rowBinding.icon.icon(icon, R.color.bremo_primary600)
+            rowBinding.icon.gradientIcon(icon)
             rowBinding.text.text = text
             binding.content.addView(row, LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT))
             rowViews += row

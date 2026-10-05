@@ -1,15 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- SCR-C02 C02AccountScreen content (DEC-047). -->
+<!-- SCR-C02 account (DEC-047, DEC-063): profile card, grouped menu, gradient provider-mode card, sign out. -->
 <merge xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     tools:parentTag="android.widget.LinearLayout">
 
-    <noox.bzr.design.views.ProviderHeaderView
-        android:id="@+id/header"
+    <FrameLayout
+        android:id="@+id/profileCard"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:avatarSize="large" />
+        android:background="@drawable/bremo_bg_menu_group"
+        android:padding="@dimen/bremo_space_l">
+
+        <noox.bzr.design.views.ProviderHeaderView
+            android:id="@+id/header"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:avatarSize="large" />
+    </FrameLayout>
 
     <noox.bzr.design.views.InfoBannerView
         android:id="@+id/unverified"
@@ -18,45 +26,112 @@
         android:visibility="gone"
         app:bremoText="@string/account_unverified" />
 
-    <noox.bzr.design.views.MenuRowView
-        android:id="@+id/personal"
+    <LinearLayout
+        android:id="@+id/menuGroup"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:bremoIcon="@drawable/ic_account"
-        app:bremoText="@string/customer_account_personal" />
+        android:background="@drawable/bremo_bg_menu_group"
+        android:divider="@drawable/bremo_divider_line"
+        android:orientation="vertical"
+        android:paddingHorizontal="@dimen/bremo_space_l"
+        android:paddingVertical="@dimen/bremo_space_xs"
+        android:showDividers="middle">
 
-    <noox.bzr.design.views.MenuRowView
-        android:id="@+id/addresses"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:bremoIcon="@drawable/ic_location"
-        app:bremoText="@string/customer_account_addresses" />
+        <noox.bzr.design.views.MenuRowView
+            android:id="@+id/personal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:bremoIcon="@drawable/ic_account"
+            app:bremoText="@string/customer_account_personal" />
 
-    <noox.bzr.design.views.MenuRowView
-        android:id="@+id/notifications"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:bremoIcon="@drawable/ic_messages"
-        app:bremoText="@string/notifications_title" />
+        <noox.bzr.design.views.MenuRowView
+            android:id="@+id/addresses"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:bremoIcon="@drawable/ic_location"
+            app:bremoText="@string/customer_account_addresses" />
 
-    <noox.bzr.design.views.MenuRowView
-        android:id="@+id/help"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:bremoIcon="@drawable/ic_info"
-        app:bremoText="@string/customer_account_help" />
+        <noox.bzr.design.views.MenuRowView
+            android:id="@+id/notifications"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:bremoIcon="@drawable/ic_bell"
+            app:bremoText="@string/notifications_title" />
 
-    <noox.bzr.design.views.MenuRowView
+        <noox.bzr.design.views.MenuRowView
+            android:id="@+id/help"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:bremoIcon="@drawable/ic_info"
+            app:bremoText="@string/customer_account_help" />
+    </LinearLayout>
+
+    <LinearLayout
         android:id="@+id/providerMode"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:bremoIcon="@drawable/ic_account"
-        app:bremoText="@string/menu_provider_mode" />
+        android:background="@drawable/bremo_bg_button_primary"
+        android:foreground="?attr/selectableItemBackground"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:padding="@dimen/bremo_space_l">
 
-    <noox.bzr.design.views.MenuRowView
-        android:id="@+id/logout"
+        <FrameLayout
+            android:layout_width="@dimen/bremo_size_menu_icon_box"
+            android:layout_height="@dimen/bremo_size_menu_icon_box"
+            android:background="@drawable/bremo_bg_hero_well">
+
+            <ImageView
+                android:layout_width="@dimen/bremo_size_icon"
+                android:layout_height="@dimen/bremo_size_icon"
+                android:layout_gravity="center"
+                android:importantForAccessibility="no"
+                app:srcCompat="@drawable/ic_wrench"
+                app:tint="@color/bremo_on_primary" />
+        </FrameLayout>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/bremo_space_m"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/providerModeTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/menu_provider_mode"
+                android:textAppearance="@style/TextAppearance.Bremo.Button" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/customer_account_provider_mode_body"
+                android:textAppearance="@style/TextAppearance.Bremo.Caption"
+                android:textColor="@color/bremo_on_hero_body" />
+        </LinearLayout>
+
+        <ImageView
+            android:layout_width="@dimen/bremo_size_icon"
+            android:layout_height="@dimen/bremo_size_icon"
+            android:importantForAccessibility="no"
+            app:srcCompat="@drawable/ic_chevron"
+            app:tint="@color/bremo_on_primary" />
+    </LinearLayout>
+
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:bremoIcon="@drawable/ic_close"
-        app:bremoText="@string/customer_account_logout" />
+        android:background="@drawable/bremo_bg_menu_group"
+        android:paddingHorizontal="@dimen/bremo_space_l"
+        android:paddingVertical="@dimen/bremo_space_xs">
+
+        <noox.bzr.design.views.MenuRowView
+            android:id="@+id/logout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:bremoIcon="@drawable/ic_logout"
+            app:bremoText="@string/customer_account_logout" />
+    </FrameLayout>
 </merge>

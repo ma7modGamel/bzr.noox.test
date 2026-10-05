@@ -9,7 +9,7 @@ import noox.bzr.design.R
 import noox.bzr.design.databinding.ViewWarningBoxBinding
 
 /** 43 §3 WarningBox (amber): icon and text on a tinted card. */
-class WarningBoxView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) : LinearLayout(context, attrs) {
+class WarningBoxView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) : BremoLinearLayout(context, attrs) {
     private val binding: ViewWarningBoxBinding
 
     var text: String = ""

@@ -1,98 +1,98 @@
 {
     "buttons": {
-        "percent": 0.02,
-        "matches": true,
-        "approved_difference": false,
-        "reason": null
+        "percent": 10.54,
+        "matches": false,
+        "approved_difference": true,
+        "reason": "إعادة تصميم معتمدة (DEC-063، طلب المالك 2026-10-05): ألوان Codex الجديدة، وتدرجات الأزرار والأيقونات وخلفياتها، وأيقونات الخدمات الملونة، وظل الكروت، وشريط التنقل. المرجع الجديد هو لقطة XML نفسها، وSwiftUI يطابقها."
     },
     "navigation": {
-        "percent": 0.14,
-        "matches": true,
-        "approved_difference": false,
-        "reason": null
+        "percent": 13.62,
+        "matches": false,
+        "approved_difference": true,
+        "reason": "إعادة تصميم معتمدة (DEC-063، طلب المالك 2026-10-05): ألوان Codex الجديدة، وتدرجات الأزرار والأيقونات وخلفياتها، وأيقونات الخدمات الملونة، وظل الكروت، وشريط التنقل. المرجع الجديد هو لقطة XML نفسها، وSwiftUI يطابقها."
     },
     "selection-top": {
-        "percent": 4.07,
+        "percent": 8.85,
         "matches": false,
         "approved_difference": true,
-        "reason": "تغيير وصول معتمد بعد تجميد مرجع Compose: مساحة لمس SelectableChip صارت 48dp مع بقاء الرسم 40dp، وطُبق المدخل نفسه في SwiftUI."
+        "reason": "تغيير وصول معتمد بعد تجميد مرجع Compose: مساحة لمس SelectableChip صارت 48dp مع بقاء الرسم 40dp، وطُبق المدخل نفسه في SwiftUI. إعادة تصميم معتمدة (DEC-063، طلب المالك 2026-10-05): ألوان Codex الجديدة، وتدرجات الأزرار والأيقونات وخلفياتها، وأيقونات الخدمات الملونة، وظل الكروت، وشريط التنقل. المرجع الجديد هو لقطة XML نفسها، وSwiftUI يطابقها."
     },
     "selection-bottom": {
-        "percent": 3.59,
+        "percent": 8.34,
         "matches": false,
         "approved_difference": true,
-        "reason": "تغيير وصول معتمد بعد تجميد مرجع Compose: مساحة لمس SelectableChip صارت 48dp مع بقاء الرسم 40dp، وطُبق المدخل نفسه في SwiftUI."
+        "reason": "تغيير وصول معتمد بعد تجميد مرجع Compose: مساحة لمس SelectableChip صارت 48dp مع بقاء الرسم 40dp، وطُبق المدخل نفسه في SwiftUI. إعادة تصميم معتمدة (DEC-063، طلب المالك 2026-10-05): ألوان Codex الجديدة، وتدرجات الأزرار والأيقونات وخلفياتها، وأيقونات الخدمات الملونة، وظل الكروت، وشريط التنقل. المرجع الجديد هو لقطة XML نفسها، وSwiftUI يطابقها."
     },
     "fields-top": {
-        "percent": 0.01,
-        "matches": true,
-        "approved_difference": false,
-        "reason": null
+        "percent": 8.94,
+        "matches": false,
+        "approved_difference": true,
+        "reason": "إعادة تصميم معتمدة (DEC-063، طلب المالك 2026-10-05): ألوان Codex الجديدة، وتدرجات الأزرار والأيقونات وخلفياتها، وأيقونات الخدمات الملونة، وظل الكروت، وشريط التنقل. المرجع الجديد هو لقطة XML نفسها، وSwiftUI يطابقها."
     },
     "fields-bottom": {
-        "percent": 0.02,
-        "matches": true,
-        "approved_difference": false,
-        "reason": null
+        "percent": 9.36,
+        "matches": false,
+        "approved_difference": true,
+        "reason": "إعادة تصميم معتمدة (DEC-063، طلب المالك 2026-10-05): ألوان Codex الجديدة، وتدرجات الأزرار والأيقونات وخلفياتها، وأيقونات الخدمات الملونة، وظل الكروت، وشريط التنقل. المرجع الجديد هو لقطة XML نفسها، وSwiftUI يطابقها."
     },
     "cards-top": {
-        "percent": 0.3,
-        "matches": true,
-        "approved_difference": false,
-        "reason": null
+        "percent": 23.03,
+        "matches": false,
+        "approved_difference": true,
+        "reason": "إعادة تصميم معتمدة (DEC-063، طلب المالك 2026-10-05): ألوان Codex الجديدة، وتدرجات الأزرار والأيقونات وخلفياتها، وأيقونات الخدمات الملونة، وظل الكروت، وشريط التنقل. المرجع الجديد هو لقطة XML نفسها، وSwiftUI يطابقها."
     },
     "cards-bottom": {
-        "percent": 0.45,
-        "matches": true,
-        "approved_difference": false,
-        "reason": null
+        "percent": 27.39,
+        "matches": false,
+        "approved_difference": true,
+        "reason": "إعادة تصميم معتمدة (DEC-063، طلب المالك 2026-10-05): ألوان Codex الجديدة، وتدرجات الأزرار والأيقونات وخلفياتها، وأيقونات الخدمات الملونة، وظل الكروت، وشريط التنقل. المرجع الجديد هو لقطة XML نفسها، وSwiftUI يطابقها."
     },
     "provider-top": {
-        "percent": 0.15,
-        "matches": true,
-        "approved_difference": false,
-        "reason": null
+        "percent": 16.28,
+        "matches": false,
+        "approved_difference": true,
+        "reason": "إعادة تصميم معتمدة (DEC-063، طلب المالك 2026-10-05): ألوان Codex الجديدة، وتدرجات الأزرار والأيقونات وخلفياتها، وأيقونات الخدمات الملونة، وظل الكروت، وشريط التنقل. المرجع الجديد هو لقطة XML نفسها، وSwiftUI يطابقها."
     },
     "provider-bottom": {
-        "percent": 0.06,
-        "matches": true,
-        "approved_difference": false,
-        "reason": null
+        "percent": 13.19,
+        "matches": false,
+        "approved_difference": true,
+        "reason": "إعادة تصميم معتمدة (DEC-063، طلب المالك 2026-10-05): ألوان Codex الجديدة، وتدرجات الأزرار والأيقونات وخلفياتها، وأيقونات الخدمات الملونة، وظل الكروت، وشريط التنقل. المرجع الجديد هو لقطة XML نفسها، وSwiftUI يطابقها."
     },
     "tracking": {
-        "percent": 0.02,
-        "matches": true,
-        "approved_difference": false,
-        "reason": null
+        "percent": 8.12,
+        "matches": false,
+        "approved_difference": true,
+        "reason": "إعادة تصميم معتمدة (DEC-063، طلب المالك 2026-10-05): ألوان Codex الجديدة، وتدرجات الأزرار والأيقونات وخلفياتها، وأيقونات الخدمات الملونة، وظل الكروت، وشريط التنقل. المرجع الجديد هو لقطة XML نفسها، وSwiftUI يطابقها."
     },
     "feedback-top": {
-        "percent": 0,
-        "matches": true,
-        "approved_difference": false,
-        "reason": null
+        "percent": 11.5,
+        "matches": false,
+        "approved_difference": true,
+        "reason": "إعادة تصميم معتمدة (DEC-063، طلب المالك 2026-10-05): ألوان Codex الجديدة، وتدرجات الأزرار والأيقونات وخلفياتها، وأيقونات الخدمات الملونة، وظل الكروت، وشريط التنقل. المرجع الجديد هو لقطة XML نفسها، وSwiftUI يطابقها."
     },
     "feedback-bottom": {
-        "percent": 0.01,
-        "matches": true,
-        "approved_difference": false,
-        "reason": null
+        "percent": 10.26,
+        "matches": false,
+        "approved_difference": true,
+        "reason": "إعادة تصميم معتمدة (DEC-063، طلب المالك 2026-10-05): ألوان Codex الجديدة، وتدرجات الأزرار والأيقونات وخلفياتها، وأيقونات الخدمات الملونة، وظل الكروت، وشريط التنقل. المرجع الجديد هو لقطة XML نفسها، وSwiftUI يطابقها."
     },
     "chat": {
-        "percent": 0.01,
-        "matches": true,
-        "approved_difference": false,
-        "reason": null
+        "percent": 4.45,
+        "matches": false,
+        "approved_difference": true,
+        "reason": "إعادة تصميم معتمدة (DEC-063، طلب المالك 2026-10-05): ألوان Codex الجديدة، وتدرجات الأزرار والأيقونات وخلفياتها، وأيقونات الخدمات الملونة، وظل الكروت، وشريط التنقل. المرجع الجديد هو لقطة XML نفسها، وSwiftUI يطابقها."
     },
     "media-sheet": {
-        "percent": 0,
-        "matches": true,
-        "approved_difference": false,
-        "reason": null
+        "percent": 8.69,
+        "matches": false,
+        "approved_difference": true,
+        "reason": "إعادة تصميم معتمدة (DEC-063، طلب المالك 2026-10-05): ألوان Codex الجديدة، وتدرجات الأزرار والأيقونات وخلفياتها، وأيقونات الخدمات الملونة، وظل الكروت، وشريط التنقل. المرجع الجديد هو لقطة XML نفسها، وSwiftUI يطابقها."
     },
     "text-area": {
-        "percent": 0.01,
-        "matches": true,
-        "approved_difference": false,
-        "reason": null
+        "percent": 6.85,
+        "matches": false,
+        "approved_difference": true,
+        "reason": "إعادة تصميم معتمدة (DEC-063، طلب المالك 2026-10-05): ألوان Codex الجديدة، وتدرجات الأزرار والأيقونات وخلفياتها، وأيقونات الخدمات الملونة، وظل الكروت، وشريط التنقل. المرجع الجديد هو لقطة XML نفسها، وSwiftUI يطابقها."
     }
 }

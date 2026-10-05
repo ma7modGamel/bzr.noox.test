@@ -155,7 +155,7 @@ class CustomerViewModel(
         home.addressCityId?.let { cityId = it }
         mapOf(
             "event" to "loaded", "operating_mode" to home.operatingMode, "has_orders" to (home.orderCount > 0),
-            "customer_name" to home.customerName,
+            "customer_name" to home.customerName, "address_label" to home.addressLabel,
             "category_labels" to catalog.map(CustomerCategory::name),
             "category_icons" to catalog.map { it.iconKey.orEmpty() },
             "selected_category_index" to -1,
@@ -167,6 +167,12 @@ class CustomerViewModel(
 
     fun openProblem() {
         state = CustomerLogic.reduce("SCR-C03", problemInput())
+    }
+
+    /** C01 urgent card (DEC-063): the same request flow, with "now" chosen for the timing step. */
+    fun openUrgentRequest() {
+        if (options("timing_types").any { it.code == URGENT_TIMING }) timingType = URGENT_TIMING
+        openProblem()
     }
 
     fun selectCategory(index: Int) {
@@ -1765,6 +1771,9 @@ class CustomerViewModel(
     private companion object {
         /** An amount the server has not set yet (null before pricing) shows as zero. */
         const val ZERO_AMOUNT = "0.00"
+
+        /** The timing code the urgent card preselects. */
+        const val URGENT_TIMING = "NOW"
     }
 }
 

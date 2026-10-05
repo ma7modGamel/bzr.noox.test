@@ -9,7 +9,7 @@ import noox.bzr.design.R
 import noox.bzr.design.databinding.ViewOfflineBannerBinding
 
 /** 43 §3 OfflineBanner (38 §9): icon and text on a tinted card. */
-class OfflineBannerView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) : LinearLayout(context, attrs) {
+class OfflineBannerView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) : BremoLinearLayout(context, attrs) {
     private val binding: ViewOfflineBannerBinding
 
     var text: String = ""

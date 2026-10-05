@@ -68,6 +68,10 @@ foreach ($tokens['motion'] as $name => $value) {
     $values[] = '    <integer name="bremo_motion_'.tokenResName((string) $name).'">'.$value.'</integer>';
 }
 array_push($values, ...$integers);
+// DEC-063: shadow tokens as elevations (half the blur), coloured by bremo_shadow_*.
+foreach ($tokens['shadow'] as $name => $shadow) {
+    $values[] = '    <dimen name="bremo_elevation_'.tokenResName((string) $name).'">'.num($shadow['blur'] / 2).'dp</dimen>';
+}
 // Scrim alpha for the bottom-sheet dialog comes from the scrim colour token.
 $scrimAlpha = hexdec(substr(argb(colorHex($tokens['color']['scrim'])), 0, 2)) / 255;
 $values[] = '    <item name="bremo_opacity_scrim" format="float" type="dimen">'.num(round($scrimAlpha, 2)).'</item>';
@@ -107,8 +111,16 @@ foreach ($stateLists as $name => $items) {
 /**
  * @param  array{shape?: string, fill?: string, stroke?: string, strokeWidth?: string, radius?: string, topRadius?: string}  $spec
  */
-$shapeBody = static function (array $spec, string $indent) use ($color): string {
+$shapeBody = static function (array $spec, string $indent) use ($color, $tokens): string {
     $lines = [];
+    if (isset($spec['gradient'])) {
+        // DEC-063: top-start to bottom-end (315°), or top to bottom (270°) for screen backdrops.
+        if (! isset($tokens['gradient'][$spec['gradient']])) {
+            throw new RuntimeException("Unknown gradient token {$spec['gradient']}");
+        }
+        $gradientName = 'bremo_gradient_'.tokenResName($spec['gradient']);
+        $lines[] = $indent.'    <gradient android:type="linear" android:angle="'.($spec['angle'] ?? 315).'" android:startColor="@color/'.$gradientName.'_from" android:endColor="@color/'.$gradientName.'_to" />';
+    }
     if (isset($spec['fill'])) {
         $lines[] = $indent.'    <solid android:color="'.$color($spec['fill']).'" />';
     }
@@ -152,13 +164,13 @@ $shapes = [
     'bremo_bg_rating_fill' => ['fill' => 'primary500', 'radius' => $dimen('radius', 'full')],
     'bremo_bg_sheet' => ['fill' => 'surface', 'topRadius' => $dimen('radius', 'sheet_top')],
     'bremo_bg_sheet_handle' => ['fill' => 'border', 'radius' => $dimen('radius', 'full')],
-    'bremo_bg_bubble_sent' => ['fill' => 'primary600', 'stroke' => 'primary600', 'strokeWidth' => $border, 'radius' => $dimen('radius', 'card')],
+    'bremo_bg_bubble_sent' => ['gradient' => 'brand', 'radius' => $dimen('radius', 'card')],
     'bremo_bg_bubble_received' => ['fill' => 'surface', 'stroke' => 'border', 'strokeWidth' => $border, 'radius' => $dimen('radius', 'card')],
     'bremo_bg_bubble_blocked' => ['fill' => 'surface', 'stroke' => 'danger', 'strokeWidth' => $border, 'radius' => $dimen('radius', 'card')],
     'bremo_bg_check_row' => ['fill' => 'surface', 'stroke' => 'border', 'strokeWidth' => $border, 'radius' => $dimen('radius', 'field')],
     'bremo_bg_check_row_checked' => ['fill' => 'primary50', 'stroke' => 'border', 'strokeWidth' => $border, 'radius' => $dimen('radius', 'field')],
     'bremo_bg_checkbox' => ['fill' => 'surface', 'stroke' => 'slate300', 'strokeWidth' => $control, 'radius' => $dimen('radius', 'checkbox')],
-    'bremo_bg_checkbox_checked' => ['fill' => 'primary600', 'stroke' => 'primary600', 'strokeWidth' => $control, 'radius' => $dimen('radius', 'checkbox')],
+    'bremo_bg_checkbox_checked' => ['gradient' => 'brand', 'radius' => $dimen('radius', 'checkbox')],
     'bremo_bg_radio' => ['shape' => 'oval', 'stroke' => 'slate300', 'strokeWidth' => $control],
     'bremo_bg_radio_checked' => ['shape' => 'oval', 'stroke' => 'primary600', 'strokeWidth' => $control],
     'bremo_bg_avatar' => ['shape' => 'oval', 'fill' => 'surfaceAlt'],
@@ -167,14 +179,26 @@ $shapes = [
     'bremo_bg_eta_icon' => ['shape' => 'oval', 'fill' => 'primary50Info'],
     'bremo_bg_feedback_empty' => ['shape' => 'oval', 'fill' => 'primary50'],
     'bremo_bg_feedback_error' => ['shape' => 'oval', 'fill' => 'surfaceAlt'],
-    'bremo_bg_step_filled' => ['shape' => 'oval', 'fill' => 'primary600', 'stroke' => 'primary600', 'strokeWidth' => $control],
+    'bremo_bg_step_filled' => ['shape' => 'oval', 'gradient' => 'brand'],
     'bremo_bg_step_on_hold' => ['shape' => 'oval', 'fill' => 'star', 'stroke' => 'star', 'strokeWidth' => $control],
     'bremo_bg_step_pending' => ['shape' => 'oval', 'fill' => 'surface', 'stroke' => 'border', 'strokeWidth' => $control],
-    'bremo_bg_stepper_done' => ['shape' => 'oval', 'fill' => 'primary600'],
+    'bremo_bg_stepper_done' => ['shape' => 'oval', 'gradient' => 'brand'],
     'bremo_bg_stepper_active' => ['shape' => 'oval', 'fill' => 'surface', 'stroke' => 'primary600', 'strokeWidth' => $control],
     'bremo_bg_stepper_on_hold' => ['shape' => 'oval', 'fill' => 'surface', 'stroke' => 'star', 'strokeWidth' => $control],
     'bremo_bg_stepper_pending' => ['shape' => 'oval', 'fill' => 'surface', 'stroke' => 'border', 'strokeWidth' => $control],
     'bremo_dot_primary' => ['shape' => 'oval', 'fill' => 'primary600'],
+    // DEC-063 — gradient surfaces.
+    'bremo_bg_hero' => ['gradient' => 'hero', 'radius' => $dimen('radius', 'hero_card')],
+    'bremo_bg_urgent' => ['gradient' => 'urgent', 'radius' => $dimen('radius', 'card')],
+    'bremo_bg_urgent_button' => ['gradient' => 'urgentButton', 'radius' => $dimen('radius', 'button')],
+    'bremo_bg_icon_well' => ['gradient' => 'iconWell', 'radius' => $dimen('radius', 'menu_icon_box')],
+    'bremo_bg_icon_well_round' => ['shape' => 'oval', 'gradient' => 'iconWell'],
+    'bremo_bg_brand_round' => ['shape' => 'oval', 'gradient' => 'iconBrand'],
+    'bremo_bg_nav_pill' => ['gradient' => 'iconWell', 'radius' => $dimen('radius', 'full')],
+    'bremo_bg_hero_well' => ['fill' => 'onHeroWell', 'radius' => $dimen('radius', 'menu_icon_box')],
+    'bremo_bg_icon_well_danger' => ['fill' => 'dangerTint', 'radius' => $dimen('radius', 'menu_icon_box')],
+    'bremo_bg_menu_group' => ['fill' => 'surface', 'radius' => $dimen('radius', 'card')],
+    'bremo_bg_screen' => ['gradient' => 'screen', 'angle' => 270],
     'bremo_dot_star' => ['shape' => 'oval', 'fill' => 'star'],
 ];
 foreach ($shapes as $name => $spec) {
@@ -196,6 +220,16 @@ foreach ($tokens['space'] as $name => $value) {
     syncText($root, $res.'/drawable/'.$gapName.'.xml', $gap."\n", $checkOnly, $errors, $outputs);
 }
 
+// DEC-063: hairline between rows of a menu group.
+syncText($root, $res.'/drawable/bremo_divider_line.xml', implode("\n", [
+    '<?xml version="1.0" encoding="utf-8"?>',
+    $header,
+    '<shape '.$android.' android:shape="rectangle">',
+    '    <solid android:color="'.$color('border').'" />',
+    '    <size android:height="@dimen/bremo_border_width" />',
+    '</shape>',
+])."\n", $checkOnly, $errors, $outputs);
+
 // Selection frames: the chosen state is a selector (43 §3 "مختار / غير مختار").
 $selectors = [
     'bremo_bg_selectable_card' => [
@@ -205,6 +239,10 @@ $selectors = [
     'bremo_bg_selectable_chip' => [
         ['android:state_selected="true"', ['fill' => $tokens['border']['selectedFill'], 'stroke' => $tokens['border']['selectedColor'], 'strokeWidth' => $selectedBorder, 'radius' => $dimen('radius', 'chip')]],
         ['', ['fill' => 'surface', 'stroke' => 'border', 'strokeWidth' => $border, 'radius' => $dimen('radius', 'chip')]],
+    ],
+    'bremo_bg_button_primary' => [
+        ['android:state_pressed="true"', ['gradient' => 'brandPressed', 'radius' => $dimen('radius', 'button')]],
+        ['', ['gradient' => 'brand', 'radius' => $dimen('radius', 'button')]],
     ],
     'bremo_bg_field_selector' => [
         ['android:state_focused="true"', ['fill' => 'surface', 'stroke' => 'primary600', 'strokeWidth' => $selectedBorder, 'radius' => $dimen('radius', 'field')]],
@@ -414,6 +452,8 @@ $style('Theme.Bremo', 'Theme.MaterialComponents.Light.NoActionBar', [
     'materialCardViewStyle' => '@style/Widget.Bremo.Card',
     'chipStyle' => '@style/Widget.Bremo.Chip',
     'bottomNavigationStyle' => '@style/Widget.Bremo.BottomNavigation',
+    // Every XML LinearLayout becomes BremoLinearLayout: RTL-safe gaps on Android 13 and older.
+    'viewInflaterClass' => 'noox.bzr.design.views.BremoViewInflater',
     'bottomSheetDialogTheme' => '@style/ThemeOverlay.Bremo.BottomSheetDialog',
     'android:statusBarColor' => $color('surface'),
     'android:navigationBarColor' => $color('surface'),

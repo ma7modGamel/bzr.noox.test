@@ -779,4 +779,25 @@
     <string name="action_open_notifications_count">الإشعارات (%1$d غير مقروء)</string>
     <string name="account_rating_reminders">تذكير التقييم</string>
     <string name="account_rating_reminders_body">تذكير واحد بعد اكتمال الطلب إن لم تقيّم. باقي الإشعارات تشغيلية ولا تُوقف.</string>
+    <string name="brand_loading">جاري تجهيز التفاصيل…</string>
+    <string name="store_feature_title">خدمات بيتك
+في مكان واحد</string>
+    <string name="store_feature_body">اطلب الخدمة · تابع طلبك · تواصل مع الفني</string>
+    <string name="store_screenshot_home_title">خدمات بيتك، بسهولة</string>
+    <string name="store_screenshot_home_body">اختَر الخدمة وابدأ طلبك من مكان واحد</string>
+    <string name="store_screenshot_request_title">طلب واضح من البداية</string>
+    <string name="store_screenshot_request_body">حدّد المشكلة وأضف التفاصيل التي يحتاجها الفني</string>
+    <string name="store_screenshot_offers_title">قارن العروض براحتك</string>
+    <string name="store_screenshot_offers_body">راجع تفاصيل الفني والسعر قبل اختيار العرض</string>
+    <string name="store_screenshot_chat_title">تواصل حول طلبك</string>
+    <string name="store_screenshot_chat_body">أرسل التفاصيل والصور داخل محادثة الطلب</string>
+    <string name="customer_home_hero_title">اطلب خدمة</string>
+    <string name="customer_home_hero_body_marketplace">صف المشكلة واستقبل عروض الفنيين</string>
+    <string name="customer_home_hero_body_staff">صف المشكلة ونرسل لك فنيًا معتمدًا</string>
+    <string name="customer_home_urgent_title">عندك حالة طارئة؟</string>
+    <string name="customer_home_urgent_body">فني في أقرب وقت متاح</string>
+    <string name="customer_home_urgent_action">اطلب فني الآن</string>
+    <string name="customer_home_location_empty">أضف عنوان الخدمة</string>
+    <string name="customer_account_provider_mode_body">استقبل الطلبات وتابع شغلك</string>
+    <string name="provider_home_shortcuts_title">اختصارات</string>
 </resources>

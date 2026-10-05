@@ -14,7 +14,7 @@ import noox.bzr.design.databinding.ViewStepIndicatorBinding
 import androidx.core.content.withStyledAttributes
 
 /** 43 §3 StepIndicator: numbered circles joined by lines, then the step label. */
-class StepIndicatorView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) : LinearLayout(context, attrs) {
+class StepIndicatorView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) : BremoLinearLayout(context, attrs) {
     private val binding: ViewStepIndicatorBinding
 
     var current: Int = 1

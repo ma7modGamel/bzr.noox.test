@@ -9,7 +9,7 @@ import noox.bzr.design.R
 import noox.bzr.design.databinding.ViewDrawerMenuBinding
 
 /** 43 §3 DrawerMenu: the content placed inside the NavigationView of a DrawerLayout. */
-class DrawerMenuView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) : LinearLayout(context, attrs) {
+class DrawerMenuView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) : BremoLinearLayout(context, attrs) {
     private val binding: ViewDrawerMenuBinding
     private val rowViews = mutableListOf<MenuRowView>()
 

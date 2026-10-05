@@ -8,13 +8,11 @@
         android:layout_height="@dimen/bremo_size_avatar_small"
         android:background="@drawable/bremo_bg_feedback_empty">
 
-        <ImageView
+        <noox.bzr.design.views.GradientIconView
+            android:id="@+id/emptyIcon"
             android:layout_width="@dimen/bremo_size_icon"
             android:layout_height="@dimen/bremo_size_icon"
-            android:layout_gravity="center"
-            android:importantForAccessibility="no"
-            app:srcCompat="@drawable/ic_empty"
-            app:tint="@color/bremo_primary600" />
+            android:layout_gravity="center" />
     </FrameLayout>
 
     <TextView

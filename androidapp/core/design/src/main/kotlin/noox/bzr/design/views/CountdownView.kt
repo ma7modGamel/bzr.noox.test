@@ -10,7 +10,7 @@ import noox.bzr.design.R
 import noox.bzr.design.databinding.ViewCountdownBinding
 
 /** 43 §3 Countdown: turns danger below the urgent threshold ("أقل من 5 دقائق"). */
-class CountdownView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) : LinearLayout(context, attrs) {
+class CountdownView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) : BremoLinearLayout(context, attrs) {
     private val binding: ViewCountdownBinding
 
     var seconds: Int = 0

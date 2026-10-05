@@ -1,5 +1,7 @@
 package noox.bzr.customer
 
+import noox.bzr.design.views.BremoLinearLayout
+
 import android.content.Context
 import android.util.AttributeSet
 import android.view.LayoutInflater
@@ -39,7 +41,11 @@ abstract class CustomerScreenView(context: Context) : FrameLayout(context) {
         scaffold.error.onRetry = { (onReload ?: onBack)() }
     }
 
+    /** C01 draws its own header (location, notifications, greeting) instead of the top bar (DEC-063). */
+    protected open val showsTopBar: Boolean = true
+
     fun render(state: CustomerUiState) {
+        scaffold.topBar.isVisible = showsTopBar
         scaffold.topBar.title = title(state)
         scaffold.topBar.showsBack = state.screen !in setOf("SCR-C01", "SCR-C25", "SCR-C18", "SCR-C02")
         scaffold.error.retry = string(if (onReload == null) R.string.common_cancel else R.string.common_retry)
@@ -97,7 +103,7 @@ abstract class CustomerScreenView(context: Context) : FrameLayout(context) {
 }
 
 /** ActionButtons: the visible order actions, primary / danger / secondary by kind. */
-class ActionButtonsView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) : LinearLayout(context, attrs) {
+class ActionButtonsView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) : BremoLinearLayout(context, attrs) {
     var onAction: (String) -> Unit = {}
     private var shown: List<String> = emptyList()
 

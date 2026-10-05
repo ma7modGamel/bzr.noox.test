@@ -17,12 +17,15 @@
         android:paddingVertical="@dimen/bremo_space_l"
         android:showDividers="middle">
 
-        <Space
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/bremo_space_xxl" />
+        <noox.bzr.design.views.BremoBrandMarkView
+            android:id="@+id/brandLogo"
+            android:layout_width="@dimen/bremo_size_brand_auth_logo"
+            android:layout_height="@dimen/bremo_size_brand_auth_logo"
+            android:layout_gravity="center_horizontal" />
 
         <TextView
             android:id="@+id/appName"
+            android:layout_gravity="center_horizontal"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/app_name"

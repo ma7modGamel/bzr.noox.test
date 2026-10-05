@@ -8,7 +8,7 @@ import noox.bzr.design.R
 import noox.bzr.design.databinding.ViewErrorStateBinding
 
 /** 43 §3 ErrorState (38 §9): icon circle, title, body, optional retry. */
-class ErrorStateView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) : LinearLayout(context, attrs) {
+class ErrorStateView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) : BremoLinearLayout(context, attrs) {
     private val binding: ViewErrorStateBinding
 
     var title: String = ""

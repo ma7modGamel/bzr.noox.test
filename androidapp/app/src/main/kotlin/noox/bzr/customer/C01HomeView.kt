@@ -15,9 +15,22 @@ class C01HomeView(context: Context) : CustomerScreenView(context) {
     var onOpen: (String) -> Unit = {}
     var onCategorySelect: (Int) -> Unit = {}
     var onOrderSelect: (Int) -> Unit = {}
+    var onUrgent: () -> Unit = {}
+
+    override val showsTopBar = false
 
     init {
-        binding.newRequest.onClick = { onOpen("SCR-C03") }
+        binding.newRequest.setOnClickListener { onOpen("SCR-C03") }
+        binding.urgent.setOnClickListener { onUrgent() }
+        binding.urgentAction.setOnClickListener { onUrgent() }
+        binding.location.setOnClickListener { onOpen("SCR-C14") }
+        binding.bell.setOnClickListener { onOpen("SCR-C32") }
+        binding.bell.contentDescription = string(R.string.notifications_title)
+        binding.locationIcon.setIcon(R.drawable.ic_location)
+        binding.bellIcon.setIcon(R.drawable.ic_bell)
+        binding.urgentIcon.setIcon(R.drawable.ic_siren)
+        binding.urgentIcon.setGradient(color(R.color.bremo_gradient_urgent_button_from), color(R.color.bremo_gradient_urgent_button_to))
+        binding.newRequest.contentDescription = string(R.string.customer_home_hero_title)
     }
 
     override fun title(state: CustomerUiState) = string(R.string.nav_home)
@@ -25,6 +38,10 @@ class C01HomeView(context: Context) : CustomerScreenView(context) {
     override fun renderContent(state: CustomerUiState) {
         val name = state.fieldValues.firstOrNull().orEmpty()
         binding.greeting.text = if (name.isBlank()) string(R.string.customer_greeting_plain) else context.getString(R.string.customer_greeting, name)
+        binding.avatar.text = name.trim().take(1)
+        binding.avatar.visibility = if (name.isBlank()) GONE else VISIBLE
+        binding.locationLabel.text = state.fieldValues.getOrNull(1).orEmpty().ifBlank { string(R.string.customer_home_location_empty) }
+        binding.heroBody.text = string(if (state.showPricing) R.string.customer_home_hero_body_marketplace else R.string.customer_home_hero_body_staff)
         binding.empty.isVisible = state.phase == CustomerPhase.Empty
         renderCategories(state)
         binding.orderList.removeAllViews()
@@ -41,39 +58,20 @@ class C01HomeView(context: Context) : CustomerScreenView(context) {
         }
     }
 
+    /** DEC-063: equal columns from [noox.bzr.design.views.TileGridLayout], so no tile is clipped or pushed. */
     private fun renderCategories(state: CustomerUiState) {
         binding.categoryGrid.removeAllViews()
-        state.options.chunked(categoryColumns()).forEachIndexed { rowIndex, labels ->
-            val row = LinearLayout(context).apply {
-                orientation = LinearLayout.HORIZONTAL
-                dividerDrawable = androidx.core.content.ContextCompat.getDrawable(context, R.drawable.bremo_gap_m)
-                showDividers = LinearLayout.SHOW_DIVIDER_MIDDLE
-            }
-            labels.forEachIndexed { columnIndex, label ->
-                val index = rowIndex * categoryColumns() + columnIndex
-                row.addView(
-                    SelectableTileView(context).apply {
-                        text = label
-                        categoryIcon = state.optionIcons.getOrNull(index)
-                        this.state = if (index == state.selectedIndex) SelectionState.Selected else SelectionState.Unselected
-                        setOnClickListener { onCategorySelect(index) }
-                    },
-                    LinearLayout.LayoutParams(0, LayoutParams.WRAP_CONTENT, 1f),
-                )
-            }
-            repeat(categoryColumns() - labels.size) {
-                row.addView(android.widget.Space(context), LinearLayout.LayoutParams(0, 0, 1f))
-            }
-            binding.categoryGrid.addView(row, LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT))
+        state.options.forEachIndexed { index, label ->
+            binding.categoryGrid.addView(
+                SelectableTileView(context).apply {
+                    text = label
+                    categoryIcon = state.optionIcons.getOrNull(index)
+                    this.state = if (index == state.selectedIndex) SelectionState.Selected else SelectionState.Unselected
+                    setOnClickListener { onCategorySelect(index) }
+                },
+            )
         }
     }
-
-    private fun categoryColumns(): Int {
-        val configuration = resources.configuration
-        val available = configuration.screenWidthDp * resources.displayMetrics.density -
-            resources.getDimension(R.dimen.bremo_space_screen_horizontal) * 2
-        val cell = resources.getDimension(R.dimen.bremo_size_category_column_min_width) * configuration.fontScale
-        val gap = resources.getDimension(R.dimen.bremo_space_m)
-        return ((available + gap) / (cell + gap)).toInt().coerceIn(1, 3)
-    }
 }
+
+private fun android.view.View.color(id: Int): Int = androidx.core.content.ContextCompat.getColor(context, id)

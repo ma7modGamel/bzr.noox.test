@@ -23,4 +23,25 @@ object CategoryIcons {
         "water-tanks" -> R.drawable.bremo_category_water_tanks
         else -> R.drawable.ic_home
     }
+
+    /** DEC-063: the category's gradient and tint; unknown keys use the brand gradient. */
+    fun palette(key: String?): CategoryPalette = when (key) {
+        "air-conditioning" -> CategoryPalette(0xFF5BDDF0.toInt(), 0xFF0E8FB0.toInt(), 0xFFE1F7FB.toInt())
+        "aluminum-glass" -> CategoryPalette(0xFF4FE0CB.toInt(), 0xFF0B7A6E.toInt(), 0xFFDDF7F2.toInt())
+        "appliances" -> CategoryPalette(0xFF9AA8FF.toInt(), 0xFF4B4FD6.toInt(), 0xFFECEEFF.toInt())
+        "carpentry" -> CategoryPalette(0xFFF7B46A.toInt(), 0xFFB4541C.toInt(), 0xFFFDEEDC.toInt())
+        "electricity" -> CategoryPalette(0xFFFFD24A.toInt(), 0xFFF08A0C.toInt(), 0xFFFFF4D6.toInt())
+        "home-installations" -> CategoryPalette(0xFFC39BFF.toInt(), 0xFF7A3BE0.toInt(), 0xFFF1E8FF.toInt())
+        "ironwork" -> CategoryPalette(0xFF9AA9BC.toInt(), 0xFF3A4A5E.toInt(), 0xFFEBEFF4.toInt())
+        "painting" -> CategoryPalette(0xFFFF7A93.toInt(), 0xFFD6264B.toInt(), 0xFFFFE6EB.toInt())
+        "pest-control" -> CategoryPalette(0xFF7EE29A.toInt(), 0xFF18934A.toInt(), 0xFFE2F8E8.toInt())
+        "plumbing" -> CategoryPalette(0xFF38BDF8.toInt(), 0xFF1D5FD8.toInt(), 0xFFE3F1FE.toInt())
+        "satellite" -> CategoryPalette(0xFF7CC8FF.toInt(), 0xFF1468B8.toInt(), 0xFFE2F1FD.toInt())
+        "tiles-flooring" -> CategoryPalette(0xFFFF9E7A.toInt(), 0xFFC9431C.toInt(), 0xFFFFE9E0.toInt())
+        "water-tanks" -> CategoryPalette(0xFF6FB7FF.toInt(), 0xFF2147C9.toInt(), 0xFFE4EEFF.toInt())
+        else -> CategoryPalette(0xFF1FBFB0.toInt(), 0xFF06706A.toInt(), 0xFFEAF6F3.toInt())
+    }
 }
+
+/** ARGB colours of one category: icon gradient [from] → [to], and the [tint] of its well. */
+data class CategoryPalette(val from: Int, val to: Int, val tint: Int)

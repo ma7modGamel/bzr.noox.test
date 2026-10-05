@@ -9,7 +9,7 @@ import noox.bzr.design.R
 import noox.bzr.design.databinding.ViewInfoBannerBinding
 
 /** 43 §3 InfoBanner (teal): icon and text on a tinted card. */
-class InfoBannerView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) : LinearLayout(context, attrs) {
+class InfoBannerView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) : BremoLinearLayout(context, attrs) {
     private val binding: ViewInfoBannerBinding
 
     var text: String = ""

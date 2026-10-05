@@ -10,21 +10,29 @@ import noox.bzr.design.R
 import noox.bzr.design.databinding.ViewMenuRowBinding
 
 /** 43 §3 MenuRow: icon box, text, chevron (C02 menu). */
-class MenuRowView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) : LinearLayout(context, attrs) {
+class MenuRowView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) : BremoLinearLayout(context, attrs) {
     private val binding: ViewMenuRowBinding
 
     @DrawableRes
     var icon: Int = R.drawable.ic_home
         set(value) {
             field = value
-            binding.icon.icon(value, R.color.bremo_navy800)
+            binding.icon.setIcon(value)
         }
+
     var text: String = ""
         set(value) {
             field = value
             binding.text.text = value
         }
     var onClick: () -> Unit = {}
+
+    /** A destructive row (sign out): red icon in a red-tinted well, red label. */
+    var danger: Boolean = false
+        set(value) {
+            field = value
+            renderTone()
+        }
 
     init {
         orientation = HORIZONTAL
@@ -37,6 +45,19 @@ class MenuRowView @JvmOverloads constructor(context: Context, attrs: AttributeSe
         context.withStyledAttributes(attrs, R.styleable.MenuRowView) {
             resource(R.styleable.MenuRowView_bremoIcon)?.let { icon = it }
             text = getString(R.styleable.MenuRowView_bremoText).orEmpty()
+        }
+        renderTone()
+    }
+
+    private fun renderTone() {
+        if (danger) {
+            binding.icon.setGradient(color(R.color.bremo_danger), color(R.color.bremo_danger))
+            binding.iconBox.setBackgroundResource(R.drawable.bremo_bg_icon_well_danger)
+            binding.text.setTextColor(color(R.color.bremo_danger))
+        } else {
+            binding.icon.setGradient(color(R.color.bremo_gradient_icon_brand_from), color(R.color.bremo_gradient_icon_brand_to))
+            binding.iconBox.setBackgroundResource(R.drawable.bremo_bg_icon_well)
+            binding.text.setTextColor(color(R.color.bremo_navy900))
         }
     }
 }

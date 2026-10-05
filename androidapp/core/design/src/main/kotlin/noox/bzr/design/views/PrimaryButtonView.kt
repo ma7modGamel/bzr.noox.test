@@ -4,7 +4,6 @@ import android.content.Context
 import android.util.AttributeSet
 import android.widget.FrameLayout
 import androidx.core.view.isVisible
-import androidx.core.content.ContextCompat
 import androidx.core.content.withStyledAttributes
 import noox.bzr.design.ButtonVisualState
 import noox.bzr.design.R
@@ -58,10 +57,11 @@ class PrimaryButtonView @JvmOverloads constructor(context: Context, attrs: Attri
         button.text = if (loading) "" else text
         button.icon = if (loading && SnapshotMode.enabled) drawable(R.drawable.bremo_progress_arc) else null
         binding.progress.isVisible = loading && !SnapshotMode.enabled
-        button.backgroundTintList = ContextCompat.getColorStateList(
-            context,
-            if (state == ButtonVisualState.Pressed) R.color.bremo_primary700 else R.color.bremo_button_primary_bg,
-        )
+        // DEC-063: brand gradient (pressed: deeper gradient) with a soft brand-coloured shadow.
+        button.backgroundTintList = null
+        button.setBackgroundResource(R.drawable.bremo_bg_button_primary)
+        button.isPressed = state == ButtonVisualState.Pressed
+        brandShadow(button, enabled = state == ButtonVisualState.Normal || state == ButtonVisualState.Pressed)
         button.isEnabled = interactive()
         button.contentDescription = if (state == ButtonVisualState.Loading) "$text, ${context.getString(R.string.a11y_loading)}" else text
         applyEnabledAlpha(state != ButtonVisualState.Disabled)

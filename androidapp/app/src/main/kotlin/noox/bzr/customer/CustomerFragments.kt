@@ -106,6 +106,7 @@ class C01HomeFragment : CustomerFragment<C01HomeView>(R.id.scr_c01) {
     override fun C01HomeView.bind() {
         onCategorySelect = viewModel::selectCategory
         onOrderSelect = viewModel::selectOrder
+        onUrgent = viewModel::openUrgentRequest
         onOpen = { route ->
             when (route) {
                 "SCR-C03" -> viewModel.openProblem()

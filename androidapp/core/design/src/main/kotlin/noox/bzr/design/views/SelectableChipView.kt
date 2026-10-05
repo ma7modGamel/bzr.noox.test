@@ -55,6 +55,10 @@ class SelectableChipView @JvmOverloads constructor(context: Context, attrs: Attr
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         minimumHeight = maxOf(height, px(R.dimen.bremo_size_touch_target_min))
+        // In a TileGridLayout row every chip gets the row height, so the frames line up (DEC-063).
+        val fill = MeasureSpec.getMode(heightMeasureSpec) == MeasureSpec.EXACTLY
+        val wanted = if (fill) LayoutParams.MATCH_PARENT else LayoutParams.WRAP_CONTENT
+        if (binding.chip.layoutParams.height != wanted) binding.chip.layoutParams = binding.chip.layoutParams.apply { this.height = wanted }
         super.onMeasure(widthMeasureSpec, heightMeasureSpec)
     }
 

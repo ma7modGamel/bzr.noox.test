@@ -144,7 +144,8 @@ object CustomerLogic {
             items = titles,
             itemDetails = input.strings("order_subtitles"),
             itemStates = input.strings("order_statuses"),
-            fieldValues = listOf(input.text("customer_name")),
+            // The default address labels the home header's location row (DEC-063).
+            fieldValues = listOf(input.text("customer_name"), input.text("address_label")),
         )
     }
 

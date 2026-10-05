@@ -9,7 +9,7 @@ import noox.bzr.design.R
 import noox.bzr.design.databinding.ViewCheckRowBinding
 
 /** 43 §3 CheckRow: checked or unchecked. */
-class CheckRowView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) : LinearLayout(context, attrs) {
+class CheckRowView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) : BremoLinearLayout(context, attrs) {
     private val binding: ViewCheckRowBinding
 
     var text: String = ""

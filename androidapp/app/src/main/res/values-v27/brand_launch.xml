@@ -1,0 +1,2 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources><style name="Theme.Bremo.Starting" parent="Theme.Bremo"><item name="android:windowBackground">@drawable/bremo_launch_background</item><item name="android:statusBarColor">@color/bremo_brand_backdrop</item><item name="android:navigationBarColor">@color/bremo_brand_backdrop</item><item name="android:windowLightStatusBar">false</item><item name="android:windowLightNavigationBar">false</item></style></resources>

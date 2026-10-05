@@ -780,4 +780,25 @@
     <string name="action_open_notifications_count">Notifications (%1$d unread)</string>
     <string name="account_rating_reminders">Review reminder</string>
     <string name="account_rating_reminders_body">One reminder after completion if you haven’t left a review. Other service notifications stay enabled.</string>
+    <string name="brand_loading">Getting the details ready…</string>
+    <string name="store_feature_title">Home services.
+One place.</string>
+    <string name="store_feature_body">Request a service · Track your request · Chat with your technician</string>
+    <string name="store_screenshot_home_title">Home services, made simple</string>
+    <string name="store_screenshot_home_body">Choose a service and start your request in one place</string>
+    <string name="store_screenshot_request_title">A clear request from the start</string>
+    <string name="store_screenshot_request_body">Describe the problem and add the details your technician needs</string>
+    <string name="store_screenshot_offers_title">Compare offers at your pace</string>
+    <string name="store_screenshot_offers_body">Review the technician and price before choosing an offer</string>
+    <string name="store_screenshot_chat_title">Keep the conversation connected</string>
+    <string name="store_screenshot_chat_body">Share details and photos right inside your request</string>
+    <string name="customer_home_hero_title">Request a service</string>
+    <string name="customer_home_hero_body_marketplace">Describe the problem and get offers from technicians</string>
+    <string name="customer_home_hero_body_staff">Describe the problem and we’ll send a verified technician</string>
+    <string name="customer_home_urgent_title">Have an emergency?</string>
+    <string name="customer_home_urgent_body">A technician at the earliest time</string>
+    <string name="customer_home_urgent_action">Get help now</string>
+    <string name="customer_home_location_empty">Add a service address</string>
+    <string name="customer_account_provider_mode_body">Receive requests and manage your work</string>
+    <string name="provider_home_shortcuts_title">Shortcuts</string>
 </resources>

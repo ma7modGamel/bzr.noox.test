@@ -10,7 +10,7 @@ import noox.bzr.design.R
 import noox.bzr.design.databinding.ViewProviderHeaderBinding
 
 /** 43 §3 ProviderHeader: verified avatar (64/72/88), name, optional verified line, rating line. */
-class ProviderHeaderView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) : LinearLayout(context, attrs) {
+class ProviderHeaderView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) : BremoLinearLayout(context, attrs) {
     private val binding: ViewProviderHeaderBinding
 
     var name: String = ""

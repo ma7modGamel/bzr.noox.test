@@ -31,13 +31,13 @@ class StatRowView @JvmOverloads constructor(context: Context, attrs: AttributeSe
         val row = binding.items
         row.removeAllViews()
         items.forEachIndexed { index, item ->
-            val column = LinearLayout(context).apply {
+            val column = BremoLinearLayout(context).apply {
                 orientation = LinearLayout.VERTICAL
                 gravity = Gravity.CENTER_HORIZONTAL
                 gap(R.drawable.bremo_gap_xs)
             }
             val itemBinding = ViewStatItemBinding.inflate(inflater, column)
-            itemBinding.icon.icon(item.icon, R.color.bremo_primary500)
+            itemBinding.icon.gradientIcon(item.icon)
             itemBinding.value.text = item.value
             itemBinding.label.text = item.label
             row.addView(column, LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f))

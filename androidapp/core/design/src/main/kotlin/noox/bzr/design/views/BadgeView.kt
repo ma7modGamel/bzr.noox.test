@@ -11,7 +11,7 @@ import noox.bzr.design.R
 import noox.bzr.design.databinding.ViewBadgeBinding
 
 /** 43 §3 Badge: highlight (amber, optional star) or order status (teal). */
-class BadgeView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) : LinearLayout(context, attrs) {
+class BadgeView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) : BremoLinearLayout(context, attrs) {
     private val binding: ViewBadgeBinding
 
     var text: String = ""

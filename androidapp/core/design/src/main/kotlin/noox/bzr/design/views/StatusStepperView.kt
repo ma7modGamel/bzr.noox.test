@@ -12,7 +12,7 @@ import noox.bzr.design.StepState
 import noox.bzr.design.databinding.ViewStatusStepBinding
 
 /** 43 §3 StatusStepper (C09): the line toward the previous step is teal once this step is reached. */
-class StatusStepperView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) : LinearLayout(context, attrs) {
+class StatusStepperView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) : BremoLinearLayout(context, attrs) {
     var steps: List<Pair<String, StepState>> = emptyList()
         set(value) {
             field = value
@@ -26,7 +26,7 @@ class StatusStepperView @JvmOverloads constructor(context: Context, attrs: Attri
     private fun render() {
         removeAllViews()
         steps.forEachIndexed { index, (label, state) ->
-            val column = LinearLayout(context).apply {
+            val column = BremoLinearLayout(context).apply {
                 orientation = VERTICAL
                 gravity = Gravity.CENTER_HORIZONTAL
                 gap(R.drawable.bremo_gap_s)

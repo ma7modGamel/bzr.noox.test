@@ -8,7 +8,7 @@ import noox.bzr.design.R
 import noox.bzr.design.databinding.ViewRatingLineBinding
 
 /** Star + rating, then the optional services count (ProviderHeader, OfferCard). */
-class RatingLineView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) : LinearLayout(context, attrs) {
+class RatingLineView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) : BremoLinearLayout(context, attrs) {
     private val binding: ViewRatingLineBinding
 
     init {

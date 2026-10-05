@@ -17,7 +17,7 @@ internal fun LinearLayout.feedbackFrame() {
 }
 
 /** 43 §3 EmptyState (38 §9): icon circle, title, body, optional primary action. */
-class EmptyStateView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) : LinearLayout(context, attrs) {
+class EmptyStateView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) : BremoLinearLayout(context, attrs) {
     private val binding: ViewEmptyStateBinding
 
     var title: String = ""
@@ -41,6 +41,7 @@ class EmptyStateView @JvmOverloads constructor(context: Context, attrs: Attribut
     init {
         feedbackFrame()
         binding = ViewEmptyStateBinding.inflate(inflater, this)
+        binding.emptyIcon.setIcon(R.drawable.ic_empty)
         binding.action.onClick = { onAction() }
         binding.action.showIf(false)
         context.withStyledAttributes(attrs, R.styleable.FeedbackStateView) {

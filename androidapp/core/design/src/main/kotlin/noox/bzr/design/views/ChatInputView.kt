@@ -11,7 +11,7 @@ import noox.bzr.design.R
 import noox.bzr.design.databinding.ViewChatInputBinding
 
 /** 43 §3 ChatInput: text box with the send icon. Static without [onValueChange], as in the gallery. */
-class ChatInputView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) : LinearLayout(context, attrs) {
+class ChatInputView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) : BremoLinearLayout(context, attrs) {
     private val binding: ViewChatInputBinding
     private var syncing = false
 

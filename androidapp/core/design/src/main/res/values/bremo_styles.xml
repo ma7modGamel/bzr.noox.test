@@ -255,6 +255,7 @@
         <item name="materialCardViewStyle">@style/Widget.Bremo.Card</item>
         <item name="chipStyle">@style/Widget.Bremo.Chip</item>
         <item name="bottomNavigationStyle">@style/Widget.Bremo.BottomNavigation</item>
+        <item name="viewInflaterClass">noox.bzr.design.views.BremoViewInflater</item>
         <item name="bottomSheetDialogTheme">@style/ThemeOverlay.Bremo.BottomSheetDialog</item>
         <item name="android:statusBarColor">@color/bremo_surface</item>
         <item name="android:navigationBarColor">@color/bremo_surface</item>

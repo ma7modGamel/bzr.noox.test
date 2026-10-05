@@ -5,21 +5,16 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:parentTag="android.widget.LinearLayout">
 
-    <LinearLayout
+    <noox.bzr.design.views.TileGridLayout
         android:id="@+id/categoryGrid"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:divider="@drawable/bremo_gap_m"
-        android:showDividers="middle" />
+        android:layout_height="wrap_content" />
 
-    <LinearLayout
+    <!-- DEC-063: options in equal columns, like the category tiles. -->
+    <noox.bzr.design.views.TileGridLayout
         android:id="@+id/problemList"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:divider="@drawable/bremo_gap_m"
-        android:showDividers="middle" />
+        android:layout_height="wrap_content" />
 
     <noox.bzr.design.views.TextAreaFieldView
         android:id="@+id/description"

@@ -15,8 +15,21 @@ class C02AccountView(context: Context) : CustomerScreenView(context) {
         binding.addresses.onClick = { onOpen("SCR-C14") }
         binding.notifications.onClick = { onOpen("SCR-C32") }
         binding.help.onClick = { onOpen("SCR-C29") }
-        binding.providerMode.onClick = { onOpen("SCR-P01") }
+        binding.providerMode.setOnClickListener { onOpen("SCR-P01") }
+        binding.providerMode.contentDescription = string(R.string.menu_provider_mode)
         binding.logout.onClick = { onOpen("SCR-C10") }
+        binding.logout.danger = true
+        // DEC-063: white cards lift off the tinted screen with the quiet card shadow.
+        listOf(binding.profileCard, binding.menuGroup, binding.logout.parent as android.view.View).forEach(::liftCard)
+    }
+
+    private fun liftCard(view: android.view.View) {
+        view.elevation = resources.getDimension(R.dimen.bremo_elevation_card)
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.P) {
+            val shadow = androidx.core.content.ContextCompat.getColor(context, R.color.bremo_shadow_card)
+            view.outlineSpotShadowColor = shadow
+            view.outlineAmbientShadowColor = shadow
+        }
     }
 
     override fun title(state: CustomerUiState) = string(R.string.customer_account_title)

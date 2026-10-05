@@ -4,6 +4,8 @@ import android.Manifest
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
+import android.os.SystemClock
+import android.view.ViewGroup
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
@@ -32,6 +34,7 @@ import noox.bzr.customer.CustomerViewModel
 import noox.bzr.customer.UrlConnectionCustomerApi
 import noox.bzr.design.R as DesignR
 import noox.bzr.design.views.BottomNavView
+import noox.bzr.design.views.BrandSplashView
 import noox.bzr.links.AndroidPushDevice
 import noox.bzr.links.BremoMessagingService
 import noox.bzr.links.DeepLinkRouter
@@ -56,6 +59,11 @@ class MainActivity : AppCompatActivity() {
     /** A notification or link that arrived before sign-in, or before the first screen (17 §الروابط العميقة). */
     private var pendingLink: String? = null
     private val bottomNav by lazy { findViewById<BottomNavView>(R.id.bottom_nav) }
+
+    /** DEC-064: the animated launch over the first screen; gone after the first destination and its minimum time. */
+    private var splash: BrandSplashView? = null
+    private var splashStartedAt = 0L
+    private var firstScreenReady = false
     private val notificationPermission = registerForActivityResult(ActivityResultContracts.RequestPermission()) { }
 
     override val defaultViewModelProviderFactory: ViewModelProvider.Factory
@@ -79,9 +87,19 @@ class MainActivity : AppCompatActivity() {
         }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        setTheme(DesignR.style.Theme_Bremo)
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_main)
+        if (savedInstanceState == null) showSplash()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            // Hand-off from the system splash: our symbol takes the system icon's size, then ours starts moving.
+            splashScreen.setOnExitAnimationListener { systemSplash ->
+                splash?.continueFrom(systemSplash.iconView)
+                systemSplash.remove()
+                startSplash()
+            }
+        }
         // targetSdk 35 draws edge to edge: keep the screens clear of the status and navigation bars.
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.root)) { view, insets ->
             val bars = insets.getInsets(WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.displayCutout() or WindowInsetsCompat.Type.ime())
@@ -150,6 +168,7 @@ class MainActivity : AppCompatActivity() {
                     .collect {
                         navController.show(it)
                         showTab(it)
+                        hideSplash()
                     }
             }
         }
@@ -180,6 +199,40 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
+    }
+
+    private fun showSplash() {
+        val view = BrandSplashView(this)
+        (window.decorView as ViewGroup).addView(view, ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT))
+        splash = view
+        // Before Android 12 there is no system hand-off: the window background shows the same symbol, so start now.
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
+            startSplash()
+        } else {
+            // No system splash (a warm start, or opened from a notification) means no hand-off call: start anyway
+            // one screen transition after the first frame, so the splash never waits on a call that will not come.
+            val wait = resources.getInteger(DesignR.integer.bremo_motion_screen_transition_ms).toLong()
+            view.post { view.postDelayed(::startSplash, wait) }
+        }
+    }
+
+    private fun startSplash() {
+        val view = splash ?: return
+        if (splashStartedAt != 0L) return
+        splashStartedAt = SystemClock.uptimeMillis()
+        view.play()
+        if (firstScreenReady) hideSplash()
+    }
+
+    /** Leaves once the first screen is ready and the splash has had its minimum time on screen. */
+    private fun hideSplash() {
+        firstScreenReady = true
+        val view = splash ?: return
+        if (splashStartedAt == 0L) return
+        splash = null
+        val minimum = resources.getInteger(DesignR.integer.bremo_motion_splash_min_ms).toLong()
+        val wait = (minimum - (SystemClock.uptimeMillis() - splashStartedAt)).coerceAtLeast(0)
+        view.postDelayed({ view.dismiss() }, wait)
     }
 
     private fun showTab(destination: Int) {

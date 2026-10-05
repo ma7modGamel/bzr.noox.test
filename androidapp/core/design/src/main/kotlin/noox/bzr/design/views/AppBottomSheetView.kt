@@ -12,7 +12,7 @@ import noox.bzr.design.databinding.ViewAppBottomSheetBinding
  * 43 §3 AppBottomSheet content: handle, title, body, primary action, optional secondary action.
  * Screens show it inside a BottomSheetDialogFragment ([AppBottomSheetFragment]).
  */
-class AppBottomSheetView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) : LinearLayout(context, attrs) {
+class AppBottomSheetView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) : BremoLinearLayout(context, attrs) {
     private val binding: ViewAppBottomSheetBinding
 
     var title: String = ""

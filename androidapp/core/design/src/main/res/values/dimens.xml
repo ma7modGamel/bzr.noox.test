@@ -85,6 +85,11 @@
     <dimen name="bremo_size_content_max_width">600dp</dimen>
     <dimen name="bremo_size_compact_breakpoint">360dp</dimen>
     <dimen name="bremo_size_category_column_min_width">104dp</dimen>
+    <dimen name="bremo_size_brand_auth_logo">96dp</dimen>
+    <dimen name="bremo_size_brand_loader_logo">64dp</dimen>
+    <dimen name="bremo_size_brand_launch_logo">112dp</dimen>
+    <dimen name="bremo_size_tile_icon_well">64dp</dimen>
+    <dimen name="bremo_size_hero_icon">56dp</dimen>
     <dimen name="bremo_border_width">1dp</dimen>
     <dimen name="bremo_border_selected_width">1.5dp</dimen>
     <dimen name="bremo_icon_stroke">2dp</dimen>

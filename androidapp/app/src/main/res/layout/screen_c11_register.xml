@@ -26,6 +26,12 @@
         android:paddingVertical="@dimen/bremo_space_l"
         android:showDividers="middle">
 
+        <noox.bzr.design.views.BremoBrandMarkView
+            android:id="@+id/brandLogo"
+            android:layout_width="@dimen/bremo_size_brand_auth_logo"
+            android:layout_height="@dimen/bremo_size_brand_auth_logo"
+            android:layout_gravity="center_horizontal" />
+
         <noox.bzr.design.views.ErrorStateView
             android:id="@+id/messageError"
             android:layout_width="match_parent"

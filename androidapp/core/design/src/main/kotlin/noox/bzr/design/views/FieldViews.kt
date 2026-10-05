@@ -19,7 +19,7 @@ import noox.bzr.design.R
  * States: empty, filled, focused (teal 1.5), error (red 1.5 + text), disabled (40%).
  * Without [onValueChange] the field is static (gallery and snapshots), as in Compose and SwiftUI.
  */
-abstract class FieldShellView internal constructor(context: Context, attrs: AttributeSet?) : LinearLayout(context, attrs) {
+abstract class FieldShellView internal constructor(context: Context, attrs: AttributeSet?) : BremoLinearLayout(context, attrs) {
     internal abstract val labelView: TextView
     internal abstract val optionalView: TextView
     internal abstract val frameView: View

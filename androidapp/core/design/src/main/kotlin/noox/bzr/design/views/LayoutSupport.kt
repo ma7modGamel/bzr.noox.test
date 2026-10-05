@@ -14,7 +14,7 @@ internal fun LinearLayout.gap(@DrawableRes gap: Int) {
 }
 
 /** LinearLayout that never grows past [maxWidth] (ChatBubble: DesignSize.chatBubbleMaxWidth). */
-class MaxWidthLinearLayout @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) : LinearLayout(context, attrs) {
+class MaxWidthLinearLayout @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) : BremoLinearLayout(context, attrs) {
     var maxWidth: Int = Int.MAX_VALUE
         set(value) {
             field = value

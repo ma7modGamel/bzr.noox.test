@@ -8,7 +8,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/bremo_surface_alt"
+        android:background="@drawable/bremo_bg_screen"
         android:orientation="vertical">
 
         <noox.bzr.design.views.AppTopBarView
@@ -39,17 +39,19 @@
                     android:orientation="vertical"
                     android:showDividers="middle">
 
-                    <noox.bzr.design.views.LoadingSkeletonView
+                    <noox.bzr.design.views.BremoBrandLoaderView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content" />
 
                     <noox.bzr.design.views.LoadingSkeletonView
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content" />
+                        android:layout_height="wrap_content"
+                        android:importantForAccessibility="noHideDescendants" />
 
                     <noox.bzr.design.views.LoadingSkeletonView
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content" />
+                        android:layout_height="wrap_content"
+                        android:importantForAccessibility="noHideDescendants" />
                 </LinearLayout>
 
                 <noox.bzr.design.views.ErrorStateView

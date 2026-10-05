@@ -79,6 +79,17 @@ class MobileLayoutQualityTest(
         assertTrue(clipping.joinToString("\n"), clipping.isEmpty())
     }
 
+    @Test
+    fun brand_loading_accommodates_localization_and_text_scaling() {
+        ScreenSnapshots.prepare(paparazzi)
+        val view = C01HomeView(paparazzi.context).apply {
+            render(CustomerUiState("SCR-C01", CustomerPhase.Loading))
+        }
+        paparazzi.snapshot(view, name = "brand-loading-$width-$locale-$fontScale")
+        assertTextFits(view, "SCR-C01-loading")
+        assertTrue(clipping.joinToString("\n"), clipping.isEmpty())
+    }
+
     private fun assertTextFits(view: View, screen: String) {
         if (view.visibility != View.VISIBLE) return
         if (view is TextView && view !is EditText && view.text.isNotBlank() && view.layout != null) {
