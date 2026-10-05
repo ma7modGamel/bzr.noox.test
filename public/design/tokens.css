@@ -57,6 +57,14 @@
   --color-badgebg: #FCECCC;
   --color-badgetext: #76531A;
   --color-danger: #B43D47;
+  --color-brandprimary: #00ACB6;
+  --color-brandsecondary: #149C94;
+  --color-brandtint: #E8F4F4;
+  --color-brandbackdrop: #006A70;
+  --color-onherowell: #FFFFFF33;
+  --color-onherobody: #FFFFFFE0;
+  --color-urgenttext: #5C3B06;
+  --color-dangertint: #FDECEE;
   --type-screentitle-size: 22px;
   --type-screentitle-weight: 700;
   --type-displaynumber-size: 32px;
@@ -165,6 +173,11 @@
   --size-contentmaxwidth: 600px;
   --size-compactbreakpoint: 360px;
   --size-categorycolumnminwidth: 104px;
+  --size-brandauthlogo: 96px;
+  --size-brandloaderlogo: 64px;
+  --size-brandlaunchlogo: 112px;
+  --size-tileiconwell: 64px;
+  --size-heroicon: 56px;
   --border-width: 1px;
   --font-family: 'Cairo';
 }

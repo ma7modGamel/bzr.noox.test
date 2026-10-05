@@ -1,0 +1,15 @@
+{
+    "images": [
+        {
+            "filename": "bremo-icon.png",
+            "idiom": "universal"
+        }
+    ],
+    "info": {
+        "author": "tools/gen-design",
+        "version": 1
+    },
+    "properties": {
+        "template-rendering-intent": "original"
+    }
+}

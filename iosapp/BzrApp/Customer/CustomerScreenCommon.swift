@@ -29,13 +29,16 @@ struct CustomerScreen<Content: View>: View {
     let onBack: (() -> Void)?
     let content: Content
     let bottomBar: AnyView?
+    /// C01 draws its own header instead of the top bar (DEC-063).
+    let showsTopBar: Bool
     @Environment(\.customerBack) private var customerBack
     @Environment(\.customerRetry) private var customerRetry
 
     init(
         title: String, state: CustomerUIState, onBack: (() -> Void)? = nil, bottomBar: AnyView? = nil,
-        @ViewBuilder content: () -> Content
+        showsTopBar: Bool = true, @ViewBuilder content: () -> Content
     ) {
+        self.showsTopBar = showsTopBar
         self.title = title
         self.state = state
         self.onBack = onBack
@@ -45,14 +48,17 @@ struct CustomerScreen<Content: View>: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            AppTopBar(
-                title: title, showsBack: !["SCR-C01", "SCR-C25", "SCR-C18", "SCR-C02"].contains(state.screen),
-                onBack: onBack ?? customerBack)
+            if showsTopBar {
+                AppTopBar(
+                    title: title, showsBack: !["SCR-C01", "SCR-C25", "SCR-C18", "SCR-C02"].contains(state.screen),
+                    onBack: onBack ?? customerBack)
+            }
             ScrollView {
                 VStack(alignment: .leading, spacing: DesignSpace.l) {
                     switch state.phase {
                     case .loading:
-                        ForEach(0..<3, id: \.self) { _ in LoadingSkeleton() }
+                        BremoBrandLoader()
+                        ForEach(0..<2, id: \.self) { _ in LoadingSkeleton().accessibilityHidden(true) }
                     case .error:
                         ErrorState(
                             title: bzrString("error.title"), body: bzrString("error.body"),
@@ -70,7 +76,7 @@ struct CustomerScreen<Content: View>: View {
             }
             .scrollDismissesKeyboard(.interactively)
         }
-        .background(DesignColors.surfaceAlt)
+        .background(DesignGradients.screen.ignoresSafeArea())
         .safeAreaInset(edge: .bottom, spacing: 0) {
             if state.phase != .loading && state.phase != .error, let bottomBar {
                 bottomBar

@@ -209,7 +209,8 @@ public enum CustomerLogic {
             items: titles, itemDetails: input.strings("order_subtitles"),
             itemStates: input.strings("order_statuses"), options: input.strings("category_labels"),
             selectedIndex: input.integer("selected_category_index", default: -1),
-            fieldValues: [input.text("customer_name")])
+            // The default address labels the home header's location row (DEC-063).
+            fieldValues: [input.text("customer_name"), input.text("address_label")])
         state.optionIcons = input.strings("category_icons")
         return state
     }
@@ -2863,6 +2864,7 @@ public final class CustomerViewModel {
                     "event": .text("loaded"), "operating_mode": .text(home.operatingMode),
                     "has_orders": .bool(home.orderCount > 0),
                     "customer_name": .text(home.customerName),
+                    "address_label": .text(home.addressLabel),
                     "category_labels": .strings(catalog.map(\.name)),
                     "category_icons": .strings(catalog.map { $0.iconKey ?? "" }),
                     "selected_category_index": .integer(-1),
@@ -2878,6 +2880,15 @@ public final class CustomerViewModel {
     public func openProblem() {
         state = CustomerLogic.reduce(screen: "SCR-C03", input: problemInput())
     }
+
+    /// C01 urgent card (DEC-063): the same request flow, with "now" chosen for the timing step.
+    public func openUrgentRequest() {
+        if options("timing_types").contains(where: { $0.code == Self.urgentTiming }) { timingType = Self.urgentTiming }
+        openProblem()
+    }
+
+    /// The timing code the urgent card preselects.
+    static let urgentTiming = "NOW"
 
     public func selectCategory(index: Int) {
         guard

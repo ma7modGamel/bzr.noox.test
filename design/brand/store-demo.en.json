@@ -1,0 +1,28 @@
+{
+  "SCR-C01": {
+    "customer_name": "Aya",
+    "category_labels": ["Plumbing", "Electrical", "Air conditioning", "Appliances", "Carpentry", "Painting"],
+    "order_titles": ["Plumbing — water leak"],
+    "order_subtitles": ["#1042 · Nasr City · 2026-10-05 · 9:00 AM"],
+    "order_statuses": ["On the way"]
+  },
+  "SCR-C03": {
+    "category_labels": ["Plumbing", "Electrical", "Air conditioning", "Appliances", "Carpentry", "Painting"],
+    "problem_labels": ["Water leak", "Blocked drain", "Install or replace", "Another problem"],
+    "description": "Water is leaking beneath the kitchen sink."
+  },
+  "SCR-C06": {
+    "order_title": "Plumbing — water leak · #1042",
+    "offer_rows": [
+      "31|Mohamed El Sayed|4.9|86|350 EGP|Arrives in 25 minutes|Top rated|true",
+      "32|Ahmed Ali|4.7|41|300 EGP|Arrives in 40 minutes|Lowest price|false"
+    ]
+  },
+  "SCR-C19": {
+    "provider_name": "Mohamed El Sayed",
+    "order_summary": "Plumbing #1042 · On the way",
+    "message_bodies": ["I’m on my way.", "Thank you, see you soon."],
+    "message_times": ["5:15 PM", "5:16 PM"],
+    "draft": "Great, thank you."
+  }
+}

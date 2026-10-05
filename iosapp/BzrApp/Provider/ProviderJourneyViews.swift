@@ -45,7 +45,8 @@ private struct ProviderScreen<Content: View>: View {
                 VStack(alignment: .leading, spacing: DesignSpace.l) {
                     switch state.phase {
                     case .loading:
-                        ForEach(0..<3, id: \.self) { _ in LoadingSkeleton() }
+                        BremoBrandLoader()
+                        ForEach(0..<2, id: \.self) { _ in LoadingSkeleton().accessibilityHidden(true) }
                     case .error:
                         ErrorState(
                             title: bzrString("error.title"), body: bzrString("error.body"),
@@ -408,23 +409,7 @@ public struct P08HomeView: View {
 
     public var body: some View {
         ProviderScreen(title: bzrString("provider.home.title"), state: state, onBack: onBack) {
-            Button(
-                action: { Task { await onAvailabilityChange(!state.availableNow) } },
-                label: {
-                    CheckRow(
-                        text: bzrString("provider.home.available.title"),
-                        checked: state.availableNow)
-                }
-            )
-            .buttonStyle(BzrPressStyle())
-            .disabled(!state.canContinue)
-            .opacity(state.canContinue ? 1 : DesignOpacity.disabled)
-            .accessibilityValue(
-                bzrString(
-                    state.availableNow
-                        ? "provider.home.available.on_state"
-                        : "provider.home.available.off_state"))
-            BzrText(bzrString("provider.home.available.body"), style: DesignType.secondary)
+            availabilityCard
             if state.messageKey == "provider.home.availability.saved" {
                 InfoBanner(text: bzrString("provider.home.availability.saved"))
             }
@@ -468,25 +453,102 @@ public struct P08HomeView: View {
                     onAction("open_my_offers")
                 }
             }
-            if state.visibleActions.contains("open_notifications") {
-                SecondaryButton(
-                    text: state.unreadCount > 0
-                        ? String(format: bzrString("action.open_notifications.count"), state.unreadCount)
-                        : bzrString("action.open_notifications")
-                ) { onAction("open_notifications") }
-            }
-            if state.visibleActions.contains("open_messages") {
-                SecondaryButton(text: bzrString("action.open_messages")) { onAction("open_messages") }
-            }
-            if state.visibleActions.contains("open_earnings") {
-                SecondaryButton(text: bzrString("action.open_earnings")) { onAction("open_earnings") }
-            }
-            if state.visibleActions.contains("open_provider_profile") {
-                SecondaryButton(text: bzrString("action.open_provider_profile")) {
-                    onAction("open_provider_profile")
+            if !shortcuts.isEmpty {
+                BzrText(bzrString("provider.home.shortcuts.title"), style: DesignType.sectionTitle)
+                // DEC-063: shortcuts as gradient-icon tiles in equal columns.
+                BzrServiceGrid {
+                    ForEach(shortcuts, id: \.action) { shortcut in
+                        Button {
+                            onAction(shortcut.action)
+                        } label: {
+                            SelectableTile(text: shortcut.label, icon: shortcut.icon, state: .unselected)
+                        }
+                        .buttonStyle(BzrPressStyle())
+                    }
                 }
             }
         }
+    }
+
+    /// DEC-063: on = the brand gradient card with white text; off = a white card. Tapping toggles.
+    private var availabilityCard: some View {
+        let available = state.availableNow
+        return Button {
+            Task { await onAvailabilityChange(!available) }
+        } label: {
+            HStack(spacing: DesignSpace.m) {
+                Group {
+                    if available {
+                        BzrIcon(.check, tint: DesignColors.onPrimary)
+                    } else {
+                        BzrGradientIcon(.check)
+                    }
+                }
+                .frame(width: DesignSize.menuIconBox, height: DesignSize.menuIconBox)
+                .background {
+                    RoundedRectangle(cornerRadius: DesignRadius.menuIconBox)
+                        .fill(available ? AnyShapeStyle(DesignColors.onHeroWell) : AnyShapeStyle(DesignGradients.iconWell))
+                }
+                VStack(alignment: .leading, spacing: DesignSpace.xxs) {
+                    BzrText(
+                        bzrString("provider.home.available.title"),
+                        style: DesignType.cardTitle.colored(available ? DesignColors.onPrimary : DesignColors.navy900))
+                    BzrText(
+                        bzrString("provider.home.available.body"),
+                        style: DesignType.caption.colored(available ? DesignColors.onHeroBody : DesignColors.slate500))
+                }
+                Spacer(minLength: 0)
+                BzrText(
+                    bzrString(available ? "provider.home.available.on_state" : "provider.home.available.off_state"),
+                    style: DesignType.body.weighted(DesignFont.bold)
+                        .colored(available ? DesignColors.primary700 : DesignColors.onPrimary), lineLimit: 1
+                )
+                .padding(.horizontal, DesignSpace.l)
+                .frame(minHeight: DesignSize.touchTargetMin)
+                .background {
+                    if available {
+                        Capsule().fill(DesignGradients.iconWell)
+                    } else {
+                        RoundedRectangle(cornerRadius: DesignRadius.button).fill(DesignGradients.brand)
+                    }
+                }
+            }
+            .padding(DesignSpace.l)
+            .background {
+                if available {
+                    RoundedRectangle(cornerRadius: DesignRadius.heroCard).fill(DesignGradients.hero)
+                } else {
+                    RoundedRectangle(cornerRadius: DesignRadius.card).fill(DesignColors.surface)
+                }
+            }
+            .bzrShadow(available ? DesignShadows.brand : DesignShadows.card)
+        }
+        .buttonStyle(BzrPressStyle())
+        .disabled(!state.canContinue)
+        .opacity(state.canContinue ? 1 : DesignOpacity.disabled)
+        .accessibilityElement(children: .combine)
+        .accessibilityValue(
+            bzrString(available ? "provider.home.available.on_state" : "provider.home.available.off_state"))
+    }
+
+    private struct Shortcut {
+        let action: String
+        let icon: BzrIconKey
+        let label: String
+    }
+
+    /// The shortcuts the state allows (offers stay with the market list).
+    private var shortcuts: [Shortcut] {
+        [
+            Shortcut(
+                action: "open_notifications", icon: .bell,
+                label: state.unreadCount > 0
+                    ? String(format: bzrString("action.open_notifications.count"), state.unreadCount)
+                    : bzrString("action.open_notifications")),
+            Shortcut(action: "open_messages", icon: .messages, label: bzrString("action.open_messages")),
+            Shortcut(action: "open_earnings", icon: .orders, label: bzrString("action.open_earnings")),
+            Shortcut(action: "open_provider_profile", icon: .account, label: bzrString("action.open_provider_profile")),
+        ].filter { state.visibleActions.contains($0.action) }
     }
 
     private func providerStatus(_ key: String) -> String {

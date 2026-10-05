@@ -1,7 +1,8 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
-  <rect x="9" y="5" width="30" height="38" rx="5" fill="#EAF6F3"/>
-  <rect x="9" y="5" width="30" height="9" rx="4" fill="#087F78"/>
-  <circle cx="24" cy="28" r="10" fill="#087F78"/>
-  <circle cx="24" cy="28" r="6" fill="#EAF6F3"/>
-  <circle cx="33" cy="9.5" r="2" fill="#EAF6F3"/>
+  <defs><linearGradient id="tone-a" x1="0" y1="0" x2="48" y2="48" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#9AA8FF"/><stop offset="1" stop-color="#4B4FD6"/></linearGradient></defs>
+  <rect x="9" y="5" width="30" height="38" rx="5" fill="#D2D8FF"/>
+  <rect x="9" y="5" width="30" height="9" rx="4" fill="url(#tone-a)"/>
+  <circle cx="24" cy="28" r="10" fill="url(#tone-a)"/>
+  <circle cx="24" cy="28" r="6" fill="#D2D8FF"/>
+  <circle cx="33" cy="9.5" r="2" fill="#D2D8FF"/>
 </svg>

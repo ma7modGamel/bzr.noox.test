@@ -1,0 +1,20 @@
+{
+    "colors": [
+        {
+            "idiom": "universal",
+            "color": {
+                "color-space": "srgb",
+                "components": {
+                    "red": "0.000000",
+                    "green": "0.415686",
+                    "blue": "0.439216",
+                    "alpha": "1.000000"
+                }
+            }
+        }
+    ],
+    "info": {
+        "author": "tools/gen-design",
+        "version": 1
+    }
+}

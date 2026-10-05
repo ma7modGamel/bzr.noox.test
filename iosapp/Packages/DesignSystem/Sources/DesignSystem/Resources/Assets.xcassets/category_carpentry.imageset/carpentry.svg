@@ -1,7 +1,8 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
-  <rect x="4" y="32" width="40" height="11" rx="3" fill="#EAF6F3"/>
-  <rect x="9" y="36" width="10" height="2" rx="1" fill="#087F78"/>
-  <rect x="25" y="38" width="12" height="2" rx="1" fill="#087F78"/>
-  <path d="M11.5 27.5l3 3 17-17-3-3z" fill="#087F78"/>
-  <path d="M21.2 8.1l12.7 12.7 4.9-4.9-12.7-12.7z" fill="#087F78"/>
+  <defs><linearGradient id="tone-a" x1="0" y1="0" x2="48" y2="48" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#F7B46A"/><stop offset="1" stop-color="#B4541C"/></linearGradient></defs>
+  <rect x="4" y="32" width="40" height="11" rx="3" fill="#FBDDBC"/>
+  <rect x="9" y="36" width="10" height="2" rx="1" fill="url(#tone-a)"/>
+  <rect x="25" y="38" width="12" height="2" rx="1" fill="url(#tone-a)"/>
+  <path d="M11.5 27.5l3 3 17-17-3-3z" fill="url(#tone-a)"/>
+  <path d="M21.2 8.1l12.7 12.7 4.9-4.9-12.7-12.7z" fill="url(#tone-a)"/>
 </svg>

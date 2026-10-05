@@ -1,0 +1,47 @@
+{
+    "generated_by": "tools/gen-brand-assets",
+    "brand": "Bremo",
+    "source_hashes": {
+        "design/brand/brand.json": "e8f92eeb9bbef47e169181a72f90df2be18cf5171ce7ae3ed21630ba61b735dd",
+        "design/brand/symbol.svg": "f8d0c5c4d880b5ac5b9e48053447c099342d0302b902395b028b200276e36300",
+        "design/brand/store-demo.en.json": "6989d29408e12fa566fd9d431f8ecc4b3dd63afd7467cc8ccf86dea10a9fb692",
+        "design/tokens.json": "c9a58c56c31bab242c9095b91746803f8e3ef085a18ebb0d53a838392bdeb9a3",
+        "design/strings.ar.json": "76d18ffcef18e08ce4764fda36c0f112d06dfbacb5cf02dec79db8857e8d0c98",
+        "design/strings.en.json": "ffff67c5d2e0e337a1c62e5a3c9b18b9fc2b83e7b55d598ace1c907e3a0cea71"
+    },
+    "outputs": {
+        "design/generated/brand/app-icon.svg": "c5521c879957677bfbf4806a35b4fa73c695a378b99d4f56b632943796d2bee2",
+        "design/brand/app-icon-1024.png": "201586db39eff2cce7137028cd50d312081fdfb676f1d785c23f08c1caab6a48",
+        "design/generated/brand/symbol-transparent.png": "e46674b9a61ca6d9b7c133f2e877f0715e31ab6fdc8c270dccf9aaa5b6b83d73",
+        "design/generated/store/app-store/app-icon-1024.png": "201586db39eff2cce7137028cd50d312081fdfb676f1d785c23f08c1caab6a48",
+        "design/generated/store/google-play/app-icon-512.png": "f83d17676aba647459957cec3e7b36a52cc1ff64a73bc62462f2e915333af4b2",
+        "design/generated/store/google-play/feature-graphic-ar.svg": "3a312c9903098839f21423ddd97ee736c628bc4ce9081b2b80558780f04f0ae6",
+        "design/generated/store/google-play/feature-graphic-ar.png": "48c39b7e5f294b2d346018d15fea20bd085889518fe34b689bde16fd1ddfae5c",
+        "design/generated/store/captures/android/ar/01-home.png": "61400e9c77ec133716a9ac141f74d67e481d08880122f9804549c54be40490ff",
+        "design/generated/store/google-play/screenshots/ar/01-home.png": "220686bdbd5a6e41bbdcf6621bd4eecda1910843dbe83ab7dd788df00fbeb566",
+        "design/generated/store/captures/android/ar/02-request.png": "d4c56a855d1ec8992dffe5dcbad4f9c96458a7b1154809f5436aebcb33637a54",
+        "design/generated/store/google-play/screenshots/ar/02-request.png": "020d5be47a555e6373121c82f7e05725b1161677434d6870d5eb9b3c4963e813",
+        "design/generated/store/captures/android/ar/03-offers.png": "21136efa1ccf5b59c6622374762f95e2b50aa05e28ad466b8d0b07dfaad2c4a2",
+        "design/generated/store/google-play/screenshots/ar/03-offers.png": "8067f6413a73347de21a96c93ad2efb5eb44593495f6307eeaaecb53dd090175",
+        "design/generated/store/captures/android/ar/04-chat.png": "44edbfbd1faded28b3e9fd34e5936eb2f3b95152188f961d0cd9986bddd82782",
+        "design/generated/store/google-play/screenshots/ar/04-chat.png": "e0496028905d0c40eba67671e488f969b4d4192fc2a5b68a9be2f865fe1a697a",
+        "design/generated/store/google-play/feature-graphic-en.svg": "fbf63924f2b2b3781e11272154d1ea2e9ff14b497eacdbf6ce83698c225d4242",
+        "design/generated/store/google-play/feature-graphic-en.png": "f3041e0aeb8061e823a41dc2026fa75b909b43b9ef37b33852a3788659af1ec9",
+        "design/generated/store/captures/android/en/01-home.png": "79e8b97b8f8950d3539059ca70066f0992d6000df543120351d56e20f25698e1",
+        "design/generated/store/google-play/screenshots/en/01-home.png": "93e90a0745a98c7ce88b6a2b7e99d25a509462a93e4fd6e7950292b5d7f7c550",
+        "design/generated/store/captures/android/en/02-request.png": "ecc717b4dc7882a204d599f087bf0de972cc0ba384e1a3633550ca39b4656f26",
+        "design/generated/store/google-play/screenshots/en/02-request.png": "635cfc576a97ff5b86deca4f4faba7853808763eb8cb76dbf184f1d048602e1f",
+        "design/generated/store/captures/android/en/03-offers.png": "4d6f4b5cb4bc1c5ae9bc70584a443e927a467b6624d2032c750e1aa610413917",
+        "design/generated/store/google-play/screenshots/en/03-offers.png": "978cfc56ad3cfa79d64137b24cab1bd774bd0ea8fb14aebeb4d85d99ba7f9edb",
+        "design/generated/store/captures/android/en/04-chat.png": "f8b83e3f24e6c984d1bd68351c5b02c4a9b04309fffd050e5ef6cb08cf83a828",
+        "design/generated/store/google-play/screenshots/en/04-chat.png": "993ec9b503c3839b21e9e0f4c2ef2538d55487fd688b1d3466be4a489bbbca8b",
+        "design/generated/store/bremo-store-assets.zip": "235bc8f3cf7abeff5e89f1204632015950c33b255fb8843cbd5987c2b8028541",
+        "design/generated/brand/bremo-brand-kit.zip": "bd19e845b1026fc4a8c63b0a5aa5e80594035f8147a6e47dd980e02ea1424b5f"
+    },
+    "android_capture_source": "Android native XML Views rendered by Paparazzi with shared fixtures; demo data.",
+    "iphone_screenshots": "Prepared by the owner on macOS; no Android screenshots are relabeled as iOS.",
+    "specifications": {
+        "google_play": "https://support.google.com/googleplay/android-developer/answer/9866151?hl=en",
+        "app_store": "https://developer.apple.com/help/app-store-connect/manage-app-information/add-an-app-icon/"
+    }
+}

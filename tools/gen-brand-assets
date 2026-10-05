@@ -1,0 +1,231 @@
+#!/usr/bin/env php
+<?php
+
+declare(strict_types=1);
+
+$root = dirname(__DIR__);
+$brand = json_decode((string) file_get_contents($root.'/design/brand/brand.json'), true, flags: JSON_THROW_ON_ERROR);
+$tokens = json_decode((string) file_get_contents($root.'/design/tokens.json'), true, flags: JSON_THROW_ON_ERROR);
+$symbol = (string) file_get_contents($root.'/'.$brand['symbol']);
+$symbolBody = (string) preg_replace('/^<svg[^>]*>|<\/svg>\s*$/', '', $symbol);
+$temporary = sys_get_temp_dir().'/bremo-brand-'.bin2hex(random_bytes(6));
+mkdir($temporary, 0755, true);
+register_shutdown_function(static function () use ($temporary): void {
+    $files = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($temporary, FilesystemIterator::SKIP_DOTS), RecursiveIteratorIterator::CHILD_FIRST);
+    foreach ($files as $file) {
+        if ($file->isDir()) {
+            rmdir($file->getPathname());
+        } else {
+            unlink($file->getPathname());
+        }
+    }
+    rmdir($temporary);
+});
+$fontConfig = '<fontconfig><include ignore_missing="yes">/etc/fonts/fonts.conf</include><dir>'.htmlspecialchars($root.'/design/fonts', ENT_XML1).'</dir><cachedir>'.$temporary.'/font-cache</cachedir></fontconfig>';
+file_put_contents($temporary.'/fonts.conf', $fontConfig);
+putenv('FONTCONFIG_FILE='.$temporary.'/fonts.conf');
+$primary = $tokens['color']['brandPrimary'];
+$backdrop = $tokens['color']['brandBackdrop'];
+$tint = $tokens['color']['brandTint'];
+$outputs = [];
+
+/** @param list<string> $arguments */
+function brandConvert(array $arguments): void
+{
+    $process = proc_open(array_merge(['convert'], $arguments), [1 => ['pipe', 'w'], 2 => ['pipe', 'w']], $pipes);
+    if (! is_resource($process)) {
+        throw new RuntimeException('ImageMagick is required to export brand assets.');
+    }
+    $output = stream_get_contents($pipes[1]);
+    $error = stream_get_contents($pipes[2]);
+    fclose($pipes[1]);
+    fclose($pipes[2]);
+    if (proc_close($process) !== 0) {
+        throw new RuntimeException($error ?: $output);
+    }
+}
+
+function brandWrite(string $relative, string $content): string
+{
+    global $root, $outputs;
+    $path = $root.'/'.$relative;
+    if (! is_dir(dirname($path))) {
+        mkdir(dirname($path), 0755, true);
+    }
+    file_put_contents($path, $content);
+    $outputs[$relative] = hash_file('sha256', $path);
+
+    return $path;
+}
+
+function brandRaster(string $svg, string $relative, int $width, int $height, bool $opaque = true): void
+{
+    global $temporary, $root, $outputs;
+    $source = $temporary.'/'.hash('sha256', $svg).'.svg';
+    file_put_contents($source, $svg);
+    $path = $root.'/'.$relative;
+    if (! is_dir(dirname($path))) {
+        mkdir(dirname($path), 0755, true);
+    }
+    $arguments = ['python3', $root.'/tools/render-brand-svg', $source, $path, (string) $width, (string) $height];
+    if ($opaque) {
+        $arguments[] = '--opaque';
+    }
+    $process = proc_open($arguments, [1 => ['pipe', 'w'], 2 => ['pipe', 'w']], $pipes);
+    if (! is_resource($process)) {
+        throw new RuntimeException('librsvg and Cairo are required for brand SVG export.');
+    }
+    $error = stream_get_contents($pipes[2]);
+    fclose($pipes[1]);
+    fclose($pipes[2]);
+    if (proc_close($process) !== 0) {
+        throw new RuntimeException($error);
+    }
+    brandConvert([$path, '-strip', ($opaque ? 'PNG24:' : 'PNG32:').$path]);
+    $outputs[$relative] = hash_file('sha256', $path);
+}
+
+function brandSvg(int $width, int $height, string $body): string
+{
+    return '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="'.$width.'" height="'.$height.'" viewBox="0 0 '.$width.' '.$height.'">'.$body.'</svg>';
+}
+
+function brandEmbed(string $path, float $x, float $y, float $width, float $height): string
+{
+    return '<image x="'.$x.'" y="'.$y.'" width="'.$width.'" height="'.$height.'" xlink:href="data:image/png;base64,'.base64_encode((string) file_get_contents($path)).'"/>';
+}
+
+function brandText(string $text, string $locale, int $size, int $width, string $color, bool $bold = true): string
+{
+    global $temporary;
+    $path = $temporary.'/'.hash('sha256', $text.$locale.$size.$width.$color).'.png';
+    $markup = '<span font_family="Cairo" weight="'.($bold ? 'bold' : 'normal').'" foreground="'.$color.'">'.htmlspecialchars($text, ENT_XML1).'</span>';
+    brandConvert(['-background', 'none', '-pointsize', (string) $size, '-direction', $locale === 'ar' ? 'right-to-left' : 'left-to-right', '-define', 'pango:align='.($locale === 'ar' ? 'right' : 'left'), '-define', 'pango:language='.$locale, '-define', 'pango:wrap=word', '-size', $width.'x', 'pango:'.$markup, '-strip', 'PNG32:'.$path]);
+
+    return $path;
+}
+
+/** @param array<string, string> $files Archive name => repository path. */
+function brandArchive(string $relative, array $files): void
+{
+    global $root, $outputs;
+    $archive = new ZipArchive;
+    if ($archive->open($root.'/'.$relative, ZipArchive::CREATE | ZipArchive::OVERWRITE) !== true) {
+        throw new RuntimeException('Cannot create brand archive: '.$relative);
+    }
+    foreach ($files as $name => $file) {
+        if (! $archive->addFile($root.'/'.$file, $name)) {
+            throw new RuntimeException('Cannot package asset: '.$file);
+        }
+        $archive->setMtimeName($name, 946684800);
+    }
+    if (! $archive->close()) {
+        throw new RuntimeException('Cannot finalize brand archive: '.$relative);
+    }
+    $outputs[$relative] = hash_file('sha256', $root.'/'.$relative);
+}
+
+$background = '<defs><linearGradient id="background" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="'.$primary.'"/><stop offset="1" stop-color="'.$backdrop.'"/></linearGradient></defs><rect width="1024" height="1024" fill="url(#background)"/>';
+$scale = 1024 * $brand['icon']['symbolHeightRatio'] / 400;
+$x = (1024 - 320 * $scale) / 2;
+$y = (1024 - 400 * $scale) / 2;
+$icon = brandSvg(1024, 1024, $background.'<g transform="translate('.$x.' '.$y.') scale('.$scale.')">'.$symbolBody.'</g>');
+brandWrite('design/generated/brand/app-icon.svg', $icon);
+brandRaster($icon, 'design/brand/app-icon-1024.png', 1024, 1024);
+brandRaster($symbol, 'design/generated/brand/symbol-transparent.png', 1200, 1500, false);
+brandRaster($icon, 'design/generated/store/app-store/app-icon-1024.png', 1024, 1024);
+brandRaster($icon, 'design/generated/store/google-play/app-icon-512.png', 512, 512, false);
+$iconPath = $root.'/design/brand/app-icon-1024.png';
+
+foreach (['ar', 'en'] as $locale) {
+    $strings = json_decode((string) file_get_contents($root.'/design/strings.'.$locale.'.json'), true, flags: JSON_THROW_ON_ERROR);
+    $title = brandText($strings['store.feature.title'], $locale, 48, 630, '#FFFFFF');
+    $detail = brandText($strings['store.feature.body'], $locale, 17, 640, $tint, false);
+    $titleSize = getimagesize($title);
+    $detailSize = getimagesize($detail);
+    $banner = brandSvg(1024, 500,
+        '<defs><linearGradient id="banner" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="'.$backdrop.'"/><stop offset="1" stop-color="'.$tokens['color']['brandSecondary'].'"/></linearGradient></defs><rect width="1024" height="500" fill="url(#banner)"/>'
+        .'<circle cx="165" cy="410" r="260" fill="'.$primary.'" opacity="0.12"/><circle cx="1080" cy="-70" r="310" fill="'.$primary.'" opacity="0.16"/>'
+        .'<g opacity="0.16" transform="translate(75 120) scale(0.65)">'.$symbolBody.'</g>'
+        .brandEmbed($iconPath, 864, 64, 64, 64)
+        .brandEmbed($title, 310, 148, $titleSize[0], $titleSize[1])
+        .brandEmbed($detail, 306, 148 + $titleSize[1] + 16, $detailSize[0], $detailSize[1])
+    );
+    brandWrite('design/generated/store/google-play/feature-graphic-'.$locale.'.svg', $banner);
+    brandRaster($banner, 'design/generated/store/google-play/feature-graphic-'.$locale.'.png', 1024, 500);
+
+    foreach ($brand['store']['screens'] as $screen) {
+        $captureRelative = 'design/generated/store/captures/android/'.$locale.'/'.$screen['file'].'.png';
+        $capture = $root.'/'.$captureRelative;
+        if (in_array('--import-android', $argv, true)) {
+            $matches = glob($root.'/androidapp/app/src/test/snapshots/images/noox.bzr.customer_StoreScreenshotExportTest_export_native_store_screens*store-'.$locale.'-'.$screen['file'].'.png') ?: [];
+            if (count($matches) !== 1) {
+                throw new RuntimeException('Run StoreScreenshotExportTest first; missing capture '.$screen['id'].'/'.$locale);
+            }
+            brandWrite($captureRelative, (string) file_get_contents($matches[0]));
+        }
+        if (! is_file($capture)) {
+            continue;
+        }
+        $captureSize = getimagesize($capture);
+        if (array_slice($captureSize, 0, 2) !== $brand['store']['androidScreenshots']) {
+            throw new RuntimeException('Export captures at device resolution before generating store artwork: '.$captureRelative);
+        }
+        $outputs[$captureRelative] = hash_file('sha256', $capture);
+        $headline = brandText($strings[$screen['headlineKey']], $locale, 46, 880, '#FFFFFF');
+        $description = brandText($strings[$screen['detailKey']], $locale, 20, 880, $tint, false);
+        $headlineSize = getimagesize($headline);
+        $descriptionSize = getimagesize($description);
+        $phoneY = max(350, 162 + $headlineSize[1] + 16 + $descriptionSize[1] + 32);
+        $phoneHeight = 1920 - $phoneY - 58;
+        $captureHeight = $phoneHeight - 32;
+        $captureWidth = $captureHeight * $captureSize[0] / $captureSize[1];
+        $captureX = (1080 - $captureWidth) / 2;
+        $poster = brandSvg(1080, 1920,
+            '<defs><linearGradient id="poster" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="'.$backdrop.'"/><stop offset="1" stop-color="'.$tokens['color']['brandSecondary'].'"/></linearGradient></defs><rect width="1080" height="1920" fill="url(#poster)"/>'
+            .'<circle cx="-30" cy="1540" r="540" fill="'.$primary.'" opacity="0.16"/>'
+            .brandEmbed($iconPath, $locale === 'ar' ? 916 : 100, 68, 64, 64)
+            .brandEmbed($headline, 100, 162, $headlineSize[0], $headlineSize[1])
+            .brandEmbed($description, 100, 162 + $headlineSize[1] + 16, $descriptionSize[0], $descriptionSize[1])
+            .'<rect x="'.($captureX - 16).'" y="'.$phoneY.'" width="'.($captureWidth + 32).'" height="'.$phoneHeight.'" rx="40" fill="'.$tokens['color']['navy900'].'"/>'
+            .brandEmbed($capture, $captureX, $phoneY + 16, $captureWidth, $captureHeight)
+        );
+        brandRaster($poster, 'design/generated/store/google-play/screenshots/'.$locale.'/'.$screen['file'].'.png', 1080, 1920);
+    }
+}
+
+$storeFiles = [];
+foreach (array_keys($outputs) as $file) {
+    if (str_starts_with($file, 'design/generated/store/') && str_ends_with($file, '.png') && ! str_contains($file, '/captures/')) {
+        $storeFiles[substr($file, strlen('design/generated/store/'))] = $file;
+    }
+}
+brandArchive('design/generated/store/bremo-store-assets.zip', $storeFiles);
+brandArchive('design/generated/brand/bremo-brand-kit.zip', [
+    'symbol.svg' => $brand['symbol'],
+    'symbol-transparent.png' => 'design/generated/brand/symbol-transparent.png',
+    'app-icon.svg' => 'design/generated/brand/app-icon.svg',
+    'app-icon-1024.png' => 'design/brand/app-icon-1024.png',
+]);
+
+$manifest = [
+    'generated_by' => 'tools/gen-brand-assets',
+    'brand' => $brand['name'],
+    'source_hashes' => [
+        'design/brand/brand.json' => hash_file('sha256', $root.'/design/brand/brand.json'),
+        $brand['symbol'] => hash_file('sha256', $root.'/'.$brand['symbol']),
+        'design/brand/store-demo.en.json' => hash_file('sha256', $root.'/design/brand/store-demo.en.json'),
+        'design/tokens.json' => hash_file('sha256', $root.'/design/tokens.json'),
+        'design/strings.ar.json' => hash_file('sha256', $root.'/design/strings.ar.json'),
+        'design/strings.en.json' => hash_file('sha256', $root.'/design/strings.en.json'),
+    ],
+    'outputs' => $outputs,
+    'android_capture_source' => 'Android native XML Views rendered by Paparazzi with shared fixtures; demo data.',
+    'iphone_screenshots' => 'Prepared by the owner on macOS; no Android screenshots are relabeled as iOS.',
+    'specifications' => [
+        'google_play' => 'https://support.google.com/googleplay/android-developer/answer/9866151?hl=en',
+        'app_store' => 'https://developer.apple.com/help/app-store-connect/manage-app-information/add-an-app-icon/',
+    ],
+];
+brandWrite('design/generated/brand/manifest.json', json_encode($manifest, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)."\n");
+fwrite(STDOUT, 'Exported '.count($outputs)." brand assets.\n");

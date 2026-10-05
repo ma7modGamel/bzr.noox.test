@@ -40,6 +40,14 @@ public enum DesignColors {
     public static let badgeBg = Color(red: 0.9882, green: 0.9255, blue: 0.8000, opacity: 1.0000)
     public static let badgeText = Color(red: 0.4627, green: 0.3255, blue: 0.1020, opacity: 1.0000)
     public static let danger = Color(red: 0.7059, green: 0.2392, blue: 0.2784, opacity: 1.0000)
+    public static let brandPrimary = Color(red: 0.0000, green: 0.6745, blue: 0.7137, opacity: 1.0000)
+    public static let brandSecondary = Color(red: 0.0784, green: 0.6118, blue: 0.5804, opacity: 1.0000)
+    public static let brandTint = Color(red: 0.9098, green: 0.9569, blue: 0.9569, opacity: 1.0000)
+    public static let brandBackdrop = Color(red: 0.0000, green: 0.4157, blue: 0.4392, opacity: 1.0000)
+    public static let onHeroWell = Color(red: 1.0000, green: 1.0000, blue: 1.0000, opacity: 0.2000)
+    public static let onHeroBody = Color(red: 1.0000, green: 1.0000, blue: 1.0000, opacity: 0.8784)
+    public static let urgentText = Color(red: 0.3608, green: 0.2314, blue: 0.0235, opacity: 1.0000)
+    public static let dangerTint = Color(red: 0.9922, green: 0.9255, blue: 0.9333, opacity: 1.0000)
 }
 
 public enum DesignType {
@@ -150,6 +158,11 @@ public enum DesignSize {
     public static let contentMaxWidth: CGFloat = 600
     public static let compactBreakpoint: CGFloat = 360
     public static let categoryColumnMinWidth: CGFloat = 104
+    public static let brandAuthLogo: CGFloat = 96
+    public static let brandLoaderLogo: CGFloat = 64
+    public static let brandLaunchLogo: CGFloat = 112
+    public static let tileIconWell: CGFloat = 64
+    public static let heroIcon: CGFloat = 56
 }
 
 public enum DesignBorder {
@@ -169,6 +182,11 @@ public enum DesignRatio {
     public static let progressArc: CGFloat = 0.75
     public static let pressFeedback: CGFloat = 0.88
     public static let loadingDim: CGFloat = 0.55
+    public static let brandCorner: CGFloat = 0.24
+    public static let brandLoadingScale: CGFloat = 0.96
+    public static let wellFade: CGFloat = 0.45
+    public static let splashRingScale: CGFloat = 2.6
+    public static let splashGlow: CGFloat = 0.22
 }
 
 public enum DesignThreshold {
@@ -176,7 +194,11 @@ public enum DesignThreshold {
 }
 
 public enum DesignOpacity { public static let disabled: CGFloat = 0.4 }
-public enum DesignMotion { public static let screenTransitionMs = 250; public static let sheetMs = 250; public static let navBarMs = 180 }
+public enum DesignMotion {
+    public static let screenTransitionMs = 250; public static let sheetMs = 250; public static let navBarMs = 180
+    public static let splashEnterMs = 900; public static let splashMinMs = 1400; public static let splashExitMs = 320
+    public static let splashLoopMs = 4800; public static let brandPulseMs = 1200
+}
 public enum DesignA11y { public static let maxFontScale: CGFloat = 1.3 }
 public enum DesignFont {
     public static let family = "Cairo"
@@ -186,4 +208,4 @@ public enum DesignFont {
     public static let bold = "Cairo-Bold"
     public static let files = ["Cairo-Regular", "Cairo-Medium", "Cairo-SemiBold", "Cairo-Bold"]
 }
-public enum DesignMeta { public static let tokensSha256 = "d49628e0dda171e8f68cf471e4560763d8b10b71d6ba514ed78de5fd46103d80" }
+public enum DesignMeta { public static let tokensSha256 = "5bb01266d27537bb30959a2bbbcf117df987920c9759433d0ce9662259ff0995" }

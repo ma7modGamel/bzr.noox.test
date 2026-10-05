@@ -43,16 +43,19 @@ public struct C03ProblemView: View {
                     .buttonStyle(BzrPressStyle())
                 }
             }
-            ForEach(Array(state.itemDetails.enumerated()), id: \.offset) { index, label in
-                Button(
-                    action: { onProblemSelect(index) },
-                    label: {
-                        SelectableChip(
-                            text: label,
-                            state: index == state.selectedOptionIndex ? .selected : .unselected)
-                    }
-                )
-                .buttonStyle(BzrPressStyle())
+            // DEC-063: options in equal columns, like the category tiles.
+            BzrServiceGrid {
+                ForEach(Array(state.itemDetails.enumerated()), id: \.offset) { index, label in
+                    Button(
+                        action: { onProblemSelect(index) },
+                        label: {
+                            SelectableChip(
+                                text: label,
+                                state: index == state.selectedOptionIndex ? .selected : .unselected)
+                        }
+                    )
+                    .buttonStyle(BzrPressStyle())
+                }
             }
             TextAreaField(
                 label: bzrString("request.description.label"),

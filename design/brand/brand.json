@@ -1,0 +1,32 @@
+{
+  "name": "Bremo",
+  "reference": "design/brand/reference-sheet.png",
+  "symbol": "design/brand/symbol.svg",
+  "colors": {
+    "primary": "brandPrimary",
+    "secondary": "brandSecondary",
+    "tint": "brandTint",
+    "backdrop": "brandBackdrop"
+  },
+  "icon": {"canvas": 1024, "symbolHeightRatio": 0.70},
+  "androidAdaptive": {"canvas": 108, "symbolHeight": 56},
+  "androidSplash": {"canvas": 108, "symbolHeight": 72},
+  "store": {
+    "googlePlayIcon": [512, 512],
+    "appleIcon": [1024, 1024],
+    "featureGraphic": [1024, 500],
+    "androidScreenshots": [1080, 1920],
+    "iphoneScreenshots": [1320, 2868],
+    "screens": [
+      {"id": "SCR-C01", "file": "01-home", "headlineKey": "store.screenshot.home.title", "detailKey": "store.screenshot.home.body"},
+      {"id": "SCR-C03", "file": "02-request", "headlineKey": "store.screenshot.request.title", "detailKey": "store.screenshot.request.body"},
+      {"id": "SCR-C06", "file": "03-offers", "headlineKey": "store.screenshot.offers.title", "detailKey": "store.screenshot.offers.body"},
+      {"id": "SCR-C19", "file": "04-chat", "headlineKey": "store.screenshot.chat.title", "detailKey": "store.screenshot.chat.body"}
+    ]
+  },
+  "rasterStudy": {
+    "tool": "built-in image_gen",
+    "source": "design/brand/symbol-raster-study.png",
+    "prompt": "Preserve the upper-left Bremo app-icon ribbon silhouette from the supplied brand sheet; white/ice curved ribbon and teal folded upright, transparent background, no text or tile. Native production geometry is maintained separately in symbol.svg."
+  }
+}

@@ -75,8 +75,9 @@ public struct CustomerLoginScreen: View {
 
     public var body: some View {
         AuthBody {
-            Color.clear.frame(height: DesignSpace.xxl)
+            BremoBrandMark().frame(maxWidth: .infinity)
             BzrText(bzrString("app.name"), style: DesignType.screenTitle)
+                .frame(maxWidth: .infinity)
             BzrText(bzrString("auth.login.title"), style: DesignType.sectionTitle)
             BzrText(bzrString("auth.login.body"), style: DesignType.secondary)
             authMessage(state: state)
@@ -133,6 +134,7 @@ public struct CustomerRegisterScreen: View {
         VStack(spacing: 0) {
             AppTopBar(title: bzrString("auth.register.title"), onBack: onBack)
             AuthBody {
+                BremoBrandMark().frame(maxWidth: .infinity)
                 authMessage(state: state)
                 AppTextField(
                     label: bzrString("auth.name.label"), placeholder: bzrString("auth.name.placeholder"),

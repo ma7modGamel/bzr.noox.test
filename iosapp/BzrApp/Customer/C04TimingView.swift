@@ -56,16 +56,19 @@ public struct C04TimingView: View {
             .buttonStyle(BzrPressStyle())
             if let message = state.messageKey { InfoBanner(text: bzrString(message)) }
             ScreenHeading(bzrString("request.materials.title"))
-            ForEach(Array(state.materialOptions.enumerated()), id: \.offset) { index, label in
-                Button(
-                    action: { onMaterialSelect(index) },
-                    label: {
-                        SelectableChip(
-                            text: label,
-                            state: index == state.selectedMaterialIndex ? .selected : .unselected)
-                    }
-                )
-                .buttonStyle(BzrPressStyle())
+            // DEC-063: options in equal columns, like the category tiles.
+            BzrServiceGrid {
+                ForEach(Array(state.materialOptions.enumerated()), id: \.offset) { index, label in
+                    Button(
+                        action: { onMaterialSelect(index) },
+                        label: {
+                            SelectableChip(
+                                text: label,
+                                state: index == state.selectedMaterialIndex ? .selected : .unselected)
+                        }
+                    )
+                    .buttonStyle(BzrPressStyle())
+                }
             }
             if state.showPricing {
                 ScreenHeading(bzrString("request.pricing.title"))

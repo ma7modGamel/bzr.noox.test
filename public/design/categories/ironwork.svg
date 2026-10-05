@@ -1,6 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
-  <path d="M6 22h28c0 4-3 7-8 7v5h6v6H14v-6h6v-5c-6 0-10-3-14-7z" fill="#087F78"/>
-  <path d="M34 22h8c0 3-3 5-8 5z" fill="#EAF6F3"/>
-  <rect x="22" y="4" width="16" height="8" rx="2" fill="#EAF6F3"/>
-  <rect x="28" y="11" width="4" height="9" rx="2" fill="#087F78"/>
+  <defs><linearGradient id="tone-a" x1="0" y1="0" x2="48" y2="48" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#9AA9BC"/><stop offset="1" stop-color="#3A4A5E"/></linearGradient></defs>
+  <path d="M6 22h28c0 4-3 7-8 7v5h6v6H14v-6h6v-5c-6 0-10-3-14-7z" fill="url(#tone-a)"/>
+  <path d="M34 22h8c0 3-3 5-8 5z" fill="#D2D8E1"/>
+  <rect x="22" y="4" width="16" height="8" rx="2" fill="#D2D8E1"/>
+  <rect x="28" y="11" width="4" height="9" rx="2" fill="url(#tone-a)"/>
 </svg>

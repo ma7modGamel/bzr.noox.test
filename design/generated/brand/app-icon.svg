@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1024" height="1024" viewBox="0 0 1024 1024"><defs><linearGradient id="background" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#00ACB6"/><stop offset="1" stop-color="#006A70"/></linearGradient></defs><rect width="1024" height="1024" fill="url(#background)"/><g transform="translate(225.28 153.6) scale(1.792)">
+  <defs>
+    <linearGradient id="teal" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#00ACB6"/>
+      <stop offset="1" stop-color="#149C94"/>
+    </linearGradient>
+    <linearGradient id="ribbon" x1="0" y1="0" x2="0.4" y2="1">
+      <stop offset="0" stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#E8F4F4"/>
+    </linearGradient>
+  </defs>
+  <path id="teal-fold" fill="url(#teal)" d="M89 78 H141 C182 78 214 96 214 135 C214 173 181 189 132 189 H106 V305 C106 355 75 389 29 389 H12 Q2 389 2 379 V153 C2 110 39 78 89 78 Z"/>
+  <path id="white-ribbon" fill="url(#ribbon)" d="M13 2 H177 C248 2 301 54 301 126 C301 200 252 267 176 267 H120 C58 267 23 301 2 346 C2 301 13 236 59 207 C79 194 103 189 132 189 C181 189 214 173 214 135 C214 96 182 78 141 78 H88 C39 78 5 44 5 8 Q5 2 13 2 Z"/>
+</g></svg>

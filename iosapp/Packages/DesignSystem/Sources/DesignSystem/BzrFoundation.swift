@@ -181,3 +181,32 @@ public struct BzrServiceGrid<Content: View>: View {
         ) { content }
     }
 }
+
+/// DEC-063: a line icon filled with a gradient (brand by default), the SwiftUI twin of Android `GradientIconView`.
+public struct BzrGradientIcon: View {
+    private let key: BzrIconKey
+    private let gradient: LinearGradient
+    private let size: CGFloat
+
+    public init(_ key: BzrIconKey, gradient: LinearGradient = DesignGradients.iconBrand, size: CGFloat = DesignSize.icon) {
+        self.key = key
+        self.gradient = gradient
+        self.size = size
+    }
+
+    public var body: some View {
+        Image(key.rawValue, bundle: .module)
+            .renderingMode(.template)
+            .resizable()
+            .frame(width: size, height: size)
+            .foregroundStyle(gradient)
+            .accessibilityHidden(true)
+    }
+}
+
+extension View {
+    /// DEC-063: a token shadow, or none.
+    public func bzrShadow(_ style: DesignShadowStyle?) -> some View {
+        shadow(color: style?.color ?? .clear, radius: style?.radius ?? 0, y: style?.y ?? 0)
+    }
+}

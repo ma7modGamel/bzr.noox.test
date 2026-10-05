@@ -258,7 +258,8 @@ struct CustomerJourneyRoot: View {
                 C01HomeView(
                     state: viewModel.state, onOpen: open,
                     onCategorySelect: viewModel.selectCategory,
-                    onOrderSelect: { index in Task { await viewModel.selectOrder(index: index) } })
+                    onOrderSelect: { index in Task { await viewModel.selectOrder(index: index) } },
+                    onUrgent: viewModel.openUrgentRequest)
             }
         }
         .environment(\.customerBack) { Task { await viewModel.goBack() } }

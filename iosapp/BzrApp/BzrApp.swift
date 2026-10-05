@@ -12,6 +12,7 @@ struct BzrApp: App {
     /// A provider link opens the provider root on its target instead of the application status (DEC-058).
     @State private var providerLinkTarget: DeepLinkTarget?
     @State private var push = PushCenter.shared
+    @State private var showsSplash = true
     private let session: AppAuthSessionStore
     private let apiBaseURL: URL
 
@@ -77,8 +78,24 @@ struct BzrApp: App {
             .onChange(of: scenePhase) { _, phase in
                 if phase == .active { push.refreshAuthorization() }
             }
+            // DEC-064: the animated launch over the first screen, for its minimum time, then a soft fade.
+            .overlay {
+                if showsSplash {
+                    BrandSplash()
+                        .transition(.opacity.combined(with: .scale(scale: Self.splashExitScale)))
+                        .task {
+                            try? await Task.sleep(for: .milliseconds(DesignMotion.splashMinMs))
+                            withAnimation(.easeIn(duration: Double(DesignMotion.splashExitMs) / 1000)) {
+                                showsSplash = false
+                            }
+                        }
+                }
+            }
         }
     }
+
+    /// The splash grows slightly as it fades, as if the app comes forward through it.
+    private static let splashExitScale = 1.06
 
     private func makeCustomerViewModel(_ token: String) -> CustomerViewModel {
         CustomerViewModel(

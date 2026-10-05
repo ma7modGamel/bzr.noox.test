@@ -12464,6 +12464,326 @@
                     }
                 }
             }
+        },
+        "brand.loading": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "جاري تجهيز التفاصيل…"
+                    }
+                },
+                "en": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "Getting the details ready…"
+                    }
+                }
+            }
+        },
+        "store.feature.title": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "خدمات بيتك\nفي مكان واحد"
+                    }
+                },
+                "en": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "Home services.\nOne place."
+                    }
+                }
+            }
+        },
+        "store.feature.body": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "اطلب الخدمة · تابع طلبك · تواصل مع الفني"
+                    }
+                },
+                "en": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "Request a service · Track your request · Chat with your technician"
+                    }
+                }
+            }
+        },
+        "store.screenshot.home.title": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "خدمات بيتك، بسهولة"
+                    }
+                },
+                "en": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "Home services, made simple"
+                    }
+                }
+            }
+        },
+        "store.screenshot.home.body": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "اختَر الخدمة وابدأ طلبك من مكان واحد"
+                    }
+                },
+                "en": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "Choose a service and start your request in one place"
+                    }
+                }
+            }
+        },
+        "store.screenshot.request.title": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "طلب واضح من البداية"
+                    }
+                },
+                "en": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "A clear request from the start"
+                    }
+                }
+            }
+        },
+        "store.screenshot.request.body": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "حدّد المشكلة وأضف التفاصيل التي يحتاجها الفني"
+                    }
+                },
+                "en": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "Describe the problem and add the details your technician needs"
+                    }
+                }
+            }
+        },
+        "store.screenshot.offers.title": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "قارن العروض براحتك"
+                    }
+                },
+                "en": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "Compare offers at your pace"
+                    }
+                }
+            }
+        },
+        "store.screenshot.offers.body": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "راجع تفاصيل الفني والسعر قبل اختيار العرض"
+                    }
+                },
+                "en": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "Review the technician and price before choosing an offer"
+                    }
+                }
+            }
+        },
+        "store.screenshot.chat.title": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "تواصل حول طلبك"
+                    }
+                },
+                "en": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "Keep the conversation connected"
+                    }
+                }
+            }
+        },
+        "store.screenshot.chat.body": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "أرسل التفاصيل والصور داخل محادثة الطلب"
+                    }
+                },
+                "en": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "Share details and photos right inside your request"
+                    }
+                }
+            }
+        },
+        "customer.home.hero.title": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "اطلب خدمة"
+                    }
+                },
+                "en": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "Request a service"
+                    }
+                }
+            }
+        },
+        "customer.home.hero.body.marketplace": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "صف المشكلة واستقبل عروض الفنيين"
+                    }
+                },
+                "en": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "Describe the problem and get offers from technicians"
+                    }
+                }
+            }
+        },
+        "customer.home.hero.body.staff": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "صف المشكلة ونرسل لك فنيًا معتمدًا"
+                    }
+                },
+                "en": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "Describe the problem and we’ll send a verified technician"
+                    }
+                }
+            }
+        },
+        "customer.home.urgent.title": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "عندك حالة طارئة؟"
+                    }
+                },
+                "en": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "Have an emergency?"
+                    }
+                }
+            }
+        },
+        "customer.home.urgent.body": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "فني في أقرب وقت متاح"
+                    }
+                },
+                "en": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "A technician at the earliest time"
+                    }
+                }
+            }
+        },
+        "customer.home.urgent.action": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "اطلب فني الآن"
+                    }
+                },
+                "en": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "Get help now"
+                    }
+                }
+            }
+        },
+        "customer.home.location.empty": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "أضف عنوان الخدمة"
+                    }
+                },
+                "en": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "Add a service address"
+                    }
+                }
+            }
+        },
+        "customer.account.provider_mode.body": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "استقبل الطلبات وتابع شغلك"
+                    }
+                },
+                "en": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "Receive requests and manage your work"
+                    }
+                }
+            }
+        },
+        "provider.home.shortcuts.title": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "اختصارات"
+                    }
+                },
+                "en": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "Shortcuts"
+                    }
+                }
+            }
         }
     },
     "version": "1.0"

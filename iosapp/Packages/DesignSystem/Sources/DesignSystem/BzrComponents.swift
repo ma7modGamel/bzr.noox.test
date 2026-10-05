@@ -149,8 +149,10 @@ public struct PrimaryButton: View {
             .padding(.horizontal, DesignSpace.l)
             .padding(.vertical, DesignSpace.m)
             .frame(minHeight: height)
-            .background(state == .pressed ? DesignColors.primary700 : DesignColors.primary600)
+            // DEC-063: brand gradient (deeper when pressed) with a soft brand-coloured shadow.
+            .background(state == .pressed ? DesignGradients.brandPressed : DesignGradients.brand)
             .clipShape(RoundedRectangle(cornerRadius: DesignRadius.button))
+            .bzrShadow(state == .normal || state == .pressed ? DesignShadows.brand : nil)
         }
         .buttonStyle(BzrPressStyle())
         .disabled(!(state == .normal || state == .pressed))
@@ -256,6 +258,7 @@ public struct BottomNav: View {
     private let selectedIndex: Int
     private let onSelect: (Int) -> Void
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Namespace private var selection
 
     public init(
         items: [(BzrIconKey, String)], selectedIndex: Int, onSelect: @escaping (Int) -> Void = { _ in }
@@ -272,18 +275,27 @@ public struct BottomNav: View {
                     onSelect(index)
                 } label: {
                     VStack(spacing: DesignSpace.xs) {
-                        BzrIcon(
-                            items[index].0,
-                            tint: index == selectedIndex ? DesignColors.primary700 : DesignColors.slate400
-                        )
+                        // DEC-063: the gradient capsule slides to the chosen tab; its icon takes the brand gradient.
+                        Group {
+                            if index == selectedIndex {
+                                BzrGradientIcon(items[index].0)
+                            } else {
+                                BzrIcon(items[index].0, tint: DesignColors.slate400)
+                            }
+                        }
                         .padding(.horizontal, DesignSpace.l)
                         .padding(.vertical, DesignSpace.xs)
-                        .background(index == selectedIndex ? DesignColors.primary50 : .clear)
-                        .clipShape(Capsule())
+                        .background {
+                            if index == selectedIndex {
+                                Capsule().fill(DesignGradients.iconWell)
+                                    .matchedGeometryEffect(id: "selection", in: selection)
+                            }
+                        }
                         BzrText(
                             items[index].1,
-                            style: DesignType.caption.colored(
-                                index == selectedIndex ? DesignColors.primary700 : DesignColors.slate400),
+                            style: index == selectedIndex
+                                ? DesignType.caption.weighted(DesignFont.bold).colored(DesignColors.primary700)
+                                : DesignType.caption.colored(DesignColors.slate400),
                             alignment: .center)
                     }
                     .frame(maxWidth: .infinity)
@@ -299,10 +311,9 @@ public struct BottomNav: View {
         .padding(.horizontal, DesignSpace.s)
         .padding(.vertical, DesignSpace.s)
         .frame(minHeight: DesignSize.bottomNavHeight)
-        .background(DesignColors.surface)
-        .overlay(alignment: .top) { HorizontalLine() }
+        .background(DesignColors.surface.bzrShadow(DesignShadows.card))
         .animation(
-            reduceMotion ? nil : .easeOut(duration: Double(DesignMotion.navBarMs) / 1000),
+            reduceMotion ? nil : .spring(response: Double(DesignMotion.navBarMs) / 1000 * 2, dampingFraction: 0.78),
             value: selectedIndex)
     }
 }
@@ -311,21 +322,33 @@ public struct MenuRow: View {
     private let icon: BzrIconKey
     private let text: String
     private let onClick: () -> Void
+    private let danger: Bool
 
-    public init(icon: BzrIconKey, text: String, onClick: @escaping () -> Void = {}) {
+    /// `danger` marks a destructive row (sign out): red icon in a red-tinted well, red label (DEC-063).
+    public init(icon: BzrIconKey, text: String, onClick: @escaping () -> Void = {}, danger: Bool = false) {
         self.icon = icon
         self.text = text
         self.onClick = onClick
+        self.danger = danger
     }
 
     public var body: some View {
         Button(action: onClick) {
             HStack(spacing: DesignSpace.m) {
-                BzrIcon(icon)
-                    .frame(width: DesignSize.menuIconBox, height: DesignSize.menuIconBox)
-                    .background(DesignColors.surfaceAlt)
-                    .clipShape(RoundedRectangle(cornerRadius: DesignRadius.menuIconBox))
-                BzrText(text).frame(maxWidth: .infinity, alignment: .leading)
+                Group {
+                    if danger {
+                        BzrIcon(icon, tint: DesignColors.danger)
+                    } else {
+                        BzrGradientIcon(icon)
+                    }
+                }
+                .frame(width: DesignSize.menuIconBox, height: DesignSize.menuIconBox)
+                .background {
+                    RoundedRectangle(cornerRadius: DesignRadius.menuIconBox)
+                        .fill(danger ? AnyShapeStyle(DesignColors.dangerTint) : AnyShapeStyle(DesignGradients.iconWell))
+                }
+                BzrText(text, style: DesignType.body.colored(danger ? DesignColors.danger : DesignColors.navy900))
+                    .frame(maxWidth: .infinity, alignment: .leading)
                 BzrIcon(.chevron, tint: DesignColors.slate400)
             }
             .padding(.vertical, DesignSpace.s)
@@ -414,9 +437,14 @@ private struct StepCircle: View {
         let filled = state != .pending
         let filledColor = state == .onHold ? DesignColors.star : DesignColors.primary600
         ZStack {
-            Circle().fill(filled ? filledColor : DesignColors.surface)
-            Circle().strokeBorder(
-                filled ? filledColor : DesignColors.border, lineWidth: DesignSize.controlStroke)
+            // DEC-063: reached steps take the brand gradient; on-hold stays amber.
+            if filled && state != .onHold {
+                Circle().fill(DesignGradients.brand)
+            } else {
+                Circle().fill(filled ? filledColor : DesignColors.surface)
+                Circle().strokeBorder(
+                    filled ? filledColor : DesignColors.border, lineWidth: DesignSize.controlStroke)
+            }
             switch state {
             case .done:
                 BzrIcon(.check, tint: DesignColors.onPrimary, size: DesignSize.iconSmall)
@@ -438,6 +466,13 @@ public struct SelectableTile: View {
     private let state: SelectionState
     private let categoryIcon: String?
 
+    private var wellGradient: LinearGradient {
+        guard let categoryIcon else { return DesignGradients.iconWell }
+        let tint = CategoryPalettes.palette(categoryIcon).tint
+        return LinearGradient(
+            colors: [tint, tint.opacity(DesignRatio.wellFade)], startPoint: .topLeading, endPoint: .bottomTrailing)
+    }
+
     /// `categoryIcon` is the `icon_path` file name from `/catalog`, drawn in its own two tones (DEC-059).
     public init(text: String, icon: BzrIconKey, state: SelectionState, categoryIcon: String? = nil) {
         self.text = text
@@ -448,22 +483,29 @@ public struct SelectableTile: View {
 
     public var body: some View {
         VStack(spacing: DesignSpace.s) {
-            if let asset = categoryIcon.flatMap(CategoryIcons.asset) {
-                Image(asset, bundle: .module)
-                    .resizable()
-                    .frame(width: DesignSize.tileIcon, height: DesignSize.tileIcon)
-                    .accessibilityHidden(true)
-            } else {
-                BzrIcon(
-                    icon, tint: state == .selected ? DesignColors.primary600 : DesignColors.navy800,
-                    size: DesignSize.tileIcon)
+            ZStack {
+                // DEC-063: the icon sits in a well tinted with its category's hue.
+                RoundedRectangle(cornerRadius: DesignRadius.menuIconBox)
+                    .fill(wellGradient)
+                if let asset = categoryIcon.flatMap(CategoryIcons.asset) {
+                    Image(asset, bundle: .module)
+                        .resizable()
+                        .frame(width: DesignSize.tileIcon, height: DesignSize.tileIcon)
+                        .accessibilityHidden(true)
+                } else {
+                    BzrGradientIcon(icon, size: DesignSize.tileIcon)
+                }
             }
-            BzrText(text, style: DesignType.secondary.weighted(DesignFont.semibold), alignment: .center)
+            .frame(width: DesignSize.tileIconWell, height: DesignSize.tileIconWell)
+            BzrText(
+                text, style: DesignType.secondary.weighted(DesignFont.bold).colored(DesignColors.navy800),
+                alignment: .center, lineLimit: 2)
         }
-        .padding(DesignSpace.s)
-        .frame(maxWidth: .infinity)
+        .padding(DesignSpace.m)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
         .frame(minHeight: DesignSize.categoryTileH)
         .selectionFrame(state, radius: DesignRadius.card)
+        .bzrShadow(DesignShadows.card)
     }
 }
 
@@ -541,7 +583,7 @@ public struct CheckRow: View {
         HStack(spacing: DesignSpace.m) {
             ZStack {
                 RoundedRectangle(cornerRadius: DesignRadius.checkbox).fill(
-                    checked ? DesignColors.primary600 : DesignColors.surface)
+                    checked ? AnyShapeStyle(DesignGradients.brand) : AnyShapeStyle(DesignColors.surface))
                 RoundedRectangle(cornerRadius: DesignRadius.checkbox)
                     .strokeBorder(
                         checked ? DesignColors.primary600 : DesignColors.slate300,
@@ -887,7 +929,7 @@ public struct SummaryCard: View {
             ForEach(rows.indices, id: \.self) { index in
                 if index > 0 { HorizontalLine() }
                 HStack(spacing: DesignSpace.m) {
-                    BzrIcon(rows[index].0, tint: DesignColors.primary600)
+                    BzrGradientIcon(rows[index].0)
                     BzrText(rows[index].1)
                 }
             }
@@ -927,9 +969,10 @@ private struct Avatar: View {
     let size: CGFloat
 
     var body: some View {
-        BzrIcon(.account, label: bzrString("a11y.avatar"), tint: DesignColors.slate400)
+        // DEC-063: the brand gradient until a photo exists.
+        BzrIcon(.account, label: bzrString("a11y.avatar"), tint: DesignColors.onPrimary)
             .frame(width: size, height: size)
-            .background(DesignColors.surfaceAlt)
+            .background(DesignGradients.iconBrand)
             .clipShape(Circle())
     }
 }
@@ -1158,7 +1201,7 @@ public struct StatRow: View {
             HStack(spacing: 0) {
                 ForEach(items.indices, id: \.self) { index in
                     VStack(spacing: DesignSpace.xs) {
-                        BzrIcon(items[index].icon, tint: DesignColors.primary500)
+                        BzrGradientIcon(items[index].icon)
                         BzrText(items[index].value, style: DesignType.cardTitle)
                         BzrText(
                             items[index].label, style: DesignType.secondary, alignment: .center)
@@ -1436,7 +1479,7 @@ private struct StepperDot: View {
         switch state {
         case .done:
             ZStack {
-                Circle().fill(DesignColors.primary600)
+                Circle().fill(DesignGradients.brand)
                 BzrIcon(.check, tint: DesignColors.onPrimary, size: DesignSize.iconXs)
             }
             .frame(width: DesignSize.stepperDot, height: DesignSize.stepperDot)
@@ -1607,12 +1650,19 @@ private struct FeedbackState<Action: View>: View {
     let title: String
     let detail: String
     let action: Action
+    /// DEC-063: the empty state's icon takes the brand gradient in a gradient well.
+    var branded = false
 
     var body: some View {
         VStack(spacing: DesignSpace.s) {
             ZStack {
-                Circle().fill(iconBackground)
-                BzrIcon(icon, tint: iconTint)
+                if branded {
+                    Circle().fill(DesignGradients.iconWell)
+                    BzrGradientIcon(icon)
+                } else {
+                    Circle().fill(iconBackground)
+                    BzrIcon(icon, tint: iconTint)
+                }
             }
             .frame(width: DesignSize.avatarSmall, height: DesignSize.avatarSmall)
             BzrText(title, style: DesignType.cardTitle, alignment: .center)
@@ -1642,7 +1692,7 @@ public struct EmptyState: View {
     public var body: some View {
         FeedbackState(
             icon: .empty, iconTint: DesignColors.primary600, iconBackground: DesignColors.primary50,
-            title: title, detail: detail
+            title: title, detail: detail, branded: true
         ) {
             if let action { PrimaryButton(text: action, onClick: onAction) }
         }
@@ -1675,8 +1725,9 @@ public struct ErrorState: View {
 extension FeedbackState {
     fileprivate init(
         icon: BzrIconKey, iconTint: Color, iconBackground: Color, title: String, detail: String,
-        @ViewBuilder action: () -> Action
+        branded: Bool = false, @ViewBuilder action: () -> Action
     ) {
+        self.branded = branded
         self.icon = icon
         self.iconTint = iconTint
         self.iconBackground = iconBackground
@@ -1778,8 +1829,15 @@ public struct ChatBubble: View {
                 BzrText(text, style: DesignType.body.colored(foreground))
             }
             .padding(DesignSpace.m)
+            // DEC-063: a sent bubble wears the brand gradient, as on Android.
+            .background {
+                if sent && !blocked {
+                    RoundedRectangle(cornerRadius: DesignRadius.card).fill(DesignGradients.brand)
+                }
+            }
             .bzrFrame(
-                radius: DesignRadius.card, fill: fill, border: borderColor, width: DesignBorder.width
+                radius: DesignRadius.card, fill: sent && !blocked ? .clear : fill, border: sent && !blocked ? .clear : borderColor,
+                width: DesignBorder.width
             )
             .frame(maxWidth: DesignSize.chatBubbleMaxWidth, alignment: sent ? .leading : .trailing)
             if sent { Spacer(minLength: 0) }

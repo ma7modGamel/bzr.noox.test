@@ -3,12 +3,14 @@
 public enum BzrIconKey: String, CaseIterable {
     case account
     case arrowBack = "arrow_back"
+    case bell
     case calendar
     case camera
     case car
     case chat
     case check
     case chevron
+    case clipboardPlus = "clipboard_plus"
     case clock
     case close
     case edit
@@ -18,6 +20,7 @@ public enum BzrIconKey: String, CaseIterable {
     case image
     case info
     case location
+    case logout
     case menu
     case messages
     case mic
@@ -30,10 +33,12 @@ public enum BzrIconKey: String, CaseIterable {
     case send
     case share
     case shield
+    case siren
     case starFilled = "star_filled"
     case star
     case trash
     case video
     case warningFilled = "warning_filled"
     case warning
+    case wrench
 }

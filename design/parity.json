@@ -245,7 +245,8 @@
         "parameters": [
           "icon",
           "text",
-          "onClick"
+          "onClick",
+          "danger"
         ],
         "text_keys": [],
         "fixtures": [
@@ -258,7 +259,8 @@
         "parameters": [
           "icon",
           "text",
-          "onClick"
+          "onClick",
+          "danger"
         ],
         "text_keys": [],
         "fixtures": [
