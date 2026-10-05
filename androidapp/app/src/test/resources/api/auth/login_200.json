@@ -1,0 +1,12 @@
+{
+    "user": {
+        "id": 1,
+        "name": "منى",
+        "email": "customer@test.local",
+        "phone": "01011111111",
+        "is_verified": true,
+        "rating_avg": "4.50",
+        "provider": null
+    },
+    "token": "1|recorded-token"
+}

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:parentTag="android.widget.FrameLayout">
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/button"
+        style="@style/Widget.Bremo.Button.IconSquare"
+        android:layout_width="@dimen/bremo_size_chat_square_button_w"
+        android:layout_height="@dimen/bremo_size_chat_square_button_h"
+        app:iconSize="@dimen/bremo_size_icon" />
+</merge>

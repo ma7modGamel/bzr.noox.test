@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- SCR-C23 C23CompletionScreen content (DEC-047). -->
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:parentTag="android.widget.LinearLayout">
+
+    <TextView
+        android:id="@+id/heading"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="@style/TextAppearance.Bremo.SectionTitle"
+        android:text="@string/completion_confirm_heading" />
+
+    <noox.bzr.design.views.SummaryCardView
+        android:id="@+id/amounts"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:bremoTitle="@string/payment_summary_heading" />
+
+    <noox.bzr.design.views.InfoBannerView
+        android:id="@+id/help"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:bremoText="@string/completion_confirm_help" />
+
+    <noox.bzr.design.views.PrimaryButtonView
+        android:id="@+id/confirm"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:bremoText="@string/action_confirm_completion" />
+
+    <noox.bzr.design.views.SecondaryButtonView
+        android:id="@+id/report"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:bremoText="@string/completion_report_problem" />
+</merge>

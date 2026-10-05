@@ -1,0 +1,10 @@
+{
+    "last_location": {
+        "lat": "30.0590000",
+        "lng": "31.3390000",
+        "recorded_at": "2026-10-05T06:00:31+00:00"
+    },
+    "eta_minutes": 1,
+    "eta_approximate": true,
+    "eta_calculated_at": "2026-10-05T06:00:00+00:00"
+}

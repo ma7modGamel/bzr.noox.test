@@ -1,0 +1,6 @@
+{
+    "error": {
+        "code": "EMAIL_ALREADY_VERIFIED",
+        "message": "البريد مفعّل بالفعل."
+    }
+}

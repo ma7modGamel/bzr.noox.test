@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- SCR-C09 C09TrackingScreen content (DEC-047). -->
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:parentTag="android.widget.LinearLayout">
+
+    <noox.bzr.design.views.OfflineBannerView
+        android:id="@+id/offline"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:bremoText="@string/offline_message" />
+
+    <noox.bzr.design.views.BadgeView
+        android:id="@+id/status"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:badgeKind="status" />
+
+    <noox.bzr.design.views.InfoBannerView
+        android:id="@+id/cancelled"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:bremoText="@string/tracking_status_cancelled" />
+
+    <noox.bzr.design.views.EtaCardView
+        android:id="@+id/eta"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone" />
+
+    <noox.bzr.design.views.MapCardView
+        android:id="@+id/map"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:bremoTitle="@string/map_title" />
+
+    <noox.bzr.design.views.InfoBannerView
+        android:id="@+id/waiting"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:bremoText="@string/tracking_waiting" />
+
+    <noox.bzr.design.views.StatusStepperView
+        android:id="@+id/stepper"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone" />
+
+    <noox.bzr.design.views.WarningBoxView
+        android:id="@+id/reviewing"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:bremoText="@string/status_reviewing" />
+
+    <noox.bzr.design.views.SummaryCardView
+        android:id="@+id/summary"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:bremoTitle="@string/summary_title"
+        app:editText="@string/common_edit" />
+
+    <noox.bzr.customer.ActionButtonsView
+        android:id="@+id/actions"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+</merge>

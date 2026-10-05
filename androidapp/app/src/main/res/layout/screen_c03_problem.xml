@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- SCR-C03 C03ProblemScreen content (DEC-047). -->
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:parentTag="android.widget.LinearLayout">
+
+    <noox.bzr.design.views.TileGridLayout
+        android:id="@+id/categoryGrid"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <!-- DEC-063: options in equal columns, like the category tiles. -->
+    <noox.bzr.design.views.TileGridLayout
+        android:id="@+id/problemList"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <noox.bzr.design.views.TextAreaFieldView
+        android:id="@+id/description"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:bremoLabel="@string/request_description_label"
+        app:bremoPlaceholder="@string/request_description_placeholder" />
+
+    <TextView
+        android:id="@+id/mediaTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="@style/TextAppearance.Bremo.SectionTitle"
+        android:text="@string/request_media_title" />
+
+    <noox.bzr.design.views.SecondaryButtonView
+        android:id="@+id/addMedia"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:bremoText="@string/request_media_add" />
+
+    <noox.bzr.design.views.MediaThumbView
+        android:id="@+id/thumb"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone" />
+
+    <noox.bzr.design.views.PrimaryButtonView
+        android:id="@+id/next"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:bremoText="@string/common_next" />
+</merge>

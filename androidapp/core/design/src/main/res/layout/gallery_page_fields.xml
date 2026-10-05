@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:parentTag="android.widget.LinearLayout">
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/gallery_component_fields"
+        android:textAppearance="@style/TextAppearance.Bremo.SectionTitle" />
+    <noox.bzr.design.views.AppTextFieldView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:bremoLabel="@string/field_label"
+        app:bremoPlaceholder="@string/field_placeholder"
+        app:fieldState="empty" />
+    <noox.bzr.design.views.AppTextFieldView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:bremoLabel="@string/field_label"
+        app:bremoPlaceholder="@string/field_placeholder"
+        app:fieldState="filled"
+        app:bremoValue="@string/field_value" />
+    <noox.bzr.design.views.AppTextFieldView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:bremoLabel="@string/field_label"
+        app:bremoPlaceholder="@string/field_placeholder"
+        app:fieldState="focused"
+        app:bremoValue="@string/field_value" />
+    <noox.bzr.design.views.AppTextFieldView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:bremoLabel="@string/field_label"
+        app:bremoPlaceholder="@string/field_placeholder"
+        app:fieldState="error"
+        app:bremoError="@string/field_error" />
+    <noox.bzr.design.views.AppTextFieldView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:bremoLabel="@string/field_label"
+        app:bremoPlaceholder="@string/field_placeholder"
+        app:fieldState="disabled"
+        app:bremoValue="@string/field_value" />
+    <noox.bzr.design.views.AmountFieldView
+        android:id="@+id/amount_empty"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:bremoLabel="@string/field_amount_label"
+        app:bremoPlaceholder="@string/field_amount_placeholder"
+        app:bremoCurrency="@string/common_currency_egp"
+        app:fieldState="empty"
+        app:bremoOptionalLabel="@string/common_optional" />
+    <noox.bzr.design.views.AmountFieldView
+        android:id="@+id/amount_filled"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:bremoLabel="@string/field_amount_label"
+        app:bremoPlaceholder="@string/field_amount_placeholder"
+        app:bremoCurrency="@string/common_currency_egp"
+        app:fieldState="filled"
+        app:bremoOptionalLabel="@string/common_optional" />
+    <noox.bzr.design.views.AmountFieldView
+        android:id="@+id/amount_focused"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:bremoLabel="@string/field_amount_label"
+        app:bremoPlaceholder="@string/field_amount_placeholder"
+        app:bremoCurrency="@string/common_currency_egp"
+        app:fieldState="focused"
+        app:bremoOptionalLabel="@string/common_optional" />
+    <noox.bzr.design.views.AmountFieldView
+        android:id="@+id/amount_error"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:bremoLabel="@string/field_amount_label"
+        app:bremoPlaceholder="@string/field_amount_placeholder"
+        app:bremoCurrency="@string/common_currency_egp"
+        app:fieldState="error"
+        app:bremoOptionalLabel="@string/common_optional"
+        app:bremoError="@string/field_error" />
+    <noox.bzr.design.views.AmountFieldView
+        android:id="@+id/amount_disabled"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:bremoLabel="@string/field_amount_label"
+        app:bremoPlaceholder="@string/field_amount_placeholder"
+        app:bremoCurrency="@string/common_currency_egp"
+        app:fieldState="disabled"
+        app:bremoOptionalLabel="@string/common_optional" />
+</merge>

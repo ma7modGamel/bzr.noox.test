@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:parentTag="android.widget.LinearLayout">
+    <noox.bzr.design.views.VerifiedAvatarView
+        android:id="@+id/avatar"
+        android:layout_width="@dimen/bremo_size_avatar_small"
+        android:layout_height="@dimen/bremo_size_avatar_small" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:divider="@drawable/bremo_gap_xs"
+        android:orientation="vertical"
+        android:showDividers="middle">
+
+        <TextView
+            android:id="@+id/name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="@style/TextAppearance.Bremo.CardTitle" />
+
+        <LinearLayout
+            android:id="@+id/verified"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:divider="@drawable/bremo_gap_xs"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:showDividers="middle">
+
+            <View
+                android:layout_width="@dimen/bremo_size_status_dot"
+                android:layout_height="@dimen/bremo_size_status_dot"
+                android:background="@drawable/bremo_bg_status_dot" />
+
+            <TextView
+                android:id="@+id/verifiedLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="@style/TextAppearance.Bremo.Secondary"
+                android:textColor="@color/bremo_primary700" />
+        </LinearLayout>
+
+        <noox.bzr.design.views.RatingLineView
+            android:id="@+id/ratingLine"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+</merge>

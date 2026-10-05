@@ -1,1 +1,312 @@
-/home/tro/bzr-android-xml/tools/compare-android-xml
+#!/usr/bin/env php
+<?php
+
+// DEC-047 / 43 §13: compare every XML View snapshot with its approved Compose target.
+// The approved Compose images live in design/reference/android-compose/<set>/ and do not change;
+// the XML images come from Paparazzi. Output: side-by-side page with a difference percentage.
+//
+//   php tools/compare-android-xml gallery          → reports/xml-conversion/gallery/comparison.html
+//   php tools/compare-android-xml 3a               → screens of batch 3a (also 3b 3c 4a 4b 4c 4d), same page per group
+//   php tools/compare-android-xml index            → reports/xml-conversion/comparison.html (all sets, from their summary.json)
+// Screen targets were frozen from the approved Compose snapshots into reports/xml-conversion/reference/compose-screens/
+// (Android-owned; design/ is shared).
+
+declare(strict_types=1);
+
+$root = dirname(__DIR__);
+$set = $argv[1] ?? 'gallery';
+
+/** Channel difference under which two pixels count as equal (font anti-aliasing, 43 §8). */
+const TOLERANCE = 24;
+/** Pixels may move by this much (sub-pixel text placement differs between Compose and TextView). */
+const SHIFT = 1;
+/** A pair "matches" when no more than this share of pixels differs. */
+const MATCH_PERCENT = 0.5;
+
+/** The image composited over the window background colour. */
+function flatten(GdImage $image, int $background): GdImage
+{
+    $flat = imagecreatetruecolor(imagesx($image), imagesy($image));
+    imagefill($flat, 0, 0, $background);
+    imagealphablending($flat, true);
+    imagecopy($flat, $image, 0, 0, 0, 0, imagesx($image), imagesy($image));
+
+    return $flat;
+}
+
+/** True when the pixel of $source at (x, y) has an equal pixel in $target within SHIFT. */
+function near(GdImage $source, int $x, int $y, GdImage $target): bool
+{
+    if ($x >= imagesx($source) || $y >= imagesy($source)) {
+        return false;
+    }
+    $pixel = imagecolorat($source, $x, $y);
+    for ($dy = -SHIFT; $dy <= SHIFT; $dy++) {
+        for ($dx = -SHIFT; $dx <= SHIFT; $dx++) {
+            $tx = $x + $dx;
+            $ty = $y + $dy;
+            if ($tx < 0 || $ty < 0 || $tx >= imagesx($target) || $ty >= imagesy($target)) {
+                continue;
+            }
+            $other = imagecolorat($target, $tx, $ty);
+            if (abs((($pixel >> 16) & 0xFF) - (($other >> 16) & 0xFF)) <= TOLERANCE
+                && abs((($pixel >> 8) & 0xFF) - (($other >> 8) & 0xFF)) <= TOLERANCE
+                && abs(($pixel & 0xFF) - ($other & 0xFF)) <= TOLERANCE) {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+$sets = [
+    'gallery' => [
+        'title' => 'معرض المكونات — Compose المعتمد مقابل XML',
+        'xml' => 'androidapp/core/design/src/test/snapshots/images/noox.bzr.design.gallery_ComponentGalleryViewsSnapshotTest_xml_gallery_cases_match_shared_fixture_xml-gallery-%s.png',
+        'cases' => array_map(
+            static fn (array $case): string => $case['id'],
+            json_decode((string) file_get_contents($root.'/design/fixtures/gallery/components.json'), true, flags: JSON_THROW_ON_ERROR)['snapshot_cases'],
+        ),
+        'notes' => $root.'/design/reference/android-compose/gallery/differences.json',
+    ],
+];
+
+/** Screen groups in the order of 43 §13 step 3; each screen belongs to the last batch that changed it. */
+const SCREEN_GROUPS = [
+    '3a' => [10, 11, 12, 13],
+    '3b' => [1, 2, 3, 4, 5, 6, 7, 8],
+    '3c' => [14, 15, 16, 17],
+    '4a' => [9, 20, 30, 31],
+    '4b' => [21, 22, 23, 24],
+    '4c' => [18, 19, 25, 26, 27, 28],
+    '4d' => [29, 32, 33, 34, 35],
+];
+foreach (SCREEN_GROUPS as $group => $numbers) {
+    $cases = [];
+    foreach ($numbers as $number) {
+        $screen = sprintf('SCR-C%02d', $number);
+        $fixture = json_decode((string) file_get_contents($root.'/design/fixtures/'.$screen.'/cases.json'), true, flags: JSON_THROW_ON_ERROR);
+        foreach ($fixture['cases'] as $case) {
+            if ($case['snapshot'] ?? true) {
+                $cases[] = strtolower($screen.'-'.$case['id']);
+            }
+        }
+    }
+    $sets[$group] = [
+        'title' => 'الشاشات '.$group.' — Compose المعتمد مقابل XML',
+        'reference' => $root.'/reports/xml-conversion/reference/compose-screens',
+        'xml' => 'androidapp/app/src/test/snapshots/images/*_xml_screen_cases_match_shared_fixture_%s.png',
+        'cases' => $cases,
+        'notes' => $root.'/reports/xml-conversion/reference/differences-'.$group.'.json',
+    ];
+}
+if ($set === 'index') {
+    writeIndex($root, $sets);
+    exit(0);
+}
+if (! isset($sets[$set])) {
+    fwrite(STDERR, "Unknown set {$set}\n");
+    exit(2);
+}
+$config = $sets[$set];
+$referenceDir = $config['reference'] ?? $root.'/design/reference/android-compose/'.$set;
+$output = $root.'/reports/xml-conversion/'.$set;
+foreach ([$referenceDir, $output.'/compose', $output.'/xml', $output.'/diff'] as $directory) {
+    if (! is_dir($directory) && ! mkdir($directory, 0775, true) && ! is_dir($directory)) {
+        throw new RuntimeException("Cannot create {$directory}");
+    }
+}
+
+// Transparent pixels (a Compose root without background) show the window background on a device: Theme.Bremo surface.
+$surface = hexdec(ltrim(json_decode((string) file_get_contents($root.'/design/tokens.json'), true, flags: JSON_THROW_ON_ERROR)['color']['surface'], '#'));
+$notes = is_file($config['notes']) ? json_decode((string) file_get_contents($config['notes']), true, flags: JSON_THROW_ON_ERROR) : [];
+$rows = [];
+$summary = [];
+$failures = 0;
+$approvedDifferences = 0;
+foreach ($config['cases'] as $case) {
+    $reference = $referenceDir.'/'.$case.'.png';
+    $xml = $root.'/'.sprintf($config['xml'], $case);
+    if (str_contains($xml, '*')) {
+        $xml = (glob($xml) ?: [''])[0];
+    }
+    if (! is_file($reference) || ! is_file($xml)) {
+        throw new RuntimeException("Missing image for {$case}");
+    }
+
+    $a = flatten(imagecreatefrompng($reference), $surface);
+    $b = flatten(imagecreatefrompng($xml), $surface);
+    imagepng($a, $output.'/compose/'.$case.'.png');
+    imagepng($b, $output.'/xml/'.$case.'.png');
+    $width = max(imagesx($a), imagesx($b));
+    $height = max(imagesy($a), imagesy($b));
+    $diff = imagecreatetruecolor($width, $height);
+    $faded = imagecolorallocate($diff, 235, 235, 235);
+    $marked = imagecolorallocate($diff, 220, 38, 38);
+    imagefill($diff, 0, 0, $faded);
+    $different = 0;
+    for ($y = 0; $y < $height; $y++) {
+        for ($x = 0; $x < $width; $x++) {
+            $same = near($a, $x, $y, $b) && near($b, $x, $y, $a);
+            if (! $same) {
+                $different++;
+                imagesetpixel($diff, $x, $y, $marked);
+            }
+        }
+    }
+    imagepng($diff, $output.'/diff/'.$case.'.png');
+    $percent = round(100 * $different / ($width * $height), 2);
+    $matches = $percent <= MATCH_PERCENT;
+    $note = $notes[$case] ?? null;
+    $reason = is_array($note) ? ($note['reason'] ?? null) : $note;
+    $approvedDifference = ! $matches && is_array($note) && ($note['approved'] ?? false) === true;
+    $failures += $matches || $approvedDifference ? 0 : 1;
+    $approvedDifferences += $approvedDifference ? 1 : 0;
+    $summary[$case] = [
+        'percent' => $percent,
+        'matches' => $matches,
+        'approved_difference' => $approvedDifference,
+        'reason' => $reason,
+    ];
+    $status = match (true) {
+        $matches => '<span class="ok">مطابق — يُقفل</span>',
+        $approvedDifference => '<span class="ok">اختلاف معتمد — يُقفل</span>',
+        default => '<span class="bad">مختلف — يرجع للمالك</span>',
+    };
+    $why = $matches ? '' : '<p class="why"><strong>سبب الاختلاف:</strong> '.htmlspecialchars($reason ?? 'لم يُكتب سبب بعد').'</p>';
+    $rows[] = '<section class="pair" id="'.htmlspecialchars($case).'">'
+        .'<header><strong>'.htmlspecialchars($case).'</strong><span class="pct">'.number_format($percent, 2).'٪</span>'.$status.'</header>'.$why
+        .'<div class="cols">'
+        .'<figure><figcaption>Compose (المعتمد)</figcaption><img src="compose/'.$case.'.png" alt="" loading="lazy"></figure>'
+        .'<figure><figcaption>XML Views</figcaption><img src="xml/'.$case.'.png" alt="" loading="lazy"></figure>'
+        .'<figure><figcaption>الاختلاف</figcaption><img src="diff/'.$case.'.png" alt="" loading="lazy"></figure>'
+        .'</div></section>';
+}
+
+$count = count($summary);
+$matched = count(array_filter($summary, static fn (array $row): bool => $row['matches']));
+$tolerance = TOLERANCE;
+$shift = SHIFT;
+$threshold = MATCH_PERCENT;
+$title = htmlspecialchars($config['title']);
+$body = implode("\n", $rows);
+$html = <<<HTML
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{$title}</title>
+
+<style>
+  body { margin: 0; font-family: Cairo, sans-serif; background: var(--color-surface-alt, #f4f4f8); color: var(--color-navy800, #101d3c); }
+  main { max-width: 1320px; margin: 0 auto; padding: 24px 16px; }
+  .summary { background: #fff; border-radius: 12px; padding: 16px; margin-bottom: 16px; }
+  .pair { background: #fff; border-radius: 12px; padding: 16px; margin-bottom: 16px; }
+  .pair header { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+  .pct { font-variant-numeric: tabular-nums; }
+  .ok { color: #1e8c8c; font-weight: 700; }
+  .bad { color: #c64f53; font-weight: 700; }
+  .why { background: #fcf0d4; border-radius: 8px; padding: 8px 12px; }
+  .cols { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-top: 12px; }
+  figure { margin: 0; }
+  figcaption { font-size: 13px; color: #57617b; margin-bottom: 4px; }
+  img { width: 100%; height: auto; border: 1px solid #e0e4e8; border-radius: 8px; }
+  @media (max-width: 720px) { .cols { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<main>
+<h1>{$title}</h1>
+<div class="summary">
+  <p>مطابق: <strong>{$matched}</strong>، واختلاف معتمد: <strong>{$approvedDifferences}</strong>، من <strong>{$count}</strong>. يُحسب البكسل مختلفًا إذا لم يوجد في الصورة الأخرى، ضمن إزاحة {$shift} بكسل، بكسل يقل فرق كل قناة لون فيه عن {$tolerance} من 255 (يستبعد تنعيم الخط وموضع النص تحت البكسل — 43 §8). اللقطة «مطابقة» إذا لم تتجاوز نسبة الاختلاف {$threshold}٪.</p>
+</div>
+{$body}
+</main>
+</body>
+</html>
+HTML;
+file_put_contents($output.'/comparison.html', $html);
+file_put_contents($output.'/summary.json', json_encode($summary, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)."\n");
+
+foreach ($summary as $case => $result) {
+    $status = $result['matches'] ? 'match' : ($result['approved_difference'] ? 'APPROVED' : 'DIFFERS');
+    fwrite(STDOUT, sprintf("%-20s %6.2f%%  %s\n", $case, $result['percent'], $status));
+}
+fwrite(STDOUT, "{$matched} match + {$approvedDifferences} approved / ".count($summary).". Page: reports/xml-conversion/{$set}/comparison.html\n");
+if (in_array('--strict', $argv, true) && $failures > 0) {
+    exit(1);
+}
+
+/** @param array<string, array<string, mixed>> $sets */
+function writeIndex(string $root, array $sets): void
+{
+    $rows = [];
+    $total = 0;
+    $matched = 0;
+    $approved = 0;
+    foreach (array_keys($sets) as $name) {
+        $summaryPath = $root.'/reports/xml-conversion/'.$name.'/summary.json';
+        if (! is_file($summaryPath)) {
+            $rows[] = '<tr><td>'.$name.'</td><td colspan="3">لم تُقارن بعد</td></tr>';
+            continue;
+        }
+        $summary = json_decode((string) file_get_contents($summaryPath), true, flags: JSON_THROW_ON_ERROR);
+        $count = count($summary);
+        $ok = count(array_filter(
+            $summary,
+            static fn (array $row): bool => $row['matches'] || ($row['approved_difference'] ?? false),
+        ));
+        $approvedInSet = count(array_filter(
+            $summary,
+            static fn (array $row): bool => $row['approved_difference'] ?? false,
+        ));
+        $total += $count;
+        $matched += $ok;
+        $approved += $approvedInSet;
+        $worst = $summary === [] ? 0 : max(array_column($summary, 'percent'));
+        $differs = array_keys(array_filter(
+            $summary,
+            static fn (array $row): bool => ! $row['matches'] && ! ($row['approved_difference'] ?? false),
+        ));
+        $closedStatus = $approvedInSet > 0
+            ? '<span class="ok">مطابق '.($ok - $approvedInSet).' + اختلاف معتمد '.$approvedInSet.' — تُقفل</span>'
+            : '<span class="ok">كلها مطابقة — تُقفل</span>';
+        $rows[] = '<tr><td><a href="'.$name.'/comparison.html">'.$name.'</a></td><td>'.$ok.' / '.$count.'</td><td>'.number_format($worst, 2).'٪</td><td>'
+            .($differs === [] ? $closedStatus : '<span class="bad">'.htmlspecialchars(implode('، ', $differs)).'</span>').'</td></tr>';
+    }
+    $body = implode("\n", $rows);
+    $html = <<<HTML
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>مقارنة XML بالمعتمد</title>
+<style>
+  body { margin: 0; font-family: Cairo, sans-serif; background: #f4f4f8; color: #101d3c; }
+  main { max-width: 960px; margin: 0 auto; padding: 24px 16px; }
+  table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 12px; overflow: hidden; }
+  th, td { padding: 10px 12px; border-bottom: 1px solid #e0e4e8; text-align: start; }
+  .ok { color: #1e8c8c; font-weight: 700; }
+  .bad { color: #c64f53; font-weight: 700; }
+</style>
+</head>
+<body>
+<main>
+<h1>تحويل أندرويد إلى XML — المعتمدة | XML | الفرق | نسبة الاختلاف</h1>
+<p>مغلق: <strong>{$matched}</strong> من <strong>{$total}</strong> لقطة، منها <strong>{$approved}</strong> اختلاف معتمد. كل مجموعة لها صفحة تعرض المعتمدة (Compose) وXML وخريطة الفرق ونسبة الاختلاف لكل لقطة.</p>
+<table>
+<thead><tr><th>المجموعة</th><th>مطابق</th><th>أعلى اختلاف</th><th>الحالة</th></tr></thead>
+<tbody>
+{$body}
+</tbody>
+</table>
+</main>
+</body>
+</html>
+HTML;
+    file_put_contents($root.'/reports/xml-conversion/comparison.html', $html);
+    fwrite(STDOUT, "{$matched}/{$total} closed ({$approved} approved differences). Page: reports/xml-conversion/comparison.html\n");
+}

@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:parentTag="com.google.android.material.card.MaterialCardView">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:divider="@drawable/bremo_gap_m"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:showDividers="middle">
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:divider="@drawable/bremo_gap_xs"
+            android:orientation="vertical"
+            android:showDividers="middle">
+
+            <TextView
+                android:id="@+id/title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="@style/TextAppearance.Bremo.CardTitle" />
+
+            <TextView
+                android:id="@+id/subtitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="@style/TextAppearance.Bremo.Secondary" />
+
+            <noox.bzr.design.views.BadgeView
+                android:id="@+id/status"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:badgeKind="status" />
+        </LinearLayout>
+
+        <ImageView
+            android:id="@+id/chevron"
+            android:layout_width="@dimen/bremo_size_icon"
+            android:layout_height="@dimen/bremo_size_icon"
+            android:importantForAccessibility="no"
+            android:scaleType="fitCenter"
+            app:srcCompat="@drawable/ic_chevron"
+            app:tint="@color/bremo_slate400" />
+    </LinearLayout>
+</merge>

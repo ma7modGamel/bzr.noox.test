@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:parentTag="android.widget.LinearLayout">
+
+    <!-- DEC-063: availability as a card; brand gradient when on, a white card when off. -->
+    <LinearLayout
+        android:id="@+id/availability"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/bremo_bg_menu_group"
+        android:clickable="true"
+        android:focusable="true"
+        android:foreground="?attr/selectableItemBackground"
+        android:gravity="center_vertical"
+        android:minHeight="@dimen/bremo_size_touch_target_min"
+        android:orientation="horizontal"
+        android:padding="@dimen/bremo_space_l">
+
+        <FrameLayout
+            android:id="@+id/availabilityWell"
+            android:layout_width="@dimen/bremo_size_menu_icon_box"
+            android:layout_height="@dimen/bremo_size_menu_icon_box"
+            android:background="@drawable/bremo_bg_icon_well">
+
+            <noox.bzr.design.views.GradientIconView
+                android:id="@+id/availabilityIcon"
+                android:layout_width="@dimen/bremo_size_icon"
+                android:layout_height="@dimen/bremo_size_icon"
+                android:layout_gravity="center" />
+        </FrameLayout>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/bremo_space_m"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/availabilityTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/provider_home_available_title"
+                android:textAppearance="@style/TextAppearance.Bremo.CardTitle" />
+
+            <TextView
+                android:id="@+id/availabilityBody"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/provider_home_available_body"
+                android:textAppearance="@style/TextAppearance.Bremo.Caption" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/availabilityState"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:minHeight="@dimen/bremo_size_touch_target_min"
+            android:paddingHorizontal="@dimen/bremo_space_l"
+            android:textAppearance="@style/TextAppearance.Bremo.Body"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+    <noox.bzr.design.views.InfoBannerView
+        android:id="@+id/saved"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:bremoText="@string/provider_home_availability_saved" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/provider_home_assigned_title"
+        android:textAppearance="@style/TextAppearance.Bremo.SectionTitle" />
+
+    <noox.bzr.design.views.OrderCardView
+        android:id="@+id/order"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone" />
+
+    <noox.bzr.design.views.EmptyStateView
+        android:id="@+id/empty"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <noox.bzr.design.views.PrimaryButtonView
+        android:id="@+id/openOrder"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:bremoText="@string/action_open_assigned_order" />
+
+    <TextView
+        android:id="@+id/marketTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/provider_market_requests_title"
+        android:textAppearance="@style/TextAppearance.Bremo.SectionTitle"
+        android:visibility="gone" />
+
+    <noox.bzr.design.views.EmptyStateView
+        android:id="@+id/marketEmpty"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/marketRequests"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:nestedScrollingEnabled="false"
+        android:visibility="gone" />
+
+    <noox.bzr.design.views.SecondaryButtonView
+        android:id="@+id/myOffers"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:bremoText="@string/action_open_my_offers" />
+
+    <TextView
+        android:id="@+id/shortcutsTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/provider_home_shortcuts_title"
+        android:textAppearance="@style/TextAppearance.Bremo.SectionTitle" />
+
+    <!-- DEC-063: shortcuts as gradient-icon tiles in equal columns. -->
+    <noox.bzr.design.views.TileGridLayout
+        android:id="@+id/shortcuts"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+</merge>

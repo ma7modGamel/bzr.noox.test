@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:parentTag="com.google.android.material.card.MaterialCardView">
+    <LinearLayout
+        android:id="@+id/content"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:divider="@drawable/bremo_gap_m"
+        android:orientation="vertical"
+        android:showDividers="middle">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:divider="@drawable/bremo_gap_m"
+            android:orientation="horizontal"
+            android:showDividers="middle">
+
+            <FrameLayout
+                android:layout_width="@dimen/bremo_size_avatar_xs"
+                android:layout_height="@dimen/bremo_size_avatar_xs"
+                android:background="@drawable/bremo_bg_avatar">
+
+                <ImageView
+                    android:layout_width="@dimen/bremo_size_icon"
+                    android:layout_height="@dimen/bremo_size_icon"
+                    android:layout_gravity="center"
+                    android:contentDescription="@string/a11y_avatar"
+                    app:srcCompat="@drawable/ic_account"
+                    app:tint="@color/bremo_slate400" />
+            </FrameLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:divider="@drawable/bremo_gap_xs"
+                android:orientation="vertical"
+                android:showDividers="middle">
+
+                <TextView
+                    android:id="@+id/name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/cairo_bold"
+                    android:textAppearance="@style/TextAppearance.Bremo.Body"
+                    android:textColor="@color/bremo_navy900" />
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:divider="@drawable/bremo_gap_s"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:showDividers="middle">
+
+                    <LinearLayout
+                        android:id="@+id/stars"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal" />
+
+                    <ImageView
+                        android:layout_width="@dimen/bremo_size_icon_small"
+                        android:layout_height="@dimen/bremo_size_icon_small"
+                        android:importantForAccessibility="no"
+                        app:srcCompat="@drawable/ic_check"
+                        app:tint="@color/bremo_primary600" />
+
+                    <TextView
+                        android:id="@+id/verified"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textAppearance="@style/TextAppearance.Bremo.Caption"
+                        android:textColor="@color/bremo_primary700" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="@style/TextAppearance.Bremo.Caption" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/body"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="@style/TextAppearance.Bremo.Body" />
+
+        <TextView
+            android:id="@+id/tag"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bremo_bg_tag"
+            android:paddingStart="@dimen/bremo_space_s"
+            android:paddingTop="@dimen/bremo_space_xs"
+            android:paddingEnd="@dimen/bremo_space_s"
+            android:paddingBottom="@dimen/bremo_space_xs"
+            android:textAppearance="@style/TextAppearance.Bremo.Caption" />
+    </LinearLayout>
+</merge>

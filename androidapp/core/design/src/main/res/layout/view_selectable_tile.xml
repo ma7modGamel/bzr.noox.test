@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:parentTag="android.widget.LinearLayout">
+    <!-- DEC-063: the icon sits in a well tinted with its category's hue. -->
+    <FrameLayout
+        android:id="@+id/iconWell"
+        android:layout_width="@dimen/bremo_size_tile_icon_well"
+        android:layout_height="@dimen/bremo_size_tile_icon_well"
+        android:background="@drawable/bremo_bg_icon_well">
+        <ImageView
+            android:id="@+id/icon"
+            android:layout_width="@dimen/bremo_size_tile_icon"
+            android:layout_height="@dimen/bremo_size_tile_icon"
+            android:layout_gravity="center"
+            android:importantForAccessibility="no"
+            android:scaleType="fitCenter"
+            app:srcCompat="@drawable/ic_home"
+            app:tint="@color/bremo_navy800" />
+    </FrameLayout>
+
+    <TextView
+        android:id="@+id/text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:maxLines="2"
+        android:ellipsize="end"
+        android:textAppearance="@style/TextAppearance.Bremo.Secondary"
+        android:textColor="@color/bremo_navy800"
+        android:textStyle="bold" />
+</merge>

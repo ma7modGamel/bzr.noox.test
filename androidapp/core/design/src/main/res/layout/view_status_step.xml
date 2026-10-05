@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:parentTag="android.widget.LinearLayout">
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/bremo_size_stepper_dot_active">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/bremo_size_stepper_line"
+            android:layout_gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <View
+                android:id="@+id/lineBefore"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1" />
+
+            <View
+                android:id="@+id/lineAfter"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1" />
+        </LinearLayout>
+
+        <FrameLayout
+            android:id="@+id/dot"
+            android:layout_width="@dimen/bremo_size_stepper_dot"
+            android:layout_height="@dimen/bremo_size_stepper_dot"
+            android:layout_gravity="center">
+
+            <ImageView
+                android:id="@+id/check"
+                android:layout_width="@dimen/bremo_size_icon_xs"
+                android:layout_height="@dimen/bremo_size_icon_xs"
+                android:layout_gravity="center"
+                android:importantForAccessibility="no"
+                app:srcCompat="@drawable/ic_check"
+                app:tint="@color/bremo_on_primary" />
+
+            <View
+                android:id="@+id/inner"
+                android:layout_width="@dimen/bremo_size_radio_dot"
+                android:layout_height="@dimen/bremo_size_radio_dot"
+                android:layout_gravity="center" />
+        </FrameLayout>
+    </FrameLayout>
+
+    <TextView
+        android:id="@+id/label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:ellipsize="end"
+        android:gravity="center"
+        android:maxLines="2"
+        android:textAppearance="@style/TextAppearance.Bremo.Caption" />
+</merge>

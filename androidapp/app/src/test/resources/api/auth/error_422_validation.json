@@ -1,0 +1,11 @@
+{
+    "error": {
+        "code": "VALIDATION_FAILED",
+        "message": "بيانات غير صالحة.",
+        "fields": {
+            "email": [
+                "بيانات الدخول غير صحيحة."
+            ]
+        }
+    }
+}

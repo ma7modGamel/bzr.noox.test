@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- SCR-C21 C21PaymentSummaryScreen content (DEC-047). -->
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:parentTag="android.widget.LinearLayout">
+
+    <TextView
+        android:id="@+id/heading"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="@style/TextAppearance.Bremo.SectionTitle"
+        android:text="@string/payment_summary_heading" />
+
+    <noox.bzr.design.views.SummaryCardView
+        android:id="@+id/amounts"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:bremoTitle="@string/payment_summary_heading" />
+
+    <TextView
+        android:id="@+id/methodTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="@style/TextAppearance.Bremo.SectionTitle"
+        android:text="@string/payment_method_title" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/methods"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:nestedScrollingEnabled="false"
+        android:overScrollMode="never" />
+
+    <noox.bzr.design.views.InfoBannerView
+        android:id="@+id/optionBody"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:bremoText="@string/payment_option_body" />
+
+    <noox.bzr.design.views.PrimaryButtonView
+        android:id="@+id/pay"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:bremoText="@string/action_pay_electronic" />
+
+    <noox.bzr.customer.ActionButtonsView
+        android:id="@+id/actions"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+</merge>

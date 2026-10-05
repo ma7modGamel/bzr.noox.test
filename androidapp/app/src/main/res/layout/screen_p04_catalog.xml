@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:tools="http://schemas.android.com/tools" tools:parentTag="android.widget.LinearLayout">
+    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/provider_onboarding_step_3" android:textAppearance="@style/TextAppearance.Bremo.Caption" />
+    <LinearLayout android:id="@+id/categories" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:divider="@drawable/bremo_gap_s" android:showDividers="middle" />
+    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/provider_onboarding_specialties_title" android:textAppearance="@style/TextAppearance.Bremo.SectionTitle" />
+    <LinearLayout android:id="@+id/specialties" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:divider="@drawable/bremo_gap_s" android:showDividers="middle" />
+    <noox.bzr.design.views.WarningBoxView android:id="@+id/validation" android:layout_width="match_parent" android:layout_height="wrap_content" android:visibility="gone" />
+    <noox.bzr.design.views.PrimaryButtonView android:id="@+id/next" android:layout_width="match_parent" android:layout_height="wrap_content" app:bremoText="@string/common_next" />
+</merge>

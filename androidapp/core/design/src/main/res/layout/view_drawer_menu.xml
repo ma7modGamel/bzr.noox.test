@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:parentTag="android.widget.LinearLayout">
+    <noox.bzr.design.views.ProviderHeaderView
+        android:id="@+id/header"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:avatarSize="large" />
+
+    <Space
+        android:id="@+id/topSpacer"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/bremo_space_s" />
+
+    <Space
+        android:id="@+id/bottomSpacer"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/bremo_space_s" />
+
+    <noox.bzr.design.views.PrimaryButtonView
+        android:id="@+id/action"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+</merge>

@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:parentTag="android.widget.LinearLayout">
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/gallery_component_sort_chips"
+        android:textAppearance="@style/TextAppearance.Bremo.SectionTitle" />
+    <noox.bzr.design.views.SortChipsView
+        android:id="@+id/sortChips"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:divider="@drawable/bremo_gap_s"
+        android:orientation="horizontal"
+        android:showDividers="middle">
+        <noox.bzr.design.views.BadgeView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:bremoText="@string/badge_top_rated"
+            app:badgeKind="highlight"
+            app:bremoIcon="@drawable/ic_star_filled" />
+        <noox.bzr.design.views.BadgeView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:bremoText="@string/badge_best_price"
+            app:badgeKind="highlight" />
+        <noox.bzr.design.views.BadgeView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:bremoText="@string/badge_fastest"
+            app:badgeKind="highlight" />
+        <noox.bzr.design.views.BadgeView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:bremoText="@string/order_status"
+            app:badgeKind="status" />
+    </LinearLayout>
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/gallery_component_provider_header"
+        android:textAppearance="@style/TextAppearance.Bremo.SectionTitle" />
+    <noox.bzr.design.views.ProviderHeaderView
+        android:id="@+id/providerSmall"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:avatarSize="small" />
+    <noox.bzr.design.views.ProviderHeaderView
+        android:id="@+id/providerMedium"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:avatarSize="medium"
+        app:verifiedLabel="@string/provider_verified" />
+    <noox.bzr.design.views.ProviderHeaderView
+        android:id="@+id/providerLarge"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:avatarSize="large"
+        app:verifiedLabel="@string/provider_verified" />
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/gallery_component_stats"
+        android:textAppearance="@style/TextAppearance.Bremo.SectionTitle" />
+    <noox.bzr.design.views.StatRowView
+        android:id="@+id/stats"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+    <noox.bzr.design.views.RatingBarsView
+        android:id="@+id/ratingBars"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+    <noox.bzr.design.views.ReviewCardView
+        android:id="@+id/review"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/gallery_component_sticky_action_bar"
+        android:textAppearance="@style/TextAppearance.Bremo.SectionTitle" />
+    <noox.bzr.design.views.StickyActionBarView
+        android:id="@+id/sticky"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+</merge>

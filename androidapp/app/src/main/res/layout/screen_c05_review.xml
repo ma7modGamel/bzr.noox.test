@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- SCR-C05 C05ReviewScreen content (DEC-047). -->
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:parentTag="android.widget.LinearLayout">
+
+    <noox.bzr.design.views.SummaryCardView
+        android:id="@+id/summary"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:bremoTitle="@string/summary_title"
+        app:editText="@string/common_edit" />
+
+    <noox.bzr.design.views.InfoBannerView
+        android:id="@+id/staffPricing"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:bremoText="@string/request_staff_pricing" />
+
+    <noox.bzr.design.views.CheckRowView
+        android:id="@+id/terms"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:bremoText="@string/request_review_terms" />
+
+    <noox.bzr.design.views.InfoBannerView
+        android:id="@+id/termsRequired"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:bremoText="@string/request_terms_required" />
+
+    <noox.bzr.design.views.WarningBoxView
+        android:id="@+id/refused"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone" />
+
+    <noox.bzr.design.views.PrimaryButtonView
+        android:id="@+id/publish"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:bremoText="@string/request_publish" />
+</merge>

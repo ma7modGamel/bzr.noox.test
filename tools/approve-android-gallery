@@ -1,1 +1,31 @@
-/home/tro/bzr-android-xml/tools/approve-android-gallery
+#!/usr/bin/env php
+<?php
+
+declare(strict_types=1);
+
+$root = dirname(__DIR__);
+$fixture = json_decode((string) file_get_contents($root.'/design/fixtures/gallery/components.json'), true, flags: JSON_THROW_ON_ERROR);
+$target = $root.'/design/reference/gallery';
+if (! is_dir($target) && ! mkdir($target, 0775, true) && ! is_dir($target)) {
+    throw new RuntimeException('Cannot create Android gallery reference directory.');
+}
+
+$approved = [];
+foreach ($fixture['snapshot_cases'] as $case) {
+    $id = $case['id'];
+    $matches = glob($root.'/androidapp/core/design/src/test/snapshots/images/*_gallery-'.$id.'.png') ?: [];
+    if (count($matches) !== 1) {
+        throw new RuntimeException("Expected exactly one Android snapshot for {$id}; found ".count($matches).'.');
+    }
+    $size = getimagesize($matches[0]);
+    if ($size === false || $size[0] !== $fixture['viewport']['width'] || $size[1] !== $fixture['viewport']['height']) {
+        throw new RuntimeException("Android snapshot {$id} does not match the shared viewport.");
+    }
+    $destination = $target.'/gallery-'.$id.'.png';
+    if (! copy($matches[0], $destination)) {
+        throw new RuntimeException("Could not approve {$id}.");
+    }
+    $approved[] = $id;
+}
+
+fwrite(STDOUT, 'Approved '.count($approved).' Android gallery snapshots as references: '.implode(', ', $approved)."\n");

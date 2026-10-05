@@ -1,0 +1,353 @@
+{
+    "data": [
+        {
+            "id": 1000,
+            "name": "سباكة",
+            "icon_path": "design/categories/plumbing.svg",
+            "icon_url": "http://bzr.noox.test/design/categories/plumbing.svg",
+            "problem_types": [
+                {
+                    "id": 1000,
+                    "name": "تسريب مياه",
+                    "is_other": false
+                },
+                {
+                    "id": 1001,
+                    "name": "انسداد صرف",
+                    "is_other": false
+                },
+                {
+                    "id": 1002,
+                    "name": "تركيب أو تغيير خلاط",
+                    "is_other": false
+                },
+                {
+                    "id": 1003,
+                    "name": "تركيب أو صيانة سخان",
+                    "is_other": false
+                },
+                {
+                    "id": 1004,
+                    "name": "تركيب أدوات صحية",
+                    "is_other": false
+                },
+                {
+                    "id": 1005,
+                    "name": "صيانة سيفون أو صندوق طرد",
+                    "is_other": false
+                },
+                {
+                    "id": 1006,
+                    "name": "ضعف ضغط المياه",
+                    "is_other": false
+                },
+                {
+                    "id": 1007,
+                    "name": "تركيب فلتر مياه",
+                    "is_other": false
+                },
+                {
+                    "id": 1008,
+                    "name": "مشكلة أخرى",
+                    "is_other": true
+                }
+            ]
+        },
+        {
+            "id": 1001,
+            "name": "كهرباء",
+            "icon_path": "design/categories/electricity.svg",
+            "icon_url": "http://bzr.noox.test/design/categories/electricity.svg",
+            "problem_types": [
+                {
+                    "id": 1009,
+                    "name": "انقطاع الكهرباء عن جزء من الشقة",
+                    "is_other": false
+                },
+                {
+                    "id": 1010,
+                    "name": "فصل القاطع باستمرار",
+                    "is_other": false
+                },
+                {
+                    "id": 1011,
+                    "name": "تركيب إضاءة أو نجف",
+                    "is_other": false
+                },
+                {
+                    "id": 1012,
+                    "name": "تركيب أو تغيير فيش ومفاتيح",
+                    "is_other": false
+                },
+                {
+                    "id": 1013,
+                    "name": "تمديد خط كهرباء جديد",
+                    "is_other": false
+                },
+                {
+                    "id": 1014,
+                    "name": "تركيب مروحة سقف",
+                    "is_other": false
+                },
+                {
+                    "id": 1015,
+                    "name": "تركيب أو صيانة لوحة كهرباء",
+                    "is_other": false
+                },
+                {
+                    "id": 1016,
+                    "name": "تركيب جرس أو إنتركم",
+                    "is_other": false
+                },
+                {
+                    "id": 1017,
+                    "name": "مشكلة أخرى",
+                    "is_other": true
+                }
+            ]
+        },
+        {
+            "id": 1002,
+            "name": "تكييفات",
+            "icon_path": "design/categories/air-conditioning.svg",
+            "icon_url": "http://bzr.noox.test/design/categories/air-conditioning.svg",
+            "problem_types": [
+                {
+                    "id": 1018,
+                    "name": "التكييف لا يبرد",
+                    "is_other": false
+                },
+                {
+                    "id": 1019,
+                    "name": "تسريب مياه من التكييف",
+                    "is_other": false
+                },
+                {
+                    "id": 1020,
+                    "name": "صوت عالي",
+                    "is_other": false
+                },
+                {
+                    "id": 1021,
+                    "name": "شحن فريون",
+                    "is_other": false
+                },
+                {
+                    "id": 1022,
+                    "name": "تنظيف وصيانة دورية",
+                    "is_other": false
+                },
+                {
+                    "id": 1023,
+                    "name": "تركيب تكييف جديد",
+                    "is_other": false
+                },
+                {
+                    "id": 1024,
+                    "name": "فك ونقل تكييف",
+                    "is_other": false
+                },
+                {
+                    "id": 1025,
+                    "name": "مشكلة أخرى",
+                    "is_other": true
+                }
+            ]
+        },
+        {
+            "id": 1003,
+            "name": "أجهزة منزلية",
+            "icon_path": "design/categories/appliances.svg",
+            "icon_url": "http://bzr.noox.test/design/categories/appliances.svg",
+            "problem_types": [
+                {
+                    "id": 1026,
+                    "name": "صيانة غسالة",
+                    "is_other": false
+                },
+                {
+                    "id": 1027,
+                    "name": "صيانة ثلاجة أو ديب فريزر",
+                    "is_other": false
+                },
+                {
+                    "id": 1028,
+                    "name": "صيانة بوتاجاز أو فرن",
+                    "is_other": false
+                },
+                {
+                    "id": 1029,
+                    "name": "صيانة ميكروويف",
+                    "is_other": false
+                },
+                {
+                    "id": 1030,
+                    "name": "صيانة غسالة أطباق",
+                    "is_other": false
+                },
+                {
+                    "id": 1031,
+                    "name": "تركيب جهاز جديد",
+                    "is_other": false
+                },
+                {
+                    "id": 1032,
+                    "name": "مشكلة أخرى",
+                    "is_other": true
+                }
+            ]
+        },
+        {
+            "id": 1004,
+            "name": "نجارة",
+            "icon_path": "design/categories/carpentry.svg",
+            "icon_url": "http://bzr.noox.test/design/categories/carpentry.svg",
+            "problem_types": [
+                {
+                    "id": 1033,
+                    "name": "إصلاح أو ضبط باب",
+                    "is_other": false
+                },
+                {
+                    "id": 1034,
+                    "name": "تغيير كالون أو مفصلات",
+                    "is_other": false
+                },
+                {
+                    "id": 1035,
+                    "name": "فتح باب مقفول",
+                    "is_other": false
+                },
+                {
+                    "id": 1036,
+                    "name": "إصلاح دولاب أو مطبخ",
+                    "is_other": false
+                },
+                {
+                    "id": 1037,
+                    "name": "فك وتركيب أثاث",
+                    "is_other": false
+                },
+                {
+                    "id": 1038,
+                    "name": "تركيب أرفف",
+                    "is_other": false
+                },
+                {
+                    "id": 1039,
+                    "name": "مشكلة أخرى",
+                    "is_other": true
+                }
+            ]
+        },
+        {
+            "id": 1005,
+            "name": "دهانات",
+            "icon_path": "design/categories/painting.svg",
+            "icon_url": "http://bzr.noox.test/design/categories/painting.svg",
+            "problem_types": [
+                {
+                    "id": 1040,
+                    "name": "دهان غرفة",
+                    "is_other": false
+                },
+                {
+                    "id": 1041,
+                    "name": "دهان شقة كاملة",
+                    "is_other": false
+                },
+                {
+                    "id": 1042,
+                    "name": "معالجة رطوبة وتقشير",
+                    "is_other": false
+                },
+                {
+                    "id": 1043,
+                    "name": "ترميم شروخ ومعجون",
+                    "is_other": false
+                },
+                {
+                    "id": 1044,
+                    "name": "ورق حائط",
+                    "is_other": false
+                },
+                {
+                    "id": 1045,
+                    "name": "مشكلة أخرى",
+                    "is_other": true
+                }
+            ]
+        },
+        {
+            "id": 1006,
+            "name": "تركيبات منزلية متفرقة",
+            "icon_path": "design/categories/home-installations.svg",
+            "icon_url": "http://bzr.noox.test/design/categories/home-installations.svg",
+            "problem_types": [
+                {
+                    "id": 1046,
+                    "name": "تركيب ستائر وجرارات",
+                    "is_other": false
+                },
+                {
+                    "id": 1047,
+                    "name": "تعليق شاشة على الحائط",
+                    "is_other": false
+                },
+                {
+                    "id": 1048,
+                    "name": "تعليق لوحات ومرايات",
+                    "is_other": false
+                },
+                {
+                    "id": 1049,
+                    "name": "تركيب إكسسوارات حمام",
+                    "is_other": false
+                },
+                {
+                    "id": 1050,
+                    "name": "تجميع أثاث جاهز",
+                    "is_other": false
+                },
+                {
+                    "id": 1051,
+                    "name": "مشكلة أخرى",
+                    "is_other": true
+                }
+            ]
+        },
+        {
+            "id": 1007,
+            "name": "ألوميتال وزجاج",
+            "icon_path": "design/categories/aluminum-glass.svg",
+            "icon_url": "http://bzr.noox.test/design/categories/aluminum-glass.svg",
+            "problem_types": [
+                {
+                    "id": 1052,
+                    "name": "إصلاح شباك أو باب ألوميتال",
+                    "is_other": false
+                },
+                {
+                    "id": 1053,
+                    "name": "تغيير زجاج مكسور",
+                    "is_other": false
+                },
+                {
+                    "id": 1054,
+                    "name": "تركيب سلك ناموسية",
+                    "is_other": false
+                },
+                {
+                    "id": 1055,
+                    "name": "تغيير عجل أو كوالين",
+                    "is_other": false
+                },
+                {
+                    "id": 1056,
+                    "name": "مشكلة أخرى",
+                    "is_other": true
+                }
+            ]
+        }
+    ]
+}

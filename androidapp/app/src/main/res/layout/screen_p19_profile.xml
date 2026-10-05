@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:parentTag="android.widget.LinearLayout">
+
+    <noox.bzr.design.views.ProviderHeaderView
+        android:id="@+id/header"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:avatarSize="medium" />
+
+    <noox.bzr.design.views.StatRowView
+        android:id="@+id/stats"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <noox.bzr.design.views.SecondaryButtonView
+        android:id="@+id/changeAvatar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:bremoText="@string/provider_onboarding_profile_photo_add" />
+
+    <noox.bzr.design.views.InfoBannerView
+        android:id="@+id/saved"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:bremoText="@string/provider_profile_saved" />
+
+    <noox.bzr.design.views.WarningBoxView
+        android:id="@+id/full"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:bremoText="@string/provider_profile_portfolio_full" />
+
+    <noox.bzr.design.views.AppTextFieldView
+        android:id="@+id/experience"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:bremoLabel="@string/provider_profile_experience" />
+
+    <noox.bzr.design.views.TextAreaFieldView
+        android:id="@+id/bio"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:bremoLabel="@string/provider_profile_bio" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/provider_profile_categories"
+        android:textAppearance="@style/TextAppearance.Bremo.SectionTitle" />
+
+    <noox.bzr.design.views.SummaryCardView
+        android:id="@+id/categories"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:bremoTitle="@string/provider_profile_categories" />
+
+    <noox.bzr.design.views.InfoBannerView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:bremoText="@string/provider_profile_read_only" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/provider_profile_specialties"
+        android:textAppearance="@style/TextAppearance.Bremo.SectionTitle" />
+
+    <LinearLayout
+        android:id="@+id/specialties"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:divider="@drawable/bremo_gap_s"
+        android:orientation="vertical"
+        android:showDividers="middle" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/provider_profile_areas"
+        android:textAppearance="@style/TextAppearance.Bremo.SectionTitle" />
+
+    <LinearLayout
+        android:id="@+id/areas"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:divider="@drawable/bremo_gap_s"
+        android:orientation="vertical"
+        android:showDividers="middle" />
+
+    <noox.bzr.design.views.WarningBoxView
+        android:id="@+id/validation"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/provider_profile_portfolio_add"
+        android:textAppearance="@style/TextAppearance.Bremo.SectionTitle" />
+
+    <LinearLayout
+        android:id="@+id/portfolio"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:divider="@drawable/bremo_gap_s"
+        android:orientation="vertical"
+        android:showDividers="middle" />
+
+    <noox.bzr.design.views.TextAreaFieldView
+        android:id="@+id/caption"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:bremoLabel="@string/provider_profile_portfolio_caption" />
+
+    <noox.bzr.design.views.SecondaryButtonView
+        android:id="@+id/addPortfolio"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:bremoText="@string/provider_profile_portfolio_add" />
+
+    <noox.bzr.design.views.SecondaryButtonView
+        android:id="@+id/contactSupport"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:bremoText="@string/action_contact_support" />
+
+    <noox.bzr.design.views.PrimaryButtonView
+        android:id="@+id/save"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:bremoText="@string/common_save" />
+</merge>

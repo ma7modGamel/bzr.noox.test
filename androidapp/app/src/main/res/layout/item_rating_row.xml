@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- SCR-C24 RatingRow: dimension label and five star buttons, spacing s. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:divider="@drawable/bremo_gap_s"
+    android:orientation="vertical"
+    android:showDividers="middle">
+
+    <TextView
+        android:id="@+id/label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="@style/TextAppearance.Bremo.CardTitle" />
+
+    <LinearLayout
+        android:id="@+id/stars"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:divider="@drawable/bremo_gap_s"
+        android:orientation="horizontal"
+        android:showDividers="middle">
+
+        <noox.bzr.design.views.IconSquareButtonView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:bremoIcon="@drawable/ic_star" />
+
+        <noox.bzr.design.views.IconSquareButtonView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:bremoIcon="@drawable/ic_star" />
+
+        <noox.bzr.design.views.IconSquareButtonView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:bremoIcon="@drawable/ic_star" />
+
+        <noox.bzr.design.views.IconSquareButtonView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:bremoIcon="@drawable/ic_star" />
+
+        <noox.bzr.design.views.IconSquareButtonView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:bremoIcon="@drawable/ic_star" />
+
+    </LinearLayout>
+</LinearLayout>

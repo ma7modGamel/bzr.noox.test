@@ -1,0 +1,232 @@
+{
+    "scr-c18-loading": {
+        "percent": 0,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c18-error": {
+        "percent": 0.01,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c18-empty": {
+        "percent": 0,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c18-no_messages": {
+        "percent": 0.02,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c18-single": {
+        "percent": 0.07,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c18-multiple": {
+        "percent": 0.14,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c19-loading": {
+        "percent": 0,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c19-error": {
+        "percent": 0.01,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c19-empty": {
+        "percent": 0.03,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c19-messages": {
+        "percent": 0.04,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c19-masked": {
+        "percent": 0.03,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c19-images": {
+        "percent": 0.04,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c19-sending": {
+        "percent": 0.03,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c19-read_only": {
+        "percent": 0.02,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c25-loading": {
+        "percent": 0,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c25-error": {
+        "percent": 0.01,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c25-current_empty": {
+        "percent": 0.06,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c25-past_empty": {
+        "percent": 0.07,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c25-current": {
+        "percent": 0.06,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c25-past": {
+        "percent": 0.07,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c25-next_page": {
+        "percent": 0.07,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c26-loading": {
+        "percent": 0,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c26-error": {
+        "percent": 0.01,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c26-cash": {
+        "percent": 0.02,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c26-electronic": {
+        "percent": 0.02,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c26-waived": {
+        "percent": 0.02,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c26-cancelled": {
+        "percent": 0.02,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c26-expired": {
+        "percent": 0,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c26-unavailable": {
+        "percent": 0.02,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c27-loading": {
+        "percent": 0,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c27-error": {
+        "percent": 0.01,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c27-empty": {
+        "percent": 0.02,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c27-reason_selected": {
+        "percent": 0.02,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c27-valid": {
+        "percent": 0.02,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c27-with_photo": {
+        "percent": 0.02,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c27-submitting": {
+        "percent": 0.02,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c27-success": {
+        "percent": 0,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c27-open": {
+        "percent": 0,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c27-resolved": {
+        "percent": 0,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c28-loading": {
+        "percent": 0.01,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c28-error": {
+        "percent": 0.02,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c28-empty": {
+        "percent": 0.02,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c28-selected": {
+        "percent": 0.02,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c28-with_details": {
+        "percent": 0.02,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c28-submitting": {
+        "percent": 0.02,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c28-success": {
+        "percent": 0,
+        "matches": true,
+        "reason": null
+    }
+}

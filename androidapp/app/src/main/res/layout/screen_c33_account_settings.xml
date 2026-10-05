@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- SCR-C33 C33AccountSettingsScreen content (DEC-047); the delete sheet is the overlay. -->
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:parentTag="android.widget.LinearLayout">
+
+    <noox.bzr.design.views.InfoBannerView
+        android:id="@+id/message"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone" />
+
+    <LinearLayout
+        android:id="@+id/edit"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        android:orientation="vertical"
+        android:divider="@drawable/bremo_gap_m"
+        android:showDividers="middle">
+
+        <noox.bzr.design.views.AppTextFieldView
+            android:id="@+id/editName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:bremoLabel="@string/account_settings_name" />
+
+        <noox.bzr.design.views.AppTextFieldView
+            android:id="@+id/editEmail"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:bremoLabel="@string/account_settings_email"
+            app:fieldState="disabled" />
+
+        <noox.bzr.design.views.AppTextFieldView
+            android:id="@+id/editPhone"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:bremoLabel="@string/account_settings_phone" />
+
+        <noox.bzr.design.views.PrimaryButtonView
+            android:id="@+id/save"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:bremoText="@string/account_settings_save" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/password"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        android:orientation="vertical"
+        android:divider="@drawable/bremo_gap_m"
+        android:showDividers="middle">
+
+        <noox.bzr.design.views.SecureTextFieldView
+            android:id="@+id/currentPassword"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:bremoLabel="@string/account_settings_current_password" />
+
+        <noox.bzr.design.views.SecureTextFieldView
+            android:id="@+id/newPassword"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:bremoLabel="@string/account_settings_new_password" />
+
+        <noox.bzr.design.views.SecureTextFieldView
+            android:id="@+id/confirmPassword"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:bremoLabel="@string/account_settings_confirm_password" />
+
+        <noox.bzr.design.views.PrimaryButtonView
+            android:id="@+id/changePassword"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:bremoText="@string/account_settings_password" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/overview"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:divider="@drawable/bremo_gap_m"
+        android:showDividers="middle">
+
+        <TextView
+            android:id="@+id/profile"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="@style/TextAppearance.Bremo.SectionTitle"
+            android:text="@string/account_settings_profile" />
+
+        <noox.bzr.design.views.MenuRowView
+            android:id="@+id/name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:bremoIcon="@drawable/ic_account" />
+
+        <noox.bzr.design.views.MenuRowView
+            android:id="@+id/email"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:bremoIcon="@drawable/ic_info" />
+
+        <noox.bzr.design.views.MenuRowView
+            android:id="@+id/phone"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:bremoIcon="@drawable/ic_phone" />
+
+        <noox.bzr.design.views.MenuRowView
+            android:id="@+id/passwordRow"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:bremoIcon="@drawable/ic_shield"
+            app:bremoText="@string/account_settings_password" />
+
+        <noox.bzr.design.views.CheckRowView
+            android:id="@+id/ratingReminders"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:clickable="true"
+            android:focusable="true"
+            android:minHeight="@dimen/bremo_size_touch_target_min"
+            app:bremoText="@string/account_rating_reminders" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/account_rating_reminders_body"
+            android:textAppearance="@style/TextAppearance.Bremo.Secondary" />
+
+        <noox.bzr.design.views.MenuRowView
+            android:id="@+id/terms"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:bremoIcon="@drawable/ic_info"
+            app:bremoText="@string/terms_title" />
+
+        <noox.bzr.design.views.MenuRowView
+            android:id="@+id/logout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:bremoIcon="@drawable/ic_close"
+            app:bremoText="@string/customer_account_logout" />
+
+        <noox.bzr.design.views.DangerTextButtonView
+            android:id="@+id/delete"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:bremoText="@string/account_delete" />
+
+    </LinearLayout>
+</merge>

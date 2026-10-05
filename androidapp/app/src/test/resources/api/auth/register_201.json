@@ -1,0 +1,13 @@
+{
+    "user": {
+        "id": 1,
+        "name": "أحمد",
+        "email": "new@test.local",
+        "phone": "01012345678",
+        "is_verified": false,
+        "rating_avg": null,
+        "provider": null
+    },
+    "token": "1|recorded-token",
+    "email_verification_required": true
+}

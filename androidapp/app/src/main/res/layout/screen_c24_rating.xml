@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- SCR-C24 C24RatingScreen content (DEC-047). -->
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:parentTag="android.widget.LinearLayout">
+
+    <TextView
+        android:id="@+id/heading"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="@style/TextAppearance.Bremo.SectionTitle"
+        android:text="@string/rating_heading" />
+
+    <TextView
+        android:id="@+id/help"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="@style/TextAppearance.Bremo.Secondary"
+        android:text="@string/rating_help" />
+
+    <include
+        android:id="@+id/quality"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        layout="@layout/item_rating_row" />
+
+    <include
+        android:id="@+id/punctuality"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        layout="@layout/item_rating_row" />
+
+    <include
+        android:id="@+id/conduct"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        layout="@layout/item_rating_row" />
+
+    <noox.bzr.design.views.TextAreaFieldView
+        android:id="@+id/comment"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:bremoLabel="@string/rating_comment"
+        app:bremoPlaceholder="@string/rating_comment_placeholder" />
+
+    <noox.bzr.design.views.InfoBannerView
+        android:id="@+id/success"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:bremoText="@string/rating_success" />
+
+    <noox.bzr.design.views.WarningBoxView
+        android:id="@+id/warning"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone" />
+
+    <noox.bzr.design.views.PrimaryButtonView
+        android:id="@+id/submit"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:bremoText="@string/rating_submit" />
+</merge>

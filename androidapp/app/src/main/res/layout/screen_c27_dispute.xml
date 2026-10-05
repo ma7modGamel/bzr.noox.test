@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- SCR-C27 C27DisputeScreen content (DEC-047). -->
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:parentTag="android.widget.LinearLayout">
+
+    <noox.bzr.design.views.InfoBannerView
+        android:id="@+id/success"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:bremoText="@string/dispute_success" />
+
+    <noox.bzr.design.views.BadgeView
+        android:id="@+id/existingStatus"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone" />
+
+    <noox.bzr.design.views.SummaryCardView
+        android:id="@+id/existing"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:bremoTitle="@string/dispute_existing_title" />
+
+    <noox.bzr.design.views.InfoBannerView
+        android:id="@+id/existingNote"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone" />
+
+    <TextView
+        android:id="@+id/reasonTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="@style/TextAppearance.Bremo.SectionTitle"
+        android:text="@string/dispute_reason_title" />
+
+    <TextView
+        android:id="@+id/reasonBody"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="@style/TextAppearance.Bremo.Secondary"
+        android:text="@string/dispute_body" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/reasons"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:nestedScrollingEnabled="false"
+        android:overScrollMode="never" />
+
+    <noox.bzr.design.views.TextAreaFieldView
+        android:id="@+id/description"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:bremoLabel="@string/dispute_description_label"
+        app:bremoPlaceholder="@string/dispute_description_placeholder" />
+
+    <noox.bzr.design.views.SecondaryButtonView
+        android:id="@+id/addPhoto"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:bremoText="@string/dispute_photo_add" />
+
+    <noox.bzr.design.views.MediaThumbView
+        android:id="@+id/photo"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone" />
+
+    <noox.bzr.design.views.InfoBannerView
+        android:id="@+id/descriptionMax"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:bremoText="@string/request_description_max" />
+
+    <noox.bzr.design.views.PrimaryButtonView
+        android:id="@+id/submit"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:bremoText="@string/dispute_submit" />
+</merge>

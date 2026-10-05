@@ -34,3 +34,6 @@ iosapp/Core/.build/
 iosapp/Packages/DesignSystem/.build/
 iosapp/BzrApp.xcodeproj/
 iosapp/Packages/DesignSystem/Tests/DesignSystemTests/__Exports__/
+androidapp/build/
+androidapp/.idea/
+androidapp/.kotlin/

@@ -1,0 +1,38 @@
+name: Android XML Views (DEC-047)
+
+# Every change: generated resources match the source, design rules, parity, XML snapshots against the approved
+# targets, unit tests (shared logic fixtures), lint, and the permanent no-Compose proof (scripts/check-no-compose.sh).
+on:
+  pull_request:
+  push:
+
+jobs:
+  android-xml:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.3"
+          extensions: gd
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - uses: android-actions/setup-android@v3
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Generated Android resources match design/ (no hand edits)
+        run: php tools/gen-design --check
+      - name: Design rules (no hex / dp / sp / text literals, start-end only, RTL) and no Compose
+        run: php tools/lint-design --no-compose
+      - name: Android / iOS parity manifest
+        run: php tools/check-parity
+      - name: Build, unit tests (shared logic fixtures), XML snapshots, lint
+        working-directory: androidapp
+        run: ./gradlew assembleDebug testDebugUnitTest verifyPaparazziDebug lintDebug
+      - name: XML snapshots against the approved targets
+        run: |
+          for set in gallery 3a 3b 3c 4a 4b 4c 4d; do php tools/compare-android-xml "$set" --strict; done
+          php tools/compare-android-xml index
+      - name: No Compose anywhere (Gradle, source, release APK and AAB, no cross-platform UI)
+        run: scripts/check-no-compose.sh

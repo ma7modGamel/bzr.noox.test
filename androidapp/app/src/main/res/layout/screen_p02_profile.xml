@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:tools="http://schemas.android.com/tools" tools:parentTag="android.widget.LinearLayout">
+    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/provider_onboarding_step_1" android:textAppearance="@style/TextAppearance.Bremo.Caption" />
+    <noox.bzr.design.views.InfoBannerView android:id="@+id/photoStatus" android:layout_width="match_parent" android:layout_height="wrap_content" />
+    <noox.bzr.design.views.SecondaryButtonView android:id="@+id/photo" android:layout_width="match_parent" android:layout_height="wrap_content" app:bremoText="@string/provider_onboarding_profile_photo_add" />
+    <noox.bzr.design.views.AppTextFieldView android:id="@+id/experience" android:layout_width="match_parent" android:layout_height="wrap_content" app:bremoLabel="@string/provider_onboarding_experience_label" />
+    <noox.bzr.design.views.TextAreaFieldView android:id="@+id/bio" android:layout_width="match_parent" android:layout_height="wrap_content" app:bremoLabel="@string/provider_onboarding_bio_label" app:bremoPlaceholder="@string/provider_onboarding_bio_placeholder" />
+    <noox.bzr.design.views.PrimaryButtonView android:id="@+id/next" android:layout_width="match_parent" android:layout_height="wrap_content" app:bremoText="@string/common_next" />
+</merge>

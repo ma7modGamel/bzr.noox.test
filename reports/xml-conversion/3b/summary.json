@@ -1,0 +1,207 @@
+{
+    "scr-c01-loading": {
+        "percent": 0,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c01-error": {
+        "percent": 0.01,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c01-empty": {
+        "percent": 0.38,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c01-marketplace": {
+        "percent": 0.38,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c01-staff": {
+        "percent": 0.38,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c02-loading": {
+        "percent": 0,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c02-error": {
+        "percent": 0.01,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c02-verified": {
+        "percent": 0.02,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c02-unverified": {
+        "percent": 0.02,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c03-loading": {
+        "percent": 0,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c03-error": {
+        "percent": 0.01,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c03-empty": {
+        "percent": 0.03,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c03-other_short": {
+        "percent": 0.03,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c03-with_media": {
+        "percent": 0.02,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c04-loading": {
+        "percent": 0,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c04-error": {
+        "percent": 0.01,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c04-marketplace_now": {
+        "percent": 0.02,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c04-now_unavailable": {
+        "percent": 0.02,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c04-scheduled_missing": {
+        "percent": 0.02,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c04-staff_scheduled": {
+        "percent": 0.02,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c04-address_missing": {
+        "percent": 0.02,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c05-loading": {
+        "percent": 0,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c05-error": {
+        "percent": 0.01,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c05-terms_missing": {
+        "percent": 0,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c05-marketplace": {
+        "percent": 0.01,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c05-staff": {
+        "percent": 0.01,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c06-loading": {
+        "percent": 0,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c06-error": {
+        "percent": 0.01,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c06-empty": {
+        "percent": 0.01,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c06-execution_now": {
+        "percent": 0.39,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c06-inspection": {
+        "percent": 0.38,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c06-scheduled": {
+        "percent": 0.38,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c07-loading": {
+        "percent": 0,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c07-error": {
+        "percent": 0.01,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c07-available": {
+        "percent": 0.03,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c07-unavailable": {
+        "percent": 0,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c08-loading": {
+        "percent": 0,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c08-error": {
+        "percent": 0.01,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c08-execution": {
+        "percent": 0.02,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c08-inspection": {
+        "percent": 0.02,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c08-scheduled": {
+        "percent": 0.02,
+        "matches": true,
+        "reason": null
+    }
+}

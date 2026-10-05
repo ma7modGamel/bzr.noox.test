@@ -1,0 +1,2 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android"><item android:drawable="@color/bremo_brand_backdrop"/><item android:gravity="center" android:width="@dimen/bremo_size_brand_launch_logo" android:height="@dimen/bremo_size_brand_launch_logo" android:drawable="@drawable/bremo_launch_symbol"/></layer-list>

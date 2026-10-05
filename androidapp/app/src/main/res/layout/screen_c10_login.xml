@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- SCR-C10 CustomerLoginScreen (DEC-047). -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:divider="@drawable/bremo_gap_m"
+        android:orientation="vertical"
+        android:paddingHorizontal="@dimen/bremo_space_screen_horizontal"
+        android:paddingVertical="@dimen/bremo_space_l"
+        android:showDividers="middle">
+
+        <noox.bzr.design.views.BremoBrandMarkView
+            android:id="@+id/brandLogo"
+            android:layout_width="@dimen/bremo_size_brand_auth_logo"
+            android:layout_height="@dimen/bremo_size_brand_auth_logo"
+            android:layout_gravity="center_horizontal" />
+
+        <TextView
+            android:id="@+id/appName"
+            android:layout_gravity="center_horizontal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/app_name"
+            android:textAppearance="@style/TextAppearance.Bremo.ScreenTitle" />
+
+        <TextView
+            android:id="@+id/loginTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/auth_login_title"
+            android:textAppearance="@style/TextAppearance.Bremo.SectionTitle" />
+
+        <TextView
+            android:id="@+id/loginBody"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/auth_login_body"
+            android:textAppearance="@style/TextAppearance.Bremo.Secondary" />
+
+        <noox.bzr.design.views.ErrorStateView
+            android:id="@+id/messageError"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            app:bremoTitle="@string/error_title" />
+
+        <noox.bzr.design.views.InfoBannerView
+            android:id="@+id/messageInfo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone" />
+
+        <noox.bzr.design.views.AppTextFieldView
+            android:id="@+id/email"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:bremoLabel="@string/auth_email_label"
+            app:bremoPlaceholder="@string/auth_email_placeholder" />
+
+        <noox.bzr.design.views.SecureTextFieldView
+            android:id="@+id/password"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:bremoLabel="@string/auth_password_label"
+            app:bremoPlaceholder="@string/auth_password_placeholder" />
+
+        <noox.bzr.design.views.PrimaryButtonView
+            android:id="@+id/submit"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:bremoText="@string/auth_login_action" />
+
+        <noox.bzr.design.views.SecondaryButtonView
+            android:id="@+id/register"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:bremoText="@string/auth_register_open" />
+
+        <noox.bzr.design.views.LinkButtonView
+            android:id="@+id/forgot"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:bremoText="@string/auth_password_forgot_open" />
+    </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+</FrameLayout>

@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:parentTag="android.widget.LinearLayout">
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/gallery_component_media"
+        android:textAppearance="@style/TextAppearance.Bremo.SectionTitle" />
+    <noox.bzr.design.views.MediaThumbView
+        android:id="@+id/mediaPhoto"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+    <noox.bzr.design.views.MediaThumbView
+        android:id="@+id/mediaVideo"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+    <noox.bzr.design.views.MediaThumbView
+        android:id="@+id/mediaAudio"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/gallery_component_bottom_sheet"
+        android:textAppearance="@style/TextAppearance.Bremo.SectionTitle" />
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/bremo_scrim"
+        android:paddingTop="@dimen/bremo_space_xxl">
+
+        <noox.bzr.design.views.AppBottomSheetView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:action="@string/button_primary"
+            app:bremoBody="@string/sheet_body"
+            app:bremoTitle="@string/sheet_title" />
+    </FrameLayout>
+</merge>

@@ -1,0 +1,142 @@
+{
+    "scr-c10-empty": {
+        "percent": 0.02,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c10-loading": {
+        "percent": 0,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c10-invalid_email": {
+        "percent": 0.01,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c10-blocked": {
+        "percent": 0.01,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c10-network_error": {
+        "percent": 0.01,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c10-rate_limited": {
+        "percent": 0.01,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c10-unverified": {
+        "percent": 0.01,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c10-verified": {
+        "percent": 0.01,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c11-empty": {
+        "percent": 0.19,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c11-loading": {
+        "percent": 0,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c11-invalid_phone": {
+        "percent": 0,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c11-email_used": {
+        "percent": 0,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c11-network_error": {
+        "percent": 0,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c11-rate_limited": {
+        "percent": 0,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c11-registered": {
+        "percent": 0,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c12-waiting": {
+        "percent": 0.01,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c12-checking": {
+        "percent": 0,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c12-not_verified": {
+        "percent": 0.01,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c12-resent": {
+        "percent": 0.01,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c12-network_error": {
+        "percent": 0.01,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c12-rate_limited": {
+        "percent": 0.01,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c12-verified": {
+        "percent": 0,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c13-empty": {
+        "percent": 0.01,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c13-loading": {
+        "percent": 0,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c13-invalid_email": {
+        "percent": 0,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c13-network_error": {
+        "percent": 0,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c13-rate_limited": {
+        "percent": 0,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c13-sent": {
+        "percent": 0,
+        "matches": true,
+        "reason": null
+    }
+}

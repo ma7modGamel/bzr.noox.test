@@ -1,0 +1,157 @@
+{
+    "scr-c21-loading": {
+        "percent": 0,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c21-error": {
+        "percent": 0.01,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c21-cash": {
+        "percent": 0.01,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c21-electronic": {
+        "percent": 0.01,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c21-switching": {
+        "percent": 0.01,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c21-unavailable": {
+        "percent": 0.01,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c22-loading": {
+        "percent": 0,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c22-error": {
+        "percent": 0.01,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c22-select_channel": {
+        "percent": 0.01,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c22-card_selected": {
+        "percent": 0.02,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c22-creating": {
+        "percent": 0.02,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c22-card_pending": {
+        "percent": 0.02,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c22-kiosk_pending": {
+        "percent": 0.02,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c22-success": {
+        "percent": 0.02,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c22-failed": {
+        "percent": 0.02,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c22-expired": {
+        "percent": 0.02,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c23-loading": {
+        "percent": 0,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c23-error": {
+        "percent": 0.01,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c23-ready": {
+        "percent": 0.01,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c23-submitting": {
+        "percent": 0.01,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c23-unavailable": {
+        "percent": 0,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c24-loading": {
+        "percent": 0,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c24-error": {
+        "percent": 0.01,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c24-empty": {
+        "percent": 0.12,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c24-partial": {
+        "percent": 0.12,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c24-valid": {
+        "percent": 0.11,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c24-comment_too_long": {
+        "percent": 0.12,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c24-submitting": {
+        "percent": 0.11,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c24-window_closed": {
+        "percent": 0.12,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c24-already_exists": {
+        "percent": 0.12,
+        "matches": true,
+        "reason": null
+    },
+    "scr-c24-success": {
+        "percent": 0.11,
+        "matches": true,
+        "reason": null
+    }
+}
