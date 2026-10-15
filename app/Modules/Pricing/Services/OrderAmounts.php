@@ -35,15 +35,22 @@ final readonly class OrderAmounts
 
     public static function projected(Order $order, PriceProposal $proposal): self
     {
+        return self::preview($order, $proposal)['projected'];
+    }
+
+    /** @return array{current: self, projected: self} */
+    public static function preview(Order $order, PriceProposal $proposal): array
+    {
         $approved = $order->proposals()
             ->where('status', ProposalStatus::Approved->value)
-            ->get()
-            ->when(
-                $proposal->status === ProposalStatus::Pending,
-                fn (Collection $proposals): Collection => $proposals->push($proposal),
-            );
+            ->get();
+        $current = self::fromProposals($order, $approved);
 
-        return self::fromProposals($order, $approved);
+        if ($proposal->status === ProposalStatus::Pending) {
+            $approved->push($proposal);
+        }
+
+        return ['current' => $current, 'projected' => self::fromProposals($order, $approved)];
     }
 
     /** @param Collection<int, PriceProposal> $approved */
@@ -52,6 +59,10 @@ final readonly class OrderAmounts
 
         $extraWork = self::sum($approved->where('type', ProposalType::ExtraWork)->pluck('amount')->all());
         $materials = self::sum($approved->where('type', ProposalType::Materials)->pluck('amount')->all());
+
+        if ($order->isWarrantyVisit()) {
+            return new self('0.00', '0.00', $materials, $materials);
+        }
 
         $laborBase = self::laborBase($order, $approved->firstWhere('type', ProposalType::ExecutionQuote)?->amount);
         $laborTotal = bcadd($laborBase, $extraWork, 2);

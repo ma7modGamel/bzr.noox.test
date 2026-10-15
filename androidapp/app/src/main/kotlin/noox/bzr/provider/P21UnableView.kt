@@ -37,6 +37,7 @@ class P21UnableView(context: Context) : ProviderScreenView(context) {
 
     override fun renderContent(state: ProviderUiState) {
         val noShow = state.currentAction == "report_no_show"
+        sheet.action = string(if (noShow) DesignR.string.provider_no_show_submit else DesignR.string.provider_unable_confirm)
         binding.reasons.isVisible = !noShow
         reasons.submit(state.options, state.selectedOptionIndex, !state.isBusy)
         binding.note.isVisible = state.currentAction == "report_unable"

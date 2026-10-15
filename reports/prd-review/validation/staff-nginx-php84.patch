@@ -1,0 +1,11 @@
+--- /etc/nginx/sites-available/bzr.noox.test
++++ /etc/nginx/sites-available/bzr.noox.test
+@@ -19,7 +19,7 @@
+ 
+     location ~ \.php$ {
+         include snippets/fastcgi-php.conf;
+-        fastcgi_pass unix:/run/php/php8.3-fpm.sock;
++        fastcgi_pass unix:/run/php/php8.4-fpm.sock;
+     }
+ 
+     location ~ /\.(?!well-known).* {

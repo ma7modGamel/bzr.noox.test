@@ -11,10 +11,13 @@ use App\Modules\Orders\Models\OrderMedia;
 use App\Modules\Providers\Models\ProviderProfile;
 use App\Modules\Support\Actions\CreateProviderReportAction;
 use App\Modules\Support\Actions\OpenDisputeAction;
+use App\Modules\Support\Actions\RequestWarrantyAction;
 use App\Modules\Support\Enums\SupportReasonType;
 use App\Modules\Support\Models\Dispute;
 use App\Modules\Support\Models\DisputeAttachment;
 use App\Modules\Support\Models\SupportReason;
+use App\Modules\Support\Models\WarrantyClaim;
+use App\Support\Localization;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -26,6 +29,37 @@ use Illuminate\Validation\ValidationException;
 /** واجهات C27 وC28؛ أكواد الأسباب لا تُقبل إلا إن كانت فعالة في لوحة الإدارة. */
 final class SupportController
 {
+    public function warrantyClaims(Request $request, Order $order): JsonResponse
+    {
+        abort_unless($order->customer_id === $request->user()->getKey(), 404);
+
+        return new JsonResponse(['data' => $order->warrantyClaims()->with(['providerProfile.user', 'visit'])->latest('id')->get()->map($this->serializeWarranty(...))]);
+    }
+
+    public function requestWarranty(Request $request, Order $order, RequestWarrantyAction $action): JsonResponse
+    {
+        abort_unless($order->customer_id === $request->user()->getKey(), 404);
+        $data = $request->validate(['description' => ['required', 'string', 'min:10', 'max:1000']]);
+
+        return new JsonResponse(['data' => $this->serializeWarranty($action->execute($order, $request->user(), $data['description']))], 201);
+    }
+
+    /** @return array<string, mixed> */
+    private function serializeWarranty(WarrantyClaim $claim): array
+    {
+        return ['id' => $claim->id, 'reason_code' => 'WARRANTY', 'reason_label' => Localization::text('copy.warranty_title'),
+            'description' => $claim->description, 'status' => $claim->status,
+            'status_label' => Localization::text(match ($claim->status) {
+                'ASSIGNED' => 'copy.warranty_assigned', 'COMPLETED' => 'copy.warranty_completed',
+                'CANCELLED' => 'copy.warranty_cancelled', default => 'copy.warranty_requested',
+            }),
+            'visit_order_id' => $claim->visit?->id,
+            'available_actions' => $claim->visit === null ? [] : ['open_warranty_visit'],
+            'resolution_note' => $claim->provider_profile_id === null ? null
+                : $claim->providerProfile?->user?->name.' — '.$claim->scheduled_at?->timezone(config('app.display_timezone'))->format('Y-m-d H:i'),
+            'resolution' => null, 'resolution_label' => null, 'attachments' => []];
+    }
+
     public function disputes(Request $request, Order $order): JsonResponse
     {
         Gate::authorize('view', $order);
@@ -78,7 +112,7 @@ final class SupportController
 
             if ($media->count() !== count($mediaIds)) {
                 throw ValidationException::withMessages([
-                    'media_ids' => 'تحتوي الصور على ملف غير صالح أو غير مملوك للحساب.',
+                    'media_ids' => Localization::text('copy.the_photos_include_an_invalid_file_or_one_that'),
                 ]);
             }
 

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Support\Localization;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
 
@@ -44,8 +45,8 @@ final class AppLinkController
     public function fallback(): Response
     {
         return response()->view('public.account-result', [
-            'title' => 'افتح الرابط من تطبيق '.config('app.name'),
-            'body' => 'هذا الرابط يفتح داخل تطبيق '.config('app.name').'. افتحه من هاتف عليه التطبيق وسجّل الدخول بنفس الحساب.',
+            'title' => Localization::text('web.app_link_title', ['brand' => config('app.name')]),
+            'body' => Localization::text('web.app_link_body', ['brand' => config('app.name')]),
             'success' => true,
         ])->header('Cache-Control', 'no-store')->header('X-Robots-Tag', 'noindex, nofollow');
     }

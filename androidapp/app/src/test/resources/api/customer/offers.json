@@ -1,0 +1,42 @@
+{
+    "data": [
+        {
+            "id": 1000,
+            "price": "450.00",
+            "eta_minutes": 40,
+            "inspection_fee_deductible": false,
+            "includes_text": "تغيير الخرطوم وتركيب الخلاط",
+            "note": null,
+            "status": "SUBMITTED",
+            "submitted_at": "2026-10-05T19:29:59+00:00",
+            "provider": {
+                "id": 1000,
+                "name": "كريم السباك",
+                "avatar_path": null,
+                "is_verified": true,
+                "rating_avg": "4.80",
+                "ratings_count": 7,
+                "completed_orders": 12
+            }
+        },
+        {
+            "id": 1001,
+            "price": "380.00",
+            "eta_minutes": null,
+            "inspection_fee_deductible": false,
+            "includes_text": null,
+            "note": "يمكن الحضور بعد ساعة",
+            "status": "SUBMITTED",
+            "submitted_at": "2026-10-05T19:29:59+00:00",
+            "provider": {
+                "id": 1001,
+                "name": "سامح عادل",
+                "avatar_path": null,
+                "is_verified": true,
+                "rating_avg": "4.20",
+                "ratings_count": 7,
+                "completed_orders": 3
+            }
+        }
+    ]
+}

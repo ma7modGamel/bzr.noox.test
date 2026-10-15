@@ -14,7 +14,51 @@ public enum OfferVariant { case execution, inspection, scheduled }
 public enum StepState { case done, active, pending, onHold }
 public enum MediaState { case uploading, uploaded, failed }
 public enum MediaKind { case photo, video, audio }
-public enum BadgeKind { case highlight, status }
+public enum BadgeKind {
+    case highlight, status, success, warning, neutral, danger
+
+    public static func forOrderStatus(_ status: String) -> BadgeKind {
+        switch status {
+        case "CLOSED": return .success
+        case "OPEN", "AWAITING_QUOTE_APPROVAL", "AWAITING_PAYMENT", "AWAITING_CONFIRMATION": return .warning
+        case "CANCELLED", "EXPIRED": return .neutral
+        case "DISPUTED": return .danger
+        default: return .status
+        }
+    }
+
+    var foreground: Color {
+        switch self {
+        case .highlight: return DesignColors.badgeText
+        case .status: return DesignColors.infoText
+        case .success: return DesignColors.success
+        case .warning: return DesignColors.warningText
+        case .neutral: return DesignColors.neutralText
+        case .danger: return DesignColors.danger
+        }
+    }
+
+    var background: Color {
+        switch self {
+        case .highlight: return DesignColors.badgeBg
+        case .status: return DesignColors.infoBg
+        case .success: return DesignColors.successTint
+        case .warning: return DesignColors.warningBg
+        case .neutral: return DesignColors.neutralBg
+        case .danger: return DesignColors.dangerTint
+        }
+    }
+
+    public var statusIcon: BzrIconKey {
+        switch self {
+        case .success: return .check
+        case .warning: return .clock
+        case .neutral: return .close
+        case .danger: return .warning
+        default: return .orders
+        }
+    }
+}
 public enum ChatKind { case text, image, blocked }
 public enum AvatarSize {
     case small, medium, large
@@ -55,16 +99,15 @@ private struct ProgressArc: View {
 }
 
 extension View {
-    fileprivate func selectionFrame(_ state: SelectionState, radius: CGFloat) -> some View {
+    /// DEC-070 (Figma «Primo App»): the chosen state is a tint (plus a check where the component draws one), never an outline.
+    fileprivate func selectionFrame(
+        _ state: SelectionState, radius: CGFloat, unselectedFill: Color = DesignColors.surface
+    ) -> some View {
         let selected = state == .selected
         return
             self
-            .bzrFrame(
-                radius: radius,
-                fill: selected ? DesignBorder.selectedFill : DesignColors.surface,
-                border: selected ? DesignBorder.selectedColor : DesignColors.border,
-                width: selected ? DesignBorder.selectedWidth : DesignBorder.width
-            )
+            .background(RoundedRectangle(cornerRadius: radius).fill(selected ? DesignBorder.selectedFill : unselectedFill))
+            .clipShape(RoundedRectangle(cornerRadius: radius))
             .opacity(state == .disabled ? DesignOpacity.disabled : 1)
     }
 }
@@ -120,19 +163,26 @@ public struct AppTopBar: View {
     }
 }
 
+/// 43 §3 PrimaryButton. DEC-070 (Figma «Primo App»): an optional `icon` after the label — the forward arrow on flow
+/// buttons, mirrored in RTL — and a `compact` size (smaller label and height) for buttons inside cards.
 public struct PrimaryButton: View {
     private let text: String
     private let state: ButtonVisualState
     private let height: CGFloat
+    private let icon: BzrIconKey?
+    private let compact: Bool
     private let onClick: () -> Void
 
     public init(
         text: String, state: ButtonVisualState = .normal,
-        height: CGFloat = DesignSize.primaryButtonHeight, onClick: @escaping () -> Void = {}
+        height: CGFloat = DesignSize.primaryButtonHeight, icon: BzrIconKey? = nil, compact: Bool = false,
+        onClick: @escaping () -> Void = {}
     ) {
         self.text = text
         self.state = state
-        self.height = height
+        self.height = compact ? min(height, DesignSize.homeButtonHeight) : height
+        self.icon = icon
+        self.compact = compact
         self.onClick = onClick
     }
 
@@ -142,7 +192,12 @@ public struct PrimaryButton: View {
                 if state == .loading {
                     ProgressArc(color: DesignColors.onPrimary, label: bzrString("a11y.loading"))
                 } else {
-                    BzrText(text, style: DesignType.button, alignment: .center)
+                    HStack(spacing: DesignSpace.s) {
+                        BzrText(text, style: compact ? DesignType.buttonSmall : DesignType.button, alignment: .center)
+                        if let icon {
+                            BzrIcon(icon, tint: DesignColors.onPrimary, size: compact ? DesignSize.iconSmall : DesignSize.icon)
+                        }
+                    }
                 }
             }
             .frame(maxWidth: .infinity)
@@ -165,23 +220,29 @@ public struct PrimaryButton: View {
 public struct SecondaryButton: View {
     private let text: String
     private let enabled: Bool
+    private let icon: BzrIconKey?
     private let onClick: () -> Void
 
-    public init(text: String, enabled: Bool = true, onClick: @escaping () -> Void = {}) {
+    public init(text: String, enabled: Bool = true, icon: BzrIconKey? = nil, onClick: @escaping () -> Void = {}) {
         self.text = text
         self.enabled = enabled
+        self.icon = icon
         self.onClick = onClick
     }
 
     public var body: some View {
         Button(action: onClick) {
-            BzrText(text, style: DesignType.button.colored(DesignColors.primary700), alignment: .center)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, DesignSpace.s)
-                .frame(minHeight: DesignSize.secondaryButtonHeight)
-                .bzrFrame(
-                    radius: DesignRadius.button, fill: DesignColors.surface, border: DesignColors.primary600,
-                    width: DesignBorder.width)
+            // DEC-070 (Figma «Primo App»): filled with the container tint, no outline; DEC-076: optional leading icon.
+            HStack(spacing: DesignSpace.s) {
+                if let icon { BzrIcon(icon, tint: DesignColors.primary600, size: DesignSize.iconSmall) }
+                BzrText(text, style: DesignType.secondaryButton, alignment: .center)
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, DesignSpace.s)
+            .frame(minHeight: DesignSize.secondaryButtonVisualHeight)
+            .background(RoundedRectangle(cornerRadius: DesignRadius.button).fill(DesignColors.secondaryButtonBg))
+            .frame(minHeight: DesignSize.touchTargetMin)
+            .contentShape(Rectangle())
         }
         .buttonStyle(BzrPressStyle())
         .disabled(!enabled)
@@ -244,21 +305,21 @@ public struct IconSquareButton: View {
         Button(action: onClick) {
             BzrIcon(icon, label: label, tint: DesignColors.primary600)
                 .frame(width: DesignSize.chatSquareButtonW, height: DesignSize.chatSquareButtonH)
-                .bzrFrame(
-                    radius: DesignRadius.button, fill: DesignColors.surface, border: DesignColors.primary600,
-                    width: DesignBorder.width)
+                .background(RoundedRectangle(cornerRadius: DesignRadius.button).fill(DesignColors.surfaceContainer))
         }
         .buttonStyle(BzrPressStyle())
     }
 }
 
 /// Stable tab destinations with a restrained selection capsule and native button feedback.
+/// Stable destinations with readable labels. DEC-070 (Figma «Primo App» nav): a tinted bar lifted by a soft shadow,
+/// each tab an icon over its label; the chosen tab takes the primary colour (Figma's lighter teal is darkened for
+/// contrast).
 public struct BottomNav: View {
     private let items: [(BzrIconKey, String)]
     private let selectedIndex: Int
     private let onSelect: (Int) -> Void
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    @Namespace private var selection
 
     public init(
         items: [(BzrIconKey, String)], selectedIndex: Int, onSelect: @escaping (Int) -> Void = { _ in }
@@ -269,34 +330,15 @@ public struct BottomNav: View {
     }
 
     public var body: some View {
-        HStack(alignment: .top, spacing: DesignSpace.xs) {
+        HStack(alignment: .center, spacing: DesignSpace.xs) {
             ForEach(items.indices, id: \.self) { index in
+                let tint = index == selectedIndex ? DesignColors.primary600 : DesignColors.slate500
                 Button {
                     onSelect(index)
                 } label: {
                     VStack(spacing: DesignSpace.xs) {
-                        // DEC-063: the gradient capsule slides to the chosen tab; its icon takes the brand gradient.
-                        Group {
-                            if index == selectedIndex {
-                                BzrGradientIcon(items[index].0)
-                            } else {
-                                BzrIcon(items[index].0, tint: DesignColors.slate400)
-                            }
-                        }
-                        .padding(.horizontal, DesignSpace.l)
-                        .padding(.vertical, DesignSpace.xs)
-                        .background {
-                            if index == selectedIndex {
-                                Capsule().fill(DesignGradients.iconWell)
-                                    .matchedGeometryEffect(id: "selection", in: selection)
-                            }
-                        }
-                        BzrText(
-                            items[index].1,
-                            style: index == selectedIndex
-                                ? DesignType.caption.weighted(DesignFont.bold).colored(DesignColors.primary700)
-                                : DesignType.caption.colored(DesignColors.slate400),
-                            alignment: .center)
+                        BzrIcon(items[index].0, tint: tint)
+                        BzrText(items[index].1, style: DesignType.navLabel.colored(tint), alignment: .center)
                     }
                     .frame(maxWidth: .infinity)
                     .frame(minHeight: DesignSize.touchTargetMin)
@@ -309,12 +351,9 @@ public struct BottomNav: View {
             }
         }
         .padding(.horizontal, DesignSpace.s)
-        .padding(.vertical, DesignSpace.s)
         .frame(minHeight: DesignSize.bottomNavHeight)
-        .background(DesignColors.surface.bzrShadow(DesignShadows.card))
-        .animation(
-            reduceMotion ? nil : .spring(response: Double(DesignMotion.navBarMs) / 1000 * 2, dampingFraction: 0.78),
-            value: selectedIndex)
+        .background(DesignColors.surfaceAlt.bzrShadow(DesignShadows.card))
+        .animation(reduceMotion ? nil : .easeOut(duration: Double(DesignMotion.navBarMs) / 1000), value: selectedIndex)
     }
 }
 
@@ -393,119 +432,103 @@ public struct DrawerMenu: View {
 
 // ── Selection & fields ───────────────────────────────────────────────────
 
+/// 43 §3 StepIndicator, restyled after Figma «Primo App» (DEC-070): «الخطوة n من total» and a hint on one line,
+/// then one rounded segment per step — reached segments in the primary colour, the rest in the container tint.
 public struct StepIndicator: View {
     private let current: Int
     private let total: Int
     private let label: String
+    private let hint: String
 
-    public init(current: Int, total: Int, label: String) {
+    public init(current: Int, total: Int, label: String, hint: String = "") {
         self.current = current
         self.total = total
         self.label = label
-    }
-
-    private func state(_ step: Int) -> StepState {
-        step < current ? .done : (step == current ? .active : .pending)
+        self.hint = hint
     }
 
     public var body: some View {
         VStack(spacing: DesignSpace.s) {
-            HStack(spacing: 0) {
+            HStack {
+                BzrText(label, style: DesignType.stepLabel)
+                Spacer(minLength: DesignSpace.s)
+                if !hint.isEmpty { BzrText(hint, style: DesignType.hint, lineLimit: 1) }
+            }
+            HStack(spacing: DesignSize.stepSegmentGap) {
                 ForEach(1...max(total, 1), id: \.self) { step in
-                    StepCircle(step: step, state: state(step))
-                    if step < total {
-                        Rectangle()
-                            .fill(step < current ? DesignColors.primary600 : DesignColors.border)
-                            .frame(maxWidth: .infinity)
-                            .frame(height: DesignSize.stepperLine)
-                    }
+                    Capsule()
+                        .fill(step <= current ? DesignColors.primary600 : DesignColors.surfaceContainerHighest)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: DesignSize.stepSegmentHeight)
                 }
             }
-            .frame(width: DesignSize.stepIndicatorWidth)
-            BzrText(label, style: DesignType.secondary)
+            .accessibilityHidden(true)
         }
         .frame(maxWidth: .infinity)
+        .accessibilityElement(children: .combine)
     }
 }
 
-private struct StepCircle: View {
-    @ScaledMetric private var circleSize = DesignSize.stepCircle
-    let step: Int
-    let state: StepState
-
-    var body: some View {
-        let filled = state != .pending
-        let filledColor = state == .onHold ? DesignColors.star : DesignColors.primary600
-        ZStack {
-            // DEC-063: reached steps take the brand gradient; on-hold stays amber.
-            if filled && state != .onHold {
-                Circle().fill(DesignGradients.brand)
-            } else {
-                Circle().fill(filled ? filledColor : DesignColors.surface)
-                Circle().strokeBorder(
-                    filled ? filledColor : DesignColors.border, lineWidth: DesignSize.controlStroke)
-            }
-            switch state {
-            case .done:
-                BzrIcon(.check, tint: DesignColors.onPrimary, size: DesignSize.iconSmall)
-            case .active:
-                BzrText(BzrFormat.number(step), style: DesignType.caption.colored(DesignColors.onPrimary))
-            case .onHold:
-                BzrText(BzrFormat.number(step), style: DesignType.caption.colored(DesignColors.onPrimary))
-            case .pending:
-                BzrText(BzrFormat.number(step), style: DesignType.caption)
-            }
-        }
-        .frame(width: circleSize, height: circleSize)
-    }
-}
-
+/// 43 §3 SelectableTile. DEC-070 (Figma «Primo App»): white card without an outline, an optional one-line `detail`,
+/// and the chosen tile takes the selection tint, a deeper icon well and a check badge at its top-start corner.
 public struct SelectableTile: View {
     private let text: String
+    private let detail: String
     private let icon: BzrIconKey
     private let state: SelectionState
     private let categoryIcon: String?
 
-    private var wellGradient: LinearGradient {
-        guard let categoryIcon else { return DesignGradients.iconWell }
-        let tint = CategoryPalettes.palette(categoryIcon).tint
-        return LinearGradient(
-            colors: [tint, tint.opacity(DesignRatio.wellFade)], startPoint: .topLeading, endPoint: .bottomTrailing)
-    }
-
-    /// `categoryIcon` is the `icon_path` file name from `/catalog`, drawn in its own two tones (DEC-059).
-    public init(text: String, icon: BzrIconKey, state: SelectionState, categoryIcon: String? = nil) {
+    /// `categoryIcon` is the `icon_path` file name from `/catalog` (DEC-059).
+    public init(text: String, icon: BzrIconKey, state: SelectionState, categoryIcon: String? = nil, detail: String = "") {
         self.text = text
+        self.detail = detail
         self.icon = icon
         self.state = state
         self.categoryIcon = categoryIcon
     }
 
     public var body: some View {
+        let selected = state == .selected
         VStack(spacing: DesignSpace.s) {
             ZStack {
-                // DEC-063: the icon sits in a well tinted with its category's hue.
                 RoundedRectangle(cornerRadius: DesignRadius.menuIconBox)
-                    .fill(wellGradient)
+                    .fill(selected ? DesignColors.primaryWellSelected : CategoryPalettes.palette(categoryIcon).tint)
                 if let asset = categoryIcon.flatMap(CategoryIcons.asset) {
                     Image(asset, bundle: .module)
+                        .renderingMode(.template)
                         .resizable()
+                        .foregroundStyle(DesignColors.primary600)
                         .frame(width: DesignSize.tileIcon, height: DesignSize.tileIcon)
                         .accessibilityHidden(true)
                 } else {
-                    BzrGradientIcon(icon, size: DesignSize.tileIcon)
+                    BzrIcon(icon, tint: DesignColors.primary600, size: DesignSize.tileIcon)
                 }
             }
             .frame(width: DesignSize.tileIconWell, height: DesignSize.tileIconWell)
-            BzrText(
-                text, style: DesignType.secondary.weighted(DesignFont.bold).colored(DesignColors.navy800),
-                alignment: .center, lineLimit: 2)
+            BzrText(text, style: DesignType.tileTitle, alignment: .center, lineLimit: 2)
+            if !detail.isEmpty {
+                BzrText(detail, style: DesignType.hint, alignment: .center, lineLimit: 1)
+            }
         }
         .padding(DesignSpace.m)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .frame(minHeight: DesignSize.categoryTileH)
         .selectionFrame(state, radius: DesignRadius.card)
+        .overlay(alignment: .topLeading) {
+            if selected {
+                ZStack {
+                    Circle().fill(DesignColors.primary600)
+                    BzrIcon(.check, tint: DesignColors.onPrimary, size: DesignSize.iconXs)
+                }
+                .frame(width: DesignSize.checkBadge, height: DesignSize.checkBadge)
+                .padding(DesignSpace.s)
+                .accessibilityHidden(true)
+            }
+        }
         .bzrShadow(DesignShadows.card)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel([text, detail].filter { !$0.isEmpty }.joined(separator: bzrString("format.list_separator")))
+        .accessibilityAddTraits(selected ? [.isButton, .isSelected] : .isButton)
     }
 }
 
@@ -521,11 +544,11 @@ public struct SelectableChip: View {
     }
 
     public var body: some View {
-        BzrText(text, alignment: .center)
+        BzrText(text, style: .chip, color: state == .selected ? DesignColors.chipSelectedText : DesignColors.chipText, alignment: .center)
             .padding(.horizontal, DesignSpace.m)
-            .padding(.vertical, DesignSpace.s)
-            .frame(minHeight: max(height, DesignSize.touchTargetMin))
-            .selectionFrame(state, radius: DesignRadius.chip)
+            .padding(.vertical, DesignSpace.xs)
+            .frame(minHeight: height)
+            .selectionFrame(state, radius: DesignRadius.chip, unselectedFill: DesignColors.surfaceContainer)
             .frame(minHeight: DesignSize.touchTargetMin)
             .contentShape(Rectangle())
             .accessibilityElement(children: .ignore)
@@ -535,38 +558,159 @@ public struct SelectableChip: View {
     }
 }
 
+/// 43 §3 RadioCard. DEC-070 (Figma «Primo App»): white card with a soft shadow and no outline, an optional icon well
+/// at the start and badge beside the title; the chosen card takes the selection tint and a filled radio with a check
+/// (the unselected radio keeps its outline so it stays visible on white).
 public struct RadioCard: View {
     private let title: String
     private let detail: String
     private let selected: Bool
+    private let icon: BzrIconKey?
+    private let badge: String
 
-    public init(title: String, body: String, selected: Bool) {
+    public init(title: String, body: String, selected: Bool, icon: BzrIconKey? = nil, badge: String = "") {
         self.title = title
         self.detail = body
         self.selected = selected
+        self.icon = icon
+        self.badge = badge
     }
 
     public var body: some View {
         HStack(spacing: DesignSpace.m) {
-            ZStack {
-                Circle().strokeBorder(
-                    selected ? DesignColors.primary600 : DesignColors.slate300,
-                    lineWidth: DesignSize.controlStroke)
-                if selected {
-                    Circle().fill(DesignColors.primary600).frame(
-                        width: DesignSize.radioDot, height: DesignSize.radioDot)
+            if let icon {
+                ZStack {
+                    Circle().fill(DesignColors.surfaceContainerHigh)
+                    BzrIcon(icon, tint: DesignColors.primary600, size: DesignSize.icon)
                 }
+                .frame(width: DesignSize.optionWell, height: DesignSize.optionWell)
             }
-            .frame(width: DesignSize.radio, height: DesignSize.radio)
             VStack(alignment: .leading, spacing: DesignSpace.xs) {
-                BzrText(title, style: DesignType.cardTitle)
-                BzrText(detail, style: DesignType.secondary)
+                HStack(spacing: DesignSpace.s) {
+                    BzrText(title, style: DesignType.cardTitle)
+                    if !badge.isEmpty { Badge(text: badge, kind: .status) }
+                }
+                if !detail.isEmpty { BzrText(detail, style: DesignType.secondary) }
             }
             Spacer(minLength: 0)
+            ZStack {
+                if selected {
+                    Circle().fill(DesignColors.primary600)
+                    BzrIcon(.check, tint: DesignColors.onPrimary, size: DesignSize.iconSmall)
+                } else {
+                    Circle().strokeBorder(DesignColors.slate300, lineWidth: DesignSize.controlStroke)
+                }
+            }
+            .frame(width: DesignSize.radioCheck, height: DesignSize.radioCheck)
         }
         .padding(DesignSpace.l)
         .frame(maxWidth: .infinity)
         .selectionFrame(selected ? .selected : .unselected, radius: DesignRadius.card)
+        .bzrShadow(DesignShadows.card)
+        .accessibilityElement(children: .combine)
+        .accessibilityAddTraits(selected ? [.isButton, .isSelected] : .isButton)
+    }
+}
+
+/// A catalog category's icon (DEC-059) as a single-tone glyph (DEC-070); a wrench when the key is unknown.
+public struct CategoryGlyph: View {
+    private let key: String?
+    private let size: CGFloat
+
+    public init(_ key: String?, size: CGFloat = DesignSize.iconSmall) {
+        self.key = key
+        self.size = size
+    }
+
+    public var body: some View {
+        if let asset = key.flatMap(CategoryIcons.asset) {
+            Image(asset, bundle: .module)
+                .renderingMode(.template)
+                .resizable()
+                .foregroundStyle(DesignColors.primary600)
+                .frame(width: size, height: size)
+                .accessibilityHidden(true)
+        } else {
+            BzrIcon(.wrench, tint: DesignColors.primary600, size: size)
+        }
+    }
+}
+
+/// DEC-073: a photo from `design/images` (generated into the asset catalog as `img_<name>`), filling its frame.
+public struct DesignPhoto: View {
+    private let name: String
+
+    public init(_ name: String) { self.name = name }
+
+    public var body: some View {
+        Image(name, bundle: .module)
+            .resizable()
+            .scaledToFill()
+            .accessibilityHidden(true)
+    }
+}
+
+/// DEC-070 SearchField (Figma «Primo App» 3002:2): a filled box with a search glyph and a clear button once there is text.
+public struct SearchField: View {
+    private let placeholder: String
+    private let value: String
+    private let onValueChange: ((String) -> Void)?
+
+    public init(placeholder: String, value: String, onValueChange: ((String) -> Void)? = nil) {
+        self.placeholder = placeholder
+        self.value = value
+        self.onValueChange = onValueChange
+    }
+
+    public var body: some View {
+        HStack(spacing: DesignSpace.s) {
+            BzrIcon(.search, tint: DesignColors.slate400, size: DesignSize.iconSmall)
+            TextField(
+                "", text: Binding(get: { value }, set: { onValueChange?($0) }),
+                prompt: Text(placeholder).foregroundColor(DesignColors.slate400)
+            )
+            .font(.custom(DesignType.body.fontName, size: DesignType.body.size, relativeTo: .body))
+            .foregroundStyle(DesignType.body.color)
+            .submitLabel(.search)
+            .disabled(onValueChange == nil)
+            if !value.isEmpty {
+                Button(action: { onValueChange?("") }) {
+                    BzrIcon(.close, label: bzrString("common.clear"), tint: DesignColors.slate400, size: DesignSize.iconSmall)
+                }
+                .frame(width: DesignSize.touchTargetMin, height: DesignSize.touchTargetMin)
+            }
+        }
+        .padding(.leading, DesignSpace.m)
+        .frame(minHeight: DesignSize.searchFieldHeight)
+        .background(RoundedRectangle(cornerRadius: DesignRadius.field).fill(DesignColors.surfaceAlt2))
+    }
+}
+
+/// DEC-070 ActionPill (Figma «Primo App» 3002:144): a compact white card button — icon then label.
+public struct ActionPill: View {
+    private let text: String
+    private let icon: BzrIconKey
+    private let onClick: () -> Void
+
+    public init(text: String, icon: BzrIconKey, onClick: @escaping () -> Void = {}) {
+        self.text = text
+        self.icon = icon
+        self.onClick = onClick
+    }
+
+    public var body: some View {
+        Button(action: onClick) {
+            HStack(spacing: DesignSpace.xs) {
+                BzrIcon(icon, tint: DesignColors.primary600, size: DesignSize.iconSmall)
+                BzrText(text, style: DesignType.caption.colored(DesignColors.navy900), lineLimit: 1)
+            }
+            .padding(.horizontal, DesignSpace.m)
+            .frame(maxWidth: .infinity, minHeight: DesignSize.actionPillHeight)
+            .background(RoundedRectangle(cornerRadius: DesignRadius.card).fill(DesignColors.surface))
+            .bzrShadow(DesignShadows.card)
+        }
+        .buttonStyle(BzrPressStyle())
+        .frame(minHeight: DesignSize.touchTargetMin)
     }
 }
 
@@ -951,16 +1095,14 @@ public struct Badge: View {
     public var body: some View {
         HStack(spacing: DesignSpace.xs) {
             if let icon {
-                BzrIcon(icon, tint: DesignColors.star, size: DesignSize.iconSmall)
+                BzrIcon(icon, tint: kind.foreground, size: DesignSize.badgeIcon)
             }
-            BzrText(
-                text,
-                style: DesignType.badge.colored(
-                    kind == .highlight ? DesignColors.badgeText : DesignColors.primary700))
+            BzrText(text, style: DesignType.badge.colored(kind.foreground))
         }
         .padding(.horizontal, DesignSpace.s)
         .padding(.vertical, DesignSpace.xs)
-        .background(kind == .highlight ? DesignColors.badgeBg : DesignColors.primary50Available)
+        .frame(minHeight: DesignSize.badgeHeight)
+        .background(kind.background)
         .clipShape(RoundedRectangle(cornerRadius: DesignRadius.badge))
     }
 }
@@ -986,7 +1128,7 @@ private struct VerifiedAvatar: View {
             Avatar(size: size)
             if verified {
                 ZStack {
-                    Circle().fill(DesignColors.primary500)
+                    Circle().fill(DesignColors.verifiedText)
                     Circle().strokeBorder(DesignColors.surface, lineWidth: DesignSize.controlStroke)
                     BzrIcon(
                         .shield, label: bzrString("a11y.verified"), tint: DesignColors.onPrimary,
@@ -1061,100 +1203,154 @@ public struct ProviderHeader: View {
     }
 }
 
+/// 43 §3 OfferCard, after Figma «Primo App» 3002:446 (DEC-073): avatar (initial) with an online dot, name and
+/// «موثّق», subtitle, rating and review count, price and its caption; an arrival / materials strip; the technician's
+/// note; «اختيار العرض ←», «عرض الملف» and chat.
 public struct OfferCard: View {
     private let provider: String
+    private let subtitle: String
     private let rating: String
-    private let services: String
+    private let reviews: String
     private let price: String
+    private let priceCaption: String
     private let detail: String
-    private let badge: String
+    private let materials: String
+    private let note: String
+    private let verified: Bool
+    private let verifiedLabel: String
     private let button: String
+    private let profileLabel: String
     private let chatLabel: String
-    private let variant: OfferVariant
-    private let priceCaption: String?
     private let showSelect: Bool
     private let showChat: Bool
+    private let availableNow: Bool
     private let onOpen: () -> Void
     private let onSelect: () -> Void
     private let onChat: () -> Void
 
     public init(
-        provider: String, rating: String, services: String, price: String, detail: String,
-        badge: String,
-        button: String, chatLabel: String, variant: OfferVariant, priceCaption: String? = nil,
-        showSelect: Bool = true, showChat: Bool = true,
-        onOpen: @escaping () -> Void = {}, onSelect: @escaping () -> Void = {},
-        onChat: @escaping () -> Void = {}
+        provider: String, subtitle: String = "", rating: String, reviews: String = "", price: String,
+        priceCaption: String = "", detail: String, materials: String = "", note: String = "", verified: Bool = false,
+        verifiedLabel: String = "", button: String, profileLabel: String = "", chatLabel: String,
+        showSelect: Bool = true, showChat: Bool = true, availableNow: Bool = false, onOpen: @escaping () -> Void = {},
+        onSelect: @escaping () -> Void = {}, onChat: @escaping () -> Void = {}
     ) {
         self.provider = provider
+        self.subtitle = subtitle
         self.rating = rating
-        self.services = services
+        self.reviews = reviews
         self.price = price
-        self.detail = detail
-        self.badge = badge
-        self.button = button
-        self.chatLabel = chatLabel
-        self.variant = variant
         self.priceCaption = priceCaption
+        self.detail = detail
+        self.materials = materials
+        self.note = note
+        self.verified = verified
+        self.verifiedLabel = verifiedLabel
+        self.button = button
+        self.profileLabel = profileLabel
+        self.chatLabel = chatLabel
         self.showSelect = showSelect
         self.showChat = showChat
+        self.availableNow = availableNow
         self.onOpen = onOpen
         self.onSelect = onSelect
         self.onChat = onChat
     }
 
     public var body: some View {
-        BzrCard {
+        VStack(alignment: .leading, spacing: DesignSpace.m) {
             HStack(alignment: .top, spacing: DesignSpace.m) {
-                VerifiedAvatar(size: DesignSize.avatarSmall)
-                VStack(alignment: .leading, spacing: DesignSpace.xs) {
-                    BzrText(provider, style: DesignType.cardTitle)
-                    RatingLine(rating: rating, services: services)
+                BzrText(String(provider.trimmingCharacters(in: .whitespaces).prefix(1)), style: DesignType.offerName.colored(DesignColors.primary600))
+                    .frame(width: DesignSize.offerAvatar, height: DesignSize.offerAvatar)
+                    .background(Circle().fill(DesignColors.surfaceContainer))
+                    .overlay(alignment: .bottomLeading) {
+                        if availableNow {
+                            Circle().fill(DesignColors.success)
+                                .overlay(Circle().strokeBorder(DesignColors.surface, lineWidth: DesignSize.controlStroke))
+                                .frame(width: DesignSize.onlineDot, height: DesignSize.onlineDot)
+                        }
+                    }
+                    .accessibilityHidden(true)
+                VStack(alignment: .leading, spacing: 0) {
+                    HStack(spacing: DesignSpace.s) {
+                        BzrText(provider, style: DesignType.offerName, lineLimit: 1)
+                        if verified {
+                            HStack(spacing: DesignSpace.xs) {
+                                BzrIcon(.verified, tint: DesignColors.verifiedText, size: DesignSize.badgeIcon)
+                                BzrText(verifiedLabel, style: DesignType.statusPill.colored(DesignColors.verifiedText))
+                            }
+                            .padding(.horizontal, DesignSpace.s)
+                            .background(RoundedRectangle(cornerRadius: DesignRadius.badge).fill(DesignColors.verifiedBg))
+                        }
+                    }
+                    if !subtitle.isEmpty { BzrText(subtitle, style: DesignType.secondary) }
+                    if !rating.isEmpty {
+                        HStack(spacing: DesignSpace.xs) {
+                            BzrIcon(.starFilled, tint: DesignColors.star, size: DesignSize.iconSmall)
+                            BzrText(rating, style: DesignType.detailStrong)
+                            if !reviews.isEmpty { BzrText(reviews, style: DesignType.hint) }
+                        }
+                    }
                 }
-                .frame(maxWidth: .infinity, alignment: .leading)
-                VStack(alignment: .trailing, spacing: DesignSpace.xs) {
-                    if !badge.isEmpty { Badge(text: badge, kind: .highlight, icon: .starFilled) }
-                    if variant == .inspection, let priceCaption {
-                        BzrText(priceCaption, style: DesignType.caption)
-                    }
-                    BzrText(price, style: DesignType.price)
-                    HStack(spacing: DesignSpace.xs) {
-                        BzrIcon(
-                            variant == .scheduled ? .calendar : .clock, tint: DesignColors.slate500,
-                            size: DesignSize.iconSmall)
-                        BzrText(detail, style: DesignType.secondary)
-                    }
+                Spacer(minLength: 0)
+                VStack(alignment: .trailing, spacing: 0) {
+                    BzrText(price, style: DesignType.offerPrice)
+                    if !priceCaption.isEmpty { BzrText(priceCaption, style: DesignType.hint) }
                 }
             }
-            .contentShape(Rectangle())
-            .onTapGesture(perform: onOpen)
-            if showSelect || showChat {
-                HorizontalLine()
+            if !detail.isEmpty || !materials.isEmpty {
                 HStack(spacing: DesignSpace.s) {
-                    if showSelect {
-                        PrimaryButton(text: button, height: DesignSize.compactButtonHeight, onClick: onSelect)
+                    if !detail.isEmpty {
+                        BzrIcon(.clock, tint: DesignColors.primary600, size: DesignSize.iconSmall)
+                        BzrText(detail, style: DesignType.detailStrong)
                     }
-                    if showChat { IconSquareButton(label: chatLabel, onClick: onChat) }
+                    Spacer(minLength: DesignSpace.s)
+                    if !materials.isEmpty {
+                        BzrIcon(.wrench, tint: DesignColors.slate500, size: DesignSize.iconSmall)
+                        BzrText(materials, style: DesignType.caption)
+                    }
                 }
+                .padding(DesignSpace.m)
+                .background(RoundedRectangle(cornerRadius: DesignRadius.menuIconBox).fill(DesignColors.surfaceAlt2))
+            }
+            if !note.isEmpty {
+                BzrText(note, style: DesignType.quote)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(DesignSpace.m)
+                    .background(RoundedRectangle(cornerRadius: DesignRadius.menuIconBox).fill(DesignColors.surfaceAlt2))
+            }
+            HStack(spacing: DesignSpace.s) {
+                if showSelect {
+                    PrimaryButton(text: button, state: .normal, icon: .arrowForward, compact: true, onClick: onSelect)
+                }
+                if !profileLabel.isEmpty {
+                    SecondaryButton(text: profileLabel, onClick: onOpen).fixedSize()
+                }
+                if showChat { IconSquareButton(label: chatLabel, onClick: onChat) }
             }
         }
+        .padding(DesignSpace.xl)
+        .background(RoundedRectangle(cornerRadius: DesignRadius.card).fill(DesignColors.surface))
+        .bzrShadow(DesignShadows.card)
     }
 }
 
-/// Scrolls horizontally when the chips do not fit the screen width (C06 at 400pt is already at the limit).
+/// 43 §3 SortChips. DEC-073 (Figma 3002:446): optional leading `icons`; the chosen chip is filled with the primary colour.
 public struct SortChips: View {
     private let title: String?
     private let labels: [String]
     private let selectedIndex: Int
+    private let icons: [BzrIconKey]
     private let onSelect: (Int) -> Void
 
     public init(
-        title: String?, labels: [String], selectedIndex: Int,
+        title: String?, labels: [String], selectedIndex: Int, icons: [BzrIconKey] = [],
         onSelect: @escaping (Int) -> Void = { _ in }
     ) {
         self.title = title
         self.labels = labels
         self.selectedIndex = selectedIndex
+        self.icons = icons
         self.onSelect = onSelect
     }
 
@@ -1165,14 +1361,23 @@ public struct SortChips: View {
                     BzrText(title, lineLimit: 1)
                 }
                 ForEach(labels.indices, id: \.self) { index in
+                    let selected = index == selectedIndex
+                    let tint = selected ? DesignColors.onPrimary : DesignColors.navy900
                     Button {
                         onSelect(index)
                     } label: {
-                        SelectableChip(
-                            text: labels[index], state: index == selectedIndex ? .selected : .unselected,
-                            height: DesignSize.sortChipHeight)
+                        HStack(spacing: DesignSpace.xs) {
+                            if icons.indices.contains(index) { BzrIcon(icons[index], tint: tint, size: DesignSize.iconSmall) }
+                            BzrText(labels[index], style: DesignType.chip.colored(tint), lineLimit: 1)
+                        }
+                        .padding(.horizontal, DesignSpace.l)
+                        .frame(minHeight: DesignSize.sortChipHeight)
+                        .background(Capsule().fill(selected ? DesignColors.primary600 : DesignColors.chipBg))
+                        .frame(minHeight: DesignSize.touchTargetMin)
+                        .contentShape(Rectangle())
                     }
                     .buttonStyle(BzrPressStyle())
+                    .accessibilityAddTraits(selected ? [.isSelected] : [])
                 }
             }
         }
@@ -1510,10 +1715,69 @@ private struct StepperDot: View {
 }
 
 /// Horizontal stepper as in C09: the line toward the previous step is teal once this step is reached.
+/// 43 §3 StatusStepper (C09). DEC-076 (Figma 3002:1631/2540): `vertical` lists the steps top to bottom with optional
+/// `subtitles`.
 public struct StatusStepper: View {
     private let steps: [(String, StepState)]
+    private let subtitles: [String]
+    private let vertical: Bool
 
-    public init(steps: [(String, StepState)]) { self.steps = steps }
+    public init(steps: [(String, StepState)], subtitles: [String] = [], vertical: Bool = false) {
+        self.steps = steps
+        self.subtitles = subtitles
+        self.vertical = vertical
+    }
+
+    @ViewBuilder private var verticalBody: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            ForEach(steps.indices, id: \.self) { index in
+                let state = steps[index].1
+                let active = state == .active || state == .onHold
+                HStack(alignment: .top, spacing: DesignSpace.m) {
+                    ZStack(alignment: .top) {
+                        if index < steps.count - 1 {
+                            Rectangle()
+                                .fill(steps[index + 1].1 != .pending ? DesignColors.primary400 : DesignColors.surfaceContainer)
+                                .frame(width: DesignSize.stepperLine)
+                                .frame(maxHeight: .infinity)
+                        }
+                        ZStack {
+                            switch state {
+                            case .done:
+                                Circle().fill(DesignColors.primary400)
+                                BzrIcon(.check, tint: DesignColors.onPrimary, size: DesignSize.iconSmall)
+                            case .active, .onHold:
+                                Circle().fill(DesignColors.primary50)
+                                Circle().strokeBorder(DesignColors.primary400, lineWidth: DesignSize.controlStroke)
+                                Circle().fill(DesignColors.primary600).frame(width: DesignSize.radioDot, height: DesignSize.radioDot)
+                            case .pending:
+                                Circle().fill(DesignColors.surfaceContainer)
+                                Circle().fill(DesignColors.slate400).frame(width: DesignSize.radioDot, height: DesignSize.radioDot)
+                            }
+                        }
+                        .frame(width: DesignSize.verticalStepDot, height: DesignSize.verticalStepDot)
+                    }
+                    .frame(width: DesignSize.verticalStepDot)
+                    VStack(alignment: .leading, spacing: 0) {
+                        BzrText(
+                            steps[index].0,
+                            style: active
+                                ? DesignType.tileTitle.colored(DesignColors.primary600)
+                                : DesignType.detailStrong.colored(state == .pending ? DesignColors.slate500 : DesignColors.navy900))
+                        if subtitles.indices.contains(index), !subtitles[index].isEmpty {
+                            BzrText(
+                                subtitles[index],
+                                style: DesignType.hint.colored(
+                                    active || (index == 0 && state == .done) ? DesignColors.primary600 : DesignColors.slate400))
+                        }
+                    }
+                    .padding(.bottom, DesignSpace.l)
+                    Spacer(minLength: 0)
+                }
+                .fixedSize(horizontal: false, vertical: true)
+            }
+        }
+    }
 
     private func lineColor(reached: Bool, hidden: Bool) -> Color {
         hidden ? Color.clear : (reached ? DesignColors.primary600 : DesignColors.border)
@@ -1529,6 +1793,10 @@ public struct StatusStepper: View {
     }
 
     public var body: some View {
+        if vertical { verticalBody } else { horizontalBody }
+    }
+
+    private var horizontalBody: some View {
         HStack(alignment: .top, spacing: 0) {
             ForEach(steps.indices, id: \.self) { index in
                 VStack(spacing: DesignSpace.s) {

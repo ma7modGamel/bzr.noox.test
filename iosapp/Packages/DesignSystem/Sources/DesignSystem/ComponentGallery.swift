@@ -236,10 +236,11 @@ private struct GalleryCardsPage: View {
         -> OfferCard
     {
         OfferCard(
-            provider: s("offer.provider"), rating: rating, services: services, price: price,
-            detail: detail,
-            badge: s("badge.top_rated"), button: s("offer.select"), chatLabel: s("button.chat"),
-            variant: variant, priceCaption: priceCaption
+            provider: s("offer.provider"), subtitle: s("tile.plumbing"), rating: rating,
+            reviews: BzrFormat.fill(s("offer.reviews"), [("count", services)]), price: price,
+            priceCaption: priceCaption ?? "", detail: detail,
+            note: s("provider.about.body"), verified: true, verifiedLabel: s("offer.verified"),
+            button: s("offer.select"), profileLabel: s("offer.profile"), chatLabel: s("button.chat")
         )
     }
 

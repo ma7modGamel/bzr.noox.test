@@ -16,6 +16,7 @@ use App\Modules\Support\Enums\DisputeResolution;
 use App\Modules\Support\Enums\DisputeStatus;
 use App\Modules\Support\Models\Dispute;
 use App\Support\Exceptions\BusinessRuleViolationException;
+use App\Support\Localization;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -38,11 +39,11 @@ final readonly class ResolveDisputeAction
         string $note,
     ): Order {
         if ($dispute->order_id !== $order->getKey() || $dispute->status !== DisputeStatus::Open) {
-            throw BusinessRuleViolationException::rule('BR-120', 'النزاع غير مفتوح على هذا الطلب.');
+            throw BusinessRuleViolationException::rule('BR-120', Localization::text('copy.there_is_no_open_dispute_for_this_request'));
         }
 
         if (mb_strlen(trim($note)) < 5) {
-            throw BusinessRuleViolationException::rule('BR-120', 'ملاحظة القرار إلزامية.');
+            throw BusinessRuleViolationException::rule('BR-120', Localization::text('copy.a_decision_note_is_required'));
         }
 
         if ($dispute->is_post_close) {
@@ -93,7 +94,7 @@ final readonly class ResolveDisputeAction
     private function resolveAfterClose(Order $order, Dispute $dispute, Admin $admin, DisputeResolution $resolution, string $note): Order
     {
         if (! in_array($resolution, [DisputeResolution::CloseAsIs, DisputeResolution::CloseWithRefund], true)) {
-            throw BusinessRuleViolationException::rule('BR-120', 'النزاع بعد الإغلاق يُحسم بإبقاء الطلب مغلقًا، مع استرداد أو بدونه.');
+            throw BusinessRuleViolationException::rule('BR-120', Localization::text('copy.a_dispute_after_closure_must_keep_the_request_closed'));
         }
 
         DB::transaction(function () use ($order, $dispute, $admin, $resolution, $note): void {

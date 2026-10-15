@@ -3,7 +3,24 @@
 declare(strict_types=1);
 
 $brand = readJson($root.'/design/brand/brand.json');
-$brandSymbol = (string) file_get_contents($root.'/'.$brand['symbol']);
+$brandSymbol = resolveBrandSymbol((string) file_get_contents($root.'/'.$brand['symbol']), $tokens['color']);
+$brandIcon = themedBrandIcon($brandSymbol, $tokens, $brand['icon']['symbolHeightRatio']);
+$brandPng = is_file($root.'/design/brand/app-icon-1024.png') ? (string) file_get_contents($root.'/design/brand/app-icon-1024.png') : '';
+$brandCachePath = 'design/generated/brand/app-icon.json';
+$brandCache = is_file($root.'/'.$brandCachePath) ? readJson($root.'/'.$brandCachePath) : [];
+// Verify the vector/raster pair without requiring a renderer when generated assets are already current.
+if (($brandCache['svg_sha256'] ?? null) !== hash('sha256', $brandIcon) || ($brandCache['png_sha256'] ?? null) !== hash('sha256', $brandPng)) {
+    if ($checkOnly) {
+        $errors[] = 'The themed brand icon is stale. Run php artisan design:tokens.';
+    } else {
+        $brandPng = renderBrandPng($root, $brandIcon, 1024, 1024);
+    }
+}
+$brandCache = ['svg_sha256' => hash('sha256', $brandIcon), 'png_sha256' => hash('sha256', $brandPng)];
+syncText($root, $brandCachePath, (string) json_encode($brandCache, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)."\n", $checkOnly, $errors, $outputs);
+syncText($root, 'design/generated/brand/symbol.svg', $brandSymbol, $checkOnly, $errors, $outputs);
+syncText($root, 'design/generated/brand/app-icon.svg', $brandIcon, $checkOnly, $errors, $outputs);
+syncText($root, 'design/brand/app-icon-1024.png', $brandPng, $checkOnly, $errors, $outputs);
 preg_match_all('/<path\b[^>]*d="([^"]+)"[^>]*\/>/', $brandSymbol, $brandPaths);
 if (count($brandPaths[1]) !== 2) {
     throw new RuntimeException('The Bremo symbol must have its teal fold and white ribbon.');
@@ -47,14 +64,14 @@ syncText($root, 'androidapp/app/src/main/res/drawable/bremo_launch_background.xm
 $jsonFlags = JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES;
 $iconContents = ['images' => [['filename' => 'AppIcon-1024.png', 'idiom' => 'universal', 'platform' => 'ios', 'size' => '1024x1024']], 'info' => ['author' => 'tools/gen-design', 'version' => 1]];
 syncText($root, 'iosapp/BzrApp/Assets.xcassets/AppIcon.appiconset/Contents.json', (string) json_encode($iconContents, $jsonFlags)."\n", $checkOnly, $errors, $outputs);
-syncBinary($root, $root.'/design/brand/app-icon-1024.png', 'iosapp/BzrApp/Assets.xcassets/AppIcon.appiconset/AppIcon-1024.png', $checkOnly, $errors, $outputs);
+syncText($root, 'iosapp/BzrApp/Assets.xcassets/AppIcon.appiconset/AppIcon-1024.png', $brandPng, $checkOnly, $errors, $outputs);
 $brandIconContents = ['images' => [['filename' => 'bremo-icon.png', 'idiom' => 'universal']], 'info' => ['author' => 'tools/gen-design', 'version' => 1], 'properties' => ['template-rendering-intent' => 'original']];
 $brandIconDirectory = 'iosapp/Packages/DesignSystem/Sources/DesignSystem/Resources/Assets.xcassets/bremo_brand_icon.imageset';
 syncText($root, $brandIconDirectory.'/Contents.json', (string) json_encode($brandIconContents, $jsonFlags)."\n", $checkOnly, $errors, $outputs);
-syncBinary($root, $root.'/design/brand/app-icon-1024.png', $brandIconDirectory.'/bremo-icon.png', $checkOnly, $errors, $outputs);
+syncText($root, $brandIconDirectory.'/bremo-icon.png', $brandPng, $checkOnly, $errors, $outputs);
 $launchImageContents = ['images' => [['filename' => 'symbol.svg', 'idiom' => 'universal']], 'info' => ['author' => 'tools/gen-design', 'version' => 1], 'properties' => ['preserves-vector-representation' => true, 'template-rendering-intent' => 'original']];
 syncText($root, 'iosapp/BzrApp/Assets.xcassets/BremoLaunchSymbol.imageset/Contents.json', (string) json_encode($launchImageContents, $jsonFlags)."\n", $checkOnly, $errors, $outputs);
-syncBinary($root, $root.'/'.$brand['symbol'], 'iosapp/BzrApp/Assets.xcassets/BremoLaunchSymbol.imageset/symbol.svg', $checkOnly, $errors, $outputs);
+syncText($root, 'iosapp/BzrApp/Assets.xcassets/BremoLaunchSymbol.imageset/symbol.svg', $brandSymbol, $checkOnly, $errors, $outputs);
 $rawBackdrop = ltrim($tokens['color']['brandBackdrop'], '#');
 $launchColor = ['colors' => [['idiom' => 'universal', 'color' => ['color-space' => 'srgb', 'components' => ['red' => sprintf('%.6f', hexdec(substr($rawBackdrop, 0, 2)) / 255), 'green' => sprintf('%.6f', hexdec(substr($rawBackdrop, 2, 2)) / 255), 'blue' => sprintf('%.6f', hexdec(substr($rawBackdrop, 4, 2)) / 255), 'alpha' => '1.000000']]]], 'info' => ['author' => 'tools/gen-design', 'version' => 1]];
 syncText($root, 'iosapp/BzrApp/Assets.xcassets/BremoLaunchBackground.colorset/Contents.json', (string) json_encode($launchColor, $jsonFlags)."\n", $checkOnly, $errors, $outputs);

@@ -1,0 +1,221 @@
+{
+  "gallery.component.app_top_bar": {
+    "tokens": [
+      "AppTopBar"
+    ],
+    "reason": "Technical component identifiers in the developer gallery."
+  },
+  "gallery.component.primary_button": {
+    "tokens": [
+      "PrimaryButton"
+    ],
+    "reason": "Technical component identifiers in the developer gallery."
+  },
+  "gallery.component.secondary_button": {
+    "tokens": [
+      "SecondaryButton"
+    ],
+    "reason": "Technical component identifiers in the developer gallery."
+  },
+  "gallery.component.link_button": {
+    "tokens": [
+      "LinkButton"
+    ],
+    "reason": "Technical component identifiers in the developer gallery."
+  },
+  "gallery.component.danger_text_button": {
+    "tokens": [
+      "DangerTextButton"
+    ],
+    "reason": "Technical component identifiers in the developer gallery."
+  },
+  "gallery.component.icon_square_button": {
+    "tokens": [
+      "IconSquareButton"
+    ],
+    "reason": "Technical component identifiers in the developer gallery."
+  },
+  "gallery.component.step_indicator": {
+    "tokens": [
+      "StepIndicator"
+    ],
+    "reason": "Technical component identifiers in the developer gallery."
+  },
+  "gallery.component.selectable_tile": {
+    "tokens": [
+      "SelectableTile"
+    ],
+    "reason": "Technical component identifiers in the developer gallery."
+  },
+  "gallery.component.selectable_chip": {
+    "tokens": [
+      "SelectableChip"
+    ],
+    "reason": "Technical component identifiers in the developer gallery."
+  },
+  "gallery.component.radio_card": {
+    "tokens": [
+      "RadioCard"
+    ],
+    "reason": "Technical component identifiers in the developer gallery."
+  },
+  "gallery.component.check_row": {
+    "tokens": [
+      "CheckRow"
+    ],
+    "reason": "Technical component identifiers in the developer gallery."
+  },
+  "gallery.component.fields": {
+    "tokens": [
+      "AmountField",
+      "AppTextField"
+    ],
+    "reason": "Technical component identifiers in the developer gallery."
+  },
+  "gallery.component.secure_text_field": {
+    "tokens": [
+      "SecureTextField"
+    ],
+    "reason": "Technical component identifiers in the developer gallery."
+  },
+  "gallery.component.text_area": {
+    "tokens": [
+      "TextAreaField"
+    ],
+    "reason": "Technical component identifiers in the developer gallery."
+  },
+  "gallery.component.summary_card": {
+    "tokens": [
+      "SummaryCard"
+    ],
+    "reason": "Technical component identifiers in the developer gallery."
+  },
+  "gallery.component.offer_card": {
+    "tokens": [
+      "OfferCard"
+    ],
+    "reason": "Technical component identifiers in the developer gallery."
+  },
+  "gallery.component.sort_chips": {
+    "tokens": [
+      "Badge",
+      "SortChips"
+    ],
+    "reason": "Technical component identifiers in the developer gallery."
+  },
+  "gallery.component.provider_header": {
+    "tokens": [
+      "ProviderHeader"
+    ],
+    "reason": "Technical component identifiers in the developer gallery."
+  },
+  "gallery.component.stats": {
+    "tokens": [
+      "RatingBars",
+      "ReviewCard",
+      "StatRow"
+    ],
+    "reason": "Technical component identifiers in the developer gallery."
+  },
+  "gallery.component.sticky_action_bar": {
+    "tokens": [
+      "StickyActionBar"
+    ],
+    "reason": "Technical component identifiers in the developer gallery."
+  },
+  "gallery.component.banners": {
+    "tokens": [
+      "InfoBanner",
+      "OfflineBanner",
+      "WarningBox"
+    ],
+    "reason": "Technical component identifiers in the developer gallery."
+  },
+  "gallery.component.tracking": {
+    "tokens": [
+      "EtaCard",
+      "MapCard",
+      "StatusStepper"
+    ],
+    "reason": "Technical component identifiers in the developer gallery."
+  },
+  "gallery.component.order_card": {
+    "tokens": [
+      "OrderCard"
+    ],
+    "reason": "Technical component identifiers in the developer gallery."
+  },
+  "gallery.component.feedback": {
+    "tokens": [
+      "EmptyState",
+      "ErrorState",
+      "LoadingSkeleton"
+    ],
+    "reason": "Technical component identifiers in the developer gallery."
+  },
+  "gallery.component.countdown": {
+    "tokens": [
+      "Countdown"
+    ],
+    "reason": "Technical component identifiers in the developer gallery."
+  },
+  "gallery.component.navigation": {
+    "tokens": [
+      "BottomNav",
+      "DrawerMenu",
+      "MenuRow"
+    ],
+    "reason": "Technical component identifiers in the developer gallery."
+  },
+  "gallery.component.bottom_sheet": {
+    "tokens": [
+      "AppBottomSheet"
+    ],
+    "reason": "Technical component identifiers in the developer gallery."
+  },
+  "gallery.component.chat": {
+    "tokens": [
+      "ChatBubble",
+      "ChatInput"
+    ],
+    "reason": "Technical component identifiers in the developer gallery."
+  },
+  "gallery.component.media": {
+    "tokens": [
+      "MediaThumb"
+    ],
+    "reason": "Technical component identifiers in the developer gallery."
+  },
+  "app.name": {
+    "tokens": [
+      "Bremo"
+    ],
+    "reason": "Non-translatable product brand."
+  },
+  "gallery.app_name": {
+    "tokens": [
+      "Bremo"
+    ],
+    "reason": "Non-translatable product brand."
+  },
+  "auth.email.placeholder": {
+    "tokens": [
+      "com",
+      "example",
+      "name"
+    ],
+    "reason": "Example email address."
+  },
+  "auth.phone.placeholder": {
+    "tokens": [
+      "xxxxxxxxx"
+    ],
+    "reason": "Placeholder digits in an Egyptian phone number."
+  },
+  "auth.validation.phone_invalid": {
+    "tokens": [
+      "xxxxxxxxx"
+    ],
+    "reason": "Placeholder digits in an Egyptian phone number."
+  }
+}

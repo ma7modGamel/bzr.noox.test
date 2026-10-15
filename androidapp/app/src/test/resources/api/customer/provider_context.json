@@ -1,0 +1,48 @@
+{
+    "data": {
+        "id": 1000,
+        "name": "كريم السباك",
+        "avatar_path": null,
+        "bio": "فني متخصص في أعمال السباكة.",
+        "is_verified": true,
+        "available_now": true,
+        "experience_years": 9,
+        "rating_avg": "4.80",
+        "ratings_count": 7,
+        "completed_orders": 12,
+        "rating_breakdown": {
+            "quality": "4.90",
+            "punctuality": "4.50",
+            "conduct": "5.00"
+        },
+        "categories": [
+            {
+                "id": 1000,
+                "name": "سباكة"
+            }
+        ],
+        "specialties": [
+            {
+                "id": 1000,
+                "name": "تسريب مياه"
+            }
+        ],
+        "portfolio": [],
+        "reviews": [
+            {
+                "id": 1000,
+                "customer_name": "السيد س.",
+                "quality": 5,
+                "punctuality": 4,
+                "conduct": 5,
+                "comment": "شغل نظيف ومواعيد مظبوطة",
+                "created_at": "2026-10-05T19:29:59+00:00"
+            }
+        ],
+        "available_actions": [
+            "chat",
+            "accept_offer",
+            "report_provider"
+        ]
+    }
+}

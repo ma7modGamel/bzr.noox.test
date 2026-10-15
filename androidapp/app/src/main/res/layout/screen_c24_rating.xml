@@ -1,48 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- SCR-C24 C24RatingScreen content (DEC-047). -->
+<!-- Figma «Primo App» «قيّم الخدمة» 3002:4475 — the cards are built in C24RatingView (DEC-076). -->
 <merge xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     tools:parentTag="android.widget.LinearLayout">
 
-    <TextView
-        android:id="@+id/heading"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="@style/TextAppearance.Bremo.SectionTitle"
-        android:text="@string/rating_heading" />
-
-    <TextView
-        android:id="@+id/help"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="@style/TextAppearance.Bremo.Secondary"
-        android:text="@string/rating_help" />
-
-    <include
-        android:id="@+id/quality"
+    <LinearLayout
+        android:id="@+id/body"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        layout="@layout/item_rating_row" />
-
-    <include
-        android:id="@+id/punctuality"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        layout="@layout/item_rating_row" />
-
-    <include
-        android:id="@+id/conduct"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        layout="@layout/item_rating_row" />
+        android:divider="@drawable/bremo_gap_l"
+        android:orientation="vertical"
+        android:showDividers="middle" />
 
     <noox.bzr.design.views.TextAreaFieldView
         android:id="@+id/comment"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:bremoLabel="@string/rating_comment"
-        app:bremoPlaceholder="@string/rating_comment_placeholder" />
+        app:bremoPlaceholder="@string/rating_notes" />
 
     <noox.bzr.design.views.InfoBannerView
         android:id="@+id/success"
@@ -57,10 +32,28 @@
         android:layout_height="wrap_content"
         android:visibility="gone" />
 
-    <noox.bzr.design.views.PrimaryButtonView
-        android:id="@+id/submit"
+    <LinearLayout
+        android:id="@+id/dock"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:visibility="gone"
-        app:bremoText="@string/rating_submit" />
+        android:divider="@drawable/bremo_gap_xs"
+        android:gravity="center_horizontal"
+        android:orientation="vertical"
+        android:showDividers="middle">
+
+        <noox.bzr.design.views.PrimaryButtonView
+            android:id="@+id/submit"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            app:bremoText="@string/rating_submit" />
+
+        <TextView
+            android:id="@+id/after_submit"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="@string/rating_after_submit"
+            android:textAppearance="@style/TextAppearance.Bremo.Hint" />
+    </LinearLayout>
 </merge>

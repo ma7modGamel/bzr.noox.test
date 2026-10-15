@@ -7,10 +7,12 @@ namespace App\Modules\Orders\Services;
 use App\Modules\Orders\Enums\OrderStatus;
 use App\Modules\Orders\Enums\TimingType;
 use App\Modules\Orders\Models\Order;
+use App\Modules\Providers\Enums\EmploymentType;
 use App\Modules\Providers\Enums\ProviderStatus;
 use App\Modules\Providers\Models\ProviderProfile;
 use App\Modules\Settings\Services\FeatureGate;
 use App\Support\Exceptions\BusinessRuleViolationException;
+use App\Support\Localization;
 use Illuminate\Database\Eloquent\Builder;
 
 /**
@@ -35,6 +37,10 @@ final class ProviderEligibility
             ->whereHas('areas', fn (Builder $q) => $q->where('areas.id', $order->area_id))
             ->where('user_id', '!=', $order->customer_id); // البند 5 — لا يقدم على طلبه
 
+        if ($order->isWarrantyVisit()) {
+            $query->whereKeyNot($order->warrantyClaim->order->provider_profile_id);
+        }
+
         $offersEnabled = $this->features->offersEnabled();
 
         // البند 4 — المنع بسبب المستحقات: وضع السوق فقط (BR-063، BR-065)
@@ -42,7 +48,7 @@ final class ProviderEligibility
             $query->whereNull('dues_blocked_at');
         } else {
             // DEC-057 — لوحة التعيين تعرض الموظفين المتاحين الآن فقط، لكل المواعيد.
-            $query->where('available_now', true);
+            $query->where('available_now', true)->where('employment_type', EmploymentType::Employee->value);
         }
 
         // البند 6 — طلب NOW: متاح الآن ولا طلب NOW نشط
@@ -75,7 +81,7 @@ final class ProviderEligibility
         if (! $this->isEligible($order, $provider)) {
             throw BusinessRuleViolationException::rule(
                 'BR-007',
-                'مقدم الخدمة غير مؤهل لهذا الطلب: راجع الفئة والمنطقة والتوفر وتعارض المواعيد.',
+                Localization::text('copy.the_technician_is_not_eligible_for_this_request_check'),
             );
         }
     }

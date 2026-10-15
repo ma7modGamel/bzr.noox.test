@@ -16,6 +16,12 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 
+    <noox.bzr.design.views.PrimaryButtonView
+        android:id="@+id/follow"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:bremoText="@string/waiting_follow" />
+
     <noox.bzr.customer.ActionButtonsView
         android:id="@+id/actions"
         android:layout_width="match_parent"

@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 use App\Http\Middleware\EnsureIdempotency;
 use App\Http\Middleware\ResolveAppMode;
+use App\Http\Middleware\ResolveLocale;
 use App\Support\Exceptions\DomainException;
+use App\Support\Localization;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -14,6 +16,7 @@ use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Exception\ThrottleRequestsException;
@@ -35,11 +38,23 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->redirectGuestsTo(fn () => route('filament.admin.auth.login'));
 
         $middleware->api(append: [
+            ResolveLocale::class,
             ResolveAppMode::class,
             EnsureIdempotency::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
+        $exceptions->respond(function (Response $response): Response {
+            if (request()->is('api/*') && $response->getStatusCode() >= 500) {
+                $response = new JsonResponse(['error' => ['code' => 'SERVER_ERROR', 'message' => Localization::text('messages.server_error')]], $response->getStatusCode());
+            }
+            if (request()->attributes->has('locale') || request()->is('api/*')) {
+                $response->headers->set('Content-Language', Localization::locale());
+                $response->setVary('Accept-Language', false);
+            }
+
+            return $response;
+        });
         $exceptions->shouldRenderJsonWhen(
             fn (Request $request) => $request->is('api/*') || $request->expectsJson(),
         );
@@ -57,7 +72,7 @@ return Application::configure(basePath: dirname(__DIR__))
                 ? new JsonResponse([
                     'error' => [
                         'code' => 'VALIDATION_FAILED',
-                        'message' => 'بيانات غير صالحة.',
+                        'message' => Localization::text('messages.validation'),
                         'fields' => $e->errors(),
                     ],
                 ], 422)
@@ -66,7 +81,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $exceptions->render(function (AuthenticationException $e, Request $request) {
             return $request->is('api/*')
-                ? new JsonResponse(['error' => ['code' => 'UNAUTHENTICATED', 'message' => 'يلزم تسجيل الدخول.']], 401)
+                ? new JsonResponse(['error' => ['code' => 'UNAUTHENTICATED', 'message' => Localization::text('messages.unauthenticated')]], 401)
                 : null;
         });
 
@@ -77,19 +92,19 @@ return Application::configure(basePath: dirname(__DIR__))
         */
         $exceptions->render(function (AuthorizationException|AccessDeniedHttpException $e, Request $request) {
             return $request->is('api/*')
-                ? new JsonResponse(['error' => ['code' => 'NOT_FOUND', 'message' => 'غير موجود.']], 404)
+                ? new JsonResponse(['error' => ['code' => 'NOT_FOUND', 'message' => Localization::text('messages.not_found')]], 404)
                 : null;
         });
 
         $exceptions->render(function (ModelNotFoundException|NotFoundHttpException $e, Request $request) {
             return $request->is('api/*')
-                ? new JsonResponse(['error' => ['code' => 'NOT_FOUND', 'message' => 'غير موجود.']], 404)
+                ? new JsonResponse(['error' => ['code' => 'NOT_FOUND', 'message' => Localization::text('messages.not_found')]], 404)
                 : null;
         });
 
         $exceptions->render(function (ThrottleRequestsException $e, Request $request) {
             return $request->is('api/*')
-                ? new JsonResponse(['error' => ['code' => 'RATE_LIMITED', 'message' => 'محاولات كثيرة. حاول لاحقًا.']], 429)
+                ? new JsonResponse(['error' => ['code' => 'RATE_LIMITED', 'message' => Localization::text('messages.rate_limited')]], 429)
                 : null;
         });
     })->create();

@@ -3,6 +3,7 @@ import CoreLocation
 import DesignSystem
 import PhotosUI
 import SwiftUI
+import UniformTypeIdentifiers
 import UIKit
 
 private let providerStatusKeys = [
@@ -676,8 +677,7 @@ public struct P10OfferView: View {
                                 action: { onEtaSelect(index) },
                                 label: {
                                     SelectableChip(
-                                        text: bzrString("format.minutes").replacingOccurrences(
-                                            of: "{n}", with: state.options[index]),
+                                        text: bzrPlural("format.minutes", count: Int(state.options[index]) ?? 0),
                                         state: index == state.selectedOptionIndex ? .selected : .unselected)
                                 }
                             ).buttonStyle(BzrPressStyle())
@@ -813,10 +813,51 @@ private struct ProviderActiveOrderContent: View {
     let destination: (Double, Double)?
     let onAction: (String) -> Void
     let onBack: () -> Void
+    var onWorkPhoto: (Bool, CustomerMediaUpload) -> Void = { _, _ in }
+    var onEstimate: (String) -> Void = { _ in }
+    var onArrivalCode: (String) -> Void = { _ in }
+    var onArrivalNote: (String) -> Void = { _ in }
+    @State private var arrivalCode = ""
+    @State private var arrivalNote = ""
+    @State private var estimateMinutes = ""
+    @State private var workPhoto: PhotosPickerItem?
+    @State private var pickingWorkPhoto = false
+    @State private var isBeforePhoto = true
 
     var body: some View {
         ProviderScreen(title: bzrString("provider.order.title"), state: state, onBack: onBack) {
+            if !state.warrantyCoverage.isEmpty { InfoBanner(text: state.warrantyCoverage) }
             Badge(text: providerStatus(state.displayStatus), kind: .status)
+            if state.arrivalCodeRequired {
+                AppTextField(
+                    label: bzrString("arrival.code.input"), placeholder: "", value: arrivalCode,
+                    onValueChange: { value in
+                        arrivalCode = value.compactMap(\.wholeNumberValue).map(String.init).joined().prefix(6).description
+                        onArrivalCode(arrivalCode)
+                    }
+                ).keyboardType(.numberPad)
+                if !arrivalCode.isEmpty && arrivalCode.count != 6 { WarningBox(text: bzrString("arrival.code.invalid")) }
+                if !state.arrivalError.isEmpty { WarningBox(text: state.arrivalError == "arrival.verification.failed" ? bzrString(state.arrivalError) : state.arrivalError) }
+                SecondaryButton(text: bzrString("tracking.follow"), onClick: { onAction("refresh_order") })
+                if state.arrivalExceptionPending {
+                    InfoBanner(text: bzrString("arrival.exception.pending"))
+
+                } else if state.visibleActions.contains("report_arrival_exception") {
+                    AppTextField(
+                        label: bzrString("arrival.exception.note"), placeholder: "", value: arrivalNote,
+                        onValueChange: {
+                            arrivalNote = $0; onArrivalNote($0)
+                        })
+                    if !arrivalNote.isEmpty && !(5...500).contains(arrivalNote.trimmingCharacters(in: .whitespacesAndNewlines).count) {
+                        WarningBox(text: bzrString("arrival.exception.note_invalid"))
+                    }
+                    SecondaryButton(
+                        text: bzrString("arrival.exception.report"),
+                        enabled: !state.isBusy && (5...500).contains(arrivalNote.trimmingCharacters(in: .whitespacesAndNewlines).count),
+                        onClick: { onAction("report_arrival_exception") })
+                }
+            }
+
             ProviderHeader(
                 name: state.customerName, rating: state.customerRating,
                 services: nil, size: .medium)
@@ -854,8 +895,52 @@ private struct ProviderActiveOrderContent: View {
             }
             StatusStepper(
                 steps: zip(stepLabels, state.stepStates).map { (bzrString($0), providerStep($1)) })
-            ForEach(state.visibleActions, id: \.self) { action in
-                providerActionButton(action, state: state) { onAction(action) }
+            if screen == "SCR-P14" || screen == "SCR-P15" {
+                InfoBanner(text: bzrString("repair.photos.required"))
+                BzrText(String(format: bzrString("repair.photos.count"), String(state.beforePhotoCount), String(state.afterPhotoCount)), style: DesignType.hint)
+            }
+            if state.visibleActions.contains("update_completion_estimate") {
+                if let raw = state.fieldValues.first, let date = ISO8601DateFormatter().date(from: raw) {
+                    BzrText(
+                        BzrFormatter.fill(bzrString("tracking.finish.estimated_at"), values: [("time", date.formatted(date: .abbreviated, time: .shortened))]),
+                        style: DesignType.hint)
+                }
+                AppTextField(
+                    label: bzrString("provider.completion_estimate.minutes"), placeholder: bzrString("provider.completion_estimate.hint"), value: estimateMinutes,
+                    onValueChange: { estimateMinutes = $0 }
+                )
+                .keyboardType(.numberPad)
+                if !estimateMinutes.isEmpty && Int(estimateMinutes).map({ (1...1440).contains($0) }) != true {
+                    WarningBox(text: bzrString("provider.completion_estimate.invalid"))
+                }
+                SecondaryButton(
+                    text: bzrString("provider.completion_estimate.save"), enabled: !state.isBusy && Int(estimateMinutes).map { (1...1440).contains($0) } == true,
+                    onClick: { onEstimate(estimateMinutes) })
+            }
+            ForEach(state.visibleActions.filter { !["update_completion_estimate", "report_arrival_exception"].contains($0) }, id: \.self) { action in
+                if action == "upload_repair_before" || action == "upload_repair_after" {
+                    SecondaryButton(
+                        text: bzrString(action == "upload_repair_before" ? "repair.photos.add_before" : "repair.photos.add_after"), enabled: !state.isBusy,
+                        onClick: {
+                            isBeforePhoto = action == "upload_repair_before"; pickingWorkPhoto = true
+                        })
+                } else {
+                    providerActionButton(action, state: state) { onAction(action) }
+                        .disabled(
+                            (action == "complete_work" && (state.beforePhotoCount == 0 || state.afterPhotoCount == 0))
+                                || (action == "mark_arrived" && state.arrivalCodeRequired && arrivalCode.count != 6))
+                }
+            }
+        }
+        .photosPicker(isPresented: $pickingWorkPhoto, selection: $workPhoto, matching: .images)
+        .onChange(of: workPhoto) { _, item in
+            guard let item else { return }
+            let before = isBeforePhoto
+            Task {
+                guard let originalData = try? await item.loadTransferable(type: Data.self), let data = UIImage(data: originalData)?.jpegData(compressionQuality: 0.9) else {
+                    return
+                }
+                onWorkPhoto(before, CustomerMediaUpload(fileName: "repair-photo.jpg", mimeType: "image/jpeg", data: data))
             }
         }
     }
@@ -893,10 +978,12 @@ public struct P13OnTheWayView: View {
     let destination: (Double, Double)?
     let onAction: (String) -> Void
     let onBack: () -> Void
+    var onArrivalCode: (String) -> Void = { _ in }
+    var onArrivalNote: (String) -> Void = { _ in }
     public var body: some View {
         ProviderActiveOrderContent(
             state: state, screen: "SCR-P13", destination: destination,
-            onAction: onAction, onBack: onBack)
+            onAction: onAction, onBack: onBack, onArrivalCode: onArrivalCode, onArrivalNote: onArrivalNote)
     }
 }
 
@@ -905,10 +992,11 @@ public struct P14ArrivedView: View {
     let destination: (Double, Double)?
     let onAction: (String) -> Void
     let onBack: () -> Void
+    var onWorkPhoto: (Bool, CustomerMediaUpload) -> Void = { _, _ in }
     public var body: some View {
         ProviderActiveOrderContent(
             state: state, screen: "SCR-P14", destination: destination,
-            onAction: onAction, onBack: onBack)
+            onAction: onAction, onBack: onBack, onWorkPhoto: onWorkPhoto)
     }
 }
 
@@ -917,10 +1005,12 @@ public struct P15InProgressView: View {
     let destination: (Double, Double)?
     let onAction: (String) -> Void
     let onBack: () -> Void
+    var onWorkPhoto: (Bool, CustomerMediaUpload) -> Void = { _, _ in }
+    var onEstimate: (String) -> Void = { _ in }
     public var body: some View {
         ProviderActiveOrderContent(
             state: state, screen: "SCR-P15", destination: destination,
-            onAction: onAction, onBack: onBack)
+            onAction: onAction, onBack: onBack, onWorkPhoto: onWorkPhoto, onEstimate: onEstimate)
     }
 }
 
@@ -939,6 +1029,8 @@ public struct P16AwaitingPaymentView: View {
 public struct P17CustomerRatingView: View {
     let state: ProviderUIState
     let onRate: (Int) -> Void
+    let onTag: (Int) -> Void
+    let onComment: (String) -> Void
     let onSubmit: () async -> Void
     let onBack: () -> Void
 
@@ -959,6 +1051,21 @@ public struct P17CustomerRatingView: View {
                     ) { onRate(index) }
                 }
             }
+            if !state.options.isEmpty {
+                BzrText(bzrString("provider.rating.tags"), style: DesignType.sectionTitle)
+                BzrServiceGrid(columns: 2) {
+                    ForEach(state.options.indices, id: \.self) { index in
+                        SelectableChip(text: state.options[index], state: state.selectedPrimaryIndices.contains(index) ? .selected : .unselected) { onTag(index) }
+                            .disabled(state.isBusy || !state.visibleActions.contains("rate_customer"))
+                    }
+                }
+            }
+            TextAreaField(
+                label: bzrString("provider.rating.comment"), placeholder: "", value: state.fieldValues.first ?? "",
+                state: (state.fieldValues.first ?? "").isEmpty ? .empty : .filled,
+                error: state.fieldErrors.contains("provider.rating.comment_limit") ? bzrString("provider.rating.comment_limit") : nil, onValueChange: onComment
+            )
+            .disabled(state.isBusy || !state.visibleActions.contains("rate_customer"))
             InfoBanner(text: bzrString("provider.rating.notice"))
             if let message = state.messageKey {
                 if message == "provider.rating.success" {
@@ -985,12 +1092,46 @@ public struct P17CustomerRatingView: View {
     }
 }
 
+private struct EarningsCSVDocument: FileDocument {
+    static var readableContentTypes: [UTType] { [.commaSeparatedText] }
+    let data: Data
+    init(data: Data) { self.data = data }
+    init(configuration: ReadConfiguration) throws { data = configuration.file.regularFileContents ?? Data() }
+    func fileWrapper(configuration: WriteConfiguration) throws -> FileWrapper { FileWrapper(regularFileWithContents: data) }
+}
+
 public struct P18EarningsView: View {
     let state: ProviderUIState
     let onBack: () -> Void
+    let onType: (Int) -> Void
+    let onFrom: (String) -> Void
+    let onTo: (String) -> Void
+    let onApply: () async -> Void
+    let onReset: () async -> Void
+    let onMore: () async -> Void
+    let onExport: () async -> Data?
+    @State private var document: EarningsCSVDocument?
+    @State private var showExporter = false
+    @State private var exportFailed = false
+
+    public init(
+        state: ProviderUIState, onBack: @escaping () -> Void,
+        onType: @escaping (Int) -> Void = { _ in }, onFrom: @escaping (String) -> Void = { _ in }, onTo: @escaping (String) -> Void = { _ in },
+        onApply: @escaping () async -> Void = {}, onReset: @escaping () async -> Void = {}, onMore: @escaping () async -> Void = {}, onExport: @escaping () async -> Data? = { nil }
+    ) {
+        self.state = state; self.onBack = onBack; self.onType = onType; self.onFrom = onFrom; self.onTo = onTo
+        self.onApply = onApply; self.onReset = onReset; self.onMore = onMore; self.onExport = onExport
+    }
 
     public var body: some View {
         ProviderScreen(title: bzrString("provider.earnings.title"), state: state, onBack: onBack) {
+            // DEC-068: new offers paused by dues (BR-063); debt and limit follow the three summary values.
+            if state.earningsDuesBlocked || state.messageKey == "provider.earnings.dues_blocked" {
+                WarningBox(
+                    text: String(
+                        format: bzrString("provider.earnings.dues_blocked"), value(state.secondaryOptions, 3),
+                        value(state.secondaryOptions, 4)))
+            }
             StatRow(items: [
                 StatItem(
                     icon: .orders, value: value(state.secondaryOptions, 0),
@@ -1002,12 +1143,37 @@ public struct P18EarningsView: View {
                     icon: .clock, value: value(state.secondaryOptions, 2),
                     label: bzrString("provider.earnings.pending")),
             ])
-            if state.messageKey == "provider.earnings.employee.info" {
+            if state.earningsEmployee || state.messageKey == "provider.earnings.employee.info" {
                 InfoBanner(text: bzrString("provider.earnings.employee.info"))
             }
             if state.phase == .empty {
                 EmptyState(title: bzrString("provider.earnings.empty"), body: "")
             }
+            InfoBanner(text: bzrString("provider.earnings.filter_notice"))
+            BzrServiceGrid(columns: 2) {
+                ForEach(state.earningsFilterLabels.indices, id: \.self) { index in
+                    SelectableChip(text: state.earningsFilterLabels[index], state: index == state.earningsTypeIndex ? .selected : .unselected) { onType(index) }
+                        .disabled(state.isBusy)
+                }
+            }
+            AppTextField(
+                label: bzrString("provider.earnings.from"), placeholder: bzrString("provider.earnings.date_hint"), value: state.earningsDateFrom,
+                state: state.earningsDateFrom.isEmpty ? .empty : .filled, onValueChange: onFrom
+            ).disabled(state.isBusy)
+            AppTextField(
+                label: bzrString("provider.earnings.to"), placeholder: bzrString("provider.earnings.date_hint"), value: state.earningsDateTo,
+                state: state.earningsDateTo.isEmpty ? .empty : .filled, onValueChange: onTo
+            ).disabled(state.isBusy)
+            PrimaryButton(text: bzrString("provider.earnings.apply"), state: state.isBusy ? .loading : .normal) { Task { await onApply() } }
+            SecondaryButton(text: bzrString("provider.earnings.reset"), enabled: !state.isBusy) { Task { await onReset() } }
+            SecondaryButton(text: bzrString("provider.earnings.export"), enabled: !state.isBusy && !state.earningsFiltersDirty) {
+                Task {
+                    exportFailed = false
+                    if let data = await onExport() { document = EarningsCSVDocument(data: data); showExporter = true }
+                }
+            }
+            if state.messageKey == "provider.earnings.filter_error" { WarningBox(text: bzrString("provider.earnings.filter_error")) }
+            if exportFailed || state.messageKey == "provider.earnings.export_error" { WarningBox(text: bzrString("provider.earnings.export_error")) }
             ForEach(state.items.indices, id: \.self) { index in
                 SummaryCard(
                     title: state.items[index],
@@ -1016,7 +1182,13 @@ public struct P18EarningsView: View {
                     ],
                     editText: nil)
             }
+            if state.earningsHasMore {
+                SecondaryButton(text: bzrString("provider.earnings.more"), enabled: !state.isBusy && !state.earningsFiltersDirty) { Task { await onMore() } }
+            }
             if state.isBusy { BzrText(bzrString("orders.loading_more"), style: DesignType.secondary) }
+        }
+        .fileExporter(isPresented: $showExporter, document: document, contentType: .commaSeparatedText, defaultFilename: "bremo-statement") { result in
+            if case .failure(let error) = result, (error as NSError).code != NSUserCancelledError { exportFailed = true }
         }
     }
 
@@ -1058,8 +1230,7 @@ public struct P19ProfileView: View {
                     icon: .orders, value: value(state.itemStates, 1), label: bzrString("stat.services")),
                 StatItem(
                     icon: .clock,
-                    value: bzrString("format.minutes").replacingOccurrences(
-                        of: "{n}", with: value(state.itemStates, 2)),
+                    value: Int(value(state.itemStates, 2)).map { bzrPlural("format.minutes", count: $0) } ?? "",
                     label: bzrString("stat.response_speed")),
             ])
             SecondaryButton(
@@ -1308,7 +1479,7 @@ public struct P21UnableView: View {
                 body: bzrString(
                     state.currentAction == "report_no_show"
                         ? "provider.no_show.confirm" : "provider.unable.reason"),
-                action: bzrString("provider.unable.confirm"),
+                action: bzrString(state.currentAction == "report_no_show" ? "provider.no_show.submit" : "provider.unable.confirm"),
                 actionState: state.isBusy ? .loading : (state.canContinue ? .normal : .disabled),
                 secondaryAction: bzrString("common.cancel"),
                 onAction: { Task { await onConfirm() } }, onSecondary: onBack)
@@ -1374,6 +1545,8 @@ private func providerWarningKey(_ key: String) -> String {
     case "provider.proposal.pending": "provider.proposal.pending"
     case "provider.proposal.success": "provider.proposal.success"
     case "provider.payment.waiting": "provider.payment.waiting"
+    case "media.upload_error": "media.upload_error"
+    case "provider.no_show.pending": "provider.no_show.pending"
     case "provider.no_show.confirm": "provider.no_show.confirm"
     case "provider.no_show.not_ready": "provider.no_show.not_ready"
     default: "error.body"
@@ -1484,15 +1657,19 @@ struct ProviderJourneyRoot: View {
         case "SCR-P13":
             P13OnTheWayView(
                 state: viewModel.state, destination: viewModel.activeDestination,
-                onAction: handleActiveAction, onBack: { Task { await viewModel.loadHome() } })
+                onAction: handleActiveAction, onBack: { Task { await viewModel.loadHome() } }, onArrivalCode: viewModel.updateArrivalCode,
+                onArrivalNote: viewModel.updateArrivalExceptionNote)
         case "SCR-P14":
             P14ArrivedView(
                 state: viewModel.state, destination: viewModel.activeDestination,
-                onAction: handleActiveAction, onBack: { Task { await viewModel.loadHome() } })
+                onAction: handleActiveAction, onBack: { Task { await viewModel.loadHome() } },
+                onWorkPhoto: { before, upload in Task { await viewModel.uploadWorkPhoto(before: before, upload: upload) } })
         case "SCR-P15":
             P15InProgressView(
                 state: viewModel.state, destination: viewModel.activeDestination,
-                onAction: handleActiveAction, onBack: { Task { await viewModel.loadHome() } })
+                onAction: handleActiveAction, onBack: { Task { await viewModel.loadHome() } },
+                onWorkPhoto: { before, upload in Task { await viewModel.uploadWorkPhoto(before: before, upload: upload) } },
+                onEstimate: { value in Task { await viewModel.updateCompletionEstimate(value) } })
         case "SCR-P16":
             P16AwaitingPaymentView(
                 state: viewModel.state, destination: viewModel.activeDestination,
@@ -1500,10 +1677,16 @@ struct ProviderJourneyRoot: View {
         case "SCR-P17":
             P17CustomerRatingView(
                 state: viewModel.state, onRate: viewModel.selectCustomerRating,
+                onTag: viewModel.toggleCustomerRatingTag, onComment: viewModel.updateCustomerRatingComment,
                 onSubmit: viewModel.submitCustomerRating,
                 onBack: { Task { await viewModel.loadHome() } })
         case "SCR-P18":
-            P18EarningsView(state: viewModel.state, onBack: { Task { await viewModel.loadHome() } })
+            P18EarningsView(
+                state: viewModel.state, onBack: { Task { await viewModel.loadHome() } },
+                onType: { viewModel.updateEarningsFilters(typeIndex: $0) }, onFrom: { viewModel.updateEarningsFilters(dateFrom: $0) },
+                onTo: { viewModel.updateEarningsFilters(dateTo: $0) },
+                onApply: { await viewModel.applyEarningsFilters() }, onReset: { await viewModel.applyEarningsFilters(reset: true) },
+                onMore: { await viewModel.applyEarningsFilters(more: true) }, onExport: viewModel.exportEarnings)
         case "SCR-P19":
             P19ProfileView(
                 state: viewModel.state,
@@ -1528,6 +1711,7 @@ struct ProviderJourneyRoot: View {
         case "SCR-C19":
             C19ChatView(
                 state: customerChatState(viewModel.state),
+                loadImage: { await viewModel.loadChatImage(url: $0) },
                 onDraftChange: viewModel.updateChatDraft,
                 onSend: { Task { await viewModel.sendChatMessage() } },
                 onPhotoSelected: { upload in Task { await viewModel.sendChatPhoto(upload) } },
@@ -1553,13 +1737,15 @@ struct ProviderJourneyRoot: View {
 
     private func handleActiveAction(_ action: String) {
         switch action {
-        case "start_trip", "mark_arrived":
+        case "start_trip", "mark_arrived", "report_arrival_exception":
             locationSource.resolve { latitude, longitude in
                 Task {
                     await viewModel.performLocationAction(action, latitude: latitude, longitude: longitude)
                 }
             }
         // swiftlint:disable opening_brace
+        case "refresh_order":
+            Task { await viewModel.loadActiveOrder() }
         case "call":
             if let phone = viewModel.activeCustomerPhone,
                 let url = URL(string: "tel:\(phone)")
@@ -1580,7 +1766,7 @@ struct ProviderJourneyRoot: View {
 }
 
 private func customerChatState(_ state: ProviderUIState) -> CustomerUIState {
-    CustomerUIState(
+    var result = CustomerUIState(
         screen: state.screen,
         phase: {
             switch state.phase {
@@ -1593,4 +1779,6 @@ private func customerChatState(_ state: ProviderUIState) -> CustomerUIState {
         canContinue: state.canContinue, messageKey: state.messageKey,
         items: state.items, itemDetails: state.itemDetails, itemStates: state.itemStates,
         options: state.options, fieldValues: state.fieldValues, isBusy: state.isBusy)
+    result.imageGroups = state.imageGroups
+    return result
 }

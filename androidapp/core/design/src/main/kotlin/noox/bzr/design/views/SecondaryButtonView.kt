@@ -7,7 +7,7 @@ import androidx.core.content.withStyledAttributes
 import noox.bzr.design.R
 import noox.bzr.design.databinding.ViewSecondaryButtonBinding
 
-/** 43 §3 SecondaryButton: teal outline; normal and disabled (40%). */
+/** Secondary actions use a compact neutral surface inside the full touch target. */
 class SecondaryButtonView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) : FrameLayout(context, attrs) {
     private val binding = ViewSecondaryButtonBinding.inflate(inflater, this)
 
@@ -25,9 +25,23 @@ class SecondaryButtonView @JvmOverloads constructor(context: Context, attrs: Att
             binding.button.isEnabled = value
             applyEnabledAlpha(value)
         }
+    /** DEC-076: an optional leading icon (Figma «رسالة» / «اتصال»). */
+    @androidx.annotation.DrawableRes
+    var icon: Int = 0
+        set(value) {
+            field = value
+            binding.button.icon = if (value == 0) null else androidx.core.content.ContextCompat.getDrawable(context, value)
+            binding.button.iconTint = android.content.res.ColorStateList.valueOf(androidx.core.content.ContextCompat.getColor(context, R.color.bremo_primary600))
+            binding.button.iconSize = resources.getDimensionPixelSize(R.dimen.bremo_size_icon_small)
+            binding.button.iconPadding = resources.getDimensionPixelSize(R.dimen.bremo_space_s)
+            binding.button.iconGravity = com.google.android.material.button.MaterialButton.ICON_GRAVITY_TEXT_START
+        }
     var onClick: () -> Unit = {}
 
     init {
+        val inset = (px(R.dimen.bremo_size_touch_target_min) - px(R.dimen.bremo_size_secondary_button_visual_height)) / 2
+        binding.button.insetTop = inset
+        binding.button.insetBottom = inset
         binding.button.setOnClickListener { if (enabled) onClick() }
         context.withStyledAttributes(attrs, R.styleable.SecondaryButtonView) {
             text = getString(R.styleable.SecondaryButtonView_bremoText).orEmpty()

@@ -8,9 +8,9 @@
 - الـ API: `GET /orders/{id}`؛ الأزرار من `available_actions` فقط.
 - التخطيط (من أعلى لأسفل):
   1. `AppTopBar` بعنوان `assignment.waiting.title`.
-  2. `InfoBanner` بنص `tracking.status.open`.
+  2. `InfoBanner` برسالة `waiting.message` من الخادم واسم المهلة وتاريخها من `waiting.deadline_label` و`waiting.deadline_at` عند وجودهما. يوضح الخادم انتهاء المهلة إذا كان الطلب ما زال ينتظر المعالجة.
   3. `SummaryCard` للطلب: رقم الطلب، الفئة — المشكلة، المنطقة، الموعد (الآن أو الفترة).
-  4. `ActionButtons` لـ`edit_request` و`cancel` حسب `available_actions`.
+  4. زر متابعة حالة الطلب للتحديث، ثم `ActionButtons` لـ`edit_request` و`cancel` حسب `available_actions`.
 - المتغيرات: الآن / مجدول؛ مع تعديل متاح / بلا تعديل.
 - الحالات: تحميل / خطأ قابل لإعادة المحاولة / انتظار التعيين.
 - الأخطاء: 404 ← طلباتي؛ خطأ النقل ← `error.body`.

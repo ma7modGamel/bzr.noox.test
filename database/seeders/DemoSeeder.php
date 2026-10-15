@@ -244,8 +244,9 @@ final class DemoSeeder extends Seeder
             'floor' => (string) (1 + $index % 6),
             'apartment' => (string) (2 + $index),
             'landmark' => 'بجوار المسجد',
-            'lat' => number_format((float) $this->city->center_lat + ($index - 3) * 0.004, 7, '.', ''),
-            'lng' => number_format((float) $this->city->center_lng + ($index - 3) * 0.003, 7, '.', ''),
+            // مدينة أُنشئت قبل حقول المركز تبقى بلا إحداثيات؛ مركز دمياط الجديدة كما في CatalogSeeder.
+            'lat' => number_format((float) ($this->city->center_lat ?? 31.4368) + ($index - 3) * 0.004, 7, '.', ''),
+            'lng' => number_format((float) ($this->city->center_lng ?? 31.6670) + ($index - 3) * 0.003, 7, '.', ''),
             'is_default' => true,
         ]);
     }

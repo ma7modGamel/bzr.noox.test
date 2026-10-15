@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Orders\Enums;
 
+use App\Support\Localization;
 use Filament\Support\Contracts\HasLabel;
 
 /**
@@ -26,7 +27,9 @@ enum OrderEventCode: string implements HasLabel
     case TripStarted = 'EVT-020';
     case DelayAlert = 'EVT-021';
     case Arrived = 'EVT-022';
+    case ArrivalExceptionReported = 'EVT-023';
     case WorkStarted = 'EVT-030';
+    case CompletionEstimateUpdated = 'EVT-031';
     case InspectionOnlyCompleted = 'EVT-035';
     case ClosedFreeInspection = 'EVT-036';
     case ProposalSubmitted = 'EVT-040';
@@ -35,6 +38,7 @@ enum OrderEventCode: string implements HasLabel
     case ProposalExpired = 'EVT-043';
     case ProposalWithdrawn = 'EVT-044';
     case WorkCompleted = 'EVT-050';
+    case WarrantyWorkCompleted = 'EVT-051';
     case PaymentAttemptCreated = 'EVT-060';
     case CashReceived = 'EVT-061';
     case ElectronicPaymentSucceeded = 'EVT-062';
@@ -49,52 +53,14 @@ enum OrderEventCode: string implements HasLabel
     case Cancelled = 'EVT-090';
     case UnableToPerform = 'EVT-091';
     case CustomerNoShow = 'EVT-092';
+    case CustomerNoShowReported = 'EVT-093';
+    case CustomerNoShowResolved = 'EVT-094';
     case AdminNote = 'EVT-095';
     case RatingSubmitted = 'EVT-100';
 
     public function getLabel(): string
     {
-        return match ($this) {
-            self::Published => 'نشر الطلب',
-            self::Updated => 'تعديل الطلب',
-            self::Republished => 'إعادة النشر',
-            self::OffersWindowClosed => 'انتهاء نافذة العروض',
-            self::ExpiredWithoutSelection => 'انتهاء الطلب بلا اختيار',
-            self::OfferSubmitted => 'تقديم عرض',
-            self::OfferWithdrawn => 'سحب عرض',
-            self::OfferAccepted => 'قبول عرض',
-            self::ProviderAssigned => 'تعيين مقدم خدمة',
-            self::ProviderBackedOut => 'اعتذار الفني / إعادة فتح إدارية',
-            self::PaymentMethodChanged => 'تغيير طريقة الدفع',
-            self::TripStarted => 'بدء التحرك',
-            self::DelayAlert => 'تنبيه تأخر',
-            self::Arrived => 'وصل',
-            self::WorkStarted => 'بدء التنفيذ',
-            self::InspectionOnlyCompleted => 'إنهاء بالمعاينة فقط',
-            self::ClosedFreeInspection => 'إغلاق بمعاينة مجانية بلا تنفيذ',
-            self::ProposalSubmitted => 'تقديم مقترح',
-            self::ProposalApproved => 'موافقة على مقترح',
-            self::ProposalRejected => 'رفض مقترح',
-            self::ProposalExpired => 'انتهاء مهلة مقترح',
-            self::ProposalWithdrawn => 'سحب مقترح',
-            self::WorkCompleted => 'تم الإنهاء',
-            self::PaymentAttemptCreated => 'إنشاء محاولة دفع',
-            self::CashReceived => 'تأكيد استلام نقدي',
-            self::ElectronicPaymentSucceeded => 'دفع إلكتروني ناجح',
-            self::PaymentAttemptFailed => 'فشل/انتهاء محاولة دفع',
-            self::InstapayTransferSubmitted => 'إرسال تحويل إنستاباي للتأكيد',
-            self::CompletionConfirmed => 'تأكيد العميل للإنهاء',
-            self::AutoClosed => 'إغلاق تلقائي',
-            self::ClosedWithoutPayment => 'إغلاق بدون دفع',
-            self::DisputeOpened => 'فتح مشكلة',
-            self::DisputeResolved => 'قرار النزاع',
-            self::RefundRecorded => 'تسجيل استرداد',
-            self::Cancelled => 'إلغاء',
-            self::UnableToPerform => 'تعذّر التنفيذ',
-            self::CustomerNoShow => 'العميل غير موجود',
-            self::AdminNote => 'ملاحظة إدارية',
-            self::RatingSubmitted => 'تقييم مُقدم',
-        };
+        return Localization::enum($this);
     }
 
     /** الأحداث الداخلية لا تظهر للعميل والفني في الملخص المبسط (24 §العرض). */
@@ -106,6 +72,7 @@ enum OrderEventCode: string implements HasLabel
             self::PaymentAttemptCreated,
             self::PaymentAttemptFailed,
             self::AdminNote,
+            self::CustomerNoShowResolved,
         ], true);
     }
 }

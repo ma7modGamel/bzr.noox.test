@@ -13,6 +13,7 @@ object CustomerRoutes {
         "SCR-C25" to R.id.scr_c25, "SCR-C26" to R.id.scr_c26, "SCR-C27" to R.id.scr_c27, "SCR-C28" to R.id.scr_c28,
         "SCR-C29" to R.id.scr_c29, "SCR-C30" to R.id.scr_c30, "SCR-C31" to R.id.scr_c31, "SCR-C32" to R.id.scr_c32,
         "SCR-C33" to R.id.scr_c33, "SCR-C34" to R.id.scr_c34, "SCR-C35" to R.id.scr_c35, "SCR-C36" to R.id.scr_c36,
+        "SCR-C37" to R.id.scr_c37, "SCR-C38" to R.id.scr_c38,
     )
 
     fun destination(state: CustomerUiState): Int = when {
@@ -23,5 +24,16 @@ object CustomerRoutes {
 
     /** The C35 state shown for an empty C06, built by CustomerLogic as in the Compose flow. */
     fun noOffersState(state: CustomerUiState): CustomerUiState =
-        if (state.screen == "SCR-C06") CustomerLogic.reduce("SCR-C35", mapOf("event" to "loaded", "available_actions" to state.visibleActions)) else state
+        if (state.screen == "SCR-C06") {
+            CustomerLogic.reduce(
+                "SCR-C35",
+                mapOf(
+                    "event" to "loaded", "available_actions" to state.visibleActions,
+                    "summary_rows" to state.itemDetails, "order_icon" to state.optionIcons.firstOrNull().orEmpty(),
+                    "timing_type" to if (state.showEta) "now" else "scheduled",
+                ),
+            )
+        } else {
+            state
+        }
 }

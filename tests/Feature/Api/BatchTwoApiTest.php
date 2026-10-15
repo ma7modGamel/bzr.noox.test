@@ -83,7 +83,7 @@ final class BatchTwoApiTest extends TestCase
             ->assertJsonPath('data.deadlines.proposal_expires_at', null);
 
         $this->assertEqualsCanonicalizing(
-            ['cancel', 'share_visit', 'call', 'chat'],
+            ['cancel', 'share_visit', 'chat'],
             $customerResponse->json('data.available_actions'),
         );
 
@@ -94,7 +94,7 @@ final class BatchTwoApiTest extends TestCase
             ->assertJsonPath('data.display_status', 'order.status.provider.CONFIRMED');
 
         $this->assertEqualsCanonicalizing(
-            ['start_trip', 'back_out', 'call', 'chat'],
+            ['start_trip', 'back_out', 'chat'],
             $providerResponse->json('data.available_actions'),
         );
     }
@@ -237,7 +237,7 @@ final class BatchTwoApiTest extends TestCase
         $linkId = $this->actingAs($customer, 'sanctum')
             ->postJson("/api/v1/orders/{$order->id}/share-links")
             ->assertCreated()
-            ->assertJsonPath('data.expires_at', null)
+            ->assertJsonPath('data.expires_at', now()->addHours(24)->toIso8601String())
             ->json('data.id');
 
         $this->assertSame(43, strlen(ShareLink::query()->findOrFail($linkId)->token));

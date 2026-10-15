@@ -26,6 +26,7 @@ stateDiagram-v2
   AWAITING_QUOTE_APPROVAL --> CLOSED: T-28 رفض / مهلة (المبلغ = 0)
   ARRIVED --> CANCELLED: T-16 تعذّر / عميل غير موجود
   IN_PROGRESS --> AWAITING_PAYMENT: T-17 تم الإنهاء
+  IN_PROGRESS --> CLOSED: T-31 إنهاء زيارة ضمان دون خامات معتمدة
   IN_PROGRESS --> CANCELLED: T-18 تعذّر التنفيذ
   AWAITING_PAYMENT --> AWAITING_CONFIRMATION: T-19 استلام نقدي
   AWAITING_PAYMENT --> CLOSED: T-20 دفع فوري ناجح
@@ -50,14 +51,14 @@ stateDiagram-v2
 | T-05 | CONFIRMED | `startTrip` | الفني | صلاحية الموقع؛ للمجدول: `now ≥ slot_start − 90 دقيقة` | ON_THE_WAY | EVT-020 |
 | T-06/07 | CONFIRMED / ON_THE_WAY | `backOut` / `adminReopen` | الفني / الإدارة | سبب إلزامي | OPEN | EVT-012 |
 | T-08/09 | CONFIRMED / ON_THE_WAY | `cancelOrder` | العميل / الإدارة | سبب إلزامي | CANCELLED | EVT-090 |
-| T-10 | ON_THE_WAY | `markArrived` | الفني | يُرسل الموقع (BR-111) | ARRIVED | EVT-022 |
+| T-10 | ON_THE_WAY | `markArrived` | الفني | موقع الوصول (BR-111)، وكود العميل الصحيح في وضع الموظفين | ARRIVED | EVT-022 |
 | T-11 | ARRIVED | `startWork` | الفني | `pricing_mode = EXECUTION` | IN_PROGRESS | EVT-030 |
 | T-12 | ARRIVED | `submitProposal(EXECUTION_QUOTE)` | الفني | `INSPECTION`، BR-041..043 | AWAITING_QUOTE_APPROVAL | EVT-040 |
 | T-13 | ARRIVED | `completeInspectionOnly` | الفني | `INSPECTION` ولم يُقدَّم عرض تنفيذ، ورسوم المعاينة > 0 | AWAITING_PAYMENT | EVT-035 |
 | T-14 | AWAITING_QUOTE_APPROVAL | `approveProposal` | العميل | المقترح `PENDING` | IN_PROGRESS | EVT-041 |
 | T-15 | AWAITING_QUOTE_APPROVAL | `rejectProposal` / مهلة | العميل / النظام | — | AWAITING_PAYMENT (رسوم المعاينة فقط) | EVT-042/043 |
 | T-16 | ARRIVED | `reportUnableToPerform` / `reportCustomerNoShow` | الفني | سبب؛ عدم الحضور بعد CFG-033 | CANCELLED | EVT-091/092 |
-| T-17 | IN_PROGRESS | `completeWork` | الفني | لا مقترح معلّق (BR-045) | AWAITING_PAYMENT | EVT-050 |
+| T-17 | IN_PROGRESS | `completeWork` | الفني | لا مقترح معلّق، وصور قبل وبعد؛ في الضمان: خامات معتمدة بمبلغ موجب فقط | AWAITING_PAYMENT | EVT-050 |
 | T-18 | IN_PROGRESS | `reportUnableToPerform` | الفني | سبب | CANCELLED | EVT-091 |
 | T-19 | AWAITING_PAYMENT | `confirmCashReceived` / `adminRecordCash` | الفني / الإدارة | المبلغ = `final_amount` | AWAITING_CONFIRMATION | EVT-061 |
 | T-20 | AWAITING_PAYMENT | (إشعار فوري ناجح) / `confirmInstapayTransfer` | النظام / المدير العام | فوري: توقيع صحيح والمبلغ مطابق. إنستاباي: محاولة `PENDING_VERIFICATION` والمبلغ ظاهر في حساب المنصة (BR-057) | CLOSED | EVT-062، EVT-070 |
@@ -70,6 +71,9 @@ stateDiagram-v2
 | T-27 | OPEN | `assignProvider` | الإدارة | CFG-090 معطّل، مقدم الخدمة يستوفي BR-007 | CONFIRMED | EVT-011 |
 | T-28 | ARRIVED / AWAITING_QUOTE_APPROVAL | `completeInspectionOnly` / `rejectProposal` / مهلة | الفني / العميل / النظام | `final_amount = 0` (BR-056) | CLOSED | EVT-036 |
 | T-29 | CONFIRMED / ON_THE_WAY | `reassignProvider` | الإدارة | CFG-090 معطّل؛ = T-06/07 + T-27 في معاملة واحدة | CONFIRMED | EVT-012 + EVT-011 |
+| T-30 | OPEN | `assignWarrantyVisit` | الإدارة | زيارة ضمان مرتبطة بإصلاح أصلي؛ فني آخر مؤهل وموعد دون تعارض؛ متاح في الوضعين | CONFIRMED | EVT-011 |
+| T-31 | IN_PROGRESS | `completeFreeWarrantyVisit` | الفني | زيارة ضمان، لا مقترح معلّق، صور قبل وبعد للفني المسند، لا خامات معتمدة مدفوعة | CLOSED، المبالغ صفر، الدفع WAIVED | EVT-051 |
+| T-32 | ON_THE_WAY | `confirmArrivalException` | الإدارة | بلاغ الفني بتعذّر الكود، وموقعه، ونتيجة اتصال وتحقق وسبب استثناء موثّق | ARRIVED مع بدء مهلة انتظار العميل | EVT-022 |
 
 ## تفاصيل كل حالة
 | الحالة | المعنى | الإجراءات المسموحة | المهلة | الإشعارات | تدخل الإدارة | الإلغاء |
@@ -107,6 +111,7 @@ stateDiagram-v2
 - تغيير الحالة مباشرة من أي واجهة (PATCH status) — غير موجود في API.
 - T-02 في وضع الموظفين، وT-27/T-29 في وضع السوق (`FEATURE_DISABLED`).
 - T-13/T-15 مع `final_amount = 0` (يحل محلهما T-28)، وT-28 مع `final_amount > 0`.
+- T-30/T-31 لطلب ليس زيارة ضمان. الزيارة لا تقبل عروض السوق أو مقترحات المصنعية؛ الخامات تحتاج موافقة العميل. إغلاق الزيارة يحدّث المطالبة إلى `COMPLETED` دون تجديد مدة ضمان الإصلاح الأصلي.
 
 ## التزامن
 كل إجراء يقفل صف الطلب (`SELECT … FOR UPDATE`) ويتحقق من الحالة الحالية داخل نفس المعاملة، مع عمود `version` للقفل المتفائل في الواجهات. طلبان متزامنان على نفس الطلب: الأول ينجح، والثاني يعود بـ `INVALID_TRANSITION` أو `CONFLICT`.

@@ -1,12 +1,12 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="320" height="400" viewBox="0 0 320 400">
   <defs>
     <linearGradient id="teal" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#00ACB6"/>
-      <stop offset="1" stop-color="#149C94"/>
+      <stop offset="0" stop-color="#0054D5"/>
+      <stop offset="1" stop-color="#1F69DA"/>
     </linearGradient>
     <linearGradient id="ribbon" x1="0" y1="0" x2="0.4" y2="1">
       <stop offset="0" stop-color="#FFFFFF"/>
-      <stop offset="1" stop-color="#E8F4F4"/>
+      <stop offset="1" stop-color="#F0F5FC"/>
     </linearGradient>
   </defs>
   <path id="teal-fold" fill="url(#teal)" d="M89 78 H141 C182 78 214 96 214 135 C214 173 181 189 132 189 H106 V305 C106 355 75 389 29 389 H12 Q2 389 2 379 V153 C2 110 39 78 89 78 Z"/>

@@ -3,40 +3,55 @@
 public enum BzrIconKey: String, CaseIterable {
     case account
     case arrowBack = "arrow_back"
+    case arrowForward = "arrow_forward"
     case bell
+    case bolt
     case calendar
     case camera
     case car
     case chat
     case check
     case chevron
+    case cleaning
     case clipboardPlus = "clipboard_plus"
     case clock
     case close
+    case construction
     case edit
     case empty
     case error
+    case expandMore = "expand_more"
     case home
     case image
     case info
+    case inventory2 = "inventory_2"
+    case lightbulb
     case location
     case logout
     case menu
     case messages
     case mic
+    case mood
+    case moreHorizontal = "more_horizontal"
     case more
     case navigation
     case offline
     case orders
+    case payments
     case phone
     case plus
+    case receipt
+    case search
     case send
     case share
     case shield
     case siren
     case starFilled = "star_filled"
     case star
+    case tag
     case trash
+    case tune
+    case verified
     case video
     case warningFilled = "warning_filled"
     case warning

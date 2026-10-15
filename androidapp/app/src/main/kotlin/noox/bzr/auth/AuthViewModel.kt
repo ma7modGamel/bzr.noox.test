@@ -6,6 +6,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import noox.bzr.network.SessionExpiry
 import noox.bzr.network.logFailure
 
 interface AuthSessionStore {
@@ -29,8 +30,21 @@ class AuthViewModel(private val api: AuthApi, private val session: AuthSessionSt
         state = AuthLogic.reduce(state.screen, input)
     }
 
+    /** A new token is saved (login or register); runs on the main thread before the next screen shows. */
+    var onSessionStarted: (() -> Unit)? = null
+
     fun open(screen: String) {
         state = AuthLogic.reduce(screen, mapOf("event" to "show", "email" to (session.email ?: "")))
+    }
+
+    /** After logout: the same clean login form as a fresh start, without field errors. */
+    fun reset() {
+        state = AuthUiState("SCR-C10", AuthPhase.Editing)
+    }
+
+    /** DEC-065: the server refused the saved token; back to login with the email kept and the reason shown. */
+    fun showSessionExpired(email: String) {
+        state = AuthLogic.reduce("SCR-C10", mapOf("event" to "session_expired", "email" to email))
     }
 
     fun submit() {
@@ -85,8 +99,10 @@ class AuthViewModel(private val api: AuthApi, private val session: AuthSessionSt
     }
 
     private fun acceptSession(authSession: AuthSession, event: String) {
+        SessionExpiry.reset()
         session.token = authSession.token
         session.email = authSession.email
+        onSessionStarted?.invoke()
         transition(event, mapOf("is_verified" to authSession.isVerified))
     }
 

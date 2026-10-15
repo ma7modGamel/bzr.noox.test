@@ -35,6 +35,7 @@ final class OfferResource extends JsonResource
                 'name' => $provider?->user->name,
                 'avatar_path' => $provider?->user->avatar_path,
                 'is_verified' => (bool) $provider?->isVerified(),
+                'available_now' => (bool) $provider?->available_now,
                 'rating_avg' => $provider?->rating_avg,
                 'ratings_count' => $provider?->ratings_count,
                 'completed_orders' => $provider?->completed_orders_count,

@@ -1,0 +1,65 @@
+{
+    "data": [
+        {
+            "id": 1000,
+            "status": "SUBMITTED",
+            "display_status": "مقدَّم",
+            "price": "350.00",
+            "net_amount": "315.00",
+            "eta_minutes": 30,
+            "inspection_fee_deductible": true,
+            "includes_text": "المصنعية فقط",
+            "note": null,
+            "submitted_at": "2026-10-05T06:00:00+00:00",
+            "available_actions": [
+                "open_available_request",
+                "withdraw_offer"
+            ],
+            "order": {
+                "id": 1000,
+                "number": 2,
+                "version": 1,
+                "category": "سباكة",
+                "problem_type": "تسريب مياه",
+                "area": "الحي الأول",
+                "timing_type": "NOW",
+                "slot_start": null
+            }
+        }
+    ],
+    "links": {
+        "first": "http://bzr.noox.test/api/v1/provider/offers?page=1",
+        "last": "http://bzr.noox.test/api/v1/provider/offers?page=1",
+        "prev": null,
+        "next": null
+    },
+    "meta": {
+        "current_page": 1,
+        "from": 1,
+        "last_page": 1,
+        "links": [
+            {
+                "url": null,
+                "label": "pagination.previous",
+                "page": null,
+                "active": false
+            },
+            {
+                "url": "http://bzr.noox.test/api/v1/provider/offers?page=1",
+                "label": "1",
+                "page": 1,
+                "active": true
+            },
+            {
+                "url": null,
+                "label": "pagination.next",
+                "page": null,
+                "active": false
+            }
+        ],
+        "path": "http://bzr.noox.test/api/v1/provider/offers",
+        "per_page": 20,
+        "to": 1,
+        "total": 1
+    }
+}

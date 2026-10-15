@@ -13,7 +13,7 @@ final class Area extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['city_id', 'name', 'is_active', 'sort'];
+    protected $fillable = ['city_id', 'name', 'name_en', 'is_active', 'sort'];
 
     protected function casts(): array
     {

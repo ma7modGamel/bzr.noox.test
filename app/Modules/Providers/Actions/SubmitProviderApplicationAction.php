@@ -12,6 +12,7 @@ use App\Modules\Providers\Enums\ProviderStatus;
 use App\Modules\Providers\Models\ProviderProfile;
 use App\Support\Exceptions\EmailNotVerifiedException;
 use App\Support\Exceptions\ProviderApplicationNotEditableException;
+use App\Support\Localization;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
@@ -118,7 +119,7 @@ final class SubmitProviderApplicationAction
             ->first();
 
         if ($media === null) {
-            throw ValidationException::withMessages([$field => 'الصورة غير صالحة أو غير مملوكة للحساب.']);
+            throw ValidationException::withMessages([$field => Localization::text('copy.the_photo_is_invalid_or_does_not_belong_to')]);
         }
 
         return $media;
@@ -127,7 +128,7 @@ final class SubmitProviderApplicationAction
     private function requireStoredImage(?OrderMedia $media, ?string $storedPath, string $field): void
     {
         if ($media === null && ($storedPath === null || ! Storage::disk('local')->exists($storedPath))) {
-            throw ValidationException::withMessages([$field => 'الصورة مطلوبة.']);
+            throw ValidationException::withMessages([$field => Localization::text('copy.a_photo_is_required')]);
         }
     }
 }

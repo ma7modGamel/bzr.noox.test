@@ -20,6 +20,7 @@ use App\Modules\Settings\Enums\Cfg;
 use App\Modules\Settings\Enums\OperatingMode;
 use App\Modules\Settings\Services\SettingsRepository;
 use App\Support\Exceptions\BusinessRuleViolationException;
+use App\Support\Localization;
 use Carbon\CarbonInterface;
 use Illuminate\Support\Facades\DB;
 
@@ -46,6 +47,9 @@ final readonly class SubmitProposalAction
         ?string $outsidePriceGuideReason = null,
     ): PriceProposal {
         $this->assertOwnership($order, $provider);
+        if ($order->isWarrantyVisit() && $type !== ProposalType::Materials) {
+            throw BusinessRuleViolationException::rule('WARRANTY-14', Localization::text('copy.warranty_materials_only'));
+        }
         $this->assertAmountAndReason($amount, $reason);
         $this->assertNoPendingProposal($order);
         $this->assertTypeIsAllowed($order, $type, $amount);
@@ -73,6 +77,10 @@ final readonly class SubmitProposalAction
 
         // خامات / أعمال إضافية: سجل وحدث بلا انتقال حالة
         return DB::transaction(function () use ($order, $provider, $type, $amount, $reason, $photoPath, $expiresAt, $priceGuide): PriceProposal {
+            $order = Order::query()->lockForUpdate()->findOrFail($order->id);
+            $this->assertOwnership($order, $provider);
+            $this->assertNoPendingProposal($order);
+            $this->assertTypeIsAllowed($order, $type, $amount);
             $proposal = $this->createProposal($order, $provider, $type, $amount, $reason, $photoPath, $expiresAt, $priceGuide);
 
             OrderEvent::query()->create([
@@ -159,7 +167,7 @@ final readonly class SubmitProposalAction
         if ($minimum === null || $maximum === null) {
             throw BusinessRuleViolationException::rule(
                 'BR-046',
-                'لا يوجد دليل سعر فعّال لنوع المشكلة.',
+                Localization::text('copy.there_is_no_active_price_guide_for_this_problem'),
                 ['reason' => 'PRICE_GUIDE_MISSING'],
             );
         }
@@ -181,7 +189,7 @@ final readonly class SubmitProposalAction
         if (mb_strlen($outsideReason) < 10 || mb_strlen($outsideReason) > 300) {
             throw BusinessRuleViolationException::rule(
                 'BR-046',
-                'سبب السعر خارج دليل الأسعار يجب أن يكون بين 10 و300 حرف.',
+                Localization::text('copy.the_reason_for_a_price_outside_the_guide_must'),
                 ['reason' => 'OUTSIDE_PRICE_GUIDE_REASON_REQUIRED'],
             );
         }
@@ -198,7 +206,7 @@ final readonly class SubmitProposalAction
     private function assertOwnership(Order $order, ProviderProfile $provider): void
     {
         if ($order->provider_profile_id !== $provider->getKey()) {
-            throw BusinessRuleViolationException::rule('BR-041', 'هذا الطلب غير مسنَد إليك.');
+            throw BusinessRuleViolationException::rule('BR-041', Localization::text('copy.this_request_is_not_assigned_to_you'));
         }
     }
 
@@ -206,13 +214,13 @@ final readonly class SubmitProposalAction
     private function assertAmountAndReason(string $amount, string $reason): void
     {
         if (bccomp($amount, '0.00', 2) <= 0) {
-            throw BusinessRuleViolationException::rule('BR-041', 'مبلغ المقترح يجب أن يكون أكبر من صفر.');
+            throw BusinessRuleViolationException::rule('BR-041', Localization::text('copy.the_proposal_amount_must_be_greater_than_zero'));
         }
 
         $length = mb_strlen(trim($reason));
 
         if ($length < 5 || $length > 300) {
-            throw BusinessRuleViolationException::rule('BR-041', 'سبب المقترح بين 5 و300 حرف.');
+            throw BusinessRuleViolationException::rule('BR-041', Localization::text('copy.the_proposal_reason_must_be_between_5_and_300'));
         }
     }
 
@@ -220,7 +228,7 @@ final readonly class SubmitProposalAction
     private function assertNoPendingProposal(Order $order): void
     {
         if ($order->hasPendingProposal()) {
-            throw BusinessRuleViolationException::rule('BR-041', 'يوجد مقترح معلّق على هذا الطلب.');
+            throw BusinessRuleViolationException::rule('BR-041', Localization::text('copy.there_is_already_a_pending_proposal_for_this_request'));
         }
     }
 
@@ -229,16 +237,16 @@ final readonly class SubmitProposalAction
     {
         if ($type === ProposalType::ExecutionQuote) {
             if ($order->pricing_mode !== PricingMode::Inspection) {
-                throw BusinessRuleViolationException::rule('BR-042', 'عرض التنفيذ يخص طلبات المعاينة فقط.');
+                throw BusinessRuleViolationException::rule('BR-042', Localization::text('copy.an_execution_quote_is_only_available_for_inspection_requests'));
             }
 
             if ($order->status !== OrderStatus::Arrived) {
-                throw BusinessRuleViolationException::rule('BR-042', 'عرض التنفيذ يُقدَّم بعد الوصول.');
+                throw BusinessRuleViolationException::rule('BR-042', Localization::text('copy.an_execution_quote_can_only_be_submitted_after_arrival'));
             }
 
             // مرة واحدة مهما كانت نتيجته (BR-042)
             if ($order->hasExecutionQuote()) {
-                throw BusinessRuleViolationException::rule('BR-042', 'عرض التنفيذ يُقدَّم مرة واحدة فقط.');
+                throw BusinessRuleViolationException::rule('BR-042', Localization::text('copy.an_execution_quote_can_only_be_submitted_once'));
             }
 
             $this->assertQuoteCoversInspectionFee($order, $amount);
@@ -249,7 +257,7 @@ final readonly class SubmitProposalAction
         if ($order->status !== OrderStatus::InProgress) {
             throw BusinessRuleViolationException::rule(
                 'BR-042',
-                'مقترحات الخامات والأعمال الإضافية تُقدَّم أثناء التنفيذ فقط.',
+                Localization::text('copy.materials_and_additional_work_proposals_can_only_be_submitted'),
             );
         }
     }
@@ -266,7 +274,7 @@ final readonly class SubmitProposalAction
         if (bccomp($amount, (string) $offer->price, 2) < 0) {
             throw BusinessRuleViolationException::rule(
                 'BR-043',
-                'عرض التنفيذ لا يقل عن رسوم المعاينة المخصومة ('.$offer->price.' جنيه).',
+                Localization::text('dynamic.inspection_min', ['amount' => $offer->price]),
             );
         }
     }

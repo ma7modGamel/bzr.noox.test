@@ -30,6 +30,8 @@ abstract class CustomerScreenView(context: Context) : FrameLayout(context) {
     protected val bottomBar: LinearLayout get() = scaffold.bottomBar
     protected val overlay: FrameLayout get() = scaffold.overlay
 
+    private var requestProgress: noox.bzr.design.views.StepIndicatorView? = null
+
     var onBack: () -> Unit = {}
     var onReload: (() -> Unit)? = null
 
@@ -45,6 +47,13 @@ abstract class CustomerScreenView(context: Context) : FrameLayout(context) {
     protected open val showsTopBar: Boolean = true
 
     fun render(state: CustomerUiState) {
+        requestProgress?.apply {
+            total = state.requestSteps
+            if (state.screen == "SCR-C05") current = state.requestSteps
+            label = noox.bzr.design.BzrFormat.fill(string(R.string.format_step),
+                "current" to noox.bzr.design.BzrFormat.number(current), "total" to noox.bzr.design.BzrFormat.number(total))
+            contentDescription = listOf(label, hint).filter(String::isNotEmpty).joinToString(string(R.string.format_list_separator))
+        }
         scaffold.topBar.isVisible = showsTopBar
         scaffold.topBar.title = title(state)
         scaffold.topBar.showsBack = state.screen !in setOf("SCR-C01", "SCR-C25", "SCR-C18", "SCR-C02")
@@ -57,19 +66,35 @@ abstract class CustomerScreenView(context: Context) : FrameLayout(context) {
         renderOverlay(state)
     }
 
+    /** DEC-073: a screen-owned header that stays above the scrolling body (Figma home header). */
+    protected fun pinHeader(view: View) {
+        (view.parent as ViewGroup).removeView(view)
+        val column = scaffold.topBar.parent as ViewGroup
+        column.addView(view, column.indexOfChild(scaffold.topBar) + 1, LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT))
+    }
+
     protected fun pinAction(view: View) {
         (view.parent as ViewGroup).removeView(view)
         bottomBar.addView(view, LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT))
     }
 
-    protected fun addRequestProgress(current: Int) {
+    /** DEC-071: the request flow has five steps; [hint] names the current step (Figma «Primo App»). */
+    protected fun addRequestProgress(current: Int, hint: String = "") {
         content.addView(noox.bzr.design.views.StepIndicatorView(context).apply {
             this.current = current
-            total = 3
-            label = noox.bzr.design.BzrFormat.fill(string(R.string.format_step), "current" to current.toString(), "total" to "3")
+            total = REQUEST_STEPS
+            label = noox.bzr.design.BzrFormat.fill(
+                string(R.string.format_step),
+                "current" to noox.bzr.design.BzrFormat.number(current), "total" to noox.bzr.design.BzrFormat.number(REQUEST_STEPS),
+            )
+            this.hint = hint
             importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_YES
-            contentDescription = label
-        }, 0)
+            contentDescription = listOf(label, hint).filter(String::isNotEmpty).joinToString(string(R.string.format_list_separator))
+        }.also { requestProgress = it }, 0)
+    }
+
+    private companion object {
+        const val REQUEST_STEPS = 5
     }
 
     protected abstract fun title(state: CustomerUiState): String
@@ -137,6 +162,7 @@ class ActionButtonsView @JvmOverloads constructor(context: Context, attrs: Attri
 }
 
 internal fun actionLabel(action: String): Int = when (action) {
+    "request_warranty" -> R.string.action_request_warranty
     "accept_offer" -> R.string.action_accept_offer
     "edit_request" -> R.string.action_edit_request
     "republish" -> R.string.action_republish

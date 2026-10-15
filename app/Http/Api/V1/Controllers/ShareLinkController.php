@@ -8,8 +8,10 @@ use App\Modules\Orders\Enums\OrderStatus;
 use App\Modules\Orders\Models\Order;
 use App\Modules\Orders\Models\ShareLink;
 use App\Support\Exceptions\BusinessRuleViolationException;
+use App\Support\Localization;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\URL;
 
 final class ShareLinkController
@@ -18,22 +20,23 @@ final class ShareLinkController
     {
         abort_unless($order->customer_id === $request->user()->getKey(), 404);
 
-        if ($order->status === OrderStatus::Open || $order->status->isFinal()) {
-            throw BusinessRuleViolationException::rule('DEC-037', 'المشاركة متاحة أثناء الزيارة فقط.');
-        }
+        $link = DB::transaction(function () use ($order): ShareLink {
+            $order = Order::query()->lockForUpdate()->findOrFail($order->id);
+            if ($order->status === OrderStatus::Open || $order->status->isFinal() || $order->provider_profile_id === null) {
+                throw BusinessRuleViolationException::rule('DEC-037', Localization::text('copy.sharing_is_only_available_during_the_visit'));
+            }
 
-        $link = ShareLink::query()
-            ->where('order_id', $order->getKey())
-            ->whereNull('revoked_at')
-            ->whereNull('expires_at')
-            ->latest('id')
-            ->first();
-
-        $link ??= ShareLink::query()->create([
-            'order_id' => $order->getKey(),
-            'token' => $this->token(),
-            'expires_at' => null,
-        ]);
+            return ShareLink::query()
+                ->where('order_id', $order->getKey())
+                ->whereNull('revoked_at')
+                ->where('expires_at', '>', now())
+                ->latest('id')
+                ->first() ?? ShareLink::query()->create([
+                    'order_id' => $order->getKey(),
+                    'token' => $this->token(),
+                    'expires_at' => now()->addHours(ShareLink::LIFETIME_HOURS),
+                ]);
+        });
 
         return new JsonResponse(['data' => $this->serialize($link)], 201);
     }
@@ -57,7 +60,7 @@ final class ShareLinkController
     {
         return [
             'id' => $link->getKey(),
-            'url' => URL::to('/v/'.$link->token),
+            'url' => URL::route('share.visit', ['token' => $link->token]),
             'expires_at' => $link->expires_at?->toIso8601String(),
             'revoked_at' => $link->revoked_at?->toIso8601String(),
         ];

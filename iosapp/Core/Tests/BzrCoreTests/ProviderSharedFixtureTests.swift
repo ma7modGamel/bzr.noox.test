@@ -53,7 +53,7 @@ final class ProviderSharedFixtureTests: XCTestCase {
                 count += 1
             }
         }
-        XCTAssertEqual(count, 148)
+        XCTAssertEqual(count, 149)
     }
 
     private func optional<T: Equatable>(_ expected: T?, _ actual: T, _ label: String) {

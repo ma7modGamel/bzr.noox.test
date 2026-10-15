@@ -9,6 +9,7 @@ use App\Modules\Offers\Enums\OfferStatus;
 use App\Modules\Orders\Models\Order;
 use App\Modules\Settings\Enums\Cfg;
 use App\Modules\Settings\Services\SettingsRepository;
+use App\Support\Localization;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -48,10 +49,10 @@ final class ProviderRequestResource extends JsonResource
                 'eta_max_minutes' => 180,
                 'eta_options' => [15, 30, 45, 60, 90, 120, 180],
                 'deductible_options' => [
-                    ['code' => 'YES', 'label' => 'تُخصم من المصنعية', 'value' => true],
-                    ['code' => 'NO', 'label' => 'لا تُخصم من المصنعية', 'value' => false],
+                    ['code' => 'YES', 'label' => Localization::text('copy.deducted_from_labor_charges'), 'value' => true],
+                    ['code' => 'NO', 'label' => Localization::text('copy.not_deducted_from_labor_charges'), 'value' => false],
                 ],
-                'default_includes_text' => 'المصنعية فقط',
+                'default_includes_text' => Localization::text('copy.labor_only'),
                 'can_reapply' => $ownOffer?->status === OfferStatus::Withdrawn
                     && $this->offers->where('provider_profile_id', $profileId)
                         ->where('status', OfferStatus::Withdrawn)->count() < 2,

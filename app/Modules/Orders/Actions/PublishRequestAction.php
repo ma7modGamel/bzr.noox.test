@@ -18,8 +18,10 @@ use App\Modules\Orders\Enums\TimingType;
 use App\Modules\Orders\Models\Order;
 use App\Modules\Orders\Models\OrderEvent;
 use App\Modules\Orders\Models\OrderMedia;
+use App\Modules\Orders\Services\MediaUploadService;
 use App\Modules\Orders\Services\OrderDeadlines;
 use App\Modules\Orders\Services\ProviderEligibility;
+use App\Modules\Orders\Services\RequestAvailability;
 use App\Modules\Orders\Services\SchedulingCalendar;
 use App\Modules\Settings\Enums\Cfg;
 use App\Modules\Settings\Services\FeatureGate;
@@ -27,6 +29,7 @@ use App\Modules\Settings\Services\SettingsRepository;
 use App\Support\Exceptions\AccountBlockedException;
 use App\Support\Exceptions\BusinessRuleViolationException;
 use App\Support\Exceptions\EmailNotVerifiedException;
+use App\Support\Localization;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
 
@@ -45,6 +48,7 @@ final readonly class PublishRequestAction
         private OrderDeadlines $deadlines,
         private ProviderEligibility $eligibility,
         private TermsService $terms,
+        private RequestAvailability $availability,
     ) {}
 
     public function execute(User $customer, PublishRequestData $data): Order
@@ -65,6 +69,10 @@ final readonly class PublishRequestAction
         $deadlines = $this->deadlines->for($mode, $data->timingType, $slot['start'] ?? null, $publishedAt);
 
         $order = DB::transaction(function () use ($customer, $data, $address, $category, $problemType, $slot, $mode, $deadlines, $publishedAt): Order {
+            if (! $this->features->offersEnabled() && $data->timingType === TimingType::Now) {
+                $this->availability->assertNowAvailable($customer, $address, $category->getKey());
+            }
+
             $order = Order::query()->create([
                 'number' => DB::table('order_numbers')->insertGetId([]),
                 'operating_mode' => $mode,
@@ -160,7 +168,7 @@ final readonly class PublishRequestAction
         if ($open >= $limit) {
             throw BusinessRuleViolationException::rule(
                 'BR-019',
-                "لا يمكن تجاوز {$limit} طلبات مفتوحة في نفس الوقت.",
+                Localization::text('dynamic.open_request_limit', ['limit' => $limit]),
             );
         }
     }
@@ -174,12 +182,12 @@ final readonly class PublishRequestAction
             ->find($data->customerAddressId);
 
         if ($address === null) {
-            throw BusinessRuleViolationException::rule('BR-010', 'العنوان غير موجود.');
+            throw BusinessRuleViolationException::rule('BR-010', Localization::text('copy.this_address_was_not_found'));
         }
 
         // BR-010 — منطقة مفعّلة في مدينة مفعّلة
         if (! $address->city->is_active || ! $address->area->is_active) {
-            throw BusinessRuleViolationException::rule('BR-010', 'الخدمة غير متاحة في هذه المنطقة حاليًا.');
+            throw BusinessRuleViolationException::rule('BR-010', Localization::text('copy.this_service_is_currently_unavailable_in_this_area'));
         }
 
         return $address;
@@ -197,7 +205,7 @@ final readonly class PublishRequestAction
             ->exists();
 
         if (! $servesCity) {
-            throw BusinessRuleViolationException::rule('BR-011', 'الفئة غير متاحة في هذه المدينة.');
+            throw BusinessRuleViolationException::rule('BR-011', Localization::text('copy.this_category_is_unavailable_in_this_city'));
         }
 
         return $category;
@@ -212,7 +220,7 @@ final readonly class PublishRequestAction
             ->find($data->problemTypeId);
 
         if ($problemType === null) {
-            throw BusinessRuleViolationException::rule('BR-011', 'نوع المشكلة غير متاح.');
+            throw BusinessRuleViolationException::rule('BR-011', Localization::text('copy.this_problem_type_is_unavailable'));
         }
 
         return $problemType;
@@ -224,13 +232,13 @@ final readonly class PublishRequestAction
         $description = trim((string) $data->description);
 
         if ($description !== '' && mb_strlen($description) > 1000) {
-            throw BusinessRuleViolationException::rule('BR-013', 'الوصف لا يتجاوز 1000 حرف.');
+            throw BusinessRuleViolationException::rule('BR-013', Localization::text('copy.the_description_must_not_exceed_1000_characters'));
         }
 
         if ($problemType->is_other && mb_strlen($description) < 10) {
             throw BusinessRuleViolationException::rule(
                 'BR-013',
-                'وصف المشكلة إلزامي (10 أحرف على الأقل) عند اختيار "مشكلة أخرى".',
+                Localization::text('copy.a_problem_description_of_at_least_10_characters_is'),
             );
         }
     }
@@ -240,7 +248,7 @@ final readonly class PublishRequestAction
     private function assertTerms(User $customer, PublishRequestData $data): void
     {
         if (! $data->termsAccepted && $this->terms->acceptanceRequired($customer)) {
-            throw BusinessRuleViolationException::rule('BR-018', 'الموافقة على الشروط وسياسة الإلغاء إلزامية.');
+            throw BusinessRuleViolationException::rule('BR-018', Localization::text('copy.you_must_agree_to_the_terms_and_conditions_and'));
         }
     }
 
@@ -254,7 +262,7 @@ final readonly class PublishRequestAction
         }
 
         if ($data->slotStart === null) {
-            throw BusinessRuleViolationException::rule('BR-017', 'اختيار الفترة إلزامي للطلب المجدول.');
+            throw BusinessRuleViolationException::rule('BR-017', Localization::text('copy.select_an_appointment_slot_for_the_scheduled_request'));
         }
 
         return $this->calendar->assertValidSlot($address->city, $data->slotStart);
@@ -280,7 +288,7 @@ final readonly class PublishRequestAction
         $min = (float) $this->settings->decimal(Cfg::MinOfferAmount);
 
         if ((float) $data->budgetAmount < $min) {
-            throw BusinessRuleViolationException::rule('BR-015', "الميزانية المتوقعة لا تقل عن {$min} جنيه.");
+            throw BusinessRuleViolationException::rule('BR-015', Localization::text('dynamic.budget_min', ['amount' => $min]));
         }
 
         return $data->budgetAmount;
@@ -302,13 +310,17 @@ final readonly class PublishRequestAction
             ->get();
 
         if ($media->count() !== count(array_unique($data->mediaIds))) {
-            throw BusinessRuleViolationException::rule('BR-014', 'إحدى الوسائط غير متاحة أو لا تخص هذا الحساب.');
+            throw BusinessRuleViolationException::rule('BR-014', Localization::text('copy.one_of_the_attachments_is_unavailable_or_does_not'));
         }
 
         $counts = $media->countBy('type');
 
         if (($counts['IMAGE'] ?? 0) > 5 || ($counts['VIDEO'] ?? 0) > 1 || ($counts['AUDIO'] ?? 0) > 1) {
-            throw BusinessRuleViolationException::rule('BR-014', 'تجاوزت الوسائط العدد المسموح.');
+            throw BusinessRuleViolationException::rule('BR-014', Localization::text('copy.the_number_of_attachments_exceeds_the_permitted_limit'));
+        }
+
+        foreach ($media->where('type', 'VIDEO') as $video) {
+            MediaUploadService::assertVideoDurationAllowed($video->duration_sec);
         }
 
         OrderMedia::query()->whereKey($media->modelKeys())->update([

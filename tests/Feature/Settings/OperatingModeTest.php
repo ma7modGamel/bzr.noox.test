@@ -60,8 +60,8 @@ final class OperatingModeTest extends TestCase
     {
         $settings = app(SettingsRepository::class);
 
-        // OD-01 و OD-02 — لا يلزمان قبل تفعيل CFG-090 (35)
+        // OD-01 — لا يلزم قبل تفعيل CFG-090 (35)؛ OD-02 حُسم بـ DEC-069
         $this->assertNull($settings->decimal(Cfg::DefaultCommissionRate));
-        $this->assertNull($settings->decimal(Cfg::ProviderDebtLimit));
+        $this->assertSame('5000.00', $settings->decimal(Cfg::ProviderDebtLimit));
     }
 }

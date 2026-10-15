@@ -1,16 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- SCR-C05 C05ReviewScreen content (DEC-047). -->
+<!-- SCR-C05 step 5 of 5 — review and publish (DEC-071, Figma 3002:1401). -->
 <merge xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     tools:parentTag="android.widget.LinearLayout">
 
-    <noox.bzr.design.views.SummaryCardView
-        android:id="@+id/summary"
+    <LinearLayout
+        android:id="@+id/cards"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:bremoTitle="@string/summary_title"
-        app:editText="@string/common_edit" />
+        android:divider="@drawable/bremo_gap_m"
+        android:orientation="vertical"
+        android:showDividers="middle" />
 
     <noox.bzr.design.views.InfoBannerView
         android:id="@+id/staffPricing"
@@ -18,6 +19,12 @@
         android:layout_height="wrap_content"
         android:visibility="gone"
         app:bremoText="@string/request_staff_pricing" />
+
+    <noox.bzr.design.views.InfoBannerView
+        android:id="@+id/notice"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:bremoText="@string/request_review_notice" />
 
     <noox.bzr.design.views.CheckRowView
         android:id="@+id/terms"
@@ -42,5 +49,17 @@
         android:id="@+id/publish"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        app:bremoIcon="@drawable/ic_send"
         app:bremoText="@string/request_publish" />
+
+    <TextView
+        android:id="@+id/secure"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:drawablePadding="@dimen/bremo_space_xs"
+        android:gravity="center"
+        android:text="@string/request_review_secure"
+        android:textAppearance="@style/TextAppearance.Bremo.Hint"
+        app:drawableStartCompat="@drawable/ic_shield"
+        app:drawableTint="@color/bremo_slate400" />
 </merge>

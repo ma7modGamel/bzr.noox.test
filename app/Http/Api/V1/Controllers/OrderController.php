@@ -7,8 +7,10 @@ namespace App\Http\Api\V1\Controllers;
 use App\Http\Api\V1\Resources\OfferResource;
 use App\Http\Api\V1\Resources\OrderResource;
 use App\Http\Api\V1\Resources\ProposalResource;
+use App\Modules\Customers\Models\CustomerAddress;
 use App\Modules\Offers\Actions\AcceptOfferAction;
 use App\Modules\Offers\Models\Offer;
+use App\Modules\Offers\Services\OfferRanking;
 use App\Modules\Orders\Actions\CancelOrderAction;
 use App\Modules\Orders\Actions\ConfirmCompletionAction;
 use App\Modules\Orders\Actions\PublishRequestAction;
@@ -21,6 +23,7 @@ use App\Modules\Orders\Enums\MaterialsResponsibility;
 use App\Modules\Orders\Enums\PricingMode;
 use App\Modules\Orders\Enums\TimingType;
 use App\Modules\Orders\Models\Order;
+use App\Modules\Orders\Services\RequestAvailability;
 use App\Modules\Payments\Enums\PaymentMethod;
 use App\Modules\Pricing\Actions\DecideProposalAction;
 use App\Modules\Pricing\Models\PriceProposal;
@@ -30,10 +33,36 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Storage;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 /** واجهات العميل على الطلب — 31 §العميل. الصلاحية عبر OrderPolicy (23). */
 final class OrderController
 {
+    public function proposalImage(Request $request, Order $order, PriceProposal $proposal): StreamedResponse
+    {
+        abort_unless($order->customer_id === $request->user()->id || $order->providerProfile?->user_id === $request->user()->id, 404);
+        abort_unless($proposal->order_id === $order->id && $proposal->photo_path !== null, 404);
+        abort_unless(Storage::disk('local')->exists($proposal->photo_path), 404);
+
+        return Storage::disk('local')->response($proposal->photo_path, headers: ['Cache-Control' => 'no-store, private', 'X-Content-Type-Options' => 'nosniff']);
+    }
+
+    public function availability(Request $request, RequestAvailability $availability): JsonResponse
+    {
+        $data = $request->validate([
+            'customer_address_id' => ['required', 'integer'],
+            'category_id' => ['required', 'integer', 'exists:categories,id'],
+        ]);
+        $address = CustomerAddress::query()->with(['city', 'area'])
+            ->where('user_id', $request->user()->getKey())
+            ->findOrFail($data['customer_address_id']);
+
+        return response()->json([
+            'now_available' => $availability->nowAvailable($request->user(), $address, (int) $data['category_id']),
+        ]);
+    }
+
     public function index(Request $request): AnonymousResourceCollection
     {
         $scope = $request->query('scope', 'current');
@@ -107,7 +136,7 @@ final class OrderController
     {
         Gate::authorize('view', $order);
 
-        $sort = $request->query('sort', 'rating');
+        $sort = $request->validate(['sort' => ['sometimes', 'string', 'in:best,rating,price,eta']])['sort'] ?? 'rating';
 
         $offers = $order->offers()
             ->with('providerProfile.user')
@@ -120,6 +149,10 @@ final class OrderController
                     ->whereColumn('provider_profiles.id', 'offers.provider_profile_id'),
             ))
             ->get();
+
+        if ($sort === 'best') {
+            $offers = app(OfferRanking::class)->best($order, $offers);
+        }
 
         return OfferResource::collection($offers);
     }
@@ -210,9 +243,9 @@ final class OrderController
     private function resourceRelations(): array
     {
         return [
-            'category', 'problemType', 'area', 'city', 'providerProfile.user', 'customer',
-            'offers', 'pendingProposalRecord', 'latestSuccessfulPayment', 'latestPaymentAttempt', 'review',
-            'customerRating', 'conversations', 'disputes',
+            'events', 'category', 'problemType', 'area', 'city', 'providerProfile.user', 'customer',
+            'offers', 'pendingProposalRecord', 'latestSuccessfulPayment', 'latestPaymentAttempt', 'latestNoShowEvent', 'review',
+            'customerRating', 'conversations', 'disputes', 'media', 'warrantyClaim.order',
         ];
     }
 

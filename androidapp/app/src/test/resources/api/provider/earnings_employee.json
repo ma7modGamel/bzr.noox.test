@@ -1,0 +1,40 @@
+{
+    "data": {
+        "operating_mode": "EMPLOYEE",
+        "currency": "EGP",
+        "summary": {
+            "balance": "-350.00",
+            "available": "-350.00",
+            "pending": "0.00"
+        },
+        "dues": {
+            "blocked": false,
+            "debt": "350.00",
+            "limit": null
+        },
+        "transactions": [
+            {
+                "id": "remittance-1",
+                "type": "REMITTANCE",
+                "title": "توريد نقدية",
+                "detail": "تم التوريد · 300.00 جنيه",
+                "amount": "300.00",
+                "occurred_at": "2026-10-01T10:00:00+00:00",
+                "available": true
+            },
+            {
+                "id": "order-2",
+                "type": "ORDER",
+                "title": "طلب #1042",
+                "detail": "مطلوب توريده · 650.00 جنيه",
+                "amount": "-650.00",
+                "occurred_at": "2026-10-01T10:00:00+00:00",
+                "available": true
+            }
+        ],
+        "meta": {
+            "current_page": 1,
+            "last_page": 1
+        }
+    }
+}

@@ -26,7 +26,7 @@ final class AutoCloseConfirmedOrders implements ShouldQueue
 
         Order::query()
             ->where('status', OrderStatus::AwaitingConfirmation->value)
-            ->where('completed_at', '<=', $cutoff)
+            ->whereHas('latestSuccessfulPayment', fn ($query) => $query->where('paid_at', '<=', $cutoff))
             ->orderBy('id')
             ->chunkById(100, function ($orders) use ($confirm, &$closed): void {
                 foreach ($orders as $order) {

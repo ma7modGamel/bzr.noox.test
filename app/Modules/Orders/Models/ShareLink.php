@@ -4,12 +4,15 @@ declare(strict_types=1);
 
 namespace App\Modules\Orders\Models;
 
+use App\Modules\Orders\Enums\OrderStatus;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /** DEC-037 — بدون عنوان تفصيلي ولا موقع حي ولا هاتف ولا سعر (18). */
 final class ShareLink extends Model
 {
+    public const LIFETIME_HOURS = 24;
+
     protected $fillable = ['order_id', 'token', 'expires_at', 'revoked_at'];
 
     protected function casts(): array
@@ -25,7 +28,9 @@ final class ShareLink extends Model
     public function isUsable(): bool
     {
         return $this->revoked_at === null
-            && ($this->expires_at === null || $this->expires_at->isFuture())
+            && ($this->expires_at ?? $this->created_at->copy()->addHours(self::LIFETIME_HOURS))->isFuture()
+            && $this->order->provider_profile_id !== null
+            && $this->order->status !== OrderStatus::Open
             && ! $this->order->status->isFinal();
     }
 }

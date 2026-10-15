@@ -69,7 +69,7 @@ final class PaymentController
         Gate::authorize('view', $order);
         $data = $request->validate([
             'transfer_reference' => ['required', 'string', 'min:4', 'max:64', 'regex:/^[A-Za-z0-9\-_ ]+$/'],
-            'receipt_media_id' => ['nullable', 'integer'],
+            'receipt_media_id' => ['required', 'integer'],
         ]);
 
         $payment = $action->execute(

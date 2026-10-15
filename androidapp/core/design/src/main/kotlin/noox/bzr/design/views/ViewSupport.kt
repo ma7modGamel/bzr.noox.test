@@ -104,8 +104,15 @@ internal fun View.brandShadow(target: View, enabled: Boolean) {
     }
 }
 
+/** DEC-073: compound (drawableStart/End) icons drawn at a token size instead of their 24dp viewport, as in Figma. */
+fun android.widget.TextView.sizeCompoundIcons(@DimenRes size: Int) {
+    val px = resources.getDimensionPixelSize(size)
+    val drawables = compoundDrawablesRelative.map { drawable -> drawable?.mutate()?.apply { setBounds(0, 0, px, px) } }
+    setCompoundDrawablesRelative(drawables[0], drawables[1], drawables[2], drawables[3])
+}
+
 /** DEC-063: the quiet card shadow that lifts a white card off the tinted screen. */
-internal fun View.cardShadow() {
+fun View.cardShadow() {
     elevation = resources.getDimension(noox.bzr.design.R.dimen.bremo_elevation_card)
     if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.P) {
         outlineSpotShadowColor = color(noox.bzr.design.R.color.bremo_shadow_card)

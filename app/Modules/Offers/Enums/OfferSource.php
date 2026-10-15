@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Offers\Enums;
 
+use App\Support\Localization;
 use Filament\Support\Contracts\HasLabel;
 
 /**
@@ -18,10 +19,7 @@ enum OfferSource: string implements HasLabel
 
     public function getLabel(): string
     {
-        return match ($this) {
-            self::Provider => 'عرض من مقدم الخدمة',
-            self::AdminAssignment => 'تعيين إداري',
-        };
+        return Localization::enum($this);
     }
 
     public function isAssignment(): bool

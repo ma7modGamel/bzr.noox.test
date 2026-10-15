@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Architecture;
 
+use App\Providers\Filament\AdminPanelProvider;
+use Filament\Panel;
 use Illuminate\Support\Facades\Artisan;
 use PHPUnit\Framework\Attributes\Test;
 use Symfony\Component\Process\Process;
@@ -12,11 +14,87 @@ use Tests\TestCase;
 final class DesignTokensTest extends TestCase
 {
     #[Test]
+    public function لوحة_الإدارة_تقرأ_ألوان_الهوية_والحالات_من_الثيم(): void
+    {
+        config(['design.colors.primary' => '#6B21A8', 'design.colors.success' => '#14532D']);
+
+        $colors = (new AdminPanelProvider($this->app))->panel(Panel::make())->getColors();
+
+        $this->assertSame('#6B21A8', $colors['primary']);
+        $this->assertSame('#14532D', $colors['success']);
+    }
+
+    #[Test]
+    public function تغيير_لوحة_الألوان_يصل_إلى_الهوية_والحالات_والشعار(): void
+    {
+        require_once base_path('tools/design-theme.php');
+        $tokens = json_decode((string) file_get_contents(base_path('design/tokens.json')), true, flags: JSON_THROW_ON_ERROR);
+        $tokens['theme']['primary'] = '#6B21A8';
+        $tokens['theme']['success'] = '#14532D';
+        $tokens['theme']['secondaryText'] = '#334155';
+
+        $resolved = resolveThemeTokens($tokens);
+        $symbol = resolveBrandSymbol((string) file_get_contents(base_path('design/brand/symbol.svg')), $resolved['color']);
+
+        $this->assertSame('#6B21A8', $resolved['color']['primary600']);
+        $this->assertSame('#6B21A8', $resolved['color']['brandPrimary']);
+        $this->assertSame('#6B21A8', $resolved['gradient']['brand']['from']);
+        $this->assertSame('#6B21A8', $resolved['gradient']['splash']['from']);
+        $this->assertSame('#6B21A8', $resolved['shadow']['brand']['color']);
+        $this->assertSame('#14532D', $resolved['color']['verifiedText']);
+        $this->assertSame('#334155', $resolved['color']['secondaryButtonText']);
+        $this->assertStringContainsString('stop-color="#6B21A8"', $symbol);
+        $this->assertStringNotContainsString('stop-color="#00ACB6"', $symbol);
+    }
+
+    #[Test]
+    public function كل_الألوان_الخام_موجودة_داخل_لوحة_الثيم_فقط(): void
+    {
+        $tokens = json_decode((string) file_get_contents(base_path('design/tokens.json')), true, flags: JSON_THROW_ON_ERROR);
+        unset($tokens['theme']);
+
+        array_walk_recursive($tokens, function (mixed $value): void {
+            if (is_string($value)) {
+                $this->assertDoesNotMatchRegularExpression('/^#[0-9A-Fa-f]{6}$/', $value);
+            }
+        });
+    }
+
+    #[Test]
+    public function مراجع_الألوان_الدائرية_ترفض_برسالة_واضحة(): void
+    {
+        require_once base_path('tools/design-theme.php');
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('circular colour reference');
+
+        resolveThemeTokens(['theme' => ['primary' => '{color.primary}'], 'color' => ['primary' => '{theme.primary}']]);
+    }
+
+    #[Test]
+    public function نسبة_مزج_غير_رقمية_ترفض_قبل_توليد_الأصول(): void
+    {
+        require_once base_path('tools/design-theme.php');
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('mix amount must be numeric');
+
+        resolveThemeTokens(['theme' => ['primary' => '#0054D5'], 'color' => ['tint' => ['mix' => '{theme.primary}', 'with' => '#FFFFFF', 'amount' => 'invalid']]]);
+    }
+
+    #[Test]
     public function الملفات_المولدة_للمنصتين_مطابقة_للمصدر_المشترك(): void
     {
         $exitCode = Artisan::call('design:tokens', ['--check' => true]);
 
         $this->assertSame(0, $exitCode, Artisan::output());
+    }
+
+    #[Test]
+    public function بصمة_الأيقونة_تربط_الرسم_بنسخة_المتجر_المولدة(): void
+    {
+        $cache = json_decode((string) file_get_contents(base_path('design/generated/brand/app-icon.json')), true, flags: JSON_THROW_ON_ERROR);
+
+        $this->assertSame(hash_file('sha256', base_path('design/generated/brand/app-icon.svg')), $cache['svg_sha256']);
+        $this->assertSame(hash_file('sha256', base_path('design/brand/app-icon-1024.png')), $cache['png_sha256']);
     }
 
     #[Test]
@@ -81,11 +159,11 @@ final class DesignTokensTest extends TestCase
             flags: JSON_THROW_ON_ERROR,
         );
 
-        $this->assertSame('Cairo', $tokens['font']['family']);
+        $this->assertSame('IBM Plex Sans Arabic', $tokens['font']['family']); // DEC-070
         $this->assertSame(1.3, $tokens['a11y']['maxFontScale']);
         $this->assertSame(250, $tokens['motion']['screenTransitionMs']);
         $this->assertSame(0.4, $tokens['opacity']['disabled']);
-        $this->assertSame('flat-two-tone (C01)', $tokens['categoryIconStyle']['default']);
+        $this->assertSame('Material Symbols, single tone (Figma Primo App)', $tokens['categoryIconStyle']['default']); // DEC-070
     }
 
     #[Test]

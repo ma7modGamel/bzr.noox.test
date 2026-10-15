@@ -86,7 +86,12 @@ data class AccountUser(
     @SerialName("rating_reminders_enabled") val ratingRemindersEnabled: Boolean = true,
     val terms: AccountTerms? = null,
     @SerialName("available_actions") val availableActions: List<String> = emptyList(),
+    @SerialName("order_statistics") val orderStatistics: AccountOrderStatistics? = null,
+    @SerialName("addresses_count") val addressesCount: Int? = null,
 )
+
+@Serializable
+data class AccountOrderStatistics(val completed: Int, val active: Int)
 
 @Serializable
 data class AccountResponse(val user: AccountUser)

@@ -18,7 +18,8 @@ object ScreenSnapshots {
         environment = detectEnvironment().copy(compileSdkVersion = 34),
         deviceConfig = DeviceConfig.PIXEL_5.copy(
             screenWidth = GalleryFixtures.viewportWidth,
-            screenHeight = GalleryFixtures.viewportHeight,
+            // Review only: -Pbzr.tall=1.25 (400×1000, the largest Paparazzi keeps unscaled) or 2 for a whole long screen.
+            screenHeight = (GalleryFixtures.viewportHeight * (System.getProperty("bzr.tall")?.toFloatOrNull() ?: 1f)).toInt(),
             density = Density.MEDIUM,
             fontScale = GalleryFixtures.fontScale,
             layoutDirection = LayoutDirection.RTL,

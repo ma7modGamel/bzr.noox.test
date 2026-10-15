@@ -12,7 +12,19 @@ enum class OfferVariant { Execution, Inspection, Scheduled }
 enum class StepState { Done, Active, Pending, OnHold }
 enum class MediaState { Uploading, Uploaded, Failed }
 enum class MediaKind { Photo, Video, Audio }
-enum class BadgeKind { Highlight, Status }
+enum class BadgeKind {
+    Highlight, Status, Success, Warning, Neutral, Danger;
+
+    companion object {
+        fun forOrderStatus(status: String): BadgeKind = when (status) {
+            "CLOSED" -> Success
+            "OPEN", "AWAITING_QUOTE_APPROVAL", "AWAITING_PAYMENT", "AWAITING_CONFIRMATION" -> Warning
+            "CANCELLED", "EXPIRED" -> Neutral
+            "DISPUTED" -> Danger
+            else -> Status
+        }
+    }
+}
 enum class ChatKind { Text, Image, Blocked }
 enum class AvatarSize { Small, Medium, Large }
 

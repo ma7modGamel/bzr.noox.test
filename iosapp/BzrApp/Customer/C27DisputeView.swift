@@ -10,6 +10,7 @@ public struct C27DisputeView: View {
     let onPhotoSelected: (CustomerMediaUpload) -> Void
     let onDeletePhoto: (Int) -> Void
     let onSubmit: () -> Void
+    let onOpenVisit: () -> Void
     @State private var selectedPhoto: PhotosPickerItem?
     @State private var photoPickerPresented = false
 
@@ -17,7 +18,7 @@ public struct C27DisputeView: View {
         state: CustomerUIState, onReasonSelect: @escaping (Int) -> Void = { _ in },
         onDescriptionChange: @escaping (String) -> Void = { _ in },
         onPhotoSelected: @escaping (CustomerMediaUpload) -> Void = { _ in },
-        onDeletePhoto: @escaping (Int) -> Void = { _ in }, onSubmit: @escaping () -> Void = {}
+        onDeletePhoto: @escaping (Int) -> Void = { _ in }, onSubmit: @escaping () -> Void = {}, onOpenVisit: @escaping () -> Void = {}
     ) {
         self.state = state
         self.onReasonSelect = onReasonSelect
@@ -25,12 +26,14 @@ public struct C27DisputeView: View {
         self.onPhotoSelected = onPhotoSelected
         self.onDeletePhoto = onDeletePhoto
         self.onSubmit = onSubmit
+        self.onOpenVisit = onOpenVisit
     }
 
     public var body: some View {
-        CustomerScreen(title: bzrString("dispute.title"), state: state) {
-            if state.messageKey == "dispute.success" {
-                InfoBanner(text: bzrString("dispute.success"))
+        CustomerScreen(title: bzrString(state.isWarranty ? "warranty.title" : "dispute.title"), state: state) {
+            if state.isWarranty && state.warrantyVisitID != nil { SecondaryButton(text: bzrString("warranty.follow_visit"), onClick: onOpenVisit) }
+            if state.messageKey == "dispute.success" || state.messageKey == "warranty.success" {
+                InfoBanner(text: bzrString(state.isWarranty ? "warranty.success" : "dispute.success"))
             } else if !state.items.isEmpty {
                 Badge(text: state.itemStates.first ?? "")
                 SummaryCard(
@@ -40,8 +43,8 @@ public struct C27DisputeView: View {
                     InfoBanner(text: state.itemStates[1])
                 }
             } else {
-                ScreenHeading(bzrString("dispute.reason.title"), detail: bzrString("dispute.body"))
-                ForEach(state.options.indices, id: \.self) { index in
+                ScreenHeading(bzrString(state.isWarranty ? "warranty.title" : "dispute.reason.title"), detail: bzrString(state.isWarranty ? "warranty.body" : "dispute.body"))
+                ForEach((state.isWarranty ? [] : Array(state.options.indices)), id: \.self) { index in
                     Button(
                         action: { onReasonSelect(index) },
                         label: {
@@ -52,13 +55,15 @@ public struct C27DisputeView: View {
                     ).buttonStyle(.plain).disabled(state.isBusy)
                 }
                 TextAreaField(
-                    label: bzrString("dispute.description.label"),
+                    label: bzrString(state.isWarranty ? "warranty.description" : "dispute.description.label"),
                     placeholder: bzrString("dispute.description.placeholder"),
                     value: state.fieldValues.first ?? "", state: state.isBusy ? .disabled : .empty,
                     onValueChange: onDescriptionChange)
                 SecondaryButton(
                     text: bzrString("dispute.photo.add"), onClick: { photoPickerPresented = true }
                 )
+                .disabled(state.isWarranty)
+                .opacity(state.isWarranty ? 0 : 1)
                 .photosPicker(
                     isPresented: $photoPickerPresented, selection: $selectedPhoto, matching: .images
                 )
@@ -76,9 +81,9 @@ public struct C27DisputeView: View {
                         title: bzrString("dispute.photo.title"), stateLabel: bzrString("media.uploaded"),
                         kind: .photo, state: .uploaded, onDelete: { onDeletePhoto(0) })
                 }
-                if state.visibleActions.contains("open_dispute") {
+                if state.visibleActions.contains("open_dispute") || state.visibleActions.contains("request_warranty") {
                     PrimaryButton(
-                        text: bzrString("dispute.submit"),
+                        text: bzrString(state.isWarranty ? "warranty.submit" : "dispute.submit"),
                         state: state.isBusy ? .loading : (state.canContinue ? .normal : .disabled),
                         onClick: onSubmit)
                 }

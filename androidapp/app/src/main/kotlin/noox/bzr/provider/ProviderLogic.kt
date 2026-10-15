@@ -7,6 +7,10 @@ enum class ProviderPhase { Empty, Loading, Content, Error }
 data class ProviderUiState(
     val screen: String,
     val phase: ProviderPhase,
+    val imageGroups: List<List<String>> = emptyList(),
+    val arrivalError: String = "",
+    val arrivalCodeRequired: Boolean = false,
+    val arrivalExceptionPending: Boolean = false,
     val canContinue: Boolean = false,
     val messageKey: String? = null,
     val fieldErrors: List<String> = emptyList(),
@@ -40,11 +44,28 @@ data class ProviderUiState(
     val itemDetails: List<String> = emptyList(),
     val itemStates: List<String> = emptyList(),
     val areaOptions: List<String> = emptyList(),
+    val warrantyCoverage: String = "",
+    val beforePhotoCount: Int = 0,
+    val afterPhotoCount: Int = 0,
+    val earningsFilterLabels: List<String> = emptyList(),
+    val earningsFilterCodes: List<String> = emptyList(),
+    val earningsTypeIndex: Int = 0,
+    val earningsDateFrom: String = "",
+    val earningsDateTo: String = "",
+    val earningsHasMore: Boolean = false,
+    val earningsDuesBlocked: Boolean = false,
+    val earningsEmployee: Boolean = false,
+    val earningsFiltersDirty: Boolean = false,
+
 )
 
 /** Pure provider state and validation. Network and Android UI code never own business decisions. */
 object ProviderLogic {
-    fun reduce(screen: String, input: Map<String, Any?>): ProviderUiState {
+    fun reduce(screen: String, input: Map<String, Any?>): ProviderUiState =
+        reduceScreen(screen, input + ("available_actions" to input.strings("available_actions").filter { it != "call" }))
+            .copy(warrantyCoverage = input.text("warranty_coverage"))
+
+    private fun reduceScreen(screen: String, input: Map<String, Any?>): ProviderUiState {
         return when (input.text("event")) {
             "loading" -> ProviderUiState(screen, ProviderPhase.Loading)
             "error" -> ProviderUiState(screen, ProviderPhase.Error, messageKey = "error.body")
@@ -319,12 +340,14 @@ object ProviderLogic {
         val reviewRequired = input.boolean("price_review_required")
         return ProviderUiState(
             screen = screen,
+            arrivalCodeRequired = input.boolean("arrival_code_required"), arrivalExceptionPending = input.boolean("arrival_exception_pending"),
             phase = ProviderPhase.Content,
             canContinue = !busy && input.strings("available_actions").isNotEmpty(),
             messageKey = input.text("message_key").takeIf(String::isNotBlank)
                 ?: if (reviewRequired) "provider.price_guide.other_review" else null,
             visibleActions = input.strings("available_actions"),
             items = input.strings("order_summary"),
+            fieldValues = listOf(input.text("completion_estimate_at")),
             secondaryOptions = input.strings("amount_summary"),
             isBusy = busy,
             displayStatus = input.text("display_status"),
@@ -335,6 +358,7 @@ object ProviderLogic {
             priceGuideMaximum = input.text("price_guide_max"),
             customerName = input.text("customer_name"),
             customerRating = input.text("customer_rating"),
+            beforePhotoCount = input.integer("before_photo_count"), afterPhotoCount = input.integer("after_photo_count"),
         )
     }
 
@@ -418,7 +442,7 @@ object ProviderLogic {
         val stars = input.integer("stars")
         val busy = input.text("event") == "submitting"
         val success = input.text("event") == "success"
-        val valid = stars in 1..5
+        val valid = stars in 1..5 && input.text("comment").length <= 500
         return ProviderUiState(
             screen = "SCR-P17",
             phase = ProviderPhase.Content,
@@ -428,7 +452,9 @@ object ProviderLogic {
                 input.text("message_key").isNotBlank() -> input.text("message_key")
                 else -> null
             },
-            fieldErrors = if (!valid && input.text("event") == "validate") listOf("provider.rating.required") else emptyList(),
+            fieldErrors = when { input.text("comment").length > 500 -> listOf("provider.rating.comment_limit"); !valid && input.text("event") == "validate" -> listOf("provider.rating.required"); else -> emptyList() },
+            options = input.strings("tag_labels"), optionCodes = input.strings("tag_codes"),
+            selectedPrimaryIndices = input.strings("selected_tags").mapNotNull(String::toIntOrNull), fieldValues = listOf(input.text("comment")),
             visibleActions = input.strings("available_actions"),
             items = input.strings("order_summary"),
             selectedOptionIndex = stars - 1,
@@ -440,11 +466,15 @@ object ProviderLogic {
         val titles = input.strings("transaction_titles")
         val busy = input.text("event") == "loading_more"
         val empty = titles.isEmpty()
+        // DEC-068 — BR-063 applies in marketplace mode only (BR-065); debt and limit follow the summary.
+        val duesBlocked = input.boolean("dues_blocked") && input.text("operating_mode") == "MARKETPLACE"
         return ProviderUiState(
             screen = "SCR-P18",
             phase = if (empty) ProviderPhase.Empty else ProviderPhase.Content,
             canContinue = !empty && !busy,
-            messageKey = if (empty) {
+            messageKey = if (duesBlocked) {
+                "provider.earnings.dues_blocked"
+            } else if (empty) {
                 "provider.earnings.empty"
             } else if (input.text("operating_mode") == "EMPLOYEE") {
                 "provider.earnings.employee.info"
@@ -454,7 +484,7 @@ object ProviderLogic {
             items = titles,
             itemDetails = input.strings("transaction_details"),
             itemStates = input.strings("transaction_states"),
-            secondaryOptions = input.strings("summary"),
+            secondaryOptions = input.strings("summary") + if (duesBlocked) listOf(input.text("dues_debt"), input.text("dues_limit")) else emptyList(),
             isBusy = busy,
         )
     }
@@ -506,6 +536,7 @@ object ProviderLogic {
         val draft = input.text("draft")
         return ProviderUiState(
             screen = "SCR-C19",
+            imageGroups = input.strings("image_groups").map { it.split("\n").filter(String::isNotBlank) },
             phase = if (messages.isEmpty()) ProviderPhase.Empty else ProviderPhase.Content,
             canContinue = status == "OPEN" && draft.isNotBlank() && draft.length <= 1000 && !busy,
             messageKey = when {

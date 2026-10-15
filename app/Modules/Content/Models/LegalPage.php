@@ -6,6 +6,7 @@ namespace App\Modules\Content\Models;
 
 use App\Modules\Content\Enums\LegalPageSlug;
 use App\Modules\Content\Enums\LegalPageStatus;
+use App\Support\Localization;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
@@ -28,6 +29,7 @@ final class LegalPage extends Model
     public function currentVersion(): ?LegalPageVersion
     {
         return $this->hasMany(LegalPageVersion::class)
+            ->where('locale', Localization::locale())
             ->where('status', LegalPageStatus::Published->value)
             ->where('effective_at', '<=', now())
             ->orderByDesc('effective_at')

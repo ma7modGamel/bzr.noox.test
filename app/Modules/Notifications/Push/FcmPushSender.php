@@ -47,7 +47,7 @@ final class FcmPushSender implements PushSender
         $errorCode = $this->errorCode((array) $response->json());
 
         $result = match (true) {
-            $status === 404, $errorCode === 'UNREGISTERED' => PushResult::InvalidToken,
+            $errorCode === 'UNREGISTERED' => PushResult::InvalidToken,
             // INVALID_ARGUMENT يُحذف فيه الرمز فقط إذا كان الخطأ في الرمز نفسه، لا في الحمولة.
             $status === 400 && $errorCode === 'INVALID_ARGUMENT'
                 && str_contains(strtolower((string) $response->json('error.message')), 'registration token') => PushResult::InvalidToken,

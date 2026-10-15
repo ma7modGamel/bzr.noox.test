@@ -1,47 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- SCR-C08 C08OfferDetailsScreen content (DEC-047). -->
+<!-- SCR-C08 — Figma «Primo App» «تأكيد اختيار الفني» 3002:1757 (DEC-073). Cards are filled in C08OfferDetailsView. -->
 <merge xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     tools:parentTag="android.widget.LinearLayout">
 
-    <noox.bzr.design.views.ProviderHeaderView
-        android:id="@+id/header"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:name="@string/offer_provider"
-        app:avatarSize="medium"
-        app:verifiedLabel="@string/provider_verified" />
-
-    <noox.bzr.design.views.SummaryCardView
-        android:id="@+id/details"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:bremoTitle="@string/offer_details_title"
-        />
-
-    <noox.bzr.design.views.EtaCardView
-        android:id="@+id/eta"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:visibility="gone" />
-
-    <noox.bzr.design.views.WarningBoxView
-        android:id="@+id/warning"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:bremoText="@string/offer_warning" />
-
     <LinearLayout
-        android:id="@+id/paymentMethods"
+        android:id="@+id/body"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:divider="@drawable/bremo_gap_l"
         android:orientation="vertical"
-        android:divider="@drawable/bremo_gap_m"
         android:showDividers="middle" />
 
-    <noox.bzr.customer.ActionButtonsView
-        android:id="@+id/actions"
+    <!-- Bottom dock (pinned). -->
+    <LinearLayout
+        android:id="@+id/dock"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:divider="@drawable/bremo_gap_xs"
+        android:orientation="vertical"
+        android:showDividers="middle">
+
+        <noox.bzr.design.views.PrimaryButtonView
+            android:id="@+id/confirm"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:bremoIcon="@drawable/ic_arrow_forward" />
+
+        <TextView
+            android:id="@+id/back"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/bremo_size_touch_target_min"
+            android:foreground="?attr/selectableItemBackground"
+            android:gravity="center"
+            android:text="@string/confirm_back"
+            android:textAppearance="@style/TextAppearance.Bremo.Caption" />
+    </LinearLayout>
 </merge>

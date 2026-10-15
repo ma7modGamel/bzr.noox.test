@@ -1,0 +1,217 @@
+Building for debugging...
+Build complete! (0.32 secs)
+Test Suite 'All tests' started at 2026-10-14 00:40:28.588
+Test Suite 'Debug-linux-x86_64.xctest' started at 2026-10-14 00:40:28.589
+Test Suite 'APIClientTests' started at 2026-10-14 00:40:28.589
+Test Case 'APIClientTests.testEveryRequestUsesTheSelectedLanguage' started at 2026-10-14 00:40:28.589
+Test Case 'APIClientTests.testEveryRequestUsesTheSelectedLanguage' passed (0.001 seconds)
+Test Case 'APIClientTests.testGetDecodesEnvelopeAndAddsContractHeaders' started at 2026-10-14 00:40:28.591
+Test Case 'APIClientTests.testGetDecodesEnvelopeAndAddsContractHeaders' passed (0.001 seconds)
+Test Case 'APIClientTests.testGetRejectsNonSuccessStatus' started at 2026-10-14 00:40:28.591
+Test Case 'APIClientTests.testGetRejectsNonSuccessStatus' passed (0.0 seconds)
+Test Case 'APIClientTests.testLegalDateUsesTheEgyptianEffectiveDay' started at 2026-10-14 00:40:28.591
+Test Case 'APIClientTests.testLegalDateUsesTheEgyptianEffectiveDay' passed (0.002 seconds)
+Test Case 'APIClientTests.testMoneyPreservesPiastersAndAvoidsFloatingPointRounding' started at 2026-10-14 00:40:28.593
+Test Case 'APIClientTests.testMoneyPreservesPiastersAndAvoidsFloatingPointRounding' passed (0.0 seconds)
+Test Case 'APIClientTests.testPostAddsIdempotencyKey' started at 2026-10-14 00:40:28.594
+Test Case 'APIClientTests.testPostAddsIdempotencyKey' passed (0.0 seconds)
+Test Case 'APIClientTests.testPutSendsAvailabilityAsJson' started at 2026-10-14 00:40:28.594
+Test Case 'APIClientTests.testPutSendsAvailabilityAsJson' passed (0.0 seconds)
+Test Case 'APIClientTests.testSupportedLanguageNegotiation' started at 2026-10-14 00:40:28.594
+Test Case 'APIClientTests.testSupportedLanguageNegotiation' passed (0.0 seconds)
+Test Case 'APIClientTests.testTrackingPayloadDecodesLaravelDecimalStrings' started at 2026-10-14 00:40:28.594
+Test Case 'APIClientTests.testTrackingPayloadDecodesLaravelDecimalStrings' passed (0.0 seconds)
+Test Suite 'APIClientTests' passed at 2026-10-14 00:40:28.594
+	 Executed 9 tests, with 0 failures (0 unexpected) in 0.005 (0.005) seconds
+Test Suite 'AuthSharedFixtureTests' started at 2026-10-14 00:40:28.594
+Test Case 'AuthSharedFixtureTests.testAllSharedAuthCasesMatch' started at 2026-10-14 00:40:28.594
+Test Case 'AuthSharedFixtureTests.testAllSharedAuthCasesMatch' passed (0.002 seconds)
+Test Suite 'AuthSharedFixtureTests' passed at 2026-10-14 00:40:28.597
+	 Executed 1 test, with 0 failures (0 unexpected) in 0.002 (0.002) seconds
+Test Suite 'CustomerCatalogSelectionFixtureTests' started at 2026-10-14 00:40:28.597
+Test Case 'CustomerCatalogSelectionFixtureTests.testExactBackendCatalogIdsMatchSharedCases' started at 2026-10-14 00:40:28.597
+Test Case 'CustomerCatalogSelectionFixtureTests.testExactBackendCatalogIdsMatchSharedCases' passed (0.0 seconds)
+Test Suite 'CustomerCatalogSelectionFixtureTests' passed at 2026-10-14 00:40:28.597
+	 Executed 1 test, with 0 failures (0 unexpected) in 0.0 (0.0) seconds
+Test Suite 'CustomerRecordedResponsesTests' started at 2026-10-14 00:40:28.597
+Test Case 'CustomerRecordedResponsesTests.testNumberAcceptsTextAndIsOptional' started at 2026-10-14 00:40:28.597
+Test Case 'CustomerRecordedResponsesTests.testNumberAcceptsTextAndIsOptional' passed (0.0 seconds)
+Test Case 'CustomerRecordedResponsesTests.testOrderDecodes' started at 2026-10-14 00:40:28.597
+Test Case 'CustomerRecordedResponsesTests.testOrderDecodes' passed (0.0 seconds)
+Test Case 'CustomerRecordedResponsesTests.testOrderListDecodes' started at 2026-10-14 00:40:28.597
+Test Case 'CustomerRecordedResponsesTests.testOrderListDecodes' passed (0.0 seconds)
+Test Suite 'CustomerRecordedResponsesTests' passed at 2026-10-14 00:40:28.597
+	 Executed 3 tests, with 0 failures (0 unexpected) in 0.001 (0.001) seconds
+Test Suite 'CustomerSharedFixtureTests' started at 2026-10-14 00:40:28.598
+Test Case 'CustomerSharedFixtureTests.testAllCustomerCasesMatch' started at 2026-10-14 00:40:28.598
+Test Case 'CustomerSharedFixtureTests.testAllCustomerCasesMatch' passed (0.01 seconds)
+Test Suite 'CustomerSharedFixtureTests' passed at 2026-10-14 00:40:28.607
+	 Executed 1 test, with 0 failures (0 unexpected) in 0.01 (0.01) seconds
+Test Suite 'CustomerTrustDataTests' started at 2026-10-14 00:40:28.607
+Test Case 'CustomerTrustDataTests.testAccountSummaryUsesAllBackendTotalsWithoutFetchingOnePageOfOrders' started at 2026-10-14 00:40:28.607
+Test Case 'CustomerTrustDataTests.testAccountSummaryUsesAllBackendTotalsWithoutFetchingOnePageOfOrders' passed (0.001 seconds)
+Test Case 'CustomerTrustDataTests.testConversationUnreadAndAvailabilityReachTheListAndChat' started at 2026-10-14 00:40:28.608
+Test Case 'CustomerTrustDataTests.testConversationUnreadAndAvailabilityReachTheListAndChat' passed (0.001 seconds)
+Test Case 'CustomerTrustDataTests.testImageDownloadsRejectForeignOriginsBeforeSendingTheAccountToken' started at 2026-10-14 00:40:28.609
+Test Case 'CustomerTrustDataTests.testImageDownloadsRejectForeignOriginsBeforeSendingTheAccountToken' passed (0.0 seconds)
+Test Case 'CustomerTrustDataTests.testProfileKeepsTheProtectedAvatarAndPortfolioUrls' started at 2026-10-14 00:40:28.609
+Test Case 'CustomerTrustDataTests.testProfileKeepsTheProtectedAvatarAndPortfolioUrls' passed (0.0 seconds)
+Test Suite 'CustomerTrustDataTests' passed at 2026-10-14 00:40:28.609
+	 Executed 4 tests, with 0 failures (0 unexpected) in 0.002 (0.002) seconds
+Test Suite 'DecisionDeadlineAndFeedbackTests' started at 2026-10-14 00:40:28.609
+Test Case 'DecisionDeadlineAndFeedbackTests.testDeadlineStateUsesElapsedTimeWithoutRestartingWhenTheScreenReturns' started at 2026-10-14 00:40:28.609
+Test Case 'DecisionDeadlineAndFeedbackTests.testDeadlineStateUsesElapsedTimeWithoutRestartingWhenTheScreenReturns' passed (0.0 seconds)
+Test Case 'DecisionDeadlineAndFeedbackTests.testProposalDeadlineUsesServerTimeEvenWhenTheDeviceClockDiffersByYears' started at 2026-10-14 00:40:28.609
+Test Case 'DecisionDeadlineAndFeedbackTests.testProposalDeadlineUsesServerTimeEvenWhenTheDeviceClockDiffersByYears' passed (0.001 seconds)
+Test Case 'DecisionDeadlineAndFeedbackTests.testProposalDecodesServerClockAndExpiryOutcome' started at 2026-10-14 00:40:28.611
+Test Case 'DecisionDeadlineAndFeedbackTests.testProposalDecodesServerClockAndExpiryOutcome' passed (0.0 seconds)
+Test Case 'DecisionDeadlineAndFeedbackTests.testRatingKeepsServerOptionsAndOptionalCommentAndEnforcesTheCommentLimit' started at 2026-10-14 00:40:28.611
+Test Case 'DecisionDeadlineAndFeedbackTests.testRatingKeepsServerOptionsAndOptionalCommentAndEnforcesTheCommentLimit' passed (0.1 seconds)
+Test Case 'DecisionDeadlineAndFeedbackTests.testRatingSendsStableCodesAndComment' started at 2026-10-14 00:40:28.711
+Test Case 'DecisionDeadlineAndFeedbackTests.testRatingSendsStableCodesAndComment' passed (0.001 seconds)
+Test Suite 'DecisionDeadlineAndFeedbackTests' passed at 2026-10-14 00:40:28.712
+	 Executed 5 tests, with 0 failures (0 unexpected) in 0.102 (0.102) seconds
+Test Suite 'DeepLinkRouterTests' started at 2026-10-14 00:40:28.712
+Test Case 'DeepLinkRouterTests.testRoutesMatchSharedFixture' started at 2026-10-14 00:40:28.712
+Test Case 'DeepLinkRouterTests.testRoutesMatchSharedFixture' passed (0.0 seconds)
+Test Suite 'DeepLinkRouterTests' passed at 2026-10-14 00:40:28.712
+	 Executed 1 test, with 0 failures (0 unexpected) in 0.0 (0.0) seconds
+Test Suite 'EarningsStatementTests' started at 2026-10-14 00:40:28.712
+Test Case 'EarningsStatementTests.testFilteredExportUsesAppliedServerOptionsAndPreservesTheAccountBalance' started at 2026-10-14 00:40:28.712
+Test Case 'EarningsStatementTests.testFilteredExportUsesAppliedServerOptionsAndPreservesTheAccountBalance' passed (0.001 seconds)
+Test Case 'EarningsStatementTests.testInvalidFilterKeepsTheCurrentTransactionsAndCanBeReset' started at 2026-10-14 00:40:28.713
+Test Case 'EarningsStatementTests.testInvalidFilterKeepsTheCurrentTransactionsAndCanBeReset' passed (0.0 seconds)
+Test Case 'EarningsStatementTests.testMoreAppendsTheNextPageAndStopsAtTheLastPage' started at 2026-10-14 00:40:28.713
+Test Case 'EarningsStatementTests.testMoreAppendsTheNextPageAndStopsAtTheLastPage' passed (0.0 seconds)
+Test Case 'EarningsStatementTests.testReloadDiscardsUnappliedEditsAndKeepsTheAppliedFilter' started at 2026-10-14 00:40:28.714
+Test Case 'EarningsStatementTests.testReloadDiscardsUnappliedEditsAndKeepsTheAppliedFilter' passed (0.0 seconds)
+Test Suite 'EarningsStatementTests' passed at 2026-10-14 00:40:28.714
+	 Executed 4 tests, with 0 failures (0 unexpected) in 0.002 (0.002) seconds
+Test Suite 'LiveAPIRecordedTests' started at 2026-10-14 00:40:28.714
+Test Case 'LiveAPIRecordedTests.testAddressesAndSlotsDecode' started at 2026-10-14 00:40:28.714
+Test Case 'LiveAPIRecordedTests.testAddressesAndSlotsDecode' passed (0.102 seconds)
+Test Case 'LiveAPIRecordedTests.testHomeAndOrdersDecode' started at 2026-10-14 00:40:28.816
+Test Case 'LiveAPIRecordedTests.testHomeAndOrdersDecode' passed (0.001 seconds)
+Test Case 'LiveAPIRecordedTests.testMarketDecodes' started at 2026-10-14 00:40:28.817
+Test Case 'LiveAPIRecordedTests.testMarketDecodes' passed (0.0 seconds)
+Test Case 'LiveAPIRecordedTests.testMessagesAndMediaDecode' started at 2026-10-14 00:40:28.817
+Test Case 'LiveAPIRecordedTests.testMessagesAndMediaDecode' passed (0.001 seconds)
+Test Case 'LiveAPIRecordedTests.testPaymentSupportAndAccountDecode' started at 2026-10-14 00:40:28.818
+Test Case 'LiveAPIRecordedTests.testPaymentSupportAndAccountDecode' passed (0.001 seconds)
+Test Case 'LiveAPIRecordedTests.testProviderApplicationAndHomeDecode' started at 2026-10-14 00:40:28.819
+Test Case 'LiveAPIRecordedTests.testProviderApplicationAndHomeDecode' passed (0.001 seconds)
+Test Case 'LiveAPIRecordedTests.testProviderEarningsDecode' started at 2026-10-14 00:40:28.820
+Test Case 'LiveAPIRecordedTests.testProviderEarningsDecode' passed (0.0 seconds)
+Test Case 'LiveAPIRecordedTests.testProviderMarketAndProfileDecode' started at 2026-10-14 00:40:28.820
+Test Case 'LiveAPIRecordedTests.testProviderMarketAndProfileDecode' passed (0.001 seconds)
+Test Case 'LiveAPIRecordedTests.testProviderOrdersDecode' started at 2026-10-14 00:40:28.821
+Test Case 'LiveAPIRecordedTests.testProviderOrdersDecode' passed (0.001 seconds)
+Test Suite 'LiveAPIRecordedTests' passed at 2026-10-14 00:40:28.822
+	 Executed 9 tests, with 0 failures (0 unexpected) in 0.108 (0.108) seconds
+Test Suite 'MediaDurationTests' started at 2026-10-14 00:40:28.822
+Test Case 'MediaDurationTests.testRejectedSelectionIsExplainedWithoutAddingMediaOrBlockingTheOptionalStep' started at 2026-10-14 00:40:28.822
+Test Case 'MediaDurationTests.testRejectedSelectionIsExplainedWithoutAddingMediaOrBlockingTheOptionalStep' passed (0.0 seconds)
+Test Case 'MediaDurationTests.testUnreadableOrNonFiniteVideoDurationIsRejected' started at 2026-10-14 00:40:28.822
+Test Case 'MediaDurationTests.testUnreadableOrNonFiniteVideoDurationIsRejected' passed (0.0 seconds)
+Test Case 'MediaDurationTests.testVideoAtThirtySecondsPassesAndAnExcessFractionIsRejected' started at 2026-10-14 00:40:28.822
+Test Case 'MediaDurationTests.testVideoAtThirtySecondsPassesAndAnExcessFractionIsRejected' passed (0.0 seconds)
+Test Suite 'MediaDurationTests' passed at 2026-10-14 00:40:28.822
+	 Executed 3 tests, with 0 failures (0 unexpected) in 0.0 (0.0) seconds
+Test Suite 'ModeMemoryTests' started at 2026-10-14 00:40:28.822
+Test Case 'ModeMemoryTests.testMemoryIsKeptPerAccount' started at 2026-10-14 00:40:28.822
+Test Case 'ModeMemoryTests.testMemoryIsKeptPerAccount' passed (0.101 seconds)
+Test Case 'ModeMemoryTests.testSharedRestoreCasesMatch' started at 2026-10-14 00:40:28.923
+Test Case 'ModeMemoryTests.testSharedRestoreCasesMatch' passed (0.0 seconds)
+Test Suite 'ModeMemoryTests' passed at 2026-10-14 00:40:28.923
+	 Executed 2 tests, with 0 failures (0 unexpected) in 0.101 (0.101) seconds
+Test Suite 'ProviderEarningsDecodeTests' started at 2026-10-14 00:40:28.923
+Test Case 'ProviderEarningsDecodeTests.testBlockedMarketplaceEarningsDecode' started at 2026-10-14 00:40:28.923
+Test Case 'ProviderEarningsDecodeTests.testBlockedMarketplaceEarningsDecode' passed (0.0 seconds)
+Test Case 'ProviderEarningsDecodeTests.testEmployeeEarningsDecode' started at 2026-10-14 00:40:28.924
+Test Case 'ProviderEarningsDecodeTests.testEmployeeEarningsDecode' passed (0.0 seconds)
+Test Suite 'ProviderEarningsDecodeTests' passed at 2026-10-14 00:40:28.924
+	 Executed 2 tests, with 0 failures (0 unexpected) in 0.0 (0.0) seconds
+Test Suite 'ProviderSharedFixtureTests' started at 2026-10-14 00:40:28.924
+Test Case 'ProviderSharedFixtureTests.testAllProviderCasesMatch' started at 2026-10-14 00:40:28.924
+Test Case 'ProviderSharedFixtureTests.testAllProviderCasesMatch' passed (0.004 seconds)
+Test Suite 'ProviderSharedFixtureTests' passed at 2026-10-14 00:40:28.928
+	 Executed 1 test, with 0 failures (0 unexpected) in 0.004 (0.004) seconds
+Test Suite 'RepairAndPaymentTests' started at 2026-10-14 00:40:28.928
+Test Case 'RepairAndPaymentTests.testInstapayRequiresReceiptAndLocksWhileAdministrationVerifies' started at 2026-10-14 00:40:28.928
+Test Case 'RepairAndPaymentTests.testInstapayRequiresReceiptAndLocksWhileAdministrationVerifies' passed (0.0 seconds)
+Test Case 'RepairAndPaymentTests.testRepairPhotoCountsArePreservedInProviderState' started at 2026-10-14 00:40:28.928
+Test Case 'RepairAndPaymentTests.testRepairPhotoCountsArePreservedInProviderState' passed (0.0 seconds)
+Test Case 'RepairAndPaymentTests.testReviewPhotosAreOptionalAndUploadBlocksSubmitting' started at 2026-10-14 00:40:28.928
+Test Case 'RepairAndPaymentTests.testReviewPhotosAreOptionalAndUploadBlocksSubmitting' passed (0.0 seconds)
+Test Case 'RepairAndPaymentTests.testWarrantyFormUsesServerActionAndDoesNotRequireADisputeReason' started at 2026-10-14 00:40:28.928
+Test Case 'RepairAndPaymentTests.testWarrantyFormUsesServerActionAndDoesNotRequireADisputeReason' passed (0.0 seconds)
+Test Suite 'RepairAndPaymentTests' passed at 2026-10-14 00:40:28.928
+	 Executed 4 tests, with 0 failures (0 unexpected) in 0.0 (0.0) seconds
+Test Suite 'RequestWorkflowTests' started at 2026-10-14 00:40:28.929
+Test Case 'RequestWorkflowTests.testAvailabilityUsesTheAuthenticatedAddressAndCategory' started at 2026-10-14 00:40:28.929
+Test Case 'RequestWorkflowTests.testAvailabilityUsesTheAuthenticatedAddressAndCategory' passed (0.0 seconds)
+Test Case 'RequestWorkflowTests.testCachedCallActionsAreNeverPresented' started at 2026-10-14 00:40:28.929
+Test Case 'RequestWorkflowTests.testCachedCallActionsAreNeverPresented' passed (0.0 seconds)
+Test Case 'RequestWorkflowTests.testMarketplaceRetainsItsSeparateMaterialStep' started at 2026-10-14 00:40:28.929
+Test Case 'RequestWorkflowTests.testMarketplaceRetainsItsSeparateMaterialStep' passed (0.0 seconds)
+Test Case 'RequestWorkflowTests.testStaffIncludesMaterialsAndHasFourSteps' started at 2026-10-14 00:40:28.929
+Test Case 'RequestWorkflowTests.testStaffIncludesMaterialsAndHasFourSteps' passed (0.0 seconds)
+Test Case 'RequestWorkflowTests.testUnavailableNowIsDisabledButAScheduledChoiceRemainsUsable' started at 2026-10-14 00:40:28.929
+Test Case 'RequestWorkflowTests.testUnavailableNowIsDisabledButAScheduledChoiceRemainsUsable' passed (0.0 seconds)
+Test Suite 'RequestWorkflowTests' passed at 2026-10-14 00:40:28.929
+	 Executed 5 tests, with 0 failures (0 unexpected) in 0.001 (0.001) seconds
+Test Suite 'ScreenHistoryTests' started at 2026-10-14 00:40:28.929
+Test Case 'ScreenHistoryTests.testHistoryMatchesSharedFixture' started at 2026-10-14 00:40:28.929
+Test Case 'ScreenHistoryTests.testHistoryMatchesSharedFixture' passed (0.0 seconds)
+Test Case 'ScreenHistoryTests.testSlotDayLabelsMatchSharedFixture' started at 2026-10-14 00:40:28.929
+Test Case 'ScreenHistoryTests.testSlotDayLabelsMatchSharedFixture' passed (0.001 seconds)
+Test Suite 'ScreenHistoryTests' passed at 2026-10-14 00:40:28.931
+	 Executed 2 tests, with 0 failures (0 unexpected) in 0.001 (0.001) seconds
+Test Suite 'SessionExpiryTests' started at 2026-10-14 00:40:28.931
+Test Case 'SessionExpiryTests.testANewSessionCanExpireAgain' started at 2026-10-14 00:40:28.931
+Test Case 'SessionExpiryTests.testANewSessionCanExpireAgain' passed (0.0 seconds)
+Test Case 'SessionExpiryTests.testLoginWithoutTokenIsNotAnExpiry' started at 2026-10-14 00:40:28.931
+Test Case 'SessionExpiryTests.testLoginWithoutTokenIsNotAnExpiry' passed (0.0 seconds)
+Test Case 'SessionExpiryTests.testLogoutWithRefusedTokenIsNotAnExpiry' started at 2026-10-14 00:40:28.931
+Test Case 'SessionExpiryTests.testLogoutWithRefusedTokenIsNotAnExpiry' passed (0.0 seconds)
+Test Case 'SessionExpiryTests.testOtherErrorsKeepTheSession' started at 2026-10-14 00:40:28.931
+Test Case 'SessionExpiryTests.testOtherErrorsKeepTheSession' passed (0.0 seconds)
+Test Case 'SessionExpiryTests.testRefusedTokenExpiresTheSessionOnce' started at 2026-10-14 00:40:28.931
+Test Case 'SessionExpiryTests.testRefusedTokenExpiresTheSessionOnce' passed (0.0 seconds)
+Test Suite 'SessionExpiryTests' passed at 2026-10-14 00:40:28.931
+	 Executed 5 tests, with 0 failures (0 unexpected) in 0.001 (0.001) seconds
+Test Suite 'ShareAndWaitingTests' started at 2026-10-14 00:40:28.931
+Test Case 'ShareAndWaitingTests.testAdditionalCostShowsBackendCurrentTotalIncludingPreviousApprovedMaterials' started at 2026-10-14 00:40:28.931
+Test Case 'ShareAndWaitingTests.testAdditionalCostShowsBackendCurrentTotalIncludingPreviousApprovedMaterials' passed (0.001 seconds)
+Test Case 'ShareAndWaitingTests.testAssignmentWaitUsesTheBackendMessageAndDeadline' started at 2026-10-14 00:40:28.932
+Test Case 'ShareAndWaitingTests.testAssignmentWaitUsesTheBackendMessageAndDeadline' passed (0.001 seconds)
+Test Case 'ShareAndWaitingTests.testShareFailureKeepsTrackingAvailableAndAllowsRetry' started at 2026-10-14 00:40:28.933
+Test Case 'ShareAndWaitingTests.testShareFailureKeepsTrackingAvailableAndAllowsRetry' passed (0.0 seconds)
+Test Case 'ShareAndWaitingTests.testSharingUsesTheCurrentOrderAndReturnsATemporaryLink' started at 2026-10-14 00:40:28.933
+Test Case 'ShareAndWaitingTests.testSharingUsesTheCurrentOrderAndReturnsATemporaryLink' passed (0.0 seconds)
+Test Suite 'ShareAndWaitingTests' passed at 2026-10-14 00:40:28.933
+	 Executed 4 tests, with 0 failures (0 unexpected) in 0.002 (0.002) seconds
+Test Suite 'SharedFixtureTests' started at 2026-10-14 00:40:28.933
+Test Case 'SharedFixtureTests.testCoreHasNoUserInterfaceFrameworkImports' started at 2026-10-14 00:40:28.933
+Test Case 'SharedFixtureTests.testCoreHasNoUserInterfaceFrameworkImports' passed (0.009 seconds)
+Test Case 'SharedFixtureTests.testDecodesEverySharedOrderCaseAndBindsItsActions' started at 2026-10-14 00:40:28.942
+Test Case 'SharedFixtureTests.testDecodesEverySharedOrderCaseAndBindsItsActions' passed (0.101 seconds)
+Test Case 'SharedFixtureTests.testFormatsSharedNumberAmountCountdownTimeAndDates' started at 2026-10-14 00:40:29.043
+Test Case 'SharedFixtureTests.testFormatsSharedNumberAmountCountdownTimeAndDates' passed (0.001 seconds)
+Test Suite 'SharedFixtureTests' passed at 2026-10-14 00:40:29.044
+	 Executed 3 tests, with 0 failures (0 unexpected) in 0.111 (0.111) seconds
+Test Suite 'WarrantyVisitTests' started at 2026-10-14 00:40:29.044
+Test Case 'WarrantyVisitTests.testCustomerWarrantyClaimPreservesVisitIdentityAndFinalState' started at 2026-10-14 00:40:29.044
+Test Case 'WarrantyVisitTests.testCustomerWarrantyClaimPreservesVisitIdentityAndFinalState' passed (0.0 seconds)
+Test Case 'WarrantyVisitTests.testWarrantyVisitDecodesBackendCoverageAndMaterialsChoices' started at 2026-10-14 00:40:29.044
+Test Case 'WarrantyVisitTests.testWarrantyVisitDecodesBackendCoverageAndMaterialsChoices' passed (0.0 seconds)
+Test Suite 'WarrantyVisitTests' passed at 2026-10-14 00:40:29.044
+	 Executed 2 tests, with 0 failures (0 unexpected) in 0.0 (0.0) seconds
+Test Suite 'Debug-linux-x86_64.xctest' passed at 2026-10-14 00:40:29.044
+	 Executed 71 tests, with 0 failures (0 unexpected) in 0.454 (0.454) seconds
+Test Suite 'All tests' passed at 2026-10-14 00:40:29.044
+	 Executed 71 tests, with 0 failures (0 unexpected) in 0.454 (0.454) seconds
+◇ Test run started.
+↳ Testing Library Version: 6.4 (efd8d65801f569d)
+↳ Target Platform: x86_64-unknown-linux-gnu
+✔ Test run with 0 tests in 0 suites passed after 0.001 seconds.

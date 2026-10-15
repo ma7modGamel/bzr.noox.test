@@ -16,9 +16,59 @@ import noox.bzr.gallery.databinding.ScreenProviderActiveOrderBinding
 open class ProviderActiveOrderView(context: Context, private val screen: String) : ProviderScreenView(context) {
     private val binding = ScreenProviderActiveOrderBinding.inflate(inflater, content)
     var onAction: (String) -> Unit = {}
+    var onPickWorkPhoto: (Boolean) -> Unit = {}
+    var onArrivalCodeChange: (String) -> Unit = {}
+    var onArrivalExceptionNoteChange: (String) -> Unit = {}
+    private val arrivalCodeField = noox.bzr.design.views.AppTextFieldView(context)
+    private val arrivalNoteField = noox.bzr.design.views.AppTextFieldView(context)
+    private val arrivalReport = SecondaryButtonView(context)
+    private val arrivalPending = noox.bzr.design.views.InfoBannerView(context)
+    private val arrivalRefresh = SecondaryButtonView(context)
+    private val arrivalPanel = LinearLayout(context).apply { orientation = LinearLayout.VERTICAL }
+    private var requiresArrivalCode = false
+    var onCompletionEstimate: (String) -> Unit = {}
+    private val estimateField = noox.bzr.design.views.AppTextFieldView(context)
+    private val estimateTime = android.widget.TextView(context)
+    private val estimateSave = SecondaryButtonView(context)
+    private val warrantyInfo = noox.bzr.design.views.InfoBannerView(context)
+    private val photoInfo = noox.bzr.design.views.InfoBannerView(context)
+    private val photoCount = android.widget.TextView(context)
 
     init {
+        arrivalCodeField.label = string(DesignR.string.arrival_code_input)
+        arrivalCodeField.findViewById<android.widget.EditText>(DesignR.id.edit).inputType = android.text.InputType.TYPE_CLASS_NUMBER
+        arrivalCodeField.onValueChange = { value -> arrivalCodeField.value = value; arrivalCodeField.error = null; onArrivalCodeChange(value) }
+        arrivalNoteField.label = string(DesignR.string.arrival_exception_note)
+        arrivalNoteField.onValueChange = { value -> arrivalNoteField.value = value; arrivalNoteField.error = null; onArrivalExceptionNoteChange(value) }
+        arrivalReport.text = string(DesignR.string.arrival_exception_report)
+        arrivalReport.onClick = {
+            if (arrivalNoteField.value.trim().length !in 5..500) { arrivalNoteField.error = string(DesignR.string.arrival_exception_note_invalid) }
+            else onAction("report_arrival_exception")
+        }
+        arrivalPending.text = string(DesignR.string.arrival_exception_pending)
+        arrivalRefresh.text = string(DesignR.string.tracking_follow)
+        arrivalRefresh.onClick = { onAction("refresh_order") }
+        listOf(arrivalCodeField, arrivalNoteField, arrivalReport, arrivalPending, arrivalRefresh).forEach { arrivalPanel.addView(it) }
+        content.addView(arrivalPanel, 0)
+
+        estimateField.label = string(DesignR.string.provider_completion_estimate_minutes)
+        estimateField.placeholder = string(DesignR.string.provider_completion_estimate_hint)
+        estimateField.findViewById<android.widget.EditText>(DesignR.id.edit).inputType = android.text.InputType.TYPE_CLASS_NUMBER
+        estimateField.onValueChange = { value -> estimateField.value = value; estimateField.error = null; estimateField.state = noox.bzr.design.FieldVisualState.Filled }
+        estimateSave.text = string(DesignR.string.provider_completion_estimate_save)
+        estimateSave.onClick = {
+            val minutes = estimateField.value.trim().toIntOrNull()
+            if (minutes == null || minutes !in 1..1440) { estimateField.error = string(DesignR.string.provider_completion_estimate_invalid); estimateField.state = noox.bzr.design.FieldVisualState.Error }
+            else onCompletionEstimate(estimateField.value)
+        }
+        content.addView(estimateTime)
+        content.addView(estimateField)
+        content.addView(estimateSave)
         binding.status.kind = BadgeKind.Status
+        content.addView(warrantyInfo, 0)
+        photoInfo.text = string(DesignR.string.repair_photos_required)
+        content.addView(photoInfo, content.indexOfChild(binding.actions))
+        content.addView(photoCount, content.indexOfChild(binding.actions))
     }
 
     override fun title(): String = string(DesignR.string.provider_order_title)
@@ -29,6 +79,24 @@ open class ProviderActiveOrderView(context: Context, private val screen: String)
     }
 
     override fun renderContent(state: ProviderUiState) {
+        requiresArrivalCode = state.arrivalCodeRequired
+        arrivalPanel.isVisible = requiresArrivalCode
+        arrivalCodeField.isVisible = requiresArrivalCode
+        arrivalNoteField.isVisible = requiresArrivalCode && !state.arrivalExceptionPending
+        arrivalReport.isVisible = arrivalNoteField.isVisible
+        arrivalReport.enabled = !state.isBusy
+        arrivalPending.isVisible = requiresArrivalCode && state.arrivalExceptionPending
+        arrivalRefresh.isVisible = requiresArrivalCode
+        val mayEstimate = "update_completion_estimate" in state.visibleActions
+        estimateField.isVisible = mayEstimate
+        estimateSave.isVisible = mayEstimate
+        estimateSave.enabled = !state.isBusy
+        val estimate = state.fieldValues.firstOrNull().orEmpty()
+        estimateTime.isVisible = mayEstimate && estimate.isNotEmpty()
+        val displayTime = runCatching { java.time.OffsetDateTime.parse(estimate).atZoneSameInstant(java.time.ZoneId.systemDefault()).format(java.time.format.DateTimeFormatter.ofLocalizedDateTime(java.time.format.FormatStyle.SHORT)) }.getOrDefault(estimate)
+        estimateTime.text = noox.bzr.design.BzrFormat.fill(string(DesignR.string.tracking_finish_estimated_at), "time" to displayTime)
+        warrantyInfo.isVisible = state.warrantyCoverage.isNotBlank()
+        warrantyInfo.text = state.warrantyCoverage
         binding.status.text = providerDisplayStatus(state.displayStatus)
         binding.customer.name = state.customerName
         binding.customer.rating = state.customerRating
@@ -39,7 +107,10 @@ open class ProviderActiveOrderView(context: Context, private val screen: String)
             DesignR.drawable.ic_orders to state.items.getOrElse(0) { "" },
             DesignR.drawable.ic_info to state.items.getOrElse(1) { "" },
             DesignR.drawable.ic_location to state.items.getOrElse(2) { "" },
-            DesignR.drawable.ic_clock to state.items.getOrElse(3) { "" },
+            // The view model sends the "now" key, as for P08; a scheduled slot arrives as text.
+            DesignR.drawable.ic_clock to state.items.getOrElse(3) { "" }.let {
+                if (it == "provider.home.timing.now") string(DesignR.string.provider_home_timing_now) else it
+            },
         )
         binding.priceGuide.isVisible = state.showPriceGuide
         if (state.showPriceGuide) {
@@ -49,8 +120,8 @@ open class ProviderActiveOrderView(context: Context, private val screen: String)
                 state.priceGuideMaximum,
             )
         }
-        binding.warning.isVisible = state.messageKey != null
-        binding.warning.text = warning(state.messageKey)
+        binding.warning.isVisible = state.messageKey != null || state.arrivalError.isNotEmpty()
+        binding.warning.text = if (state.arrivalError.isNotEmpty()) state.arrivalError else if (state.messageKey == "provider.no_show.pending") string(DesignR.string.provider_no_show_pending) else warning(state.messageKey)
         binding.payment.isVisible = screen == "SCR-P16" && state.secondaryOptions.isNotEmpty()
         binding.payment.editText = null
         binding.payment.rows = listOf(
@@ -67,26 +138,38 @@ open class ProviderActiveOrderView(context: Context, private val screen: String)
         binding.stepper.steps = labels.zip(state.stepStates.ifEmpty {
             listOf("done", "active", "pending", "pending", "pending", "pending")
         }.map(::stepState))
+        photoInfo.isVisible = screen == "SCR-P14" || screen == "SCR-P15"
+        photoCount.isVisible = photoInfo.isVisible
+        photoCount.text = String.format(string(DesignR.string.repair_photos_count), state.beforePhotoCount.toString(), state.afterPhotoCount.toString())
         renderActions(state)
     }
 
     private fun renderActions(state: ProviderUiState) {
         binding.actions.removeAllViews()
-        state.visibleActions.forEach { action ->
+        state.visibleActions.filter { it !in listOf("update_completion_estimate", "report_arrival_exception") }.forEach { action ->
             binding.actions.addView(button(action, state), LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
         }
     }
 
     private fun button(action: String, state: ProviderUiState): View {
         val label = string(providerActionLabel(action, screen))
-        val click = { if (!state.isBusy) onAction(action) }
+        if (action in listOf("upload_repair_before", "upload_repair_after")) return SecondaryButtonView(context).apply {
+            text = label; enabled = !state.isBusy; onClick = { onPickWorkPhoto(action == "upload_repair_before") }
+        }
+        val click = {
+            if (!state.isBusy) {
+                if (action == "mark_arrived" && requiresArrivalCode && arrivalCodeField.value.mapNotNull { it.digitToIntOrNull() }.size != 6) {
+                    arrivalCodeField.error = string(DesignR.string.arrival_code_invalid)
+                } else onAction(action)
+            }
+        }
         return when (action) {
             "start_trip", "mark_arrived", "start_work", "submit_execution_quote", "complete_work", "confirm_cash" ->
                 PrimaryButtonView(context).apply {
                     text = label
                     this.state = when {
                         state.isBusy && state.currentAction == action -> ButtonVisualState.Loading
-                        state.isBusy -> ButtonVisualState.Disabled
+                        state.isBusy || (action == "complete_work" && (state.beforePhotoCount == 0 || state.afterPhotoCount == 0)) -> ButtonVisualState.Disabled
                         else -> ButtonVisualState.Normal
                     }
                     onClick = click
@@ -109,8 +192,10 @@ open class ProviderActiveOrderView(context: Context, private val screen: String)
             "provider.order.trip.not_ready" -> DesignR.string.provider_order_trip_not_ready
             "provider.order.location.required" -> DesignR.string.provider_order_location_required
             "provider.price_guide.other_review" -> DesignR.string.provider_price_guide_other_review
+            "media.upload_error" -> DesignR.string.media_upload_error
             "provider.proposal.pending" -> DesignR.string.provider_proposal_pending
             "provider.payment.waiting" -> DesignR.string.provider_payment_waiting
+            "arrival.code.failed" -> DesignR.string.arrival_verification_failed
             else -> DesignR.string.error_body
         },
     )
@@ -130,6 +215,8 @@ class P15InProgressView(context: Context) : ProviderActiveOrderView(context, "SC
 class P16AwaitingPaymentView(context: Context) : ProviderActiveOrderView(context, "SCR-P16")
 
 private fun providerActionLabel(action: String, screen: String): Int = when (action) {
+    "upload_repair_before" -> DesignR.string.repair_photos_add_before
+    "upload_repair_after" -> DesignR.string.repair_photos_add_after
     "start_trip" -> DesignR.string.action_start_trip
     "back_out" -> DesignR.string.action_back_out
     "mark_arrived" -> DesignR.string.action_mark_arrived

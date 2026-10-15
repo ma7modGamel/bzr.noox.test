@@ -16,5 +16,5 @@
         </view></viewController>
         <placeholder placeholderIdentifier="IBFirstResponder" id="launch-responder" userLabel="First Responder" sceneMemberID="firstResponder"/>
     </objects></scene></scenes>
-    <resources><image name="BremoLaunchSymbol" width="320" height="400"/><namedColor name="BremoLaunchBackground"><color red="0.000000" green="0.415686" blue="0.439216" alpha="1" colorSpace="custom" customColorSpace="sRGB"/></namedColor></resources>
+    <resources><image name="BremoLaunchSymbol" width="320" height="400"/><namedColor name="BremoLaunchBackground"><color red="0.011765" green="0.286275" blue="0.705882" alpha="1" colorSpace="custom" customColorSpace="sRGB"/></namedColor></resources>
 </document>

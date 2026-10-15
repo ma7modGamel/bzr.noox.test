@@ -10,6 +10,7 @@ use App\Modules\Orders\Models\Order;
 use App\Modules\Providers\Models\ProviderProfile;
 use Database\Factories\UserFactory;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Contracts\Translation\HasLocalePreference;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
@@ -21,14 +22,14 @@ use Laravel\Sanctum\HasApiTokens;
 /**
  * هوية واحدة بوضعين (DEC-001): كل مستخدم عميل افتراضيًا، ويصبح فنيًا بملف معتمد.
  */
-final class User extends Authenticatable implements MustVerifyEmail
+final class User extends Authenticatable implements HasLocalePreference, MustVerifyEmail
 {
     use HasApiTokens;
     use HasFactory;
     use Notifiable;
     use SoftDeletes;
 
-    protected $fillable = ['name', 'email', 'password', 'phone', 'avatar_path', 'status', 'rating_reminders_enabled'];
+    protected $fillable = ['name', 'email', 'password', 'phone', 'avatar_path', 'status', 'rating_reminders_enabled', 'locale'];
 
     protected $hidden = ['password', 'remember_token'];
 
@@ -43,6 +44,11 @@ final class User extends Authenticatable implements MustVerifyEmail
             'customer_rating_avg' => 'decimal:2',
             'rating_reminders_enabled' => 'bool',
         ];
+    }
+
+    public function preferredLocale(): string
+    {
+        return in_array($this->locale, ['ar', 'en'], true) ? $this->locale : 'ar';
     }
 
     public function providerProfile(): HasOne

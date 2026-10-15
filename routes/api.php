@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Http\Api\V1\Controllers\AccountController;
 use App\Http\Api\V1\Controllers\AddressController;
+use App\Http\Api\V1\Controllers\ArrivalVerificationController;
 use App\Http\Api\V1\Controllers\AuthController;
 use App\Http\Api\V1\Controllers\ConfigController;
 use App\Http\Api\V1\Controllers\ConversationController;
@@ -76,7 +77,11 @@ Route::middleware('auth:sanctum')->group(function (): void {
     Route::delete('addresses/{address}', [AddressController::class, 'destroy']);
 
     // الوسائط والمحادثات المشتركة
+    Route::get('conversations/{conversation}/messages/{message}/images/{media}', [ConversationController::class, 'image'])->name('api.conversations.image');
     Route::post('media', [MediaController::class, 'store']);
+    Route::get('orders/{order}/proposals/{proposal}/image', [OrderController::class, 'proposalImage'])->name('api.orders.proposal-image');
+    Route::get('providers/{provider}/reviews/{review}/photos/{media}', [ProviderController::class, 'reviewImage'])->name('api.providers.review-image');
+    Route::post('orders/{order}/arrival-code', [ArrivalVerificationController::class, 'issue'])->middleware('throttle:20,1');
     Route::get('media/{media}', [MediaController::class, 'show'])->name('api.media.show');
     Route::delete('media/{media}', [MediaController::class, 'destroy']);
     Route::get('conversations', [ConversationController::class, 'index']);
@@ -87,6 +92,7 @@ Route::middleware('auth:sanctum')->group(function (): void {
 
     // ── العميل ────────────────────────────────────────────────────────
     Route::get('orders', [OrderController::class, 'index']);
+    Route::get('orders/availability', [OrderController::class, 'availability']);
     Route::post('orders', [OrderController::class, 'store'])->middleware('throttle:10,60'); // 31 §حدود المعدل
     Route::patch('orders/{order}', [OrderController::class, 'update'])->middleware('throttle:10,60');
     Route::get('orders/{order}', [OrderController::class, 'show']);
@@ -95,11 +101,15 @@ Route::middleware('auth:sanctum')->group(function (): void {
     Route::get('orders/{order}/proposals', [OrderController::class, 'proposals']);
     Route::get('orders/{order}/tracking', [TrackingController::class, 'show']);
     Route::get('providers/{provider}', [ProviderController::class, 'show']);
+    Route::get('providers/{provider}/images/{image}', [ProviderController::class, 'image'])
+        ->where('image', 'avatar|[0-9]+')->name('api.providers.image');
     Route::post('orders/{order}/share-links', [ShareLinkController::class, 'store'])
         ->middleware('throttle:60,1');
     Route::delete('share-links/{shareLink}', [ShareLinkController::class, 'destroy']);
     Route::post('orders/{order}/review', [RatingController::class, 'review']);
     Route::get('orders/{order}/disputes', [SupportController::class, 'disputes']);
+    Route::get('orders/{order}/warranty-claims', [SupportController::class, 'warrantyClaims']);
+    Route::post('orders/{order}/warranty-claims', [SupportController::class, 'requestWarranty']);
     Route::post('orders/{order}/disputes', [SupportController::class, 'openDispute']);
     Route::post('providers/{provider}/reports', [SupportController::class, 'reportProvider'])
         ->middleware('throttle:5,1');
@@ -123,6 +133,7 @@ Route::middleware('auth:sanctum')->group(function (): void {
             ->middleware('throttle:5,60');
         Route::get('home', [ProviderHomeController::class, 'show']);
         Route::get('earnings', ProviderEarningsController::class);
+        Route::get('earnings/export', [ProviderEarningsController::class, 'export'])->name('provider.earnings.export');
         Route::get('profile', [ProviderProfileController::class, 'show']);
         Route::patch('profile', [ProviderProfileController::class, 'update']);
         Route::post('portfolio', [ProviderPortfolioController::class, 'store']);
@@ -143,11 +154,14 @@ Route::middleware('auth:sanctum')->group(function (): void {
             Route::post('orders/{order}/start-trip', [ProviderOrderController::class, 'startTrip']);
             Route::post('orders/{order}/location', [ProviderOrderController::class, 'recordLocation'])
                 ->middleware('throttle:4,1');  // BR-110 — كل 30 ثانية
+            Route::post('orders/{order}/arrival-exception', [ArrivalVerificationController::class, 'report']);
             Route::post('orders/{order}/arrived', [ProviderOrderController::class, 'markArrived']);
             Route::post('orders/{order}/start-work', [ProviderOrderController::class, 'startWork']);
+            Route::post('orders/{order}/completion-estimate', [ProviderOrderController::class, 'completionEstimate']);
             Route::post('orders/{order}/proposals', [ProviderOrderController::class, 'submitProposal']);
             Route::post('orders/{order}/complete-inspection-only', [ProviderOrderController::class, 'completeInspectionOnly']);
             Route::post('orders/{order}/complete', [ProviderOrderController::class, 'complete']);
+            Route::post('orders/{order}/work-photos', [ProviderOrderController::class, 'workPhoto']);
             Route::post('orders/{order}/cash-received', [ProviderOrderController::class, 'cashReceived']);
             Route::post('orders/{order}/back-out', [ProviderOrderController::class, 'backOut']);
             Route::post('orders/{order}/unable', [ProviderOrderController::class, 'unable']);

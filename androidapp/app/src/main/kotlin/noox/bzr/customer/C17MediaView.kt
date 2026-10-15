@@ -77,6 +77,8 @@ class C17MediaView(context: Context) : CustomerScreenView(context) {
                 when (it) {
                     "media.validation.photo_limit" -> R.string.media_validation_photo_limit
                     "media.validation.video_limit" -> R.string.media_validation_video_limit
+                    "media.validation.video_duration" -> R.string.media_validation_video_duration
+                    "media.validation.video_unreadable" -> R.string.media_validation_video_unreadable
                     "media.validation.audio_limit" -> R.string.media_validation_audio_limit
                     else -> R.string.media_validation_rejected
                 },

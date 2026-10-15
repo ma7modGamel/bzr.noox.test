@@ -6,8 +6,16 @@ namespace App\Http\Api\V1\Resources;
 
 use App\Http\Middleware\ResolveAppMode;
 use App\Modules\Orders\Enums\ActorType;
+use App\Modules\Orders\Enums\CancelReason;
+use App\Modules\Orders\Enums\OrderStatus;
 use App\Modules\Orders\Models\Order;
+use App\Modules\Orders\Services\ArrivalVerification;
+use App\Modules\Orders\Services\OrderExecutionPresentation;
 use App\Modules\Orders\Services\OrderPresentation;
+use App\Modules\Pricing\Enums\ProposalType;
+use App\Modules\Reviews\Enums\CustomerRatingTag;
+use App\Modules\Reviews\Models\ReviewTag;
+use App\Support\Localization;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -44,12 +52,21 @@ final class OrderResource extends JsonResource
             'status_label' => $this->statusLabel(),
             'version' => $this->version,
 
-            'category' => ['id' => $this->category_id, 'name' => $this->category?->name],
-            'problem_type' => ['id' => $this->problem_type_id, 'name' => $this->problemType?->name],
+            'category' => ['id' => $this->category_id, 'name' => Localization::field($this->category)],
+            'problem_type' => ['id' => $this->problem_type_id, 'name' => Localization::field($this->problemType)],
             'customer_address_id' => $this->customer_address_id,
             'description' => $this->description,
             'pricing_mode' => $this->pricing_mode->value,
             'pricing_mode_label' => $this->pricing_mode->getLabel(),
+            'is_warranty_visit' => $this->resource->isWarrantyVisit(),
+            'warranty_coverage_text' => $this->resource->isWarrantyVisit() ? Localization::text($isProviderView ? 'copy.warranty_provider_coverage' : 'copy.warranty_coverage') : null,
+            'warranty_original_order_number' => $this->resource->isWarrantyVisit() ? $this->warrantyClaim->order->number : null,
+            'proposal_type_options' => $this->when($isProviderView && $this->resource->isWarrantyVisit(), fn (): array => [
+                ['code' => ProposalType::Materials->value, 'label' => ProposalType::Materials->getLabel()],
+            ]),
+            'customer_rating_tag_options' => $this->when($isProviderView, fn (): array => array_map(
+                fn (CustomerRatingTag $tag): array => ['code' => $tag->value, 'label' => $tag->getLabel()], CustomerRatingTag::cases(),
+            )),
             'materials_responsibility' => $this->materials_responsibility->value,
             'materials_responsibility_label' => $this->materials_responsibility->getLabel(),
             'budget_amount' => $this->budget_amount,
@@ -62,11 +79,11 @@ final class OrderResource extends JsonResource
                     : [
                         'minimum' => $this->problemType->employee_price_min,
                         'maximum' => $this->problemType->employee_price_max,
-                        'currency' => 'جنيه',
+                        'currency' => Localization::text('copy.egp'),
                     ],
             ),
             'price_guide_review_required' => $this->when(
-                $isProviderView && $this->operating_mode->value === 'EMPLOYEE',
+                $isProviderView && $this->operating_mode->value === 'EMPLOYEE' && ! $this->resource->isWarrantyVisit(),
                 (bool) $this->problemType?->is_other,
             ),
 
@@ -77,8 +94,8 @@ final class OrderResource extends JsonResource
             ],
 
             'location' => array_filter([
-                'area' => $this->area?->name,           // BR-024 — اسم المنطقة يظهر دائمًا
-                'city' => $this->city?->name,
+                'area' => Localization::field($this->area),           // BR-024 — اسم المنطقة يظهر دائمًا
+                'city' => Localization::field($this->city),
                 'address_text' => $showFullAddress ? $this->address_text : null,
                 'building' => $showFullAddress ? $this->building : null,
                 'floor' => $showFullAddress ? $this->floor : null,
@@ -89,8 +106,12 @@ final class OrderResource extends JsonResource
             ], fn ($v) => $v !== null),
 
             'deadlines' => $presentation->deadlines($this->resource),
+            'waiting' => $presentation->waiting($this->resource),
             'display_status' => $presentation->displayStatus($this->resource, $actor),
             'stepper' => $presentation->stepper($this->resource),
+            'execution_steps' => app(OrderExecutionPresentation::class)->steps($this->resource),
+            'completion_estimate' => app(OrderExecutionPresentation::class)->estimate($this->resource),
+            'review_tag_options' => $this->when(! $isProviderView, fn (): array => self::serviceReviewTagOptions($request)),
             'conversation_id' => $conversation?->getKey(),
 
             // BR-057 — يُكتب في ملاحظة تحويل إنستاباي حتى تطابقه الإدارة.
@@ -108,7 +129,9 @@ final class OrderResource extends JsonResource
             'termination' => [
                 'reason_code' => $this->cancel_reason_code?->value,
                 'reason_label' => $this->cancel_reason_code?->getLabel(),
-                'note' => $this->cancel_note,
+                'note' => $this->cancel_reason_code === CancelReason::AccountBlocked
+                    ? $this->cancel_reason_code->getLabel()
+                    : $this->cancel_note,
                 'cancelled_at' => $this->cancelled_at?->toIso8601String(),
                 'expired_at' => $this->expired_at?->toIso8601String(),
                 'closed_at' => $this->closed_at?->toIso8601String(),
@@ -122,7 +145,7 @@ final class OrderResource extends JsonResource
             'provider' => $this->whenLoaded('providerProfile', fn (): ?array => $this->providerProfile === null ? null : [
                 'id' => $this->providerProfile->id,
                 'name' => $this->providerProfile->user->name,
-                // BR-101 — الهاتف الحقيقي يظهر للطرفين من CONFIRMED
+                // قرار المالك: التواصل بين الطرفين رسائل فقط؛ الهاتف للإدارة.
                 'phone' => $presentation->phoneVisible($this->resource) ? $this->providerProfile->user->phone : null,
                 'rating_avg' => $this->providerProfile->rating_avg,
                 'completed_orders' => $this->providerProfile->completed_orders_count,
@@ -138,12 +161,32 @@ final class OrderResource extends JsonResource
                 'rating_avg' => $this->customer?->customer_rating_avg,
             ]),
 
+            'arrival_code_required' => app(ArrivalVerification::class)->required($this->resource) && $this->status === OrderStatus::OnTheWay,
+            'arrival_exception_pending' => $this->status === OrderStatus::OnTheWay && ($this->arrival_exception_report['provider_id'] ?? null) === $this->provider_profile_id && $this->arrival_exception_report !== null,
+            'absence_report_pending' => $this->resource->hasPendingNoShowReport(),
+
+            'work_photos' => ($isProviderView || $this->completed_at !== null)
+                ? $this->resource->media->whereIn('purpose', ['REPAIR_BEFORE', 'REPAIR_AFTER'])->map(fn ($media): array => ['id' => $media->getKey(), 'purpose' => $media->purpose, 'content_url' => route('api.media.show', $media)])->values()
+                : [],
+            'review_photo_ids' => $this->resource->media->where('purpose', 'CUSTOMER_REVIEW')->pluck('id')->values(),
+            'warranty_until' => $this->resource->warrantyExpiresAt()?->toIso8601String(),
+
             'available_actions' => $request->user() === null
                 ? []
                 : $presentation->availableActions($this->resource, $request->user(), $actor),
 
             'created_at' => $this->created_at?->toIso8601String(),
         ];
+    }
+
+    /** @return list<array{code: string, label: string}> */
+    private static function serviceReviewTagOptions(Request $request): array
+    {
+        if (! $request->attributes->has('service_review_tag_options')) {
+            $request->attributes->set('service_review_tag_options', ReviewTag::options());
+        }
+
+        return $request->attributes->get('service_review_tag_options');
     }
 
     /** BR-024 — الفني لا يرى العنوان التفصيلي قبل التأكيد. */

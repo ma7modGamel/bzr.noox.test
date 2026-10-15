@@ -9,7 +9,7 @@ use App\Modules\Orders\Enums\OrderEventCode as E;
 use App\Modules\Orders\Enums\OrderStatus as S;
 
 /**
- * جدول الانتقالات T-01..T-29 — 10-ORDER-LIFECYCLE هو المرجع.
+ * جدول الانتقالات T-01..T-31 — 10-ORDER-LIFECYCLE هو المرجع.
  * أي انتقال غير مذكور هنا **مرفوض** (`INVALID_TRANSITION`).
  *
  * تعديل هذا الجدول = تعديل الوثيقة. لا يُضاف انتقال بلا صف في 10.
@@ -56,6 +56,9 @@ final class TransitionTable
             new Transition('T-27', 'assignProvider', [S::Open], S::Confirmed, [$A], E::ProviderAssigned, requiresOffers: false, note: 'BR-007'),
             new Transition('T-28', 'closeFreeInspection', [S::Arrived, S::AwaitingQuoteApproval], S::Closed, [$P, $C, $Y], E::ClosedFreeInspection, note: 'BR-056 — final_amount = 0'),
             new Transition('T-29', 'reassignProvider', [S::Confirmed, S::OnTheWay], S::Confirmed, [$A], E::ProviderAssigned, requiresOffers: false, note: 'T-06 + T-27 في معاملة واحدة'),
+            new Transition('T-30', 'assignWarrantyVisit', [S::Open], S::Confirmed, [$A], E::ProviderAssigned, note: 'زيارة ضمان بفني مختلف، مصنعية صفر'),
+            new Transition('T-32', 'confirmArrivalException', [S::OnTheWay], S::Arrived, [$A], E::Arrived, note: 'استثناء وصول موثّق بعد بلاغ الفني'),
+            new Transition('T-31', 'completeFreeWarrantyVisit', [S::InProgress], S::Closed, [$P], E::WarrantyWorkCompleted, note: 'بلا خامات مدفوعة، صور قبل وبعد إلزامية'),
         ];
     }
 

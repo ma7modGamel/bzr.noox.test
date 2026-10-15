@@ -6,18 +6,22 @@ namespace App\Modules\Orders\Actions;
 
 use App\Modules\Orders\Enums\ActorType;
 use App\Modules\Orders\Enums\CancelReason;
+use App\Modules\Orders\Enums\OrderEventCode;
 use App\Modules\Orders\Enums\OrderStatus;
 use App\Modules\Orders\Models\Order;
+use App\Modules\Orders\Models\OrderEvent;
 use App\Modules\Orders\Services\OrderTermination;
 use App\Modules\Orders\StateMachine\OrderStateMachine;
 use App\Modules\Providers\Models\ProviderProfile;
 use App\Modules\Settings\Enums\Cfg;
 use App\Modules\Settings\Services\SettingsRepository;
 use App\Support\Exceptions\BusinessRuleViolationException;
+use App\Support\Localization;
 use Carbon\CarbonImmutable;
+use Illuminate\Support\Facades\DB;
 
 /**
- * T-16 / T-18 — "تعذّر التنفيذ" أو "العميل غير موجود" (BR-071).
+ * تعذّر التنفيذ يلغي؛ غياب العميل بلاغ للإدارة وحدها دون تغيير الحالة (BR-071).
  * الإلغاء هنا بلا أي مبلغ مهما كانت المرحلة (13).
  */
 final readonly class ReportUnableAction
@@ -32,8 +36,12 @@ final readonly class ReportUnableAction
     {
         $this->assertOwnership($order, $provider);
 
+        if ($reason === CancelReason::CustomerNoShow) {
+            return $this->customerNoShow($order, $provider);
+        }
+
         if (mb_strlen(trim($note)) < 5) {
-            throw BusinessRuleViolationException::rule('BR-071', 'سبب تعذّر التنفيذ إلزامي.');
+            throw BusinessRuleViolationException::rule('BR-071', Localization::text('copy.a_reason_for_being_unable_to_perform_the_work'));
         }
 
         return $this->cancel($order, $provider, $reason, $note, $this->actionFor($order));
@@ -42,22 +50,36 @@ final readonly class ReportUnableAction
     /** BR-071 — لا يُسجَّل غياب العميل إلا بعد CFG-033 من الوصول (AC-EXE-05). */
     public function customerNoShow(Order $order, ProviderProfile $provider): Order
     {
-        $this->assertOwnership($order, $provider);
+        return DB::transaction(function () use ($order, $provider): Order {
+            $fresh = Order::query()->lockForUpdate()->findOrFail($order->getKey());
+            $this->assertOwnership($fresh, $provider);
 
-        if ($order->status !== OrderStatus::Arrived || $order->arrived_at === null) {
-            throw BusinessRuleViolationException::rule('BR-071', 'يُسجَّل غياب العميل بعد تسجيل الوصول.');
-        }
+            if ($fresh->status !== OrderStatus::Arrived || $fresh->arrived_at === null) {
+                throw BusinessRuleViolationException::rule('BR-071', Localization::text('copy.customer_absence_can_only_be_reported_after_arrival_is'));
+            }
 
-        $wait = $this->settings->int(Cfg::CustomerNoShowWaitMinutes);
+            $wait = $this->settings->int(Cfg::CustomerNoShowWaitMinutes);
 
-        if ($order->arrived_at->addMinutes($wait)->gt(CarbonImmutable::now())) {
-            throw BusinessRuleViolationException::rule(
-                'BR-071',
-                "يمكن تسجيل غياب العميل بعد {$wait} دقيقة من الوصول.",
-            );
-        }
+            if ($fresh->arrived_at->addMinutes($wait)->gt(CarbonImmutable::now())) {
+                throw BusinessRuleViolationException::rule('BR-071', Localization::text('dynamic.absence_wait', ['minutes' => $wait]));
+            }
 
-        return $this->cancel($order, $provider, CancelReason::CustomerNoShow, null, 'reportUnableAtArrival');
+            if (! $fresh->hasPendingNoShowReport()) {
+                OrderEvent::query()->create([
+                    'order_id' => $fresh->getKey(),
+                    'event_code' => OrderEventCode::CustomerNoShowReported,
+                    'actor_type' => ActorType::Provider,
+                    'actor_id' => $provider->getKey(),
+                    'from_status' => $fresh->status,
+                    'to_status' => $fresh->status,
+                    'created_at' => now(),
+                ]);
+            }
+
+            $fresh->unsetRelation('latestNoShowEvent');
+
+            return $fresh;
+        });
     }
 
     private function cancel(Order $order, ProviderProfile $provider, CancelReason $reason, ?string $note, string $action): Order
@@ -90,7 +112,7 @@ final readonly class ReportUnableAction
     private function assertOwnership(Order $order, ProviderProfile $provider): void
     {
         if ($order->provider_profile_id !== $provider->getKey()) {
-            throw BusinessRuleViolationException::rule('BR-071', 'هذا الطلب غير مسنَد إليك.');
+            throw BusinessRuleViolationException::rule('BR-071', Localization::text('copy.this_request_is_not_assigned_to_you'));
         }
     }
 }

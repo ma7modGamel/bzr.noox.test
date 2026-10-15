@@ -3,16 +3,21 @@ import DesignSystem
 import SwiftUI
 
 public struct C26OrderHistoryView: View {
+    let loadImage: (String) async -> Data?
     let state: CustomerUIState
     let onAction: (String) -> Void
 
-    public init(state: CustomerUIState, onAction: @escaping (String) -> Void = { _ in }) {
+    public init(state: CustomerUIState, loadImage: @escaping (String) async -> Data? = { _ in nil }, onAction: @escaping (String) -> Void = { _ in }) {
+        self.loadImage = loadImage
         self.state = state
         self.onAction = onAction
     }
 
     public var body: some View {
         CustomerScreen(title: bzrString("order.details.title"), state: state) {
+            if !state.warrantyCoverage.isEmpty { InfoBanner(text: state.warrantyCoverage) }
+            ServicePhotoSection(title: bzrString("repair.photos.before"), urls: state.beforePhotoURLs, loadImage: loadImage)
+            ServicePhotoSection(title: bzrString("repair.photos.after"), urls: state.afterPhotoURLs, loadImage: loadImage)
             Badge(text: localizedCustomerDisplayStatus(state.displayStatus))
             SummaryCard(
                 title: bzrString("order.details.service"),

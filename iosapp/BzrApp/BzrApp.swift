@@ -12,6 +12,9 @@ struct BzrApp: App {
     /// A provider link opens the provider root on its target instead of the application status (DEC-058).
     @State private var providerLinkTarget: DeepLinkTarget?
     @State private var push = PushCenter.shared
+    /// DEC-067: the last-mode restore runs once per session.
+    @State private var restoredMode = false
+    private let modeMemory = ModeMemoryStore()
     @State private var showsSplash = true
     private let session: AppAuthSessionStore
     private let apiBaseURL: URL
@@ -37,7 +40,7 @@ struct BzrApp: App {
 
     var body: some Scene {
         WindowGroup {
-            // Register Cairo and apply the shared theme on signed-in launches as well.
+            // Register the UI font and apply the shared theme on signed-in launches as well.
             // Layout direction follows the selected app language.
             BzrTheme {
                 if let providerViewModel {
@@ -78,6 +81,17 @@ struct BzrApp: App {
             .onChange(of: scenePhase) { _, phase in
                 if phase == .active { push.refreshAuthorization() }
             }
+            // DEC-065: a refused token signs out locally (as logout does) and shows login with the reason.
+            // DEC-067: remember the mode the user moves to; logout and expiry clear the token first, so they never count.
+            .onChange(of: providerViewModel == nil) { _, customerMode in
+                guard session.token != nil else { return }
+                modeMemory.remember(
+                    email: session.email, mode: customerMode ? ModeMemory.customer : ModeMemory.provider)
+            }
+            .onReceive(
+                NotificationCenter.default.publisher(for: SessionExpiry.notification)
+                    .receive(on: RunLoop.main)
+            ) { _ in sessionExpired() }
             // DEC-064: the animated launch over the first screen, for its minimum time, then a soft fade.
             .overlay {
                 if showsSplash {
@@ -116,12 +130,35 @@ struct BzrApp: App {
         viewModel.onDeepLink = { open(link: $0) }
         viewModel.notificationsAllowed = { PushCenter.shared.notificationsAllowed }
         push.onToken = { token in Task { await viewModel.registerPushDevice(token: token) } }
+        if let token = session.token {
+            Task { try? await LiveCustomerAPI(baseURL: apiBaseURL, token: token, appMode: "CUSTOMER").updateLocale(AppLanguage.current) }
+        }
         if let token = push.token { Task { await viewModel.registerPushDevice(token: token) } }
         push.requestPermissionOnce()
         push.refreshAuthorization()
         if let link = push.pendingLink {
             push.pendingLink = nil
+            restoredMode = true
             open(link: link)
+        }
+        restoreLastMode()
+    }
+
+    /// DEC-067: once per session, start where this account left off (a pending link always wins).
+    private func restoreLastMode() {
+        guard !restoredMode, let token = session.token else { return }
+        restoredMode = true
+        let lastMode = modeMemory.lastMode(email: session.email)
+        guard lastMode == ModeMemory.provider else { return }
+        let resolver = makeProviderViewModel(token)
+        Task {
+            let status = await resolver.providerStatus(unknownOnFailure: true)
+            let restore = ModeMemory.restoreTarget(
+                lastMode: lastMode, providerStatus: status, hasPendingLink: false)
+            if restore.forget { modeMemory.remember(email: session.email, mode: ModeMemory.customer) }
+            guard restore.target != ModeMemory.customer, providerViewModel == nil else { return }
+            providerLinkTarget = DeepLinkTarget(mode: DeepLinkTarget.provider, target: restore.target)
+            providerViewModel = resolver
         }
     }
 
@@ -155,8 +192,19 @@ struct BzrApp: App {
         let deviceToken = push.token
         Task { await viewModel?.signOut(deviceToken: deviceToken) }
         session.clear()
+        restoredMode = false
         customerViewModel = nil
         providerViewModel = nil
+    }
+
+    private func sessionExpired() {
+        guard session.token != nil else { return }
+        let email = session.email ?? ""
+        session.clear()
+        restoredMode = false
+        customerViewModel = nil
+        providerViewModel = nil
+        authViewModel.showSessionExpired(email: email)
     }
 
     private func openProvider() {

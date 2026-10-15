@@ -271,7 +271,7 @@ foreach ($manifest['screens'] ?? [] as $screen) {
     validatePair($screen, 'screen', $root, $errors);
 }
 $expectedScreens = ['SCR-GALLERY'];
-foreach (['C' => 36, 'P' => 21] as $prefix => $last) {
+foreach (['C' => 38, 'P' => 21] as $prefix => $last) {
     for ($number = 1; $number <= $last; $number++) {
         $expectedScreens[] = sprintf('SCR-%s%02d', $prefix, $number);
     }
@@ -279,16 +279,19 @@ foreach (['C' => 36, 'P' => 21] as $prefix => $last) {
 sort($screenIds);
 sort($expectedScreens);
 if ($screenIds !== $expectedScreens) {
-    $errors[] = 'parity.json must list every C01–C36 and P01–P21 mobile screen exactly once';
+    $errors[] = 'parity.json must list every C01–C38 and P01–P21 mobile screen exactly once';
 }
 
 $androidNames = [];
 foreach (array_keys($strings) as $key) {
     $androidNames[preg_replace('/[^a-z0-9_]/', '_', strtolower((string) $key))] = $key;
 }
+foreach (array_keys(json_decode((string) file_get_contents($root.'/design/plurals.json'), true, flags: JSON_THROW_ON_ERROR)) as $key) {
+    $androidNames['plural_'.preg_replace('/[^a-z0-9_]/', '_', strtolower($key))] = $key;
+}
 $androidKeys = [];
 foreach (sourceFiles($root.'/androidapp', 'kt') as $file) {
-    preg_match_all('/R\.string\.([a-z0-9_]+)/', (string) file_get_contents($file), $matches);
+    preg_match_all('/R\.(?:string|plurals)\.([a-z0-9_]+)/', (string) file_get_contents($file), $matches);
     foreach ($matches[1] as $name) {
         if (isset($androidNames[$name])) {
             $androidKeys[$androidNames[$name]] = true;
@@ -313,6 +316,12 @@ foreach (glob($root.'/androidapp/*/*/src/main/res/layout/*.xml') ?: [] as $file)
 }
 $iosKeys = [];
 foreach (sourceFiles($root.'/iosapp', 'swift') as $file) {
+    preg_match_all('/\bbzr(?:String|Plural)\("([^"]+)"/', (string) file_get_contents($file), $calls);
+    foreach ($calls[1] as $key) {
+        if (! array_key_exists($key, $strings)) {
+            $errors[] = 'missing iOS localization key '.$key.' in '.substr($file, strlen($root) + 1);
+        }
+    }
     preg_match_all('/"([^"\\n]+)"/', (string) file_get_contents($file), $matches);
     foreach ($matches[1] as $key) {
         if (array_key_exists($key, $strings)) {

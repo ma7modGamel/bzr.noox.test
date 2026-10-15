@@ -50,7 +50,7 @@ class StoreScreenshotExportTest(private val locale: String) {
         ScreenSnapshots.prepare(paparazzi)
         val captures = listOf(
             Triple("SCR-C01", "marketplace", "01-home"),
-            Triple("SCR-C03", "with_media", "02-request"),
+            Triple("SCR-C03", "selected", "02-request"),
             Triple("SCR-C06", "execution_now", "03-offers"),
             Triple("SCR-C19", "messages", "04-chat"),
         )

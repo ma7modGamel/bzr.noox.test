@@ -1,0 +1,31 @@
+{
+    "data": {
+        "operating_mode": "MARKETPLACE",
+        "currency": "EGP",
+        "summary": {
+            "balance": "-650.00",
+            "available": "-650.00",
+            "pending": "0.00"
+        },
+        "dues": {
+            "blocked": true,
+            "debt": "650.00",
+            "limit": "500.00"
+        },
+        "transactions": [
+            {
+                "id": "order-1",
+                "type": "ORDER",
+                "title": "طلب #1042",
+                "detail": "عمولة مستحقة للمنصة · 650.00 جنيه",
+                "amount": "-650.00",
+                "occurred_at": "2026-10-01T10:00:00+00:00",
+                "available": true
+            }
+        ],
+        "meta": {
+            "current_page": 1,
+            "last_page": 1
+        }
+    }
+}

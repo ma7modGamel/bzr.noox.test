@@ -11,6 +11,7 @@ use App\Modules\Orders\Models\Order;
 use App\Modules\Orders\Services\OrderTermination;
 use App\Modules\Orders\StateMachine\OrderStateMachine;
 use App\Support\Exceptions\BusinessRuleViolationException;
+use App\Support\Localization;
 
 /**
  * الإلغاء — 13، BR-070..BR-072. لا رسوم ولا غرامات (DEC-016).
@@ -60,7 +61,7 @@ final readonly class CancelOrderAction
         }
 
         if ($order->customer_id !== $actorId) {
-            throw BusinessRuleViolationException::rule('BR-070', 'هذا الطلب ليس طلبك.');
+            throw BusinessRuleViolationException::rule('BR-070', Localization::text('copy.this_request_does_not_belong_to_you'));
         }
 
         $allowed = [OrderStatus::Open, OrderStatus::Confirmed, OrderStatus::OnTheWay];
@@ -68,7 +69,7 @@ final readonly class CancelOrderAction
         if (! in_array($order->status, $allowed, true)) {
             throw BusinessRuleViolationException::rule(
                 'BR-070',
-                'الإلغاء غير متاح بعد وصول الفني. استخدم "عندي مشكلة".',
+                Localization::text('copy.cancellation_is_unavailable_after_the_technician_arrives_use_report'),
             );
         }
     }

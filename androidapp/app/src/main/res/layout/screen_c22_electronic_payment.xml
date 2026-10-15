@@ -32,6 +32,13 @@
         android:nestedScrollingEnabled="false"
         android:overScrollMode="never" />
 
+    <noox.bzr.design.views.SummaryCardView android:id="@+id/instapayDetails" android:layout_width="match_parent" android:layout_height="wrap_content" app:bremoTitle="@string/payment_instapay_address" android:visibility="gone" />
+    <noox.bzr.design.views.InfoBannerView android:id="@+id/instapayInstructions" android:layout_width="match_parent" android:layout_height="wrap_content" app:bremoText="@string/payment_instapay_instructions" android:visibility="gone" />
+    <noox.bzr.design.views.TextAreaFieldView android:id="@+id/transferReference" android:layout_width="match_parent" android:layout_height="wrap_content" app:bremoLabel="@string/payment_instapay_reference" android:visibility="gone" />
+    <noox.bzr.design.views.SecondaryButtonView android:id="@+id/receipt" android:layout_width="match_parent" android:layout_height="wrap_content" app:bremoText="@string/payment_instapay_receipt" android:visibility="gone" />
+    <noox.bzr.design.views.InfoBannerView android:id="@+id/transferPending" android:layout_width="match_parent" android:layout_height="wrap_content" app:bremoText="@string/payment_instapay_pending" android:visibility="gone" />
+    <noox.bzr.design.views.SecondaryButtonView android:id="@+id/refresh" android:layout_width="match_parent" android:layout_height="wrap_content" app:bremoText="@string/payment_refresh" />
+
     <noox.bzr.design.views.InfoBannerView
         android:id="@+id/creating"
         android:layout_width="match_parent"

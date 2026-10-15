@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Orders\Enums;
 
+use App\Support\Localization;
 use Filament\Support\Contracts\HasLabel;
 
 /** رموز أسباب الإلغاء — 13-CANCELLATION-FLOW. لا رسوم ولا غرامات (DEC-016). */
@@ -34,24 +35,7 @@ enum CancelReason: string implements HasLabel
 
     public function getLabel(): string
     {
-        return match ($this) {
-            self::FoundAnother => 'وجدت فنيًا آخر',
-            self::NoLongerNeeded => 'لم أعد بحاجة للخدمة',
-            self::PriceTooHigh => 'السعر مرتفع',
-            self::ProviderLate => 'تأخر الفني',
-            self::WrongDetails => 'بيانات الطلب غير صحيحة',
-            self::Emergency => 'ظرف طارئ',
-            self::CannotReach => 'تعذّر الوصول',
-            self::OutOfScope => 'العمل خارج تخصصي',
-            self::UnsafeSite => 'الموقع غير آمن',
-            self::CustomerNoShow => 'العميل غير موجود',
-            self::WrongAddress => 'عنوان خاطئ',
-            self::AdminPolicy => 'قرار إداري',
-            self::FraudSuspected => 'اشتباه احتيال',
-            self::Duplicate => 'طلب مكرر',
-            self::AccountBlocked => 'حظر الحساب',
-            self::Other => 'سبب آخر',
-        };
+        return Localization::enum($this);
     }
 
     /** @return list<self> */
@@ -64,7 +48,7 @@ enum CancelReason: string implements HasLabel
             ],
             ActorType::Provider => [
                 self::Emergency, self::CannotReach, self::OutOfScope,
-                self::UnsafeSite, self::CustomerNoShow, self::WrongAddress, self::Other,
+                self::UnsafeSite, self::WrongAddress, self::Other,
             ],
             ActorType::Admin, ActorType::System => [
                 self::AdminPolicy, self::FraudSuspected, self::Duplicate,

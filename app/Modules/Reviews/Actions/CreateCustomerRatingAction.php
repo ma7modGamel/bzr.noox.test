@@ -12,15 +12,17 @@ use App\Modules\Reviews\Models\CustomerRating;
 use App\Modules\Settings\Enums\Cfg;
 use App\Modules\Settings\Services\SettingsRepository;
 use App\Support\Exceptions\BusinessRuleViolationException;
+use App\Support\Localization;
 use Illuminate\Support\Facades\DB;
 
 final readonly class CreateCustomerRatingAction
 {
     public function __construct(private SettingsRepository $settings) {}
 
-    public function execute(Order $order, ProviderProfile $provider, int $stars): CustomerRating
+    /** @param list<string> $tags */
+    public function execute(Order $order, ProviderProfile $provider, int $stars, array $tags = [], ?string $comment = null): CustomerRating
     {
-        return DB::transaction(function () use ($order, $provider, $stars): CustomerRating {
+        return DB::transaction(function () use ($order, $provider, $stars, $tags, $comment): CustomerRating {
             $fresh = Order::query()->lockForUpdate()->findOrFail($order->getKey());
             $deadline = $fresh->closed_at?->addDays($this->settings->int(Cfg::RatingWindowDays));
 
@@ -29,7 +31,7 @@ final readonly class CreateCustomerRatingAction
                 || $deadline === null
                 || now()->isAfter($deadline)
                 || $fresh->customerRating()->exists()) {
-                throw BusinessRuleViolationException::rule('BR-091', 'التقييم غير متاح لهذا الطلب.');
+                throw BusinessRuleViolationException::rule('BR-091', Localization::text('copy.rating_is_unavailable_for_this_request'));
             }
 
             $rating = CustomerRating::query()->create([
@@ -37,6 +39,8 @@ final readonly class CreateCustomerRatingAction
                 'customer_id' => $fresh->customer_id,
                 'provider_profile_id' => $provider->getKey(),
                 'stars' => $stars,
+                'tags' => array_values($tags),
+                'comment' => trim((string) $comment) === '' ? null : trim($comment),
             ]);
 
             $ratings = CustomerRating::query()

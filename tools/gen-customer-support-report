@@ -71,9 +71,9 @@ $rows[] = '<section class="comparison" id="'.htmlspecialchars($id).'">'
     .'<article><h2>iOS</h2><div class="pending">الحالة مختبرة في Swift Core؛ اللقطة مؤجلة لدفعة «تحقق iOS».</div></article>'
     .'</div></section>';
 
-// C17 adds its visible entry point to the previously approved C03; expose every affected content variant.
+// C17 adds its visible entry point to the problem step (C03 until DEC-071, C37 since); expose every affected content variant.
 foreach (['empty', 'other_short', 'with_media'] as $caseId) {
-    $screen = 'SCR-C03';
+    $screen = 'SCR-C37';
     $id = $screen.'-'.$caseId;
     $matches = glob($root.'/androidapp/app/src/test/snapshots/images/*_'.strtolower($id).'.png') ?: [];
     if (count($matches) !== 1) {

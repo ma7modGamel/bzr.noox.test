@@ -10,7 +10,7 @@ import noox.bzr.design.BadgeKind
 import noox.bzr.design.R
 import noox.bzr.design.databinding.ViewBadgeBinding
 
-/** 43 §3 Badge: highlight (amber, optional star) or order status (teal). */
+/** Informational badges share compact dimensions and semantic palette colours. */
 class BadgeView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) : BremoLinearLayout(context, attrs) {
     private val binding: ViewBadgeBinding
 
@@ -35,6 +35,7 @@ class BadgeView @JvmOverloads constructor(context: Context, attrs: AttributeSet?
     init {
         orientation = HORIZONTAL
         gravity = Gravity.CENTER_VERTICAL
+        minimumHeight = px(R.dimen.bremo_size_badge_height)
         gap(R.drawable.bremo_gap_xs)
         setPaddingRelative(px(R.dimen.bremo_space_s), px(R.dimen.bremo_space_xs), px(R.dimen.bremo_space_s), px(R.dimen.bremo_space_xs))
         binding = ViewBadgeBinding.inflate(inflater, this)
@@ -47,10 +48,17 @@ class BadgeView @JvmOverloads constructor(context: Context, attrs: AttributeSet?
     }
 
     private fun render() {
-        val highlight = kind == BadgeKind.Highlight
-        setBackgroundResource(if (highlight) R.drawable.bremo_bg_badge_highlight else R.drawable.bremo_bg_badge_status)
-        binding.text.setTextColor(color(if (highlight) R.color.bremo_badge_text else R.color.bremo_primary700))
+        val (background, foreground) = when (kind) {
+            BadgeKind.Highlight -> R.drawable.bremo_bg_badge_highlight to R.color.bremo_badge_text
+            BadgeKind.Status -> R.drawable.bremo_bg_badge_status to R.color.bremo_info_text
+            BadgeKind.Success -> R.drawable.bremo_bg_badge_success to R.color.bremo_success
+            BadgeKind.Warning -> R.drawable.bremo_bg_badge_warning to R.color.bremo_warning_text
+            BadgeKind.Neutral -> R.drawable.bremo_bg_badge_neutral to R.color.bremo_neutral_text
+            BadgeKind.Danger -> R.drawable.bremo_bg_badge_danger to R.color.bremo_danger
+        }
+        setBackgroundResource(background)
+        binding.text.setTextColor(color(foreground))
         binding.icon.showIf(icon != null)
-        icon?.let { binding.icon.icon(it, R.color.bremo_star) }
+        icon?.let { binding.icon.icon(it, foreground) }
     }
 }

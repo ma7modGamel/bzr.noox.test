@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- SCR-C25 C25OrdersScreen content (DEC-047). -->
+<!-- Figma «Primo App» «طلباتي» 3002:3889 — the tabs and order cards are built in C25OrdersView (DEC-076). -->
 <merge xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     tools:parentTag="android.widget.LinearLayout">
 
-    <noox.bzr.design.views.SortChipsView
+    <LinearLayout
         android:id="@+id/tabs"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:orientation="horizontal" />
 
     <noox.bzr.design.views.EmptyStateView
         android:id="@+id/empty"
@@ -16,18 +16,19 @@
         android:layout_height="wrap_content"
         android:visibility="gone" />
 
-    <androidx.recyclerview.widget.RecyclerView
+    <LinearLayout
         android:id="@+id/orders"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:nestedScrollingEnabled="false"
-        android:overScrollMode="never" />
+        android:divider="@drawable/bremo_gap_l"
+        android:orientation="vertical"
+        android:showDividers="middle" />
 
     <TextView
         android:id="@+id/loadingMore"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:visibility="gone"
+        android:text="@string/orders_loading_more"
         android:textAppearance="@style/TextAppearance.Bremo.Secondary"
-        android:text="@string/orders_loading_more" />
+        android:visibility="gone" />
 </merge>

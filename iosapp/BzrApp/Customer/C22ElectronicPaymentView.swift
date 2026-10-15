@@ -1,6 +1,8 @@
 import BzrCore
 import DesignSystem
 import SwiftUI
+import PhotosUI
+import UIKit
 
 public struct C22ElectronicPaymentView: View {
     let state: CustomerUIState
@@ -8,23 +10,34 @@ public struct C22ElectronicPaymentView: View {
     let onCreate: () -> Void
     let onOpenCheckout: () -> Void
     let onCopyCode: () -> Void
+    let onReceiptSelected: (CustomerMediaUpload) -> Void
+    let onReferenceChange: (String) -> Void
+    let onRefresh: () -> Void
+    @State private var selectedReceipt: PhotosPickerItem?
+    @State private var pickingReceipt = false
 
     public init(
         state: CustomerUIState,
         onChannelSelect: @escaping (Int) -> Void = { _ in },
         onCreate: @escaping () -> Void = {},
         onOpenCheckout: @escaping () -> Void = {},
-        onCopyCode: @escaping () -> Void = {}
+        onCopyCode: @escaping () -> Void = {},
+        onReceiptSelected: @escaping (CustomerMediaUpload) -> Void = { _ in },
+        onReferenceChange: @escaping (String) -> Void = { _ in },
+        onRefresh: @escaping () -> Void = {}
     ) {
         self.state = state
         self.onChannelSelect = onChannelSelect
         self.onCreate = onCreate
         self.onOpenCheckout = onOpenCheckout
         self.onCopyCode = onCopyCode
+        self.onReceiptSelected = onReceiptSelected
+        self.onReferenceChange = onReferenceChange
+        self.onRefresh = onRefresh
     }
 
     public var body: some View {
-        CustomerScreen(title: bzrString("payment.electronic.title"), state: state) {
+        CustomerScreen(title: bzrString("payment.electronic.title"), state: state, bottomBar: AnyView(createAction)) {
             ScreenHeading(bzrString("payment.electronic.heading"))
             SummaryCard(
                 title: bzrString("payment.amount.total"), rows: [(.check, state.items[safe: 0] ?? "")],
@@ -34,19 +47,47 @@ public struct C22ElectronicPaymentView: View {
                 channelCard(index, state.options[index])
             }
             if state.messageKey == "payment.creating" { InfoBanner(text: bzrString("payment.creating")) }
-            resultContent
-            if shouldShowCreateButton {
-                PrimaryButton(
-                    text: bzrString("payment.create"),
-                    state: state.isBusy ? .loading : (state.canContinue ? .normal : .disabled),
-                    onClick: onCreate)
+            if state.isInstapay {
+                SummaryCard(title: bzrString("payment.instapay.address"), rows: state.fieldValues.dropFirst().prefix(3).filter { !$0.isEmpty }.map { (.info, $0) }, editText: nil)
+                if paymentStatus.isEmpty || ["FAILED", "EXPIRED"].contains(paymentStatus) {
+                    InfoBanner(text: bzrString("payment.instapay.instructions"))
+                    TextAreaField(
+                        label: bzrString("payment.instapay.reference"), placeholder: "", value: state.fieldValues.first ?? "", state: state.isBusy ? .disabled : .empty,
+                        onValueChange: onReferenceChange)
+                    SecondaryButton(
+                        text: bzrString(state.hasPhoto ? "payment.instapay.receipt_attached" : "payment.instapay.receipt"), enabled: !state.isBusy,
+                        onClick: { pickingReceipt = true }
+                    )
+                    .photosPicker(isPresented: $pickingReceipt, selection: $selectedReceipt, matching: .images)
+                    .onChange(of: selectedReceipt) { _, item in
+                        guard let item else { return }
+                        Task {
+                            guard let originalData = try? await item.loadTransferable(type: Data.self),
+                                let data = UIImage(data: originalData)?.jpegData(compressionQuality: 0.9)
+                            else { return }
+                            onReceiptSelected(CustomerMediaUpload(fileName: "transfer-receipt.jpg", mimeType: "image/jpeg", data: data))
+                        }
+                    }
+                }
             }
+            if state.messageKey == "media.upload_error" { WarningBox(text: bzrString("media.upload_error")) }
+            resultContent
+            SecondaryButton(text: bzrString("payment.refresh"), enabled: !state.isBusy, onClick: onRefresh)
+
+        }
+    }
+
+    @ViewBuilder private var createAction: some View {
+        if shouldShowCreateButton {
+            PrimaryButton(
+                text: bzrString(state.isInstapay ? "payment.instapay.submit" : "payment.create"), state: state.isBusy ? .loading : (state.canContinue ? .normal : .disabled),
+                onClick: onCreate)
         }
     }
 
     private var paymentStatus: String { state.itemStates.first ?? "" }
     private var shouldShowCreateButton: Bool {
-        state.visibleActions.contains("pay_electronic")
+        (state.visibleActions.contains("pay_electronic") || state.visibleActions.contains("submit_instapay_transfer"))
             && (paymentStatus.isEmpty || ["FAILED", "EXPIRED"].contains(paymentStatus))
     }
 
@@ -60,7 +101,7 @@ public struct C22ElectronicPaymentView: View {
             }
         )
         .buttonStyle(.plain)
-        .disabled(!paymentStatus.isEmpty || state.isBusy)
+        .disabled((!paymentStatus.isEmpty && !["FAILED", "EXPIRED"].contains(paymentStatus)) || state.isBusy)
     }
 
     @ViewBuilder private var resultContent: some View {
@@ -75,8 +116,12 @@ public struct C22ElectronicPaymentView: View {
         case "PENDING":
             InfoBanner(text: bzrString("payment.checkout.ready"))
             SecondaryButton(text: bzrString("payment.checkout.open"), onClick: onOpenCheckout)
+        case "PENDING_VERIFICATION": InfoBanner(text: bzrString("payment.instapay.pending"))
         case "SUCCEEDED": InfoBanner(text: bzrString("payment.success"))
-        case "FAILED": WarningBox(text: bzrString("payment.failed"))
+        case "FAILED":
+            let message = state.isInstapay ? bzrString("payment.instapay.retry") : bzrString("payment.failed")
+            let reason = state.fieldValues[safe: 4] ?? ""
+            WarningBox(text: [reason, message].filter { !$0.isEmpty }.joined(separator: "\n"))
         case "EXPIRED": WarningBox(text: bzrString("payment.expired"))
         default: EmptyView()
         }

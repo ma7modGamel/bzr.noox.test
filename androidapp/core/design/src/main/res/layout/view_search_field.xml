@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:parentTag="android.widget.LinearLayout">
+    <ImageView
+        android:layout_width="@dimen/bremo_size_icon_small"
+        android:layout_height="@dimen/bremo_size_icon_small"
+        android:importantForAccessibility="no"
+        app:srcCompat="@drawable/ic_search"
+        app:tint="@color/bremo_slate400" />
+
+    <EditText
+        android:id="@+id/input"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:background="@null"
+        android:imeOptions="actionSearch"
+        android:importantForAutofill="no"
+        android:inputType="text"
+        android:maxLines="1"
+        android:paddingStart="@dimen/bremo_space_s"
+        android:paddingEnd="@dimen/bremo_space_s"
+        android:textAlignment="viewStart"
+        android:textAppearance="@style/TextAppearance.Bremo.Body"
+        android:textColorHint="@color/bremo_slate400"
+        tools:ignore="LabelFor" />
+
+    <ImageButton
+        android:id="@+id/clear"
+        android:layout_width="@dimen/bremo_size_touch_target_min"
+        android:layout_height="@dimen/bremo_size_touch_target_min"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="@string/common_clear"
+        android:padding="@dimen/bremo_space_m"
+        android:scaleType="fitCenter"
+        android:visibility="gone"
+        app:srcCompat="@drawable/ic_close"
+        app:tint="@color/bremo_slate400" />
+</merge>

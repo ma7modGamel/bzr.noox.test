@@ -1,0 +1,13 @@
+{
+  "date": "2026-10-11",
+  "production_accepted": false,
+  "deployed": false,
+  "backend": {"tests": 293, "passed": 293, "assertions": 4407, "duration_ms": 64559},
+  "backend_final_subset": {"tests": 39, "passed": 39, "assertions": 2375, "duration_ms": 39211, "overlaps_full_suite": true},
+  "android": {"app_tests": 120, "design_tests": 7, "passed": 127, "failures": 0, "errors": 0, "skipped": 0, "debug_build": "passed"},
+  "android_legal_goldens": {"comparisons": 8, "passed": 8, "overlaps_app_suite": true},
+  "swift_core": {"tests": 40, "passed": 40, "failures": 0, "duration_ms": 447, "platform": "linux"},
+  "gates": {"generated_resources": "passed", "parity": "passed", "source_lint": "passed"},
+  "legal": {"arabic_sources_preserved": 4, "english_drafts": 4, "approved_english_versions_found": 0, "draft_status": "Pending Legal Approval"},
+  "pending": ["legal approval", "iOS application build and runtime", "interactive device language-switch matrix", "real foreground/background push delivery", "complete historic golden and live-screen review"]
+}

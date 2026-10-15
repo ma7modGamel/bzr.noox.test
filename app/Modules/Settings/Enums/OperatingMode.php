@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Settings\Enums;
 
+use App\Support\Localization;
 use Filament\Support\Contracts\HasColor;
 use Filament\Support\Contracts\HasLabel;
 
@@ -22,8 +23,8 @@ enum OperatingMode: string implements HasColor, HasLabel
     public function getLabel(): string
     {
         return match ($this) {
-            self::Employee => 'وضع الموظفين',
-            self::Marketplace => 'وضع السوق',
+            self::Employee => Localization::text('copy.employee_mode'),
+            self::Marketplace => Localization::text('copy.marketplace_mode'),
         };
     }
 

@@ -1,0 +1,15 @@
+{
+    "data": {
+        "status": "NOT_STARTED",
+        "display_status": "provider.application.status.NOT_STARTED",
+        "available_actions": [
+            "start_provider_application",
+            "submit_provider_application"
+        ],
+        "profile_photo_uploaded": false,
+        "documents": {
+            "id_front": false,
+            "id_back": false
+        }
+    }
+}

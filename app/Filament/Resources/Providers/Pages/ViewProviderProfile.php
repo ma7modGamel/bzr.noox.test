@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Filament\Resources\Providers\Pages;
 
 use App\Filament\Resources\Providers\ProviderProfileResource;
+use App\Filament\Support\SettlementActions;
 use App\Modules\Identity\Models\Admin;
 use App\Modules\Providers\Actions\ReviewProviderAction;
 use App\Modules\Providers\Enums\EmploymentType;
@@ -94,6 +95,8 @@ final class ViewProviderProfile extends ViewRecord
                 ->requiresConfirmation()
                 ->visible(fn (): bool => $this->profile()->status === ProviderStatus::Suspended)
                 ->action(fn () => $this->run(fn (Admin $admin) => $this->review()->reactivate($this->profile(), $admin), 'تمت إعادة التفعيل.')),
+            SettlementActions::payout(fn (): ProviderProfile => $this->profile()),
+            SettlementActions::remittance(fn (): ProviderProfile => $this->profile()),
         ];
     }
 

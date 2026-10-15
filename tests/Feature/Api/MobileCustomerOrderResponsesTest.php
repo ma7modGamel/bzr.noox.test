@@ -19,6 +19,8 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Str;
 use Illuminate\Testing\TestResponse;
 use PHPUnit\Framework\Attributes\Test;
+use Tests\Support\AttachesRepairPhotos;
+use Tests\Support\RecordsMobileResponses;
 use Tests\TestCase;
 
 /**
@@ -29,6 +31,10 @@ use Tests\TestCase;
  */
 final class MobileCustomerOrderResponsesTest extends TestCase
 {
+    use AttachesRepairPhotos;
+
+    // المقترحات بخريطة معرّفات مستقلة، فلا تُغيّر إعادة التسجيل معرّفات ملفات الرحلة القائمة.
+    use RecordsMobileResponses;
     use RefreshDatabase;
 
     /** Real ids in this run → stable ids in the recorded files. */
@@ -66,13 +72,15 @@ final class MobileCustomerOrderResponsesTest extends TestCase
         $this->record('addresses', $this->customerGet($customer, '/api/v1/addresses')
             ->assertJsonStructure(['data' => [['id', 'label', 'is_default', 'city' => ['id'], 'area' => ['name'], 'address_text']]]));
 
+        $provider = ProviderProfile::factory()->servingFor($category->id, $address->area_id)->create();
+
         $orderId = $this->publish($customer, $address, $category, 'NOW');
         $this->record('order_open', $this->order($customer, $orderId));
         $this->record('orders_current', $this->customerGet($customer, '/api/v1/orders?scope=current&page=1')
             ->assertJsonStructure(['data' => [['id', 'number', 'status', 'status_label', 'category', 'problem_type', 'location', 'created_at']]]));
 
         $order = Order::query()->findOrFail($orderId);
-        $provider = ProviderProfile::factory()->servingFor($order->category_id, $order->area_id)->create();
+
         $provider->user->update(['name' => 'كريم السباك', 'phone' => '01022222222']);
         // decimal:2 fields arrive as strings ("4.80"); record a real value so the model is tested on it.
         $provider->forceFill(['rating_avg' => '4.80'])->save();
@@ -86,13 +94,18 @@ final class MobileCustomerOrderResponsesTest extends TestCase
         $this->record('tracking_on_the_way', $this->customerGet($customer, "/api/v1/orders/{$orderId}/tracking")
             ->assertJsonStructure(['last_location' => ['lat', 'lng'], 'eta_minutes', 'eta_approximate']));
 
-        $this->providerPost($provider->user, "/api/v1/provider/orders/{$orderId}/arrived", ['lat' => 30.0600, 'lng' => 31.3400])->assertOk();
+        $this->providerPost($provider->user, "/api/v1/provider/orders/{$orderId}/arrived", ['lat' => 30.0600, 'lng' => 31.3400, 'arrival_code' => $this->arrivalCode(Order::query()->findOrFail($orderId)), 'expected_version' => Order::query()->findOrFail($orderId)->version])->assertOk();
         $quoteId = $this->providerPost($provider->user, "/api/v1/provider/orders/{$orderId}/proposals", [
             'type' => 'EXECUTION_QUOTE',
             'amount' => 450,
             'reason' => 'تغيير خرطوم وصيانة الخلاط',
         ])->assertCreated()->json('data.id');
+        // 9أ المرحلة 3 — المقترحات كما تقرؤها C30/C31 (معلّق) وC26 (موافق عليه)
+        $proposalShape = ['data' => [['id', 'type', 'type_label', 'amount', 'projected_total', 'reason', 'photo_path', 'status', 'expires_at']]];
+        $this->recordResponse('customer', 'proposals_pending', $this->customerGet($customer, "/api/v1/orders/{$orderId}/proposals")->assertJsonStructure($proposalShape));
         $this->customerPost($customer, "/api/v1/orders/{$orderId}/proposals/{$quoteId}/decide", ['approve' => true])->assertOk();
+        $this->recordResponse('customer', 'proposals_approved', $this->customerGet($customer, "/api/v1/orders/{$orderId}/proposals")->assertJsonStructure($proposalShape));
+        $this->attachRepairPhotos(Order::query()->findOrFail($orderId), $provider);
         $this->providerPost($provider->user, "/api/v1/provider/orders/{$orderId}/complete")->assertOk();
         $this->providerPost($provider->user, "/api/v1/provider/orders/{$orderId}/cash-received", ['amount' => 450])->assertOk();
         $this->record('order_awaiting_confirmation', $this->order($customer, $orderId));

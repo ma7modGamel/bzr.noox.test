@@ -14,6 +14,7 @@
 declare(strict_types=1);
 
 $root = dirname(__DIR__);
+require_once __DIR__.'/design-theme.php';
 $set = $argv[1] ?? 'gallery';
 
 /** Channel difference under which two pixels count as equal (font anti-aliasing, 43 §8). */
@@ -119,7 +120,8 @@ foreach ([$referenceDir, $output.'/compose', $output.'/xml', $output.'/diff'] as
 }
 
 // Transparent pixels (a Compose root without background) show the window background on a device: Theme.Bremo surface.
-$surface = hexdec(ltrim(json_decode((string) file_get_contents($root.'/design/tokens.json'), true, flags: JSON_THROW_ON_ERROR)['color']['surface'], '#'));
+$tokens = resolveThemeTokens(json_decode((string) file_get_contents($root.'/design/tokens.json'), true, flags: JSON_THROW_ON_ERROR));
+$surface = hexdec(ltrim($tokens['color']['surface'], '#'));
 $notes = is_file($config['notes']) ? json_decode((string) file_get_contents($config['notes']), true, flags: JSON_THROW_ON_ERROR) : [];
 $rows = [];
 $summary = [];
@@ -200,7 +202,7 @@ $html = <<<HTML
 <title>{$title}</title>
 
 <style>
-  body { margin: 0; font-family: Cairo, sans-serif; background: var(--color-surface-alt, #f4f4f8); color: var(--color-navy800, #101d3c); }
+  body { margin: 0; font-family: 'IBM Plex Sans Arabic', sans-serif; background: var(--color-surface-alt, #f4f4f8); color: var(--color-navy800, #101d3c); }
   main { max-width: 1320px; margin: 0 auto; padding: 24px 16px; }
   .summary { background: #fff; border-radius: 12px; padding: 16px; margin-bottom: 16px; }
   .pair { background: #fff; border-radius: 12px; padding: 16px; margin-bottom: 16px; }
@@ -250,6 +252,7 @@ function writeIndex(string $root, array $sets): void
         $summaryPath = $root.'/reports/xml-conversion/'.$name.'/summary.json';
         if (! is_file($summaryPath)) {
             $rows[] = '<tr><td>'.$name.'</td><td colspan="3">لم تُقارن بعد</td></tr>';
+
             continue;
         }
         $summary = json_decode((string) file_get_contents($summaryPath), true, flags: JSON_THROW_ON_ERROR);
@@ -285,7 +288,7 @@ function writeIndex(string $root, array $sets): void
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>مقارنة XML بالمعتمد</title>
 <style>
-  body { margin: 0; font-family: Cairo, sans-serif; background: #f4f4f8; color: #101d3c; }
+  body { margin: 0; font-family: 'IBM Plex Sans Arabic', sans-serif; background: #f4f4f8; color: #101d3c; }
   main { max-width: 960px; margin: 0 auto; padding: 24px 16px; }
   table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 12px; overflow: hidden; }
   th, td { padding: 10px 12px; border-bottom: 1px solid #e0e4e8; text-align: start; }

@@ -2,98 +2,134 @@ package noox.bzr.design.views
 
 import android.content.Context
 import android.util.AttributeSet
-import com.google.android.material.card.MaterialCardView
-import noox.bzr.design.OfferVariant
+import android.view.Gravity
 import noox.bzr.design.R
 import noox.bzr.design.databinding.ViewOfferCardBinding
 
-/** 43 §3 OfferCard: execution, inspection (price caption), scheduled (calendar instead of ETA). */
-class OfferCardView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) :
-    MaterialCardView(context, attrs, com.google.android.material.R.attr.materialCardViewStyle) {
-    private val binding = ViewOfferCardBinding.inflate(inflater, this)
+/**
+ * 43 §3 OfferCard, after Figma «Primo App» 3002:446 (DEC-073): avatar (initial) with a backend availability indicator, name and
+ * «موثّق», subtitle, rating and review count, price and its caption; an arrival / materials strip; the
+ * technician's note; «اختيار العرض ←», «عرض الملف» and chat.
+ */
+class OfferCardView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) : BremoLinearLayout(context, attrs) {
+    private val binding: ViewOfferCardBinding
 
     var provider: String = ""
         set(value) {
             field = value
             binding.provider.text = value
+            binding.avatar.text = value.trim().take(1)
+        }
+    var subtitle: String = ""
+        set(value) {
+            field = value
+            binding.subtitle.text = value
+            binding.subtitle.showIf(value.isNotEmpty())
         }
     var rating: String = ""
         set(value) {
             field = value
-            binding.ratingLine.bind(value, services)
+            binding.rating.text = value
+            binding.ratingRow.showIf(value.isNotEmpty())
         }
-    var services: String = ""
+    var reviews: String = ""
         set(value) {
             field = value
-            binding.ratingLine.bind(rating, value)
+            binding.reviews.text = value
+            binding.reviews.showIf(value.isNotEmpty())
         }
     var price: String = ""
         set(value) {
             field = value
             binding.price.text = value
         }
+    var priceCaption: String = ""
+        set(value) {
+            field = value
+            binding.priceCaption.text = value
+            binding.priceCaption.showIf(value.isNotEmpty())
+        }
     var detail: String = ""
         set(value) {
             field = value
             binding.detail.text = value
+            renderStrip()
         }
-    var badge: String = ""
+    var materials: String = ""
         set(value) {
             field = value
-            binding.badge.text = value
-            binding.badge.showIf(value.isNotBlank())
+            binding.materials.text = value
+            binding.materials.showIf(value.isNotEmpty())
+            renderStrip()
+        }
+    var note: String = ""
+        set(value) {
+            field = value
+            binding.note.text = value
+            binding.note.showIf(value.isNotEmpty())
+        }
+    var verified: Boolean = false
+        set(value) {
+            field = value
+            binding.verified.showIf(value)
+        }
+    var verifiedLabel: String = ""
+        set(value) {
+            field = value
+            binding.verified.text = value
         }
     var button: String = ""
         set(value) {
             field = value
             binding.select.text = value
         }
+    var profileLabel: String = ""
+        set(value) {
+            field = value
+            binding.profile.text = value
+        }
     var chatLabel: String = ""
         set(value) {
             field = value
             binding.chat.label = value
         }
-    var variant: OfferVariant = OfferVariant.Execution
-        set(value) {
-            field = value
-            render()
-        }
-    var priceCaption: String? = null
-        set(value) {
-            field = value
-            render()
-        }
     var showSelect: Boolean = true
         set(value) {
             field = value
-            render()
+            binding.select.showIf(value)
         }
     var showChat: Boolean = true
         set(value) {
             field = value
-            render()
+            binding.chat.showIf(value)
         }
+    var availableNow: Boolean = false
+        set(value) { field = value; binding.availability.showIf(value) }
+
     var onOpen: () -> Unit = {}
     var onSelect: () -> Unit = {}
     var onChat: () -> Unit = {}
 
     init {
-        val padding = px(R.dimen.bremo_space_card_padding)
-        setContentPadding(padding, padding, padding, padding)
+        orientation = VERTICAL
+        gravity = Gravity.FILL_HORIZONTAL
+        gap(R.drawable.bremo_gap_m)
+        setBackgroundResource(R.drawable.bremo_bg_card)
+        cardShadow()
+        val padding = px(R.dimen.bremo_space_xl)
+        setPadding(padding, padding, padding, padding)
+        binding = ViewOfferCardBinding.inflate(inflater, this)
         binding.select.onClick = { onSelect() }
+        binding.profile.onClick = { onOpen() }
         binding.chat.onClick = { onChat() }
-        setOnClickListener { onOpen() }
-        render()
+        binding.verified.showIf(false)
+        binding.verified.sizeCompoundIcons(R.dimen.bremo_size_badge_icon)
+        binding.detail.sizeCompoundIcons(R.dimen.bremo_size_icon_small)
+        binding.materials.sizeCompoundIcons(R.dimen.bremo_size_icon_small)
     }
 
-    private fun render() {
-        binding.priceCaption.text = priceCaption.orEmpty()
-        binding.badge.showIf(badge.isNotBlank())
-        binding.priceCaption.showIf(variant == OfferVariant.Inspection && priceCaption != null)
-        binding.detailIcon.icon(if (variant == OfferVariant.Scheduled) R.drawable.ic_calendar else R.drawable.ic_clock, R.color.bremo_slate500)
-        binding.select.showIf(showSelect)
-        binding.chat.showIf(showChat)
-        binding.actionRow.showIf(showSelect || showChat)
-        binding.actionDivider.showIf(showSelect || showChat)
+    private fun renderStrip() {
+        binding.detail.showIf(detail.isNotEmpty())
+        binding.strip.showIf(detail.isNotEmpty() || materials.isNotEmpty())
     }
 }

@@ -19,13 +19,14 @@ public struct C36AssignmentView: View {
 
     public var body: some View {
         CustomerScreen(title: bzrString("assignment.waiting.title"), state: state, onBack: onBack) {
-            InfoBanner(text: bzrString("tracking.status.open"))
+            InfoBanner(text: state.waitingInfo.isEmpty ? bzrString("tracking.status.open") : state.waitingInfo)
             SummaryCard(
                 title: title,
                 rows: state.items.enumerated().map { index, row in
                     (index == 0 ? .orders : index == 1 ? .location : .calendar, row)
                 },
                 editText: nil)
+            PrimaryButton(text: bzrString("waiting.follow"), state: state.isBusy ? .loading : .normal, onClick: { onAction("follow") })
             ActionButtons(actions: state.visibleActions, onAction: onAction)
         }
     }

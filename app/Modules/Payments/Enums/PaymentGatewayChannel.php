@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\Payments\Enums;
 
 use App\Modules\Settings\Enums\Cfg;
+use App\Support\Localization;
 use Filament\Support\Contracts\HasLabel;
 
 /**
@@ -19,11 +20,7 @@ enum PaymentGatewayChannel: string implements HasLabel
 
     public function getLabel(): string
     {
-        return match ($this) {
-            self::Cash => 'نقدي للفني',
-            self::InstapayManual => 'تحويل إنستاباي',
-            self::Fawry => 'فوري (بطاقة، محفظة، كود منافذ)',
-        };
+        return Localization::enum($this);
     }
 
     public function setting(): Cfg

@@ -15,6 +15,7 @@ public struct C17MediaView: View {
     let onRetry: (Int) -> Void
     let onDone: () -> Void
     let onUpload: (CustomerMediaUpload, String) -> Void
+    let onRejected: (String) -> Void
     let onRecordingChange: (Bool) -> Void
     @State private var photoSelection: PhotosPickerItem?
     @State private var videoSelection: PhotosPickerItem?
@@ -30,7 +31,8 @@ public struct C17MediaView: View {
         onDelete: @escaping (Int) -> Void = { _ in }, onRetry: @escaping (Int) -> Void = { _ in },
         onDone: @escaping () -> Void = {},
         onUpload: @escaping (CustomerMediaUpload, String) -> Void = { _, _ in },
-        onRecordingChange: @escaping (Bool) -> Void = { _ in }
+        onRecordingChange: @escaping (Bool) -> Void = { _ in },
+        onRejected: @escaping (String) -> Void = { _ in }
     ) {
         self.state = state
         self.onPickPhoto = onPickPhoto
@@ -41,6 +43,7 @@ public struct C17MediaView: View {
         self.onDone = onDone
         self.onUpload = onUpload
         self.onRecordingChange = onRecordingChange
+        self.onRejected = onRejected
     }
 
     public var body: some View {
@@ -135,6 +138,11 @@ public struct C17MediaView: View {
             guard let data = try? await item.loadTransferable(type: Data.self),
                 data.count <= 50 * 1024 * 1024
             else { return }
+            let temporary = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString).appendingPathExtension("mp4")
+            do { try data.write(to: temporary, options: .atomic) } catch { onRejected("media.validation.video_unreadable"); return }
+            defer { try? FileManager.default.removeItem(at: temporary) }
+            let duration = try? await AVURLAsset(url: temporary).load(.duration)
+            if let error = CustomerMediaLimits.videoError(durationSeconds: duration.map(CMTimeGetSeconds)) { onRejected(error); return }
             let type = item.supportedContentTypes.first ?? .mpeg4Movie
             onUpload(
                 CustomerMediaUpload(

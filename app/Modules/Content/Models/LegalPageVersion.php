@@ -6,6 +6,7 @@ namespace App\Modules\Content\Models;
 
 use App\Modules\Content\Enums\LegalPageStatus;
 use App\Modules\Identity\Models\Admin;
+use App\Support\SafeHtml;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -36,9 +37,6 @@ final class LegalPageVersion extends Model
     /** HTML المحرر بعد إزالة ما ليس نصًا منسقًا (سكربتات، أحداث، إطارات). */
     public function safeBody(): string
     {
-        $allowed = '<p><br><h2><h3><h4><ul><ol><li><strong><b><em><i><u><a><blockquote><hr>';
-        $html = strip_tags((string) $this->body, $allowed);
-
-        return (string) preg_replace('/\s(on\w+|style)\s*=\s*("[^"]*"|\'[^\']*\'|[^\s>]+)/i', '', $html);
+        return SafeHtml::sanitize((string) $this->body);
     }
 }

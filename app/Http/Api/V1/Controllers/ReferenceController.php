@@ -7,6 +7,7 @@ namespace App\Http\Api\V1\Controllers;
 use App\Modules\Catalog\Models\Category;
 use App\Modules\Geography\Models\City;
 use App\Modules\Orders\Services\SchedulingCalendar;
+use App\Support\Localization;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -18,7 +19,7 @@ final class ReferenceController
     {
         return new JsonResponse([
             'data' => City::query()->where('is_active', true)->get()
-                ->map(fn (City $c): array => ['id' => $c->id, 'name' => $c->name, 'timezone' => $c->timezone]),
+                ->map(fn (City $c): array => ['id' => $c->id, 'name' => Localization::field($c), 'timezone' => $c->timezone]),
         ]);
     }
 
@@ -26,7 +27,7 @@ final class ReferenceController
     {
         return new JsonResponse([
             'data' => $city->areas()->where('is_active', true)->orderBy('sort')->get()
-                ->map(fn ($a): array => ['id' => $a->id, 'name' => $a->name]),
+                ->map(fn ($a): array => ['id' => $a->id, 'name' => Localization::field($a)]),
         ]);
     }
 
@@ -48,15 +49,16 @@ final class ReferenceController
         return new JsonResponse([
             'data' => $categories->map(fn (Category $category): array => [
                 'id' => $category->id,
-                'name' => $category->name,
+                'name' => Localization::field($category),
                 'icon_path' => $category->icon_path,
                 // OD-08 — الأيقونة من الخادم، فتتبدل بلا تحديث للتطبيق.
                 'icon_url' => $category->icon_path === null ? null : asset($category->icon_path),
                 'problem_types' => $category->problemTypes->map(fn ($p): array => [
                     'id' => $p->id,
-                    'name' => $p->name,
+                    'name' => Localization::field($p),
                     // BR-013 — "مشكلة أخرى" تجعل الوصف إلزاميًا
                     'is_other' => $p->is_other,
+                    'customer_price_guide' => $p->customerPriceGuide(),
                 ]),
             ]),
         ]);

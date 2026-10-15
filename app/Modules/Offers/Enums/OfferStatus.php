@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Offers\Enums;
 
+use App\Support\Localization;
 use Filament\Support\Contracts\HasColor;
 use Filament\Support\Contracts\HasLabel;
 
@@ -19,14 +20,7 @@ enum OfferStatus: string implements HasColor, HasLabel
 
     public function getLabel(): string
     {
-        return match ($this) {
-            self::Submitted => 'مقدَّم',
-            self::Withdrawn => 'مسحوب',
-            self::Accepted => 'مختار',
-            self::NotSelected => 'لم يُختر',
-            self::Closed => 'مغلق',
-            self::BackedOut => 'اعتذر الفني',
-        };
+        return Localization::enum($this);
     }
 
     public function getColor(): string

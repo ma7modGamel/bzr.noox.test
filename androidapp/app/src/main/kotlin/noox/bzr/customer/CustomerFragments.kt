@@ -143,14 +143,28 @@ class C02AccountFragment : CustomerFragment<C02AccountView>(R.id.scr_c02) {
     }
 }
 
-class C03ProblemFragment : CustomerFragment<C03ProblemView>(R.id.scr_c03) {
-    override fun create() = C03ProblemView(requireContext())
-    override fun C03ProblemView.bind() {
+class C03ServiceFragment : CustomerFragment<C03ServiceView>(R.id.scr_c03) {
+    override fun create() = C03ServiceView(requireContext())
+    override fun C03ServiceView.bind() {
         onCategorySelect = viewModel::selectCategory
+        onSearch = viewModel::searchServices
+        onOpen = { route ->
+            when (route) {
+                "SCR-C37" -> viewModel.openProblemDetails()
+                else -> viewModel.show(route, routeInput(route))
+            }
+        }
+    }
+}
+
+class C37ProblemFragment : CustomerFragment<C37ProblemView>(R.id.scr_c37) {
+    override fun create() = C37ProblemView(requireContext())
+    override fun C37ProblemView.bind() {
         onProblemSelect = viewModel::selectProblem
         onDescriptionChange = viewModel::updateProblemDescription
         onOpen = { route ->
             when (route) {
+                "SCR-C03" -> viewModel.openProblem()
                 "SCR-C17" -> viewModel.openMedia()
                 "SCR-C04" -> viewModel.openTiming()
                 else -> viewModel.show(route, routeInput(route))
@@ -162,14 +176,30 @@ class C03ProblemFragment : CustomerFragment<C03ProblemView>(R.id.scr_c03) {
 class C04TimingFragment : CustomerFragment<C04TimingView>(R.id.scr_c04) {
     override fun create() = C04TimingView(requireContext())
     override fun C04TimingView.bind() {
+        onMaterialSelect = viewModel::selectMaterial
         onTimingSelect = viewModel::selectTiming
+        onOpen = { route ->
+            when (route) {
+                "SCR-C14" -> viewModel.loadAddresses()
+                "SCR-C15" -> viewModel.openNewAddress()
+                "SCR-C16" -> viewModel.loadSlots(dayLabels(), morning(), evening())
+                "SCR-C38" -> viewModel.openBudget()
+                "SCR-C05" -> viewModel.openReview()
+                "SCR-C04" -> viewModel.openTiming()
+                else -> viewModel.show(route, routeInput(route))
+            }
+        }
+    }
+}
+
+class C38BudgetFragment : CustomerFragment<C38BudgetView>(R.id.scr_c38) {
+    override fun create() = C38BudgetView(requireContext())
+    override fun C38BudgetView.bind() {
         onMaterialSelect = viewModel::selectMaterial
         onPricingSelect = viewModel::selectPricing
         onBudgetChange = viewModel::updateBudget
         onOpen = { route ->
             when (route) {
-                "SCR-C14" -> viewModel.loadAddresses()
-                "SCR-C16" -> viewModel.loadSlots(dayLabels(), morning(), evening())
                 "SCR-C05" -> viewModel.openReview()
                 else -> viewModel.show(route, routeInput(route))
             }
@@ -180,7 +210,14 @@ class C04TimingFragment : CustomerFragment<C04TimingView>(R.id.scr_c04) {
 class C05ReviewFragment : CustomerFragment<C05ReviewView>(R.id.scr_c05) {
     override fun create() = C05ReviewView(requireContext())
     override fun C05ReviewView.bind() {
-        onEdit = viewModel::openProblem
+        onEdit = { step ->
+            when (step) {
+                "SCR-C03" -> viewModel.openProblem()
+                "SCR-C37" -> viewModel.openProblemDetails()
+                "SCR-C04" -> viewModel.openTiming()
+                "SCR-C38" -> viewModel.openBudget()
+            }
+        }
         onTermsChange = {
             viewModel.setTermsAccepted(viewModel.state.termsError != null)
         }
@@ -206,6 +243,7 @@ class C06OffersFragment : CustomerFragment<C06OffersView>(R.id.scr_c06) {
 class C07ProviderFragment : CustomerFragment<C07ProviderView>(R.id.scr_c07) {
     override fun create() = C07ProviderView(requireContext())
     override fun C07ProviderView.bind() {
+        loadImage = viewModel::loadProfileImage
         onAction = { action ->
             when (action) {
                 "report_provider" -> viewModel.openProviderReport()
@@ -230,12 +268,31 @@ class C09TrackingFragment : CustomerFragment<C09TrackingView>(R.id.scr_c09) {
     override fun C09TrackingView.bind() {
         onAction = { action ->
             when (action) {
+                "refresh_arrival_code" -> viewModel.refreshArrivalCode()
                 "cancel" -> viewModel.openCancellation()
                 "approve_proposal", "reject_proposal" -> viewModel.loadPendingProposal()
                 "change_payment_method", "pay_electronic" -> viewModel.loadPaymentSummary()
                 "confirm_completion" -> viewModel.loadCompletionSummary()
+                "request_warranty" -> viewModel.openWarranty()
                 "rate" -> viewModel.openRating()
                 "open_dispute" -> viewModel.openDispute()
+                "report_provider" -> viewModel.openProviderReport()
+                "chat" -> viewModel.openCurrentOrderChat()
+                "share_visit" -> viewModel.shareVisit { url ->
+                    if (isAdded && viewLifecycleOwnerLiveData.value?.lifecycle?.currentState?.isAtLeast(androidx.lifecycle.Lifecycle.State.STARTED) == true) {
+                        val send = android.content.Intent(android.content.Intent.ACTION_SEND).apply {
+                            type = "text/plain"
+                            putExtra(android.content.Intent.EXTRA_TEXT, url)
+                        }
+                        startActivity(android.content.Intent.createChooser(send, getString(noox.bzr.design.R.string.action_share_visit)))
+                    }
+                }
+                "call" -> viewModel.currentProviderPhone()?.let { phone ->
+                    val intent = android.content.Intent(android.content.Intent.ACTION_DIAL, android.net.Uri.parse("tel:$phone"))
+                    if (intent.resolveActivity(requireContext().packageManager) != null) startActivity(intent)
+                }
+                "refresh" -> viewModel.openOrder()
+                "help" -> viewModel.loadHelp()
             }
         }
     }
@@ -266,7 +323,15 @@ class C09TrackingFragment : CustomerFragment<C09TrackingView>(R.id.scr_c09) {
                                 tracking.latitude?.let { latitude -> tracking.longitude?.let { LatLng(latitude, it) } },
                                 destination?.let { LatLng(it.first, it.second) },
                             )
-                            screenView.updateEta(tracking.etaMinutes, tracking.etaApproximate)
+                            // DEC-076: the distance left is computed from the technician's last position and the address.
+                            val km = if (tracking.latitude != null && tracking.longitude != null && destination != null) {
+                                val results = FloatArray(1)
+                                android.location.Location.distanceBetween(tracking.latitude, tracking.longitude, destination.first, destination.second, results)
+                                results[0] / METERS_PER_KM
+                            } else {
+                                null
+                            }
+                            screenView.updateEta(tracking.etaMinutes, tracking.etaApproximate, km)
                         }
                             delay(TRACKING_REFRESH_MILLIS)
                         }
@@ -282,6 +347,7 @@ class C09TrackingFragment : CustomerFragment<C09TrackingView>(R.id.scr_c09) {
 
     private companion object {
         const val TRACKING_REFRESH_MILLIS = 30_000L
+        const val METERS_PER_KM = 1000f
     }
 }
 
@@ -350,6 +416,15 @@ class C17MediaFragment : CustomerFragment<C17MediaView>(R.id.scr_c17) {
     private val videoPicker = registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
         uri ?: return@registerForActivityResult
         if (!viewModel.canAddMedia("video")) return@registerForActivityResult
+        val durationSeconds = runCatching {
+            val retriever = android.media.MediaMetadataRetriever()
+            try {
+                retriever.setDataSource(requireContext(), uri)
+                retriever.extractMetadata(android.media.MediaMetadataRetriever.METADATA_KEY_DURATION)?.toDoubleOrNull()?.div(1000)
+            } finally { retriever.release() }
+        }.getOrNull()
+        val error = CustomerMediaLimits.videoError(durationSeconds)
+        if (error != null) { viewModel.rejectMedia(error); return@registerForActivityResult }
         mediaUpload(uri, "bremo-video.mp4", "video/mp4", MAX_VIDEO_BYTES)?.let { viewModel.uploadMedia(it, "video") }
     }
     private val audioPermission = registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
@@ -453,6 +528,7 @@ class C18MessagesFragment : CustomerFragment<C18MessagesView>(R.id.scr_c18) {
     override fun create() = C18MessagesView(requireContext())
     override fun C18MessagesView.bind() {
         onSelect = viewModel::openConversation
+        onOpen = { route -> if (route == "SCR-C29") viewModel.loadHelp() else viewModel.loadNotifications() }
     }
 }
 
@@ -460,6 +536,7 @@ class C19ChatFragment : CustomerFragment<C19ChatView>(R.id.scr_c19) {
     private val picker = photoPicker("chat-image.jpg") { viewModel.sendChatImage(it) }
     override fun create() = C19ChatView(requireContext())
     override fun C19ChatView.bind() {
+        loadImage = viewModel::loadProfileImage
         onDraftChange = viewModel::updateChatDraft
         onSend = viewModel::sendChatMessage
         onAddPhoto = { picker.launch("image/*") }
@@ -479,6 +556,7 @@ class C20CancellationFragment : CustomerFragment<C20CancellationView>(R.id.scr_c
 class C21PaymentSummaryFragment : CustomerFragment<C21PaymentSummaryView>(R.id.scr_c21) {
     override fun create() = C21PaymentSummaryView(requireContext())
     override fun C21PaymentSummaryView.bind() {
+        loadImage = viewModel::loadProfileImage
         onMethodSelect = viewModel::selectPaymentMethod
         onPay = viewModel::openElectronicPayment
         onAction = { if (it == "open_dispute") viewModel.openDispute() }
@@ -486,10 +564,14 @@ class C21PaymentSummaryFragment : CustomerFragment<C21PaymentSummaryView>(R.id.s
 }
 
 class C22ElectronicPaymentFragment : CustomerFragment<C22ElectronicPaymentView>(R.id.scr_c22) {
+    private val receipt = photoPicker("transfer-receipt.jpg", viewModel::uploadPaymentReceipt)
     override fun create() = C22ElectronicPaymentView(requireContext())
     override fun C22ElectronicPaymentView.bind() {
         onChannelSelect = viewModel::selectPaymentChannel
         onCreate = viewModel::createElectronicPayment
+        onReceipt = { receipt.launch("image/*") }
+        onReferenceChange = viewModel::updateTransferReference
+        onRefresh = viewModel::refreshPayment
         onOpenCheckout = {
             viewModel.state.items.getOrNull(2)?.takeIf(String::isNotBlank)?.let { startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(it))) }
         }
@@ -504,18 +586,24 @@ class C22ElectronicPaymentFragment : CustomerFragment<C22ElectronicPaymentView>(
 class C23CompletionFragment : CustomerFragment<C23CompletionView>(R.id.scr_c23) {
     override fun create() = C23CompletionView(requireContext())
     override fun C23CompletionView.bind() {
+        loadImage = viewModel::loadProfileImage
         onAction = { action ->
-            if (action == "confirm_completion") viewModel.confirmCompletion() else if (action == "open_dispute") viewModel.openDispute()
+            if (action == "confirm_completion") viewModel.confirmCompletion() else if (action == "open_dispute") viewModel.openDispute() else if (action == "request_warranty") viewModel.openWarranty()
         }
     }
 }
 
 class C24RatingFragment : CustomerFragment<C24RatingView>(R.id.scr_c24) {
+    private val photos = photoPicker("review-photo.jpg", viewModel::uploadRatingPhoto)
     override fun create() = C24RatingView(requireContext())
     override fun C24RatingView.bind() {
         onRate = viewModel::updateRating
+        onOverall = viewModel::updateOverallRating
+        onTag = viewModel::toggleRatingTag
         onCommentChange = viewModel::updateRatingComment
         onSubmit = viewModel::submitRating
+        onAddPhoto = { photos.launch("image/*") }
+        onRemovePhoto = viewModel::removeRatingPhoto
     }
 }
 
@@ -524,12 +612,15 @@ class C25OrdersFragment : CustomerFragment<C25OrdersView>(R.id.scr_c25) {
     override fun C25OrdersView.bind() {
         onTabSelect = { viewModel.loadOrders(it) }
         onOrderSelect = viewModel::selectOrder
+        onChat = viewModel::openOrderChat
+
     }
 }
 
 class C26OrderHistoryFragment : CustomerFragment<C26OrderHistoryView>(R.id.scr_c26) {
     override fun create() = C26OrderHistoryView(requireContext())
     override fun C26OrderHistoryView.bind() {
+        loadImage = viewModel::loadProfileImage
         onAction = { action ->
             when (action) {
                 "rate" -> viewModel.openRating()
@@ -547,6 +638,7 @@ class C27DisputeFragment : CustomerFragment<C27DisputeView>(R.id.scr_c27) {
         onDescriptionChange = viewModel::updateSupportDescription
         onAddPhoto = { picker.launch("image/*") }
         onDeletePhoto = viewModel::removeDisputePhoto
+        onOpenVisit = viewModel::openWarrantyVisit
         onSubmit = viewModel::submitDispute
     }
 }
@@ -574,14 +666,28 @@ class C29HelpFragment : CustomerFragment<C29HelpView>(R.id.scr_c29) {
 class C30ExecutionQuoteFragment : CustomerFragment<C30ExecutionQuoteView>(R.id.scr_c30) {
     override fun create() = C30ExecutionQuoteView(requireContext())
     override fun C30ExecutionQuoteView.bind() {
-        onAction = viewModel::decideProposal
+        loadImage = viewModel::loadProfileImage
+        onAction = { action ->
+            when (action) {
+                "chat" -> viewModel.openCurrentOrderChat()
+                "open_dispute" -> viewModel.openDispute()
+                else -> viewModel.decideProposal(action)
+            }
+        }
     }
 }
 
 class C31AdditionalCostFragment : CustomerFragment<C31AdditionalCostView>(R.id.scr_c31) {
     override fun create() = C31AdditionalCostView(requireContext())
     override fun C31AdditionalCostView.bind() {
-        onAction = viewModel::decideProposal
+        loadImage = viewModel::loadProfileImage
+        onAction = { action ->
+            when (action) {
+                "chat" -> viewModel.openCurrentOrderChat()
+                "open_dispute" -> viewModel.openDispute()
+                else -> viewModel.decideProposal(action)
+            }
+        }
     }
 }
 
@@ -610,7 +716,13 @@ class C34TermsFragment : CustomerFragment<C34TermsView>(R.id.scr_c34) {
 class C35NoOffersFragment : CustomerFragment<C35NoOffersView>(R.id.scr_c35) {
     override fun create() = C35NoOffersView(requireContext())
     override fun C35NoOffersView.bind() {
-        onAction = viewModel::noOffersAction
+        onAction = { action ->
+            when (action) {
+                "cancel" -> viewModel.openCancellation()
+                "follow" -> viewModel.openOrder()
+                else -> viewModel.noOffersAction(action)
+            }
+        }
     }
     override fun C35NoOffersView.render(state: CustomerUiState) = render(CustomerRoutes.noOffersState(state))
 }
@@ -620,7 +732,7 @@ class C36AssignmentFragment : CustomerFragment<C36AssignmentView>(R.id.scr_c36) 
     override fun C36AssignmentView.bind() {
         onAction = { action ->
             when (action) {
-                "edit_request" -> viewModel.noOffersAction(action)
+                "edit_request", "follow" -> viewModel.noOffersAction(action)
                 "cancel" -> viewModel.openCancellation()
             }
         }

@@ -1,12 +1,14 @@
 package noox.bzr.design.views
 
 import android.content.Context
+import android.graphics.drawable.InsetDrawable
 import android.util.AttributeSet
 import android.view.View
 import android.view.accessibility.AccessibilityNodeInfo
 import android.widget.Button
 import android.widget.FrameLayout
 import androidx.core.content.withStyledAttributes
+import androidx.core.content.ContextCompat
 import noox.bzr.design.R
 import noox.bzr.design.SelectionState
 import noox.bzr.design.databinding.ViewSelectableChipBinding
@@ -37,6 +39,8 @@ class SelectableChipView @JvmOverloads constructor(context: Context, attrs: Attr
         set(value) {
             field = value
             binding.chip.minimumHeight = maxOf(value, px(R.dimen.bremo_size_touch_target_min))
+            val inset = maxOf(0, (px(R.dimen.bremo_size_touch_target_min) - value) / 2)
+            binding.chip.background = InsetDrawable(ContextCompat.getDrawable(context, R.drawable.bremo_bg_selectable_chip), 0, inset, 0, inset)
             binding.chip.layoutParams = binding.chip.layoutParams.apply { this.height = LayoutParams.WRAP_CONTENT }
             requestLayout()
         }
@@ -78,6 +82,7 @@ class SelectableChipView @JvmOverloads constructor(context: Context, attrs: Attr
         contentDescription = text
         binding.chip.isSelected = selected
         binding.chip.isEnabled = enabled
+        binding.chip.setTextColor(ContextCompat.getColor(context, if (selected) R.color.bremo_chip_selected_text else R.color.bremo_chip_text))
         applyEnabledAlpha(enabled)
     }
 }

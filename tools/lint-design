@@ -10,7 +10,7 @@ $root = dirname(__DIR__);
 
 $sources = [
     'kotlin' => [$root.'/androidapp', '/\.kt$/', '#/(generated|build|test)/#'],
-    'swift' => [$root.'/iosapp', '/\.swift$/', '#/(Generated|\.build|Tests)/#'],
+    'swift' => [$root.'/iosapp', '/\.swift$/', '#/(Generated|\.build|Tests|BzrAppTests)/#'],
 ];
 
 $rules = [
@@ -23,7 +23,8 @@ $rules = [
     'SwiftUI numeric size' => '/\b(?:cornerRadius|lineWidth|spacing|width|height|minWidth|maxWidth|minHeight|maxHeight|radius|size):\s*[1-9]\d*(?:\.\d+)?\b/',
     'SwiftUI numeric padding' => '/\.padding\(\s*(?:\.[a-z]+\s*,\s*)?[1-9]\d*(?:\.\d+)?\s*\)/',
     'numeric opacity' => '/\.(?:opacity|alpha)\(\s*0?\.\d+/',
-    'Arabic literal' => '/"[^"\n]*\p{Arabic}[^"\n]*"/u',
+    'Arabic literal' => '/"[^"\n]*(?=\p{Arabic})\p{L}[^"\n]*"/u',
+    'hardcoded UI text' => '/\b(?:Text|BzrText|Button|Label|setText|setHint|setTitle|setMessage)\(\s*"[A-Za-z]{2,}[^"\n]*"|\b(?:text|hint|contentDescription)\s*=\s*"[A-Za-z]{2,}[^"\n]*"/u',
     'Android colour literal' => '/\b(?:Color\.(?:parseColor|rgb|argb)\(|0x[0-9A-Fa-f]{8}\b)/',
     'numeric padding/margin' => '/\bset(?:Padding|PaddingRelative|Margins|MarginStart|MarginEnd)\([^)]*\b[1-9]\d*(?:\.\d+)?f?\b/',
     'numeric text size' => '/\btextSize\s*=\s*[1-9]/',
@@ -36,7 +37,7 @@ foreach ($sources as [$directory, $filePattern, $excluded]) {
     $directoryIterator = new RecursiveDirectoryIterator($directory, FilesystemIterator::SKIP_DOTS);
     $filter = new RecursiveCallbackFilterIterator(
         $directoryIterator,
-        static fn (SplFileInfo $file): bool => ! ($file->isDir() && in_array($file->getFilename(), ['.build', 'build', 'Generated', 'Tests', 'test'], true)),
+        static fn (SplFileInfo $file): bool => ! ($file->isDir() && in_array($file->getFilename(), ['.build', 'build', 'Generated', 'Tests', 'BzrAppTests', 'test'], true)),
     );
     $iterator = new RecursiveIteratorIterator($filter);
     foreach ($iterator as $file) {

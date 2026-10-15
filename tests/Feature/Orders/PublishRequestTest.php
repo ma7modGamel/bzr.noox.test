@@ -16,6 +16,7 @@ use App\Modules\Orders\Enums\OrderStatus;
 use App\Modules\Orders\Enums\PricingMode;
 use App\Modules\Orders\Enums\TimingType;
 use App\Modules\Orders\Models\Order;
+use App\Modules\Providers\Models\ProviderProfile;
 use App\Modules\Settings\Enums\OperatingMode;
 use App\Support\Exceptions\BusinessRuleViolationException;
 use App\Support\Exceptions\EmailNotVerifiedException;
@@ -226,6 +227,8 @@ final class PublishRequestTest extends TestCase
         $customer = User::factory()->create();
         $address = CustomerAddress::factory()->create(['user_id' => $customer->id]);
         $category = Category::query()->where('name', 'سباكة')->sole();
+
+        ProviderProfile::factory()->servingFor($category->id, $address->area_id)->create();
 
         $problemTypeId ??= $category->problemTypes()->where('is_other', false)->value('id');
 

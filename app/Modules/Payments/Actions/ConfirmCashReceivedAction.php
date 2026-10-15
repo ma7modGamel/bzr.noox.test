@@ -15,6 +15,7 @@ use App\Modules\Payments\Enums\PaymentStatus;
 use App\Modules\Payments\Models\Payment;
 use App\Modules\Payments\Services\PaymentChannels;
 use App\Support\Exceptions\BusinessRuleViolationException;
+use App\Support\Localization;
 use Illuminate\Support\Str;
 
 /**
@@ -33,13 +34,13 @@ final readonly class ConfirmCashReceivedAction
         $expected = (string) ($order->final_amount ?? '0.00');
 
         if (app(PaymentChannels::class)->pendingTransfer($order) !== null) {
-            throw BusinessRuleViolationException::rule('BR-057', 'يوجد تحويل إنستاباي بانتظار تأكيد الإدارة لهذا الطلب.');
+            throw BusinessRuleViolationException::rule('BR-057', Localization::text('copy.an_instapay_transfer_for_this_request_is_awaiting_administration'));
         }
 
         if (bccomp($amount, $expected, 2) !== 0) {
             throw BusinessRuleViolationException::rule(
                 'BR-053',
-                "المبلغ المستلم يجب أن يساوي الإجمالي بالكامل ({$expected} جنيه). لا دفع جزئي.",
+                Localization::text('dynamic.full_payment', ['amount' => $expected]),
             );
         }
 

@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="ar" dir="rtl">
+<html lang="{{ \App\Support\Localization::locale() }}" dir="{{ \App\Support\Localization::locale() === 'ar' ? 'rtl' : 'ltr' }}">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -17,10 +17,10 @@
     {{ $slot ?? '' }}
     @yield('content')
     <footer class="page-footer">
-        <a href="{{ route('legal.show', 'terms') }}">الشروط والأحكام</a>
-        <a href="{{ route('legal.show', 'privacy') }}">سياسة الخصوصية</a>
-        <a href="{{ route('legal.show', 'cancellation-policy') }}">سياسة الإلغاء</a>
-        <span>{{ config('mail.support_address') }}</span>
+        @foreach ([\App\Modules\Content\Enums\LegalPageSlug::Terms, \App\Modules\Content\Enums\LegalPageSlug::Privacy, \App\Modules\Content\Enums\LegalPageSlug::Cancellation] as $legalPage)
+            <a href="{{ route('legal.show', ['slug' => $legalPage->value, 'locale' => \App\Support\Localization::locale()]) }}">{{ $legalPage->getLabel() }}</a>
+        @endforeach
+        <bdi dir="ltr">{{ config('mail.support_address') }}</bdi>
     </footer>
 </main>
 </body>

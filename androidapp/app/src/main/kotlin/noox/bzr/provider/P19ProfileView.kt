@@ -66,7 +66,7 @@ class P19ProfileView(context: Context) : ProviderScreenView(context) {
             StatItem(R.drawable.ic_orders, state.itemStates.getOrElse(1) { "" }, string(R.string.stat_services)),
             StatItem(
                 R.drawable.ic_clock,
-                string(R.string.format_minutes).replace("{n}", state.itemStates.getOrElse(2) { "" }),
+                state.itemStates.getOrElse(2) { "" }.toIntOrNull()?.let { noox.bzr.design.BzrFormat.quantity(context, R.plurals.plural_format_minutes, it) }.orEmpty(),
                 string(R.string.stat_response_speed),
             ),
         )

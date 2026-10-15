@@ -6,6 +6,7 @@ namespace App\Modules\Providers\Actions;
 
 use App\Modules\Geography\Models\Area;
 use App\Modules\Providers\Models\ProviderProfile;
+use App\Support\Localization;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
@@ -29,14 +30,14 @@ final class UpdateProviderProfileAction
 
         if (array_diff($specialtyIds, $validSpecialties) !== []) {
             throw ValidationException::withMessages([
-                'specialty_ids' => 'أحد التخصصات لا يتبع فئات الفني.',
+                'specialty_ids' => Localization::text('copy.one_of_the_specialties_does_not_belong_to_the'),
             ]);
         }
 
         $validAreaIds = Area::query()->where('is_active', true)->whereKey($areaIds)->pluck('id')->all();
         if (count($validAreaIds) !== count(array_unique($areaIds))) {
             throw ValidationException::withMessages([
-                'area_ids' => 'إحدى المناطق غير متاحة.',
+                'area_ids' => Localization::text('copy.one_of_the_areas_is_unavailable'),
             ]);
         }
 

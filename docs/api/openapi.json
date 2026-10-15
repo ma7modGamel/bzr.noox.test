@@ -105,6 +105,7 @@
                     "republish",
                     "cancel",
                     "change_payment_method",
+                    "request_warranty",
                     "pay_electronic",
                     "submit_instapay_transfer",
                     "approve_proposal",
@@ -116,6 +117,10 @@
                     "call",
                     "chat",
                     "report_provider",
+                    "upload_repair_before",
+                    "upload_repair_after",
+                    "update_completion_estimate",
+                    "report_arrival_exception",
                     "submit_offer",
                     "withdraw_offer",
                     "start_trip",
@@ -849,6 +854,64 @@
                 }
             }
         },
+        "/conversations/{conversation}/messages/{message}/images/{media}": {
+            "get": {
+                "operationId": "conversationImage",
+                "tags": [
+                    "المراجع"
+                ],
+                "summary": "conversationImage",
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AppMode"
+                    },
+                    {
+                        "name": "conversation",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "message",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "media",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "نجاح"
+                    },
+                    "400": {
+                        "description": "خطأ",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/me": {
             "get": {
                 "operationId": "accountShow",
@@ -1346,6 +1409,40 @@
                 }
             }
         },
+        "/orders/availability": {
+            "get": {
+                "operationId": "orderAvailability",
+                "tags": [
+                    "الطلبات"
+                ],
+                "summary": "orderAvailability",
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AppMode"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "نجاح"
+                    },
+                    "400": {
+                        "description": "خطأ",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/orders/{order}": {
             "patch": {
                 "operationId": "orderUpdate",
@@ -1401,6 +1498,51 @@
                 "parameters": [
                     {
                         "$ref": "#/components/parameters/AppMode"
+                    },
+                    {
+                        "name": "order",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "نجاح"
+                    },
+                    "400": {
+                        "description": "خطأ",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/orders/{order}/arrival-code": {
+            "post": {
+                "operationId": "arrivalVerificationIssue",
+                "tags": [
+                    "الطلبات"
+                ],
+                "summary": "arrivalVerificationIssue",
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AppMode"
+                    },
+                    {
+                        "$ref": "#/components/parameters/IdempotencyKey"
                     },
                     {
                         "name": "order",
@@ -1925,6 +2067,56 @@
                 }
             }
         },
+        "/orders/{order}/proposals/{proposal}/image": {
+            "get": {
+                "operationId": "orderProposalImage",
+                "tags": [
+                    "الطلبات"
+                ],
+                "summary": "orderProposalImage",
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AppMode"
+                    },
+                    {
+                        "name": "order",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "proposal",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "نجاح"
+                    },
+                    "400": {
+                        "description": "خطأ",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/orders/{order}/republish": {
             "post": {
                 "operationId": "orderRepublish",
@@ -2075,6 +2267,91 @@
                 "parameters": [
                     {
                         "$ref": "#/components/parameters/AppMode"
+                    },
+                    {
+                        "name": "order",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "نجاح"
+                    },
+                    "400": {
+                        "description": "خطأ",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/orders/{order}/warranty-claims": {
+            "get": {
+                "operationId": "supportWarrantyClaims",
+                "tags": [
+                    "الطلبات"
+                ],
+                "summary": "supportWarrantyClaims",
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AppMode"
+                    },
+                    {
+                        "name": "order",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "نجاح"
+                    },
+                    "400": {
+                        "description": "خطأ",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "operationId": "supportRequestWarranty",
+                "tags": [
+                    "الطلبات"
+                ],
+                "summary": "supportRequestWarranty",
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AppMode"
+                    },
+                    {
+                        "$ref": "#/components/parameters/IdempotencyKey"
                     },
                     {
                         "name": "order",
@@ -2276,6 +2553,40 @@
                 }
             }
         },
+        "/provider/earnings/export": {
+            "get": {
+                "operationId": "providerEarningsExport",
+                "tags": [
+                    "الفني"
+                ],
+                "summary": "providerEarningsExport",
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AppMode"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "نجاح"
+                    },
+                    "400": {
+                        "description": "خطأ",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/provider/home": {
             "get": {
                 "operationId": "providerHomeShow",
@@ -2404,6 +2715,51 @@
                 "parameters": [
                     {
                         "$ref": "#/components/parameters/AppMode"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "نجاح"
+                    },
+                    "400": {
+                        "description": "خطأ",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/provider/orders/{order}/arrival-exception": {
+            "post": {
+                "operationId": "arrivalVerificationReport",
+                "tags": [
+                    "الفني"
+                ],
+                "summary": "arrivalVerificationReport",
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AppMode"
+                    },
+                    {
+                        "$ref": "#/components/parameters/IdempotencyKey"
+                    },
+                    {
+                        "name": "order",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
                     }
                 ],
                 "responses": {
@@ -2610,6 +2966,51 @@
                     "الفني"
                 ],
                 "summary": "providerOrderCompleteInspectionOnly",
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AppMode"
+                    },
+                    {
+                        "$ref": "#/components/parameters/IdempotencyKey"
+                    },
+                    {
+                        "name": "order",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "نجاح"
+                    },
+                    "400": {
+                        "description": "خطأ",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/provider/orders/{order}/completion-estimate": {
+            "post": {
+                "operationId": "providerOrderCompletionEstimate",
+                "tags": [
+                    "الفني"
+                ],
+                "summary": "providerOrderCompletionEstimate",
                 "security": [
                     {
                         "sanctum": []
@@ -2925,6 +3326,51 @@
                     "الفني"
                 ],
                 "summary": "providerOrderUnable",
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AppMode"
+                    },
+                    {
+                        "$ref": "#/components/parameters/IdempotencyKey"
+                    },
+                    {
+                        "name": "order",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "نجاح"
+                    },
+                    "400": {
+                        "description": "خطأ",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/provider/orders/{order}/work-photos": {
+            "post": {
+                "operationId": "providerOrderWorkPhoto",
+                "tags": [
+                    "الفني"
+                ],
+                "summary": "providerOrderWorkPhoto",
                 "security": [
                     {
                         "sanctum": []
@@ -3280,6 +3726,56 @@
                 }
             }
         },
+        "/providers/{provider}/images/{image}": {
+            "get": {
+                "operationId": "providerImage",
+                "tags": [
+                    "الفني"
+                ],
+                "summary": "providerImage",
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AppMode"
+                    },
+                    {
+                        "name": "provider",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "image",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "نجاح"
+                    },
+                    "400": {
+                        "description": "خطأ",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/providers/{provider}/reports": {
             "post": {
                 "operationId": "supportReportProvider",
@@ -3301,6 +3797,64 @@
                     },
                     {
                         "name": "provider",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "نجاح"
+                    },
+                    "400": {
+                        "description": "خطأ",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/providers/{provider}/reviews/{review}/photos/{media}": {
+            "get": {
+                "operationId": "providerReviewImage",
+                "tags": [
+                    "الفني"
+                ],
+                "summary": "providerReviewImage",
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AppMode"
+                    },
+                    {
+                        "name": "provider",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "review",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "media",
                         "in": "path",
                         "required": true,
                         "schema": {

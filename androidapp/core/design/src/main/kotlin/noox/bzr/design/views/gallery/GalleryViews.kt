@@ -118,21 +118,24 @@ object ComponentGalleryViews {
                 summary.rows = listOf(R.drawable.ic_orders to s(R.string.summary_service), R.drawable.ic_clock to s(R.string.summary_visit))
                 val price = BzrFormat.fill(s(R.string.format_amount), GalleryFixtures.offerPrice)
                 val eta = BzrFormat.fill(s(R.string.format_eta), GalleryFixtures.offerEtaMinutes)
-                fun OfferCardView.fill(detail: String, variant: OfferVariant, caption: String? = null) {
+                fun OfferCardView.fill(detail: String, caption: String) {
                     provider = s(R.string.offer_provider)
+                    subtitle = s(R.string.tile_plumbing)
                     this.rating = rating
-                    this.services = services
+                    reviews = BzrFormat.fill(s(R.string.offer_reviews), "count" to services)
                     this.price = price
-                    this.detail = detail
-                    badge = s(R.string.badge_top_rated)
-                    button = s(R.string.offer_select)
-                    chatLabel = s(R.string.button_chat)
-                    this.variant = variant
                     priceCaption = caption
+                    this.detail = detail
+                    note = s(R.string.provider_about_body)
+                    verified = true
+                    verifiedLabel = s(R.string.offer_verified)
+                    button = s(R.string.offer_select)
+                    profileLabel = s(R.string.offer_profile)
+                    chatLabel = s(R.string.button_chat)
                 }
-                offerExecution.fill(eta, OfferVariant.Execution)
-                offerInspection.fill(eta, OfferVariant.Inspection, s(R.string.offer_inspection_fee))
-                offerScheduled.fill(s(R.string.offer_scheduled), OfferVariant.Scheduled)
+                offerExecution.fill(eta, "")
+                offerInspection.fill(eta, s(R.string.offer_inspection_fee))
+                offerScheduled.fill(s(R.string.offer_scheduled), "")
             }
             5 -> GalleryPageProviderBinding.inflate(inflater, content).apply {
                 sortChips.title = s(R.string.sort_title)

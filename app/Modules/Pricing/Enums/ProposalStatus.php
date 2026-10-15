@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Pricing\Enums;
 
+use App\Support\Localization;
 use Filament\Support\Contracts\HasColor;
 use Filament\Support\Contracts\HasLabel;
 
@@ -18,13 +19,7 @@ enum ProposalStatus: string implements HasColor, HasLabel
 
     public function getLabel(): string
     {
-        return match ($this) {
-            self::Pending => 'بانتظار الرد',
-            self::Approved => 'موافق عليه',
-            self::Rejected => 'مرفوض',
-            self::Expired => 'انتهت مهلته',
-            self::Withdrawn => 'مسحوب',
-        };
+        return Localization::enum($this);
     }
 
     public function getColor(): string

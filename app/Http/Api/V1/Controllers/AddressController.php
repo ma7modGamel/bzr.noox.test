@@ -7,6 +7,7 @@ namespace App\Http\Api\V1\Controllers;
 use App\Modules\Customers\Models\CustomerAddress;
 use App\Modules\Geography\Models\Area;
 use App\Support\Exceptions\BusinessRuleViolationException;
+use App\Support\Localization;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -122,7 +123,7 @@ final class AddressController
             ->exists();
 
         if (! $served) {
-            throw BusinessRuleViolationException::rule('BR-010', 'الخدمة غير متاحة في هذه المنطقة.');
+            throw BusinessRuleViolationException::rule('BR-010', Localization::text('copy.this_service_is_unavailable_in_this_area'));
         }
     }
 
@@ -132,8 +133,8 @@ final class AddressController
         return [
             'id' => $address->id,
             'label' => $address->label,
-            'city' => ['id' => $address->city_id, 'name' => $address->city?->name],
-            'area' => ['id' => $address->area_id, 'name' => $address->area?->name],
+            'city' => ['id' => $address->city_id, 'name' => Localization::field($address->city)],
+            'area' => ['id' => $address->area_id, 'name' => Localization::field($address->area)],
             'address_text' => $address->address_text,
             'building' => $address->building,
             'floor' => $address->floor,

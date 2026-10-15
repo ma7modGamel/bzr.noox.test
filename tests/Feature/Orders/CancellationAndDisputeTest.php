@@ -92,7 +92,7 @@ final class CancellationAndDisputeTest extends TestCase
     {
         [$customer, $provider, , $order] = $this->assigned();
         $order = app(StartTripAction::class)->execute($order, $provider);
-        $order = app(MarkArrivedAction::class)->execute($order, $provider, 30.0600, 31.3400);
+        $order = app(MarkArrivedAction::class)->execute($order, $provider, 30.0600, 31.3400, arrivalCode: $this->arrivalCode($order));
 
         $this->expectException(BusinessRuleViolationException::class);
         app(CancelOrderAction::class)->execute(
@@ -141,7 +141,7 @@ final class CancellationAndDisputeTest extends TestCase
     {
         [, $provider, , $order] = $this->assigned();
         $order = app(StartTripAction::class)->execute($order, $provider);
-        $order = app(MarkArrivedAction::class)->execute($order, $provider, 30.0600, 31.3400);
+        $order = app(MarkArrivedAction::class)->execute($order, $provider, 30.0600, 31.3400, arrivalCode: $this->arrivalCode($order));
 
         try {
             app(ReportUnableAction::class)->customerNoShow($order, $provider);
@@ -154,8 +154,9 @@ final class CancellationAndDisputeTest extends TestCase
 
         $order = app(ReportUnableAction::class)->customerNoShow($order->refresh(), $provider);
 
-        $this->assertSame(OrderStatus::Cancelled, $order->status);
-        $this->assertSame(CancelReason::CustomerNoShow, $order->cancel_reason_code);
+        $this->assertSame(OrderStatus::Arrived, $order->status);
+        $this->assertTrue($order->hasPendingNoShowReport());
+        $this->assertNull($order->cancel_reason_code);
         $this->assertNull($order->final_amount);
     }
 
@@ -165,7 +166,7 @@ final class CancellationAndDisputeTest extends TestCase
     {
         [$customer, $provider, , $order] = $this->assigned();
         $order = app(StartTripAction::class)->execute($order, $provider);
-        $order = app(MarkArrivedAction::class)->execute($order, $provider, 30.0600, 31.3400);
+        $order = app(MarkArrivedAction::class)->execute($order, $provider, 30.0600, 31.3400, arrivalCode: $this->arrivalCode($order));
 
         $dispute = app(OpenDisputeAction::class)->execute(
             $order, ActorType::Customer, $customer->id, 'QUALITY', 'الفني لم يبدأ العمل',
@@ -184,7 +185,7 @@ final class CancellationAndDisputeTest extends TestCase
     {
         [$customer, $provider, $admin, $order] = $this->assigned();
         $order = app(StartTripAction::class)->execute($order, $provider);
-        $order = app(MarkArrivedAction::class)->execute($order, $provider, 30.0600, 31.3400);
+        $order = app(MarkArrivedAction::class)->execute($order, $provider, 30.0600, 31.3400, arrivalCode: $this->arrivalCode($order));
 
         $dispute = app(OpenDisputeAction::class)->execute(
             $order, ActorType::Customer, $customer->id, 'QUALITY', 'الفني لم يبدأ العمل',
@@ -210,6 +211,8 @@ final class CancellationAndDisputeTest extends TestCase
         $address = CustomerAddress::factory()->create(['user_id' => $customer->id]);
         $category = Category::query()->where('name', 'سباكة')->sole();
 
+        $provider = ProviderProfile::factory()->servingFor($category->id, $address->area_id)->create();
+
         $order = app(PublishRequestAction::class)->execute($customer, new PublishRequestData(
             customerAddressId: $address->id,
             categoryId: $category->id,
@@ -220,7 +223,6 @@ final class CancellationAndDisputeTest extends TestCase
             description: 'تسريب أسفل الحوض.',
         ));
 
-        $provider = ProviderProfile::factory()->servingFor($order->category_id, $order->area_id)->create();
         $admin = Admin::factory()->create();
 
         return [$customer, $provider, $admin, app(AssignProviderAction::class)->execute($order, $provider, $admin)];

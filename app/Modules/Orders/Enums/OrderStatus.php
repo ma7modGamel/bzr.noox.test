@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\Orders\Enums;
 
 use App\Modules\Settings\Enums\OperatingMode;
+use App\Support\Localization;
 use Filament\Support\Contracts\HasColor;
 use Filament\Support\Contracts\HasLabel;
 
@@ -29,27 +30,14 @@ enum OrderStatus: string implements HasColor, HasLabel
 
     public function getLabel(): string
     {
-        return match ($this) {
-            self::Open => 'استقبال العروض',
-            self::Confirmed => 'تم التأكيد',
-            self::OnTheWay => 'في الطريق',
-            self::Arrived => 'وصل',
-            self::AwaitingQuoteApproval => 'بانتظار الموافقة على عرض التنفيذ',
-            self::InProgress => 'جاري التنفيذ',
-            self::AwaitingPayment => 'بانتظار الدفع',
-            self::AwaitingConfirmation => 'بانتظار تأكيد الإنهاء',
-            self::Disputed => 'قيد المراجعة',
-            self::Closed => 'مكتمل',
-            self::Cancelled => 'ملغي',
-            self::Expired => 'منتهي',
-        };
+        return Localization::enum($this);
     }
 
     /** الاسم يختلف في وضع الموظفين لحالة OPEN فقط (21). */
     public function labelFor(OperatingMode $mode): string
     {
         if ($this === self::Open && $mode === OperatingMode::Employee) {
-            return 'بانتظار تعيين فني';
+            return Localization::text('order.awaiting_assignment');
         }
 
         return $this->getLabel();

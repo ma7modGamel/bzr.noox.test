@@ -1,0 +1,104 @@
+{
+    "data": {
+        "order": {
+            "id": 1000,
+            "number": 2,
+            "operating_mode": "MARKETPLACE",
+            "status": "OPEN",
+            "status_label": "استقبال العروض",
+            "version": 1,
+            "category": {
+                "id": 1001,
+                "name": "سباكة"
+            },
+            "problem_type": {
+                "id": 1002,
+                "name": "تسريب مياه"
+            },
+            "customer_address_id": null,
+            "description": "تسريب أسفل الحوض منذ يومين.",
+            "pricing_mode": "INSPECTION",
+            "pricing_mode_label": "معاينة أولًا",
+            "materials_responsibility": "UNSURE",
+            "materials_responsibility_label": "غير محدد",
+            "budget_amount": null,
+            "timing": {
+                "type": "NOW",
+                "slot_start": null,
+                "slot_end": null
+            },
+            "location": {
+                "area": "الحي الأول",
+                "city": "دمياط الجديدة"
+            },
+            "deadlines": {
+                "offers_close_at": "2026-10-05T06:30:00+00:00",
+                "selection_deadline_at": "2026-10-05T07:00:00+00:00",
+                "proposal_expires_at": null,
+                "no_show_allowed_at": null,
+                "auto_close_at": null
+            },
+            "display_status": "order.status.provider.OPEN",
+            "stepper": null,
+            "conversation_id": null,
+            "payment_reference": "#2",
+            "amounts": {
+                "labor_total": null,
+                "materials_total": null,
+                "final_amount": null,
+                "payment_method": null,
+                "payment_method_label": null,
+                "payment_status": "UNPAID"
+            },
+            "termination": {
+                "reason_code": null,
+                "reason_label": null,
+                "note": null,
+                "cancelled_at": null,
+                "expired_at": null,
+                "closed_at": null
+            },
+            "provider": null,
+            "customer": {
+                "name": "الآنسة غ.",
+                "phone": null,
+                "rating_avg": null
+            },
+            "available_actions": [
+                "submit_offer"
+            ],
+            "created_at": "2026-10-05T06:00:00+00:00"
+        },
+        "media": [],
+        "own_offer": null,
+        "offer_context": {
+            "min_amount": "50.00",
+            "commission_rate": "0.1000",
+            "eta_min_minutes": 5,
+            "eta_max_minutes": 180,
+            "eta_options": [
+                15,
+                30,
+                45,
+                60,
+                90,
+                120,
+                180
+            ],
+            "deductible_options": [
+                {
+                    "code": "YES",
+                    "label": "تُخصم من المصنعية",
+                    "value": true
+                },
+                {
+                    "code": "NO",
+                    "label": "لا تُخصم من المصنعية",
+                    "value": false
+                }
+            ],
+            "default_includes_text": "المصنعية فقط",
+            "can_reapply": false
+        }
+    }
+}

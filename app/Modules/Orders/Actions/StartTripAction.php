@@ -14,6 +14,7 @@ use App\Modules\Providers\Models\ProviderProfile;
 use App\Modules\Settings\Enums\Cfg;
 use App\Modules\Settings\Services\SettingsRepository;
 use App\Support\Exceptions\BusinessRuleViolationException;
+use App\Support\Localization;
 use Carbon\CarbonImmutable;
 
 /**
@@ -39,7 +40,15 @@ final readonly class StartTripAction
             action: 'startTrip',
             actorType: ActorType::Provider,
             actorId: $provider->getKey(),
-            mutate: fn (Order $fresh) => $fresh->trip_started_at = now(),
+            mutate: function (Order $fresh): void {
+                $fresh->trip_started_at = now();
+                $fresh->arrival_code = null;
+                $fresh->arrival_code_expires_at = null;
+                $fresh->arrival_code_attempts = 0;
+                $fresh->arrival_code_locked_until = null;
+                $fresh->arrival_verified_at = null;
+                $fresh->arrival_exception_report = null;
+            },
         );
 
         if ($lat !== null && $lng !== null) {
@@ -58,7 +67,7 @@ final readonly class StartTripAction
     private function assertOwnership(Order $order, ProviderProfile $provider): void
     {
         if ($order->provider_profile_id !== $provider->getKey()) {
-            throw BusinessRuleViolationException::rule('BR-022', 'هذا الطلب غير مسنَد إليك.');
+            throw BusinessRuleViolationException::rule('BR-022', Localization::text('copy.this_request_is_not_assigned_to_you'));
         }
     }
 
@@ -74,8 +83,7 @@ final readonly class StartTripAction
         if (CarbonImmutable::now()->lt($earliest)) {
             throw BusinessRuleViolationException::rule(
                 'BR-017',
-                'بدء التحرك متاح قبل بداية الفترة بـ '
-                    .$this->settings->int(Cfg::MinLeadMinutesBeforeSlot).' دقيقة على الأكثر.',
+                Localization::text('dynamic.trip_lead', ['minutes' => $this->settings->int(Cfg::MinLeadMinutesBeforeSlot)]),
             );
         }
     }

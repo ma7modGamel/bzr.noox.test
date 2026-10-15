@@ -370,6 +370,8 @@ final class NotificationDeliveryTest extends TestCase
         $customer = User::factory()->create();
         $address = CustomerAddress::factory()->create(['user_id' => $customer->id]);
         $category = Category::query()->where('name', 'سباكة')->sole();
+        $provider = ProviderProfile::factory()->servingFor($category->id, $address->area_id)->create();
+
         $order = app(PublishRequestAction::class)->execute($customer, new PublishRequestData(
             customerAddressId: $address->id,
             categoryId: $category->id,
@@ -379,7 +381,7 @@ final class NotificationDeliveryTest extends TestCase
             termsAccepted: true,
             description: 'تسريب أسفل الحوض.',
         ));
-        $provider = ProviderProfile::factory()->servingFor($order->category_id, $order->area_id)->create();
+
         $order = app(AssignProviderAction::class)->execute($order, $provider, Admin::factory()->create());
 
         return [$order->refresh()->load('customer'), $provider->load('user')];

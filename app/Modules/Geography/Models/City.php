@@ -15,7 +15,7 @@ final class City extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'is_active', 'timezone', 'center_lat', 'center_lng', 'radius_km'];
+    protected $fillable = ['name', 'name_en', 'is_active', 'timezone', 'center_lat', 'center_lng', 'radius_km'];
 
     protected function casts(): array
     {

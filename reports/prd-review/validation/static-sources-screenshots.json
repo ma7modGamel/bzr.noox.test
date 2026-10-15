@@ -1,0 +1,86 @@
+{
+  "backend-technician-completion-estimate": {
+    "path": "reports/prd-review/assets/after-static-technician-estimate.png",
+    "sha256": "bc14f0c0f853e5531ac6778c6a9e6ab17cae81d3167044de8c7e54c7a6e01ebe",
+    "source_run": "androidapp/app/build/reports/paparazzi/debug/runs/20261014161029_a28ccd.js",
+    "snapshot": {
+      "name": "backend-technician-completion-estimate",
+      "testName": "noox.bzr.customer.StaticDataSourcesViewsTest#technicianCanEnterAndSubmitAnEstimateWithoutChangingOrderState",
+      "timestamp": "2026-10-14T13:10:29.290Z",
+      "tags": [],
+      "file": "images/ab35082fde9ae22a9597bc478fefc231c692230d.png"
+    }
+  },
+  "backend-service-review-tags": {
+    "path": "reports/prd-review/assets/after-static-review-tags.png",
+    "sha256": "5f34e13f1bf6986038db85b35eebd4db911795deb4742e3aee25d90482487f16",
+    "source_run": "androidapp/app/build/reports/paparazzi/debug/runs/20261014161028_2f2877.js",
+    "snapshot": {
+      "name": "backend-service-review-tags",
+      "testName": "noox.bzr.customer.StaticDataSourcesViewsTest#reviewChoicesUseServerLabelsAndSendStableCodes",
+      "timestamp": "2026-10-14T13:10:29.050Z",
+      "tags": [],
+      "file": "images/a66e03a4bc92ef934b3edec6080f058b5e0387dc.png"
+    }
+  },
+  "backend-budget-guide": {
+    "path": "reports/prd-review/assets/after-static-budget-guide.png",
+    "sha256": "b327d0bd0cb4f3b262683b27dc4edcb3f893bfa49c08855381937c71fc5056c3",
+    "source_run": "androidapp/app/build/reports/paparazzi/debug/runs/20261014161028_34dfc7.js",
+    "snapshot": {
+      "name": "backend-budget-guide",
+      "testName": "noox.bzr.customer.StaticDataSourcesViewsTest#budgetUsesServerAmountsAndHidesTheGuideWhenUnconfigured",
+      "timestamp": "2026-10-14T13:10:28.318Z",
+      "tags": [],
+      "file": "images/62498c0b95f845f3cb997d6db3c1dbe1aa991d44.png"
+    }
+  },
+  "backend-budget-guide-unconfigured": {
+    "path": "reports/prd-review/assets/after-static-budget-unconfigured.png",
+    "sha256": "c650d697f95d63acbd74009c914a379d361e0b8c651ec1c0198fb825c00ea08d",
+    "source_run": "androidapp/app/build/reports/paparazzi/debug/runs/20261014161028_34dfc7.js",
+    "snapshot": {
+      "name": "backend-budget-guide-unconfigured",
+      "testName": "noox.bzr.customer.StaticDataSourcesViewsTest#budgetUsesServerAmountsAndHidesTheGuideWhenUnconfigured",
+      "timestamp": "2026-10-14T13:10:28.385Z",
+      "tags": [],
+      "file": "images/feabc4d572810c8395aaa76553b7a99c9285c422.png"
+    }
+  },
+  "backend-offer-availability-and-sorts": {
+    "path": "reports/prd-review/assets/after-static-offers.png",
+    "sha256": "107d8e1eac31d0e7e61d2c943976614d18913f968e2f7dc79b01f4071eaf2e5f",
+    "source_run": "androidapp/app/build/reports/paparazzi/debug/runs/20261014161028_835e7b.js",
+    "snapshot": {
+      "name": "backend-offer-availability-and-sorts",
+      "testName": "noox.bzr.customer.StaticDataSourcesViewsTest#offerAvailabilityIsNotShownOnEveryCardAndSortsAreServerLabels",
+      "timestamp": "2026-10-14T13:10:28.833Z",
+      "tags": [],
+      "file": "images/401e5ccc07d9e21183b9e004d4fa04a105ec92b6.png"
+    }
+  },
+  "backend-timing-without-arrival-promise": {
+    "path": "reports/prd-review/assets/after-static-timing.png",
+    "sha256": "e9d8886e9e5e3fa5a9f9e455fa8a72740f3b17ec1fda78eb69c8eb247d4b0378",
+    "source_run": "androidapp/app/build/reports/paparazzi/debug/runs/20261014161028_ad4e4e.js",
+    "snapshot": {
+      "name": "backend-timing-without-arrival-promise",
+      "testName": "noox.bzr.customer.StaticDataSourcesViewsTest#timingHasNoFixedArrivalWindowBeforeTravel",
+      "timestamp": "2026-10-14T13:10:28.563Z",
+      "tags": [],
+      "file": "images/4656f55e0ffcaa95362d8e1983f3ea04f3b247a2.png"
+    }
+  },
+  "backend-execution-steps-and-estimate": {
+    "path": "reports/prd-review/assets/after-static-execution.png",
+    "sha256": "f0c974d7daabd42721c512d04f3bcfb9c25a1e919006f32700dde60b23b4f4d2",
+    "source_run": "androidapp/app/build/reports/paparazzi/debug/runs/20261014161027_61f728.js",
+    "snapshot": {
+      "name": "backend-execution-steps-and-estimate",
+      "testName": "noox.bzr.customer.StaticDataSourcesViewsTest#executionShowsOnlyServerStagesTimesAndOptionalTechnicianEstimate",
+      "timestamp": "2026-10-14T13:10:27.987Z",
+      "tags": [],
+      "file": "images/e03ccc7d58028bb0410f2f6a4494d2f9cd0e7742.png"
+    }
+  }
+}

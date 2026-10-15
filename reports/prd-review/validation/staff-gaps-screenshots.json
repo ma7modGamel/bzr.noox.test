@@ -1,0 +1,86 @@
+{
+  "staff-published-terms-top": {
+    "path": "reports/prd-review/assets/after-staff-terms.png",
+    "sha256": "32addff9a196a99cd068c3b61e2e0711152d85898a0cb5a9c43b7063f50fd042",
+    "source_run": "androidapp/app/build/reports/paparazzi/debug/runs/20261015004446_a774b5.js",
+    "snapshot": {
+      "name": "staff-published-terms-top",
+      "testName": "noox.bzr.customer.StaffMediaAndArrivalViewsTest#publishedPolicyDisplaysTheApprovedWarrantyAndMessagingRules",
+      "timestamp": "2026-10-14T21:44:46.432Z",
+      "tags": [],
+      "file": "images/1928a9223e2ffe47bfe55606b8fa6af06804df6c.png"
+    }
+  },
+  "staff-published-warranty-and-arrival-policy": {
+    "path": "reports/prd-review/assets/after-staff-policy-warranty-arrival.png",
+    "sha256": "e981e9ec7b9b56bba02958368a24cdaf6d56cbf3e75428af65afc3454f4b6ad7",
+    "source_run": "androidapp/app/build/reports/paparazzi/debug/runs/20261015004446_a774b5.js",
+    "snapshot": {
+      "name": "staff-published-warranty-and-arrival-policy",
+      "testName": "noox.bzr.customer.StaffMediaAndArrivalViewsTest#publishedPolicyDisplaysTheApprovedWarrantyAndMessagingRules",
+      "timestamp": "2026-10-14T21:44:46.494Z",
+      "tags": [],
+      "file": "images/c67b521c650926b897d2ea9a38e9c700c1fd4461.png"
+    }
+  },
+  "staff-completed-order-before-after": {
+    "path": "reports/prd-review/assets/after-staff-repair-evidence.png",
+    "sha256": "b4aab19be36c6b27485c356f90307a8ff77051c5a0612949e4d7854ced1d99b1",
+    "source_run": "androidapp/app/build/reports/paparazzi/debug/runs/20261015004446_5f931f.js",
+    "snapshot": {
+      "name": "staff-completed-order-before-after",
+      "testName": "noox.bzr.customer.StaffMediaAndArrivalViewsTest#completedOrderHistoryDisplaysBeforeAndAfterPhotosFromServer",
+      "timestamp": "2026-10-14T21:44:46.235Z",
+      "tags": [],
+      "file": "images/c6ccbc015cefe4857c900e9dc01365adf457583a.png"
+    }
+  },
+  "staff-technician-arrival-code-and-exception": {
+    "path": "reports/prd-review/assets/after-staff-technician-arrival-code.png",
+    "sha256": "2da55c1d8da696a91081c5c114973ab5ec676b256e647fd13a7eb86b76d96118",
+    "source_run": "androidapp/app/build/reports/paparazzi/debug/runs/20261015004445_47a350.js",
+    "snapshot": {
+      "name": "staff-technician-arrival-code-and-exception",
+      "testName": "noox.bzr.customer.StaffMediaAndArrivalViewsTest#technicianCanEnterCustomerCodeOrReportAnExceptionToAdministration",
+      "timestamp": "2026-10-14T21:44:46.036Z",
+      "tags": [],
+      "file": "images/d2624e22434625e3365a04352923642f4c83e5ba.png"
+    }
+  },
+  "staff-customer-arrival-code": {
+    "path": "reports/prd-review/assets/after-staff-customer-arrival-code.png",
+    "sha256": "03daec64d763434aa2afe0c1167ed9cf0abe659d140a0bf208f87b402db88bb4",
+    "source_run": "androidapp/app/build/reports/paparazzi/debug/runs/20261015004445_6b9747.js",
+    "snapshot": {
+      "name": "staff-customer-arrival-code",
+      "testName": "noox.bzr.customer.StaffMediaAndArrivalViewsTest#arrivalCodeIsCustomerOnlyDuringTravelAndHasRefreshAction",
+      "timestamp": "2026-10-14T21:44:45.774Z",
+      "tags": [],
+      "file": "images/930fd683e49300f7bb9ded3fd6199327506c8f22.png"
+    }
+  },
+  "staff-chat-private-images": {
+    "path": "reports/prd-review/assets/after-staff-chat-images.png",
+    "sha256": "405f3b9a7818c88fe83ba5f46e5372db6065aa20bf76b86651bded4032b6189e",
+    "source_run": "androidapp/app/build/reports/paparazzi/debug/runs/20261015004445_87bcb4.js",
+    "snapshot": {
+      "name": "staff-chat-private-images",
+      "testName": "noox.bzr.customer.StaffMediaAndArrivalViewsTest#chatShowsAllAttachedPrivateImagesAlongsideTheMessage",
+      "timestamp": "2026-10-14T21:44:45.507Z",
+      "tags": [],
+      "file": "images/c95746bea90786da4ea7bc0d47f7789870a176a0.png"
+    }
+  },
+  "staff-current-fault-before-price-approval": {
+    "path": "reports/prd-review/assets/after-staff-fault-photo.png",
+    "sha256": "dc41fc35d7b42257488c1cccfca0104fba28d79b016382023d8dc351e60d82f5",
+    "source_run": "androidapp/app/build/reports/paparazzi/debug/runs/20261015004442_3b452e.js",
+    "snapshot": {
+      "name": "staff-current-fault-before-price-approval",
+      "testName": "noox.bzr.customer.StaffMediaAndArrivalViewsTest#quoteShowsOnlyOptionalCurrentFaultImageAndNoCompletionEvidence",
+      "timestamp": "2026-10-14T21:44:45.183Z",
+      "tags": [],
+      "file": "images/70b57ef51583675a48f3886001d961d1a342e892.png"
+    }
+  }
+}

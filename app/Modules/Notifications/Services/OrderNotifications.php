@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 namespace App\Modules\Notifications\Services;
 
+use App\Filament\Resources\Orders\OrderResource;
+use App\Modules\Identity\Models\Admin;
 use App\Modules\Identity\Models\User;
+use App\Modules\Notifications\Data\LocalizedMessage;
 use App\Modules\Notifications\Data\NotificationContent;
 use App\Modules\Notifications\Enums\NotificationCode;
 use App\Modules\Notifications\Jobs\FlushOfferNotifications;
@@ -21,6 +24,8 @@ use App\Modules\Payments\Enums\PaymentGatewayChannel;
 use App\Modules\Payments\Enums\TransferRejectionReason;
 use App\Modules\Settings\Enums\OperatingMode;
 use Carbon\CarbonImmutable;
+use Filament\Actions\Action;
+use Filament\Notifications\Notification;
 use Illuminate\Support\Collection;
 
 /**
@@ -56,19 +61,20 @@ final class OrderNotifications
             OrderEventCode::OfferAccepted => $this->offerAccepted($order),
             OrderEventCode::ProviderAssigned => $this->providerAssigned($order),
             OrderEventCode::ProviderBackedOut => $this->providerBackedOut($order, $event),
-            OrderEventCode::TripStarted => $this->toCustomer($order, NotificationCode::ProviderOnTheWay, 'الفني في الطريق', 'الفني في الطريق إليك لطلب '.$this->number($order).'. تابع موقعه ووقت الوصول.'),
-            OrderEventCode::Arrived => $this->toCustomer($order, NotificationCode::ProviderArrived, 'وصل الفني', 'وصل الفني إلى عنوانك لطلب '.$this->number($order).'.'),
-            OrderEventCode::WorkStarted => $this->toCustomer($order, NotificationCode::WorkStarted, 'بدأ التنفيذ', 'بدأ الفني العمل في طلب '.$this->number($order).'.'),
-            OrderEventCode::ProposalSubmitted => $this->toCustomer($order, NotificationCode::ProposalAwaitingApproval, 'مقترح سعر بانتظار موافقتك', 'أرسل الفني مقترحًا بمبلغ '.$this->money($event->meta['amount'] ?? null).' لطلب '.$this->number($order).'. راجعه قبل انتهاء المهلة.'),
-            OrderEventCode::ProposalApproved => $this->proposalDecided($order, 'وافق العميل على مقترحك'),
-            OrderEventCode::ProposalRejected => $this->proposalDecided($order, 'رفض العميل مقترحك'),
-            OrderEventCode::ProposalExpired => $this->proposalDecided($order, 'انتهت مهلة مقترحك'),
+            OrderEventCode::TripStarted => $this->toCustomer($order, NotificationCode::ProviderOnTheWay, new LocalizedMessage('notifications.trip_title'), new LocalizedMessage('notifications.trip_body', ['order' => $this->number($order)])),
+            OrderEventCode::Arrived => $this->toCustomer($order, NotificationCode::ProviderArrived, new LocalizedMessage('notifications.arrived_title'), new LocalizedMessage('notifications.arrived_body', ['order' => $this->number($order)])),
+            OrderEventCode::CustomerNoShowReported => $this->absenceReported($order),
+            OrderEventCode::WorkStarted => $this->toCustomer($order, NotificationCode::WorkStarted, new LocalizedMessage('notifications.work_title'), new LocalizedMessage('notifications.work_body', ['order' => $this->number($order)])),
+            OrderEventCode::ProposalSubmitted => $this->toCustomer($order, NotificationCode::ProposalAwaitingApproval, new LocalizedMessage('notifications.proposal_title'), new LocalizedMessage('notifications.proposal_body', ['amount' => $this->money($event->meta['amount'] ?? null), 'order' => $this->number($order)])),
+            OrderEventCode::ProposalApproved => $this->proposalDecided($order, new LocalizedMessage('notifications.proposal_approved')),
+            OrderEventCode::ProposalRejected => $this->proposalDecided($order, new LocalizedMessage('notifications.proposal_rejected')),
+            OrderEventCode::ProposalExpired => $this->proposalDecided($order, new LocalizedMessage('notifications.proposal_expired')),
             OrderEventCode::WorkCompleted, OrderEventCode::InspectionOnlyCompleted => $this->amountDue($order),
-            OrderEventCode::CashReceived => $this->toCustomer($order, NotificationCode::CashRecordedConfirm, 'أكّد إنهاء الطلب', 'سجّل الفني استلام '.$this->money($order->final_amount).' نقدًا لطلب '.$this->number($order).'. أكّد الإنهاء أو افتح مشكلة.'),
-            OrderEventCode::ElectronicPaymentSucceeded => $this->toProvider($order, NotificationCode::ElectronicPaymentReceived, 'تم الدفع الإلكتروني', 'دفع العميل '.$this->money($order->final_amount).' لطلب '.$this->number($order).'.'),
+            OrderEventCode::CashReceived => $this->toCustomer($order, NotificationCode::CashRecordedConfirm, new LocalizedMessage('notifications.cash_title'), new LocalizedMessage('notifications.cash_body', ['amount' => $this->money($order->final_amount), 'order' => $this->number($order)])),
+            OrderEventCode::ElectronicPaymentSucceeded => $this->toProvider($order, NotificationCode::ElectronicPaymentReceived, new LocalizedMessage('notifications.paid_title'), new LocalizedMessage('notifications.paid_body', ['amount' => $this->money($order->final_amount), 'order' => $this->number($order)])),
             OrderEventCode::PaymentAttemptFailed => $this->paymentFailed($order, $event),
-            OrderEventCode::DisputeOpened => $this->dispute($order, 'فُتحت مشكلة على طلب '.$this->number($order), 'نراجع المشكلة ونبلغك بالقرار.'),
-            OrderEventCode::DisputeResolved => $this->dispute($order, 'صدر قرار في مشكلة طلب '.$this->number($order), 'افتح الطلب لمعرفة القرار.'),
+            OrderEventCode::DisputeOpened => $this->dispute($order, new LocalizedMessage('notifications.dispute_opened', ['order' => $this->number($order)]), new LocalizedMessage('notifications.dispute_review')),
+            OrderEventCode::DisputeResolved => $this->dispute($order, new LocalizedMessage('notifications.dispute_resolved', ['order' => $this->number($order)]), new LocalizedMessage('notifications.dispute_details')),
             OrderEventCode::Cancelled, OrderEventCode::UnableToPerform, OrderEventCode::CustomerNoShow => $this->cancelled($order, $event),
             default => null,
         };
@@ -79,6 +85,18 @@ final class OrderNotifications
     }
 
     /** NTF-04: فوري لأول عرض، ثم إشعار مجمّع واحد عند انتهاء كل نافذة 5 دقائق (DEC-058). */
+    private function absenceReported(Order $order): void
+    {
+        Notification::make()->warning()
+            ->title('بلاغ غياب العميل — طلب #'.$order->number)
+            ->body('الفني ينتظر. تواصل مع العميل ثم احسم بلاغ الغياب من صفحة الطلب.')
+            ->actions([
+                Action::make('view')->label('متابعة البلاغ')
+                    ->url(OrderResource::getUrl('view', ['record' => $order->getKey()], panel: 'admin')),
+            ])
+            ->sendToDatabase(Admin::query()->where('is_active', true)->get());
+    }
+
     public function flushOfferBundle(int $orderId, CarbonImmutable $since): void
     {
         $order = Order::query()->with('customer')->find($orderId);
@@ -97,7 +115,7 @@ final class OrderNotifications
             return;
         }
 
-        $this->sendOfferNotification($order, $this->offersPhrase($count).' لطلب '.$this->number($order).'.');
+        $this->sendOfferNotification($order, new LocalizedMessage('notifications.offers_count', ['count' => $count, 'order' => $this->number($order)]));
     }
 
     /** NTF-07 — CFG-031. مرة واحدة لكل تعيين. */
@@ -111,8 +129,8 @@ final class OrderNotifications
 
         $this->notifier->sendOnce($user, new NotificationContent(
             NotificationCode::TripStartReminder,
-            'حان وقت التحرك',
-            'لم تبدأ التحرك لطلب '.$this->number($order).' بعد. ابدأ الآن أو تواصل مع العميل.',
+            new LocalizedMessage('notifications.reminder_title'),
+            new LocalizedMessage('notifications.reminder_body', ['order' => $this->number($order)]),
             'provider/orders/'.$order->getKey(),
             self::PROVIDER,
             $order->getKey(),
@@ -128,10 +146,10 @@ final class OrderNotifications
 
         $this->notifier->sendOnce($user, new NotificationContent(
             NotificationCode::RatingReminder,
-            'قيّم تجربتك',
+            new LocalizedMessage('notifications.rating_title'),
             $asProvider
-                ? 'قيّم العميل في طلب '.$this->number($order).'.'
-                : 'شاركنا تقييمك للفني في طلب '.$this->number($order).'.',
+                ? new LocalizedMessage('notifications.rating_customer', ['order' => $this->number($order)])
+                : new LocalizedMessage('notifications.rating_provider', ['order' => $this->number($order)]),
             $asProvider ? 'provider/orders/'.$order->getKey().'/rating' : 'orders/'.$order->getKey().'/rating',
             $asProvider ? self::PROVIDER : self::CUSTOMER,
             $order->getKey(),
@@ -143,8 +161,8 @@ final class OrderNotifications
     {
         $this->notifier->send($recipient, new NotificationContent(
             NotificationCode::NewMessage,
-            'رسالة جديدة',
-            'رسالة جديدة بخصوص طلب '.$this->number($order).'.',
+            new LocalizedMessage('notifications.message_title'),
+            new LocalizedMessage('notifications.message_body', ['order' => $this->number($order)]),
             ($recipientIsProvider ? 'provider/orders/' : 'orders/').$order->getKey().'/chat',
             $recipientIsProvider ? self::PROVIDER : self::CUSTOMER,
             $order->getKey(),
@@ -161,8 +179,8 @@ final class OrderNotifications
             $provider->user,
             new NotificationContent(
                 NotificationCode::NewRequest,
-                'طلب جديد في منطقتك',
-                $order->category?->name.' — قدّم عرضك قبل انتهاء المهلة.',
+                new LocalizedMessage('notifications.request_title'),
+                new LocalizedMessage('notifications.request_body', ['category' => LocalizedMessage::field($order->category)]),
                 'provider/requests/'.$order->getKey(),
                 self::PROVIDER,
                 $order->getKey(),
@@ -177,22 +195,22 @@ final class OrderNotifications
         }
 
         $this->toCustomer($order, NotificationCode::OffersWindowClosedEmpty, ...$this->noProviderTexts(
-            $order, 'انتهت مهلة العروض', 'لم يصل عرض لطلب '.$this->number($order).'. يمكنك تعديله أو إعادة نشره.',
+            $order, new LocalizedMessage('notifications.window_title'), new LocalizedMessage('notifications.window_body', ['order' => $this->number($order)]),
         ));
     }
 
     private function expired(Order $order): void
     {
         $this->toCustomer($order, NotificationCode::ExpiredWithoutSelection, ...$this->noProviderTexts(
-            $order, 'انتهى الطلب بلا اختيار', 'انتهت مهلة اختيار عرض لطلب '.$this->number($order).'. يمكنك إعادة نشره.',
+            $order, new LocalizedMessage('notifications.expired_title'), new LocalizedMessage('notifications.expired_body', ['order' => $this->number($order)]),
         ));
     }
 
     /** نص وضع الموظفين لـNTF-02/03 (17 §اختلاف الإشعارات). @return array{string, string} */
-    private function noProviderTexts(Order $order, string $title, string $body): array
+    private function noProviderTexts(Order $order, string|LocalizedMessage $title, string|LocalizedMessage $body): array
     {
         return $order->operating_mode === OperatingMode::Employee
-            ? ['لم يتوفر فني', 'لم يتوفر فني في الوقت المناسب لطلب '.$this->number($order).'. يمكنك إعادة نشره.']
+            ? [new LocalizedMessage('notifications.unavailable_title'), new LocalizedMessage('notifications.unavailable_body', ['order' => $this->number($order)])]
             : [$title, $body];
     }
 
@@ -210,16 +228,16 @@ final class OrderNotifications
 
         // داخل النافذة: مهمة التفريغ المجدولة ستجمع هذا العرض.
         if (! $windowOpen) {
-            $this->sendOfferNotification($order, 'وصل عرض جديد لطلب '.$this->number($order).'.');
+            $this->sendOfferNotification($order, new LocalizedMessage('notifications.offer_body', ['order' => $this->number($order)]));
         }
     }
 
-    private function sendOfferNotification(Order $order, string $body): void
+    private function sendOfferNotification(Order $order, string|LocalizedMessage $body): void
     {
         $now = CarbonImmutable::now();
         $sent = $this->notifier->sendOnce($order->customer, new NotificationContent(
             NotificationCode::NewOffer,
-            'عروض جديدة على طلبك',
+            new LocalizedMessage('notifications.offers_title'),
             $body,
             'orders/'.$order->getKey().'/offers',
             self::CUSTOMER,
@@ -238,11 +256,11 @@ final class OrderNotifications
             return;
         }
 
-        $this->toProvider($order, NotificationCode::OfferSelected, 'تم اختيار عرضك', 'اختار العميل عرضك لطلب '.$this->number($order).'. راجع الموعد والعنوان.');
+        $this->toProvider($order, NotificationCode::OfferSelected, new LocalizedMessage('notifications.selected_title'), new LocalizedMessage('notifications.selected_body', ['order' => $this->number($order)]));
 
         $this->offerOwners($order, [OfferStatus::NotSelected], exceptCurrent: true)->each(fn (User $user) => $this->notifier->send(
             $user,
-            new NotificationContent(NotificationCode::OfferNotSelected, 'لم يُختر عرضك', 'اختار العميل عرضًا آخر لطلب '.$this->number($order).'.', 'provider/offers', self::PROVIDER, $order->getKey()),
+            new NotificationContent(NotificationCode::OfferNotSelected, new LocalizedMessage('notifications.not_selected_title'), new LocalizedMessage('notifications.not_selected_body', ['order' => $this->number($order)]), 'provider/offers', self::PROVIDER, $order->getKey()),
         ));
     }
 
@@ -252,17 +270,17 @@ final class OrderNotifications
             return;
         }
 
-        $this->toProvider($order, NotificationCode::ProviderAssignedToYou, 'طلب معيّن لك', 'عُيّن لك طلب '.$this->number($order).' — '.$order->category?->name.'. راجع الموعد والعنوان.');
-        $this->toCustomer($order, NotificationCode::ProviderAssignedToOrder, 'تم تعيين فني لطلبك', 'عُيّن فني لطلب '.$this->number($order).'. يمكنك متابعته الآن.');
+        $this->toProvider($order, NotificationCode::ProviderAssignedToYou, new LocalizedMessage('notifications.assigned_provider_title'), new LocalizedMessage('notifications.assigned_provider_body', ['order' => $this->number($order), 'category' => LocalizedMessage::field($order->category)]));
+        $this->toCustomer($order, NotificationCode::ProviderAssignedToOrder, new LocalizedMessage('notifications.assigned_customer_title'), new LocalizedMessage('notifications.assigned_customer_body', ['order' => $this->number($order)]));
     }
 
     private function providerBackedOut(Order $order, OrderEvent $event): void
     {
         $marketplace = $order->operating_mode === OperatingMode::Marketplace;
 
-        $this->toCustomer($order, NotificationCode::ProviderBackedOut, 'اعتذر الفني', $marketplace
-            ? 'طلبك '.$this->number($order).' يستقبل عروضًا من جديد.'
-            : 'جارٍ تعيين فني بديل لطلب '.$this->number($order).'.');
+        $this->toCustomer($order, NotificationCode::ProviderBackedOut, new LocalizedMessage('notifications.backed_out_title'), $marketplace
+            ? new LocalizedMessage('notifications.backed_out_market', ['order' => $this->number($order)])
+            : new LocalizedMessage('notifications.backed_out_employee', ['order' => $this->number($order)]));
 
         if (! $marketplace) {
             return;
@@ -278,13 +296,13 @@ final class OrderNotifications
             ->get()
             ->each(fn (Offer $offer) => $offer->providerProfile?->user === null ? null : $this->notifier->send(
                 $offer->providerProfile->user,
-                new NotificationContent(NotificationCode::OfferReactivated, 'أُعيد تفعيل عرضك', 'عرضك على طلب '.$this->number($order).' متاح للعميل من جديد.', 'provider/offers', self::PROVIDER, $order->getKey()),
+                new NotificationContent(NotificationCode::OfferReactivated, new LocalizedMessage('notifications.reactivated_title'), new LocalizedMessage('notifications.reactivated_body', ['order' => $this->number($order)]), 'provider/offers', self::PROVIDER, $order->getKey()),
             ));
     }
 
-    private function proposalDecided(Order $order, string $title): void
+    private function proposalDecided(Order $order, string|LocalizedMessage $title): void
     {
-        $this->toProvider($order, NotificationCode::ProposalDecided, $title, 'طلب '.$this->number($order).'.');
+        $this->toProvider($order, NotificationCode::ProposalDecided, $title, new LocalizedMessage('notifications.request_reference', ['order' => $this->number($order)]));
     }
 
     private function amountDue(Order $order): void
@@ -294,7 +312,7 @@ final class OrderNotifications
             return;
         }
 
-        $this->toCustomer($order, NotificationCode::AmountDue, 'المبلغ المستحق '.$this->money($order->final_amount), 'انتهى العمل في طلب '.$this->number($order).'. راجع التفاصيل وادفع.');
+        $this->toCustomer($order, NotificationCode::AmountDue, new LocalizedMessage('notifications.due_title', ['amount' => $this->money($order->final_amount)]), new LocalizedMessage('notifications.due_body', ['order' => $this->number($order)]));
     }
 
     private function paymentFailed(Order $order, OrderEvent $event): void
@@ -306,10 +324,10 @@ final class OrderNotifications
 
         $reason = TransferRejectionReason::tryFrom((string) ($event->meta['reason'] ?? ''));
 
-        $this->toCustomer($order, NotificationCode::InstapayTransferRejected, 'تعذّر تأكيد تحويل إنستاباي', ($reason?->getLabel() ?? 'تعذّر تأكيد التحويل').' — يمكنك إعادة المحاولة أو الدفع نقدًا للفني. طلب '.$this->number($order));
+        $this->toCustomer($order, NotificationCode::InstapayTransferRejected, new LocalizedMessage('notifications.transfer_title'), new LocalizedMessage('notifications.transfer_body', ['reason' => $reason === null ? ['ar' => 'تعذّر تأكيد التحويل', 'en' => 'The transfer could not be confirmed'] : LocalizedMessage::enum($reason), 'order' => $this->number($order)]));
     }
 
-    private function dispute(Order $order, string $title, string $body): void
+    private function dispute(Order $order, string|LocalizedMessage $title, string|LocalizedMessage $body): void
     {
         $this->toCustomer($order, NotificationCode::DisputeUpdated, $title, $body, 'orders/'.$order->getKey().'/dispute');
         $this->toProvider($order, NotificationCode::DisputeUpdated, $title, $body);
@@ -317,8 +335,8 @@ final class OrderNotifications
 
     private function cancelled(Order $order, OrderEvent $event): void
     {
-        $title = 'أُلغي الطلب';
-        $body = 'أُلغي طلب '.$this->number($order).'.';
+        $title = new LocalizedMessage('notifications.cancelled_title');
+        $body = new LocalizedMessage('notifications.cancelled_body', ['order' => $this->number($order)]);
 
         if ($event->actor_type !== ActorType::Customer) {
             $this->toCustomer($order, NotificationCode::OrderCancelled, $title, $body);
@@ -339,11 +357,11 @@ final class OrderNotifications
 
     private function closed(Order $order): void
     {
-        $this->toCustomer($order, NotificationCode::OrderClosed, 'اكتمل الطلب', 'اكتمل طلب '.$this->number($order).'. يمكنك تقييم الفني.');
-        $this->toProvider($order, NotificationCode::OrderClosed, 'اكتمل الطلب', 'اكتمل طلب '.$this->number($order).'.');
+        $this->toCustomer($order, NotificationCode::OrderClosed, new LocalizedMessage('notifications.closed_title'), new LocalizedMessage('notifications.closed_customer', ['order' => $this->number($order)]));
+        $this->toProvider($order, NotificationCode::OrderClosed, new LocalizedMessage('notifications.closed_title'), new LocalizedMessage('notifications.closed_provider', ['order' => $this->number($order)]));
     }
 
-    private function toCustomer(Order $order, NotificationCode $code, string $title, string $body, ?string $path = null): void
+    private function toCustomer(Order $order, NotificationCode $code, string|LocalizedMessage $title, string|LocalizedMessage $body, ?string $path = null): void
     {
         if ($order->customer === null) {
             return;
@@ -354,7 +372,7 @@ final class OrderNotifications
         ));
     }
 
-    private function toProvider(Order $order, NotificationCode $code, string $title, string $body): void
+    private function toProvider(Order $order, NotificationCode $code, string|LocalizedMessage $title, string|LocalizedMessage $body): void
     {
         $user = $order->providerProfile?->user;
 
@@ -394,17 +412,6 @@ final class OrderNotifications
     {
         $value = is_numeric($amount) ? (float) $amount : 0.0;
 
-        return rtrim(rtrim(number_format($value, 2, '.', ''), '0'), '.').' جنيه';
-    }
-
-    /** العدد بصيغة عربية سليمة: عرض، عرضان، 3–10 عروض، 11+ عرضًا. */
-    private function offersPhrase(int $count): string
-    {
-        return match (true) {
-            $count === 1 => 'وصل عرض جديد',
-            $count === 2 => 'وصل عرضان جديدان',
-            $count <= 10 => 'وصلت '.$count.' عروض جديدة',
-            default => 'وصل '.$count.' عرضًا جديدًا',
-        };
+        return rtrim(rtrim(number_format($value, 2, '.', ''), '0'), '.');
     }
 }

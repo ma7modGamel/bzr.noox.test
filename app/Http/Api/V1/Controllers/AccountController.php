@@ -7,11 +7,14 @@ namespace App\Http\Api\V1\Controllers;
 use App\Modules\Content\Services\TermsService;
 use App\Modules\Identity\Actions\DeleteAccountAction;
 use App\Modules\Identity\Models\User;
+use App\Modules\Orders\Enums\OrderStatus;
 use App\Modules\Orders\Models\OrderMedia;
+use App\Support\Localization;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
@@ -29,6 +32,7 @@ final class AccountController
             'name' => ['sometimes', 'string', 'min:2', 'max:100'],
             'phone' => ['sometimes', 'regex:/^01[0-9]{9}$/'],
             'avatar_media_id' => ['sometimes', 'nullable', 'integer'],
+            'locale' => ['sometimes', Rule::in(['ar', 'en'])],
             'rating_reminders_enabled' => ['sometimes', 'boolean'], // NTF-18 فقط (17، DEC-058)
         ]);
 
@@ -42,7 +46,7 @@ final class AccountController
                 ->where('type', 'IMAGE')
                 ->first();
             if ($media === null) {
-                throw ValidationException::withMessages(['avatar_media_id' => 'الصورة غير صالحة أو غير مملوكة للحساب.']);
+                throw ValidationException::withMessages(['avatar_media_id' => Localization::text('copy.the_photo_is_invalid_or_does_not_belong_to')]);
             }
 
             if ($user->avatar_path !== null && $user->avatar_path !== $media->path) {
@@ -77,7 +81,7 @@ final class AccountController
         /** @var User $user */
         $user = $request->user();
         if (! Hash::check($data['current_password'], $user->password)) {
-            throw ValidationException::withMessages(['current_password' => 'كلمة المرور الحالية غير صحيحة.']);
+            throw ValidationException::withMessages(['current_password' => Localization::text('copy.the_current_password_is_incorrect')]);
         }
 
         $user->forceFill(['password' => $data['password']])->save();
@@ -91,7 +95,7 @@ final class AccountController
             return new JsonResponse([
                 'error' => [
                     'code' => 'ACTIVE_ORDER_EXISTS',
-                    'message' => 'لا يمكن حذف الحساب قبل انتهاء الطلبات النشطة.',
+                    'message' => Localization::text('copy.you_cannot_delete_your_account_until_all_active_requests'),
                 ],
             ], 409);
         }
@@ -102,14 +106,23 @@ final class AccountController
     /** @return array<string, mixed> */
     private function payload(User $user): array
     {
+        $user->loadCount([
+            'orders as completed_orders_count' => fn ($query) => $query->where('status', OrderStatus::Closed),
+            'orders as active_orders_count' => fn ($query) => $query->whereNotIn('status', [OrderStatus::Closed, OrderStatus::Cancelled, OrderStatus::Expired]),
+            'addresses',
+        ]);
+
         return [
             'id' => $user->getKey(),
             'name' => $user->name,
+            'locale' => $user->locale,
             'email' => $user->email,
             'phone' => $user->phone,
             'avatar_url' => $user->avatar_path === null ? null : route('api.account.avatar'),
             'is_verified' => $user->isVerified(),
             'rating_reminders_enabled' => (bool) ($user->rating_reminders_enabled ?? true),
+            'order_statistics' => ['completed' => $user->completed_orders_count, 'active' => $user->active_orders_count],
+            'addresses_count' => $user->addresses_count,
             // BR-018 — C05 يعرض الموافقة فقط عند نسخة شروط لم يوافق عليها العميل بعد.
             'terms' => [
                 'current_version' => app(TermsService::class)->currentVersion(),

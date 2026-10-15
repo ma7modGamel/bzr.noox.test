@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- SCR-C38 step 4 of 5 — budget and materials (DEC-071, Figma 3002:1270). -->
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:parentTag="android.widget.LinearLayout">
+
+    <LinearLayout
+        android:id="@+id/budgetSection"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:divider="@drawable/bremo_gap_m"
+        android:orientation="vertical"
+        android:showDividers="middle">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:drawablePadding="@dimen/bremo_space_xs"
+            android:text="@string/request_budget_section"
+            android:textAppearance="@style/TextAppearance.Bremo.SectionTitle"
+            app:drawableStartCompat="@drawable/ic_payments"
+            app:drawableTint="@color/bremo_primary600" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/request_budget_body"
+            android:textAppearance="@style/TextAppearance.Bremo.Secondary" />
+
+        <LinearLayout
+            android:id="@+id/budgetCard"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bremo_bg_card"
+            android:divider="@drawable/bremo_gap_s"
+            android:orientation="vertical"
+            android:padding="@dimen/bremo_space_l"
+            android:showDividers="middle">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/request_budget_amount"
+                    android:textAlignment="viewStart"
+                    android:textAppearance="@style/TextAppearance.Bremo.Caption" />
+
+                <!-- STATIC (DEC-074, BACKEND-NOTES B-14): no area price data yet. -->
+                <noox.bzr.design.views.BadgeView
+                    android:id="@+id/areaAverage"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:badgeKind="status" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:orientation="horizontal">
+
+                <EditText
+                    android:id="@+id/budget"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@null"
+                    android:gravity="center"
+                    android:hint="@string/request_budget_placeholder"
+                    android:importantForAutofill="no"
+                    android:inputType="numberDecimal"
+                    android:maxLength="12"
+                    android:minWidth="@dimen/bremo_size_attachment_tile"
+                    android:textAppearance="@style/TextAppearance.Bremo.AmountDisplay"
+                    android:textColorHint="@color/bremo_slate400" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingStart="@dimen/bremo_space_s"
+                    android:paddingEnd="0dp"
+                    android:text="@string/common_currency_short"
+                    android:textAppearance="@style/TextAppearance.Bremo.SectionTitle"
+                    android:textColor="@color/bremo_slate500" />
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/bremo_border_width"
+                android:background="@drawable/bremo_bg_divider" />
+
+            <!-- STATIC (DEC-074, BACKEND-NOTES B-14): fixed quick amounts until the catalog has a price guide. -->
+            <LinearLayout
+                android:id="@+id/quickAmounts"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:divider="@drawable/bremo_gap_s"
+                android:orientation="horizontal"
+                android:showDividers="middle" />
+
+            <TextView
+                android:id="@+id/budgetError"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:accessibilityLiveRegion="polite"
+                android:text="@string/request_budget_invalid"
+                android:textAppearance="@style/TextAppearance.Bremo.Caption"
+                android:textColor="@color/bremo_danger"
+                android:visibility="gone" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/pricing"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:divider="@drawable/bremo_gap_m"
+            android:orientation="vertical"
+            android:showDividers="middle" />
+    </LinearLayout>
+
+    <noox.bzr.design.views.InfoBannerView
+        android:id="@+id/staffPricing"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:drawablePadding="@dimen/bremo_space_xs"
+        android:text="@string/request_materials_section"
+        android:textAppearance="@style/TextAppearance.Bremo.SectionTitle"
+        app:drawableStartCompat="@drawable/ic_construction"
+        app:drawableTint="@color/bremo_primary600" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/request_materials_body"
+        android:textAppearance="@style/TextAppearance.Bremo.Secondary" />
+
+    <LinearLayout
+        android:id="@+id/materials"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:divider="@drawable/bremo_gap_m"
+        android:orientation="vertical"
+        android:showDividers="middle" />
+
+    <noox.bzr.design.views.InfoBannerView
+        android:id="@+id/assurance"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <noox.bzr.design.views.PrimaryButtonView
+        android:id="@+id/next"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:bremoIcon="@drawable/ic_arrow_forward"
+        app:bremoText="@string/request_step4_action" />
+</merge>

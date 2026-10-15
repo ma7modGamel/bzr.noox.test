@@ -11,6 +11,7 @@ use App\Modules\Orders\StateMachine\OrderStateMachine;
 use App\Modules\Payments\Enums\OrderPaymentStatus;
 use App\Modules\Pricing\Services\OrderAmounts;
 use App\Support\Exceptions\BusinessRuleViolationException;
+use App\Support\Localization;
 
 /**
  * إنهاء الزيارة بلا تنفيذ.
@@ -28,7 +29,7 @@ final readonly class CompleteInspectionOnlyAction
         if ($order->pricing_mode !== PricingMode::Inspection) {
             throw BusinessRuleViolationException::rule(
                 'BR-042',
-                'الإنهاء بالمعاينة فقط متاح لطلبات المعاينة.',
+                Localization::text('copy.completion_after_inspection_only_is_available_for_inspection_requests'),
             );
         }
 

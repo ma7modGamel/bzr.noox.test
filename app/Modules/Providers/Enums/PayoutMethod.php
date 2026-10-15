@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Providers\Enums;
 
+use App\Support\Localization;
 use Filament\Support\Contracts\HasLabel;
 
 enum PayoutMethod: string implements HasLabel
@@ -14,19 +15,11 @@ enum PayoutMethod: string implements HasLabel
 
     public function getLabel(): string
     {
-        return match ($this) {
-            self::Instapay => 'إنستاباي',
-            self::Wallet => 'محفظة إلكترونية',
-            self::Bank => 'حساب بنكي',
-        };
+        return Localization::enum($this);
     }
 
     public function fieldLabel(): string
     {
-        return match ($this) {
-            self::Instapay => 'رقم أو عنوان إنستاباي',
-            self::Wallet => 'رقم المحفظة',
-            self::Bank => 'رقم IBAN',
-        };
+        return Localization::enum($this, 'field');
     }
 }

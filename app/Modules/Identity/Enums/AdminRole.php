@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Identity\Enums;
 
+use App\Support\Localization;
 use Filament\Support\Contracts\HasColor;
 use Filament\Support\Contracts\HasLabel;
 
@@ -16,8 +17,8 @@ enum AdminRole: string implements HasColor, HasLabel
     public function getLabel(): string
     {
         return match ($this) {
-            self::Operations => 'مدير تشغيل',
-            self::Super => 'مدير عام',
+            self::Operations => Localization::text('copy.operations_manager'),
+            self::Super => Localization::text('copy.general_manager'),
         };
     }
 

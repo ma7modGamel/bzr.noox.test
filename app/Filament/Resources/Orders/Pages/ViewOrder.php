@@ -9,15 +9,21 @@ use App\Modules\Identity\Models\Admin;
 use App\Modules\Orders\Actions\AdminCloseWithoutPaymentAction;
 use App\Modules\Orders\Actions\AssignProviderAction;
 use App\Modules\Orders\Actions\CancelOrderAction;
+use App\Modules\Orders\Actions\MarkArrivedAction;
+use App\Modules\Orders\Actions\ResolveCustomerNoShowAction;
 use App\Modules\Orders\Enums\ActorType;
 use App\Modules\Orders\Enums\CancelReason;
 use App\Modules\Orders\Enums\OrderStatus;
+use App\Modules\Orders\Enums\TimingType;
 use App\Modules\Orders\Models\Order;
 use App\Modules\Orders\Services\ProviderEligibility;
 use App\Modules\Providers\Models\ProviderProfile;
 use App\Modules\Settings\Services\FeatureGate;
+use App\Modules\Support\Actions\AssignWarrantyVisitAction;
 use App\Support\Exceptions\DomainException;
+use Carbon\CarbonImmutable;
 use Filament\Actions\Action;
+use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Notifications\Notification;
@@ -51,14 +57,85 @@ final class ViewOrder extends ViewRecord
     protected function getHeaderActions(): array
     {
         return [
+            $this->warrantyVisitAction(),
             $this->assignAction(),
             $this->reassignAction(),
+            $this->resolveNoShowAction(),
+            $this->confirmArrivalExceptionAction(),
             $this->closeWithoutPaymentAction(),
             $this->cancelAction(),
         ];
     }
 
-    /** T-25 — إغلاق بدون دفع؛ العمولة صفر (BR-055). */
+    private function confirmArrivalExceptionAction(): Action
+    {
+        return Action::make('confirmArrivalException')->label('تأكيد الوصول باستثناء موثّق')->color('warning')
+            ->visible(fn (): bool => $this->record instanceof Order && $this->record->status === OrderStatus::OnTheWay && $this->record->arrival_exception_report !== null)
+            ->modalDescription(fn (): string => 'تحقّق من الوصول واتصل بالعميل. بلاغ الفني: '.($this->record->arrival_exception_report['note'] ?? ''))
+            ->schema([Textarea::make('contact_note')->label('نتيجة الاتصال والتحقق وسبب الاستثناء')->required()->minLength(5)->maxLength(500)])
+            ->action(function (array $data): void {
+                $report = $this->record->arrival_exception_report;
+                $this->runIntervention(fn (Admin $admin) => app(MarkArrivedAction::class)->execute(
+                    $this->record, $this->record->providerProfile, (float) $report['lat'], (float) $report['lng'], true,
+                    expectedVersion: $this->record->version, exceptionAdmin: $admin, exceptionNote: $data['contact_note']), 'تم تأكيد الوصول وتسجيل الاستثناء.');
+            });
+    }
+
+    /** غياب العميل بلاغ؛ الإدارة وحدها تتابع الاتصال وتحسم نتيجته. */
+    private function resolveNoShowAction(): Action
+    {
+        return Action::make('resolveNoShow')
+            ->label('التواصل مع العميل وحسم بلاغ الغياب')
+            ->color('warning')
+            ->visible(fn (): bool => $this->record instanceof Order && $this->record->hasPendingNoShowReport())
+            ->modalDescription('اتصل بالعميل من لوحة الإدارة، ثم سجّل نتيجة المحاولة. بلاغ الفني لا يلغي الطلب.')
+            ->schema([
+                Select::make('outcome')->label('نتيجة المتابعة')
+                    ->options(['CONTINUE' => 'العميل موجود: متابعة الزيارة', 'CANCEL' => 'تعذّر حضور العميل: إلغاء الطلب بلا مبلغ'])
+                    ->required()->in(['CONTINUE', 'CANCEL']),
+                Textarea::make('contact_note')->label('نتيجة محاولة الاتصال بالعميل')
+                    ->required()->minLength(5)->maxLength(500),
+            ])
+            ->action(function (array $data): void {
+                $this->runIntervention(
+                    fn (Admin $admin) => app(ResolveCustomerNoShowAction::class)->execute(
+                        $this->record, $admin, $data['outcome'] === 'CANCEL', (string) $data['contact_note'],
+                    ),
+                    'تم تسجيل متابعة الإدارة وحسم بلاغ الغياب.',
+                );
+            });
+    }
+
+    private function warrantyVisitAction(): Action
+    {
+        return Action::make('assignWarrantyVisit')->label('تنسيق زيارة ضمان بفني آخر')->color('warning')
+            ->visible(fn (): bool => $this->record instanceof Order && $this->record->warrantyClaims()->where('status', 'REQUESTED')->exists())
+            ->modalDescription(fn (): string => (string) $this->record->warrantyClaims()->where('status', 'REQUESTED')->latest('id')->first()?->description)
+            ->schema([
+                Select::make('provider_profile_id')->label('الفني البديل')->searchable()->required()
+                    ->options(function (): array {
+                        $candidate = clone $this->record;
+                        $candidate->timing_type = TimingType::Scheduled;
+                        $candidate->slot_start = null;
+                        $candidate->slot_end = null;
+
+                        return app(ProviderEligibility::class)->query($candidate)->where('id', '!=', $this->record->provider_profile_id)
+                            ->get()->mapWithKeys(fn (ProviderProfile $provider): array => [$provider->id => $provider->user->name])->all();
+                    }),
+                DateTimePicker::make('scheduled_at')->label('موعد الزيارة المتفق عليه مع العميل')
+                    ->timezone(config('app.display_timezone'))->required()->minDate(now()),
+                Textarea::make('note')->label('نتيجة متابعة العميل وتنسيق الزيارة')->required()->minLength(5)->maxLength(500),
+            ])->action(function (array $data): void {
+                $claim = $this->record->warrantyClaims()->where('status', 'REQUESTED')->latest('id')->firstOrFail();
+                app(AssignWarrantyVisitAction::class)->execute(
+                    $claim, ProviderProfile::query()->findOrFail($data['provider_profile_id']), auth('admin')->user(),
+                    CarbonImmutable::parse($data['scheduled_at']), (string) $data['note'],
+                );
+                Notification::make()->title('تم تنسيق زيارة الضمان بفني مختلف')->success()->send();
+                $this->refreshFormData([]);
+            });
+    }
+
     private function closeWithoutPaymentAction(): Action
     {
         return Action::make('closeWithoutPayment')

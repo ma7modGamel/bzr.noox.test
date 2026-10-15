@@ -1,8 +1,8 @@
 /*
  | نظام تصميم لوحة الإدارة — مشتق من 38-DESIGN-SYSTEM.
  |
- | القاعدة (38 §1): التركوازي للإجراء والحالة الإيجابية، الكهرماني للتنبيه والتقييم،
- | الأحمر للإلغاء فقط. لا ألوان جديدة إلا لحالة غير موجودة.
+ | لوحة الألوان مشتقة من design/tokens.json: لون الهوية للإجراءات،
+ | الأخضر للنجاح، الكهرماني للتنبيه، والأحمر للخطأ.
  |
  | اللوحة أداة تشغيل لا تطبيق عميل: تأخذ هوية 38 (اللون، الخط، الاستدارة، الحدود)
  | وتترك مقاسات الموبايل لتطبيقات العميل والفني.
@@ -17,29 +17,27 @@
 
 /* أسماء مختصرة تُستخدم داخل مكونات اللوحة — كلها تشير للتوكنات المولَّدة (DEC-043) */
 @theme {
-    --color-bzr-50: var(--bzr-primary-50);
-    --color-bzr-100: var(--bzr-primary-100);
-    --color-bzr-200: var(--bzr-primary-200);
-    --color-bzr-400: var(--bzr-primary-400);
-    --color-bzr-500: var(--bzr-primary-500);
-    --color-bzr-600: var(--bzr-primary-600);
-    --color-bzr-700: var(--bzr-primary-700);
-    --color-navy-900: var(--bzr-ink-navy-900);
-    --color-navy-800: var(--bzr-ink-navy-800);
-    --color-slate-ink-500: var(--bzr-ink-slate-500);
-    --color-slate-ink-400: var(--bzr-ink-slate-400);
-    --color-slate-ink-300: var(--bzr-ink-slate-300);
-    --color-hairline: var(--bzr-surface-border);
-    --color-surface-alt: var(--bzr-surface-alt);
-    --color-surface-alt-2: var(--bzr-surface-alt2);
-    --color-star: var(--bzr-amber-star);
-    --color-amber-bg: var(--bzr-amber-bg);
-    --color-warning-bg: var(--bzr-amber-warning-bg);
-    --color-warning-ink: var(--bzr-amber-warning-ink);
-    --color-badge-bg: var(--bzr-amber-badge-bg);
-    --color-badge-ink: var(--bzr-amber-badge-ink);
-    --color-cancel: var(--bzr-danger-500);
-    --radius-card: var(--bzr-radius-card);
+    --color-bzr-50: var(--color-primary50);
+    --color-bzr-100: color-mix(in srgb, var(--color-primary600) 12%, var(--color-surface));
+    --color-bzr-200: color-mix(in srgb, var(--color-primary600) 22%, var(--color-surface));
+    --color-bzr-400: var(--color-primary400);
+    --color-bzr-500: var(--color-primary500);
+    --color-bzr-600: var(--color-primary600);
+    --color-bzr-700: var(--color-primary700);
+    --color-navy-900: var(--color-navy900);
+    --color-navy-800: var(--color-navy800);
+    --color-slate-ink-500: var(--color-slate500);
+    --color-slate-ink-400: var(--color-slate400);
+    --color-slate-ink-300: var(--color-slate300);
+    --color-hairline: var(--color-border);
+    --color-surface-alt: var(--color-surfacealt);
+    --color-surface-alt-2: var(--color-surfacealt2);
+    --color-amber-bg: var(--color-amber50);
+    --color-warning-bg: var(--color-warningbg);
+    --color-warning-ink: var(--color-warningtext);
+    --color-badge-bg: var(--color-badgebg);
+    --color-badge-ink: var(--color-badgetext);
+    --color-cancel: var(--color-danger);
 }
 
 @layer base {
@@ -74,7 +72,7 @@
 }
 
 @layer components {
-    /* شريط معلوماتي — يقابل الشرائط التركوازية في 38 §6 */
+    /* شريط معلوماتي بلون الهوية */
     .bzr-info-strip {
         background-color: var(--color-bzr-100);
         color: var(--color-bzr-700);
@@ -96,7 +94,7 @@
         display: inline-flex;
         align-items: center;
         gap: 0.375rem;
-        border-radius: 9999px;
+        border-radius: var(--radius-badge);
         padding: 0.25rem 0.75rem;
         font-size: 0.75rem;
         font-weight: 600;
@@ -133,6 +131,6 @@
     }
 
     .dark .bzr-doc-ref {
-        background-color: color-mix(in oklab, white 8%, transparent);
+        background-color: color-mix(in oklab, var(--color-onprimary) 8%, transparent);
     }
 }

@@ -85,4 +85,17 @@ final class BrandAssetsTest extends TestCase
         }
         $archive->close();
     }
+
+    #[Test]
+    public function حزمة_الشعار_تستخدم_الرسم_الملون_بالثيم(): void
+    {
+        $archive = new ZipArchive;
+
+        $this->assertSame(true, $archive->open(base_path('design/generated/brand/bremo-brand-kit.zip')));
+        $this->assertSame(
+            file_get_contents(base_path('design/generated/brand/symbol.svg')),
+            $archive->getFromName('symbol.svg'),
+        );
+        $archive->close();
+    }
 }

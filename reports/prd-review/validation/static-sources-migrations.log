@@ -1,0 +1,8 @@
+
+ INFO Running migrations. 
+
+ 2026_10_14_115655_add_customer_price_guide_to_problem_types_table  122.35ms DONE
+ 2026_10_14_115656_add_tags_to_reviews_table .. 373.34ms DONE
+ 2026_10_14_115657_create_review_tags_table .. 183.15ms DONE
+ 2026_10_14_115658_add_completion_estimate_to_orders_table .. 177.81ms DONE
+

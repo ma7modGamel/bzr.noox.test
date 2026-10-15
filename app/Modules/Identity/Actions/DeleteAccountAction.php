@@ -6,6 +6,7 @@ namespace App\Modules\Identity\Actions;
 
 use App\Modules\Identity\Models\User;
 use App\Modules\Orders\Enums\OrderStatus;
+use App\Support\Localization;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -59,7 +60,7 @@ final readonly class DeleteAccountAction
             DB::table('sessions')->where('user_id', $user->getKey())->delete();
 
             $user->forceFill([
-                'name' => 'حساب محذوف',
+                'name' => Localization::text('copy.deleted_account'),
                 'email' => sprintf('deleted-%d-%s@invalid.local', $user->getKey(), Str::lower(Str::random(12))),
                 'phone' => 'deleted-'.$user->getKey(),
                 'avatar_path' => null,

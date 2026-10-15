@@ -16,22 +16,27 @@ use App\Modules\Orders\StateMachine\OrderStateMachine;
 use App\Modules\Payments\Enums\PaymentGatewayChannel;
 use App\Modules\Payments\Enums\PaymentMethod;
 use App\Modules\Payments\Services\PaymentChannels;
+use App\Modules\Pricing\Enums\ProposalType;
 use App\Modules\Settings\Enums\Cfg;
 use App\Modules\Settings\Enums\OperatingMode;
 use App\Modules\Settings\Services\FeatureGate;
 use App\Modules\Settings\Services\SettingsRepository;
+use App\Modules\Support\Actions\RequestWarrantyAction;
 use App\Modules\Support\Enums\DisputeStatus;
+use App\Support\Localization;
 
 /** حقول العرض التي يعتمد عليها التطبيقان بدل إعادة منطق الأعمال محليًا. */
 final readonly class OrderPresentation
 {
     public const CUSTOMER_ACTIONS = [
         'accept_offer', 'edit_request', 'republish', 'cancel', 'change_payment_method',
+        'request_warranty',
         'pay_electronic', 'submit_instapay_transfer', 'approve_proposal', 'reject_proposal', 'confirm_completion',
         'open_dispute', 'rate', 'share_visit', 'call', 'chat', 'report_provider',
     ];
 
     public const PROVIDER_ACTIONS = [
+        'upload_repair_before', 'upload_repair_after', 'update_completion_estimate', 'report_arrival_exception',
         'submit_offer', 'withdraw_offer', 'start_trip', 'back_out', 'mark_arrived',
         'start_work', 'submit_execution_quote', 'complete_inspection_only', 'submit_proposal',
         'withdraw_proposal', 'complete_work', 'report_unable', 'report_no_show',
@@ -50,6 +55,39 @@ final readonly class OrderPresentation
     public static function actionNames(): array
     {
         return array_values(array_unique([...self::CUSTOMER_ACTIONS, ...self::PROVIDER_ACTIONS]));
+    }
+
+    /** @return array{message: string, deadline_label: ?string, deadline_at: ?string}|null */
+    public function waiting(Order $order): ?array
+    {
+        if ($order->status !== OrderStatus::Open) {
+            return null;
+        }
+
+        if ($order->isWarrantyVisit() || $order->operating_mode === OperatingMode::Employee) {
+            $message = $order->isWarrantyVisit() ? 'copy.waiting_warranty_assignment' : 'copy.waiting_assignment';
+            $deadline = $order->selection_deadline_at;
+            $label = 'copy.assignment_deadline';
+        } elseif ($order->offers_close_at?->isFuture()) {
+            $message = 'copy.waiting_offers';
+            $deadline = $order->offers_close_at;
+            $label = 'copy.offers_deadline';
+        } else {
+            $hasOffers = $order->offers->contains(fn ($offer): bool => $offer->status === OfferStatus::Submitted);
+            $message = $hasOffers ? 'copy.waiting_selection' : 'copy.waiting_no_offers';
+            $deadline = $hasOffers ? $order->selection_deadline_at : null;
+            $label = 'copy.selection_deadline';
+        }
+
+        if ($deadline?->isPast()) {
+            $message = 'copy.waiting_deadline_elapsed';
+        }
+
+        return [
+            'message' => Localization::text($message),
+            'deadline_label' => $deadline === null ? null : Localization::text($label),
+            'deadline_at' => $deadline?->toIso8601String(),
+        ];
     }
 
     /** @return list<string> */
@@ -95,18 +133,7 @@ final readonly class OrderPresentation
 
     public function phoneVisible(Order $order): bool
     {
-        if ($order->provider_profile_id === null) {
-            return false;
-        }
-
-        if (! $order->status->isFinal()) {
-            return true;
-        }
-
-        $finalizedAt = $order->closed_at ?? $order->cancelled_at ?? $order->expired_at;
-
-        return $finalizedAt !== null
-            && now()->lt($finalizedAt->addHours($this->settings->int(Cfg::PhoneHideAfterCloseHours)));
+        return false;
     }
 
     /** @return list<array{key: string, state: string}>|null */
@@ -161,7 +188,7 @@ final readonly class OrderPresentation
         );
         $hasAnyOffers = $order->offers->isNotEmpty();
 
-        if ($order->operating_mode === OperatingMode::Marketplace
+        if (! $order->isWarrantyVisit() && $order->operating_mode === OperatingMode::Marketplace
             && $order->status === OrderStatus::Open && ! $hasAnyOffers) {
             $actions[] = 'edit_request';
 
@@ -170,7 +197,7 @@ final readonly class OrderPresentation
             }
         }
 
-        if ($order->operating_mode === OperatingMode::Marketplace
+        if (! $order->isWarrantyVisit() && $order->operating_mode === OperatingMode::Marketplace
             && $order->status === OrderStatus::Expired && ! $hasSubmittedOffers) {
             $actions[] = 'republish';
         }
@@ -187,6 +214,12 @@ final readonly class OrderPresentation
         }
 
         if ($order->pendingProposalRecord !== null) {
+            if ($order->status === OrderStatus::InProgress
+                && in_array($order->pendingProposalRecord->type, [ProposalType::Materials, ProposalType::ExtraWork], true)
+                && $order->pendingProposalRecord->expires_at->isFuture()) {
+                $actions[] = 'approve_proposal';
+                $actions[] = 'reject_proposal';
+            }
             if ($this->stateMachine->can($order, 'approveExecutionQuote', ActorType::Customer)) {
                 $actions[] = 'approve_proposal';
             }
@@ -221,6 +254,10 @@ final readonly class OrderPresentation
 
         if ($this->ratingIsOpen($order) && $order->review === null) {
             $actions[] = 'rate';
+        }
+
+        if (RequestWarrantyAction::eligible($order)) {
+            $actions[] = 'request_warranty';
         }
 
         if ($order->provider_profile_id !== null && ! $order->status->isFinal()) {
@@ -298,8 +335,31 @@ final readonly class OrderPresentation
             default => [],
         };
 
+        if ($order->hasPendingNoShowReport()) {
+            $actions = [];
+        }
+
+        if ($order->status === OrderStatus::OnTheWay && $order->operating_mode === OperatingMode::Employee && $order->arrival_exception_report === null) {
+            $actions[] = 'report_arrival_exception';
+        }
+
+        if ($order->status === OrderStatus::InProgress && ! $order->hasPendingNoShowReport()) {
+            $actions[] = 'update_completion_estimate';
+        }
+
+        if (! $order->hasPendingNoShowReport()) {
+            if (in_array($order->status, [OrderStatus::Arrived, OrderStatus::AwaitingQuoteApproval, OrderStatus::InProgress], true)
+                && $order->media->where('purpose', 'REPAIR_BEFORE')->count() < 5) {
+                $actions[] = 'upload_repair_before';
+            }
+            if ($order->status === OrderStatus::InProgress && $order->media->where('purpose', 'REPAIR_AFTER')->count() < 5) {
+                $actions[] = 'upload_repair_after';
+            }
+        }
+
         if ($order->status === OrderStatus::Arrived
-            && $order->arrived_at?->addMinutes($this->settings->int(Cfg::CustomerNoShowWaitMinutes))->isPast()) {
+            && ! $order->hasPendingNoShowReport()
+            && $order->arrived_at?->addMinutes($this->settings->int(Cfg::CustomerNoShowWaitMinutes))->lte(now())) {
             $actions[] = 'report_no_show';
         }
 

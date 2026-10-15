@@ -26,10 +26,13 @@ final class ProblemTypesRelationManager extends RelationManager
     {
         return $schema->components([
             TextInput::make('name')->label('نوع المشكلة')->required()->maxLength(150),
+            TextInput::make('name_en')->label('نوع المشكلة بالإنجليزية')->maxLength(150)->extraInputAttributes(['dir' => 'ltr']),
             TextInput::make('sort')->label('الترتيب')->numeric()->integer()->default(0),
             Toggle::make('is_other')
                 ->label('"مشكلة أخرى"')
                 ->helperText('يجعل وصف الطلب إلزاميًا، ويعفيه من إلزام دليل السعر مع تعليم كل سعر للمراجعة.'),
+            TextInput::make('customer_price_min')->label('أقل سعر استرشادي للعميل')->numeric()->minValue(0.01)->maxValue(99999999.99)->requiredWith('customer_price_max')->prefix('ج.م')->helperText('مستقل عن دليل الموظفين؛ يُعرض للعميل كتقدير قبل المعاينة.'),
+            TextInput::make('customer_price_max')->label('أعلى سعر استرشادي للعميل')->numeric()->minValue(0.01)->maxValue(99999999.99)->requiredWith('customer_price_min')->gte('customer_price_min')->prefix('ج.م'),
             TextInput::make('employee_price_min')
                 ->label('أقل مصنعية')
                 ->numeric()

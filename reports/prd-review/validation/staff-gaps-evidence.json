@@ -1,0 +1,356 @@
+{
+  "reviewed_at": "2026-10-15T00:46:37.170307+03:00",
+  "git_head": "856752d9b5d190535e503583b022c3c7410350b6",
+  "working_tree_changes_included": true,
+  "owner_decisions": {
+    "staff_launch_only": true,
+    "market_operationally_deferred": true,
+    "proposal_image": "Optional current fault image; no completed repair or past work before approval",
+    "work_evidence_visibility": "After repair completion",
+    "chat_images": "Approved",
+    "publish_policies": "Approved",
+    "push_setup": "Firebase/APNs deferred until before launch",
+    "arrival_code": "Implement now for staff",
+    "missing_customer_code": "Administration verifies arrival through a documented exception"
+  },
+  "scope": {
+    "P03": "Implemented optional current fault image",
+    "P04": "Implemented private chat images in both roles",
+    "P09": "Arabic policies published locally and shown together; canonical Nginx PHP configuration pending",
+    "G01": "Already implemented",
+    "G02": "Already implemented",
+    "G03": "Already implemented",
+    "G04": "Structured tags and real statistics implemented",
+    "G05": "Staff arrival verification and admin exception implemented",
+    "G06": "Post-completion work evidence and review photos implemented",
+    "G07": "Reviewer service area implemented",
+    "G08": "Admin recipient configuration pending owner data"
+  },
+  "original_prd": {
+    "path": "/home/tro/Downloads/Bremo_PRD.pdf",
+    "sha256": "7b1532e5170c88e7bae3373166498fe06e689e16bf6c4f4e3cca40d96db9996f",
+    "modified": false
+  },
+  "verification": {
+    "backend": {
+      "tool": "phpunit",
+      "result": "passed",
+      "tests": 96,
+      "passed": 96,
+      "assertions": 2951,
+      "duration_ms": 45604
+    },
+    "related_policy_recheck": {
+      "tool": "phpunit",
+      "result": "passed",
+      "tests": 8,
+      "passed": 8,
+      "assertions": 50,
+      "duration_ms": 39466
+    },
+    "android": {
+      "tests": 18,
+      "suites": [
+        {
+          "name": "noox.bzr.provider.ProviderSharedFixtureTest",
+          "tests": "1",
+          "failures": "0",
+          "errors": "0",
+          "skipped": "0"
+        },
+        {
+          "name": "noox.bzr.customer.StaticDataSourcesViewsTest",
+          "tests": "7",
+          "failures": "0",
+          "errors": "0",
+          "skipped": "0"
+        },
+        {
+          "name": "noox.bzr.customer.StaffMediaAndArrivalApiTest",
+          "tests": "2",
+          "failures": "0",
+          "errors": "0",
+          "skipped": "0"
+        },
+        {
+          "name": "noox.bzr.customer.StaffMediaAndArrivalViewsTest",
+          "tests": "7",
+          "failures": "0",
+          "errors": "0",
+          "skipped": "0"
+        },
+        {
+          "name": "noox.bzr.customer.CustomerSharedFixtureTest",
+          "tests": "1",
+          "failures": "0",
+          "errors": "0",
+          "skipped": "0"
+        }
+      ]
+    },
+    "swift_core": {
+      "tests": 83,
+      "failures": 0,
+      "platform": "Linux"
+    },
+    "apk_debug_built": true,
+    "parity": "42 components, 60 screens, 964 shared text keys",
+    "design_lint_passed": true,
+    "pint_passed": true,
+    "swift_format_passed": true,
+    "swiftui_syntax_parse_passed": true,
+    "diff_check_passed": true,
+    "arrival_recheck": {
+      "tool": "phpunit",
+      "result": "passed",
+      "tests": 5,
+      "passed": 5,
+      "assertions": 51,
+      "duration_ms": 40489
+    },
+    "arrival_recheck_scope": "Arrival verification including admin exception for frozen employee orders after a global operating-mode switch; these five tests are included in the 96-test combined run, not additional unique tests.",
+    "release_backend": {
+      "tool": "phpunit",
+      "result": "passed",
+      "tests": 415,
+      "passed": 415,
+      "assertions": 5538,
+      "duration_ms": 80585
+    },
+    "release_android": {
+      "tests": 171,
+      "failures": 0,
+      "errors": 0,
+      "apk_debug_built": true
+    }
+  },
+  "local_runtime": {
+    "environment": "local",
+    "policies": {
+      "terms": {
+        "page_version": 4,
+        "terms_acceptance_version": 2
+      },
+      "privacy": {
+        "page_version": 2
+      },
+      "cancellation": {
+        "page_version": 2
+      },
+      "locale": "ar",
+      "published_by_existing_super_admin_id": 1,
+      "effective_at": "2026-10-14T21:30:10+00:00"
+    },
+    "http_verification": {
+      "temporary_php_84_server": {
+        "terms_status": 200,
+        "privacy_status": 200,
+        "cancellation_status": 200,
+        "stopped_after_verification": true
+      },
+      "canonical_site": {
+        "host": "bzr.noox.test",
+        "status": 200,
+        "reason": null,
+        "system_config_modified": false,
+        "administrative_access_available": false,
+        "reviewable_patch": "reports/prd-review/validation/staff-nginx-php84.patch",
+        "patch_dry_run_passed": true,
+        "php_fpm": "8.4",
+        "system_config_modified_by_owner": true,
+        "policy_versions": {
+          "terms": 4,
+          "privacy": 2,
+          "cancellation": 2
+        }
+      }
+    },
+    "operating_flags": {
+      "offers_enabled": false,
+      "inspection_fee_enabled": false
+    },
+    "arrival_settings": {
+      "validity_minutes": 10,
+      "maximum_attempts": 5,
+      "lock_minutes": 5
+    },
+    "instapay": {
+      "address_configured": false,
+      "display_name_configured": false
+    }
+  },
+  "limitations": {
+    "production_deployment_performed": false,
+    "xcode_build_performed": false,
+    "ios_device_test_performed": false,
+    "android_device_test_performed": false,
+    "real_gps_or_google_routes_call_performed": false,
+    "push_device_delivery_verified": false,
+    "golden_snapshots_replaced": false,
+    "evidence_images": "Synthetic TEST IMAGE fixtures; arrival code 123456 is a UI test example, never a backend constant"
+  },
+  "local_migration": [
+    "database/migrations/2026_10_14_210114_add_arrival_verification_to_orders_table.php"
+  ],
+  "screenshots": {
+    "staff-published-terms-top": {
+      "path": "reports/prd-review/assets/after-staff-terms.png",
+      "sha256": "32addff9a196a99cd068c3b61e2e0711152d85898a0cb5a9c43b7063f50fd042",
+      "source_run": "androidapp/app/build/reports/paparazzi/debug/runs/20261015004446_a774b5.js",
+      "snapshot": {
+        "name": "staff-published-terms-top",
+        "testName": "noox.bzr.customer.StaffMediaAndArrivalViewsTest#publishedPolicyDisplaysTheApprovedWarrantyAndMessagingRules",
+        "timestamp": "2026-10-14T21:44:46.432Z",
+        "tags": [],
+        "file": "images/1928a9223e2ffe47bfe55606b8fa6af06804df6c.png"
+      }
+    },
+    "staff-published-warranty-and-arrival-policy": {
+      "path": "reports/prd-review/assets/after-staff-policy-warranty-arrival.png",
+      "sha256": "e981e9ec7b9b56bba02958368a24cdaf6d56cbf3e75428af65afc3454f4b6ad7",
+      "source_run": "androidapp/app/build/reports/paparazzi/debug/runs/20261015004446_a774b5.js",
+      "snapshot": {
+        "name": "staff-published-warranty-and-arrival-policy",
+        "testName": "noox.bzr.customer.StaffMediaAndArrivalViewsTest#publishedPolicyDisplaysTheApprovedWarrantyAndMessagingRules",
+        "timestamp": "2026-10-14T21:44:46.494Z",
+        "tags": [],
+        "file": "images/c67b521c650926b897d2ea9a38e9c700c1fd4461.png"
+      }
+    },
+    "staff-completed-order-before-after": {
+      "path": "reports/prd-review/assets/after-staff-repair-evidence.png",
+      "sha256": "b4aab19be36c6b27485c356f90307a8ff77051c5a0612949e4d7854ced1d99b1",
+      "source_run": "androidapp/app/build/reports/paparazzi/debug/runs/20261015004446_5f931f.js",
+      "snapshot": {
+        "name": "staff-completed-order-before-after",
+        "testName": "noox.bzr.customer.StaffMediaAndArrivalViewsTest#completedOrderHistoryDisplaysBeforeAndAfterPhotosFromServer",
+        "timestamp": "2026-10-14T21:44:46.235Z",
+        "tags": [],
+        "file": "images/c6ccbc015cefe4857c900e9dc01365adf457583a.png"
+      }
+    },
+    "staff-technician-arrival-code-and-exception": {
+      "path": "reports/prd-review/assets/after-staff-technician-arrival-code.png",
+      "sha256": "2da55c1d8da696a91081c5c114973ab5ec676b256e647fd13a7eb86b76d96118",
+      "source_run": "androidapp/app/build/reports/paparazzi/debug/runs/20261015004445_47a350.js",
+      "snapshot": {
+        "name": "staff-technician-arrival-code-and-exception",
+        "testName": "noox.bzr.customer.StaffMediaAndArrivalViewsTest#technicianCanEnterCustomerCodeOrReportAnExceptionToAdministration",
+        "timestamp": "2026-10-14T21:44:46.036Z",
+        "tags": [],
+        "file": "images/d2624e22434625e3365a04352923642f4c83e5ba.png"
+      }
+    },
+    "staff-customer-arrival-code": {
+      "path": "reports/prd-review/assets/after-staff-customer-arrival-code.png",
+      "sha256": "03daec64d763434aa2afe0c1167ed9cf0abe659d140a0bf208f87b402db88bb4",
+      "source_run": "androidapp/app/build/reports/paparazzi/debug/runs/20261015004445_6b9747.js",
+      "snapshot": {
+        "name": "staff-customer-arrival-code",
+        "testName": "noox.bzr.customer.StaffMediaAndArrivalViewsTest#arrivalCodeIsCustomerOnlyDuringTravelAndHasRefreshAction",
+        "timestamp": "2026-10-14T21:44:45.774Z",
+        "tags": [],
+        "file": "images/930fd683e49300f7bb9ded3fd6199327506c8f22.png"
+      }
+    },
+    "staff-chat-private-images": {
+      "path": "reports/prd-review/assets/after-staff-chat-images.png",
+      "sha256": "405f3b9a7818c88fe83ba5f46e5372db6065aa20bf76b86651bded4032b6189e",
+      "source_run": "androidapp/app/build/reports/paparazzi/debug/runs/20261015004445_87bcb4.js",
+      "snapshot": {
+        "name": "staff-chat-private-images",
+        "testName": "noox.bzr.customer.StaffMediaAndArrivalViewsTest#chatShowsAllAttachedPrivateImagesAlongsideTheMessage",
+        "timestamp": "2026-10-14T21:44:45.507Z",
+        "tags": [],
+        "file": "images/c95746bea90786da4ea7bc0d47f7789870a176a0.png"
+      }
+    },
+    "staff-current-fault-before-price-approval": {
+      "path": "reports/prd-review/assets/after-staff-fault-photo.png",
+      "sha256": "dc41fc35d7b42257488c1cccfca0104fba28d79b016382023d8dc351e60d82f5",
+      "source_run": "androidapp/app/build/reports/paparazzi/debug/runs/20261015004442_3b452e.js",
+      "snapshot": {
+        "name": "staff-current-fault-before-price-approval",
+        "testName": "noox.bzr.customer.StaffMediaAndArrivalViewsTest#quoteShowsOnlyOptionalCurrentFaultImageAndNoCompletionEvidence",
+        "timestamp": "2026-10-14T21:44:45.183Z",
+        "tags": [],
+        "file": "images/70b57ef51583675a48f3886001d961d1a342e892.png"
+      }
+    }
+  },
+  "source_hashes": {
+    "app/Http/Api/V1/Controllers/ArrivalVerificationController.php": "dc368e95a563f5df2673601e4b8ce33ddfe45dcceceeb16fae349d5b4a399b98",
+    "app/Http/Api/V1/Controllers/ConversationController.php": "726baa0c09f069ab89eac206cbce7c949457669c42b6c0ff75e42171fbf9437a",
+    "app/Http/Api/V1/Controllers/MediaController.php": "0e213fb975a6b47d2d55dd675793004add572eb78ee4fc32330c035597eeab53",
+    "app/Http/Api/V1/Controllers/ProviderController.php": "d5bf261e7b3fc12a477b58a2346a333bb427b446f9bb93905f44897f4b58c03f",
+    "app/Http/Api/V1/Controllers/OrderController.php": "6db951fd820dcc7c5a4932a17260b0f90f3bd848da9affbd2347f5931f7c32cc",
+    "app/Http/Api/V1/Controllers/PageController.php": "58890444ce1e4ff6f5088b2a0edd8eca93eb23c21ac074c4f0059e5378754f97",
+    "app/Http/Api/V1/Resources/OrderResource.php": "7c185352f3d72f6ae67441cd26eec35b14530f69aee5645ec8c7275571331929",
+    "app/Http/Api/V1/Resources/ProposalResource.php": "d7c0d71e850fbf9899288115bb0462149a54e6a576eb14a09b12201a805c7317",
+    "app/Http/Api/V1/Resources/ProviderResource.php": "242faeb36b1b3c0d881db8f1a88b4ee588d001450c90a09c31d166d0d7d38190",
+    "app/Modules/Orders/Services/ArrivalVerification.php": "41aa47f7c550fc4e5a52d6a8e72c1dae2948c85dadb2fd7eca0ec77c8411fe6a",
+    "app/Modules/Orders/Services/OrderPresentation.php": "4226be4a45715aabca9e2e58571bc3eb10d950a97114ff3a5ac5bb7a9a41deb0",
+    "app/Modules/Orders/Actions/MarkArrivedAction.php": "efbb01bb995416372868e8981be0411d9ab581ee9e2322bc3845c1a76362b82e",
+    "app/Modules/Orders/Actions/StartTripAction.php": "97559bec3894bac9368696bd6c9056b8415dba12116db90d58efdedbb260c6ce",
+    "app/Modules/Orders/Models/Order.php": "7bb0c2579a1db479167481c322d9ffb6bee01c0d3239fe29c2c2648b2e9ca9bd",
+    "app/Modules/Orders/StateMachine/TransitionTable.php": "2c58f333c29361d674a98bc54a43cd9599fd2767b32bc1643f9dbe8870723b7b",
+    "app/Modules/Reviews/Models/ReviewTag.php": "f4ecea4c98e941e829f262d7ca24ef2fc4b72f554f38872b96e79587c9f7a6d8",
+    "app/Console/Commands/PublishStaffPolicies.php": "4c5cabbdce0ade571a324a190eab1da6471a3c9aa134937fd70e4d73e2c849cf",
+    "app/Filament/Resources/Orders/Pages/ViewOrder.php": "16b392d905c78951b55f33e3cdd4f3e5e0929bed742add18c78e717b779dc852",
+    "app/Modules/Settings/Enums/Cfg.php": "97b5021814310a0b4d1504c15e92847a34ee75a3ad6cb8a6b465e763004845f0",
+    "app/Filament/Pages/OperatingSettings.php": "1b1adcc66a9037074964da21058b203cd3d966ad56d157b9cffcdf8c175f263a",
+    "routes/api.php": "ca7d26760e367c13d35e82a5b6a8912404ae5bd7c3a72dca99fa0500b6580a09",
+    "androidapp/app/src/main/kotlin/noox/bzr/customer/AuthenticatedPhotoView.kt": "b307b9c25cc7e283ff27debd9403107866dc3a57b14aac0f4c6b93b61567c917",
+    "androidapp/app/src/main/kotlin/noox/bzr/customer/CustomerViewModel.kt": "d79ba42cccbe85d9f0c53cecb0656936685940c0577363af70af37ece59644f3",
+    "androidapp/app/src/main/kotlin/noox/bzr/customer/C19ChatView.kt": "b731ac0da53a80367279ef91af16c98f6ef0892c0656f8ee0adf653e7ef53563",
+    "androidapp/app/src/main/kotlin/noox/bzr/provider/ProviderViewModel.kt": "428d78d892b543d73799a2111d44aa6912b8dca358dadb20e6ca949bfebb8d48",
+    "androidapp/app/src/main/kotlin/noox/bzr/provider/ProviderActiveOrderView.kt": "31a082eb216a3f1ed033da0bedf97b16220f58d7c74615a24877ae1a93f6578b",
+    "iosapp/Core/Sources/BzrCore/CustomerJourney.swift": "58f50db9d44f3cbc6e7237b1b4045af87d5af94e701768a3c56e7c09600e2778",
+    "iosapp/Core/Sources/BzrCore/ProviderJourney.swift": "e369c75a7134a916243c73b08e76afdcd3c8e516f7aec07f5ae688c5ed78d217",
+    "iosapp/BzrApp/Customer/AuthenticatedPhotoView.swift": "b87bd22bcea4155419bbc28331edb9523e158a204dd0b9bf49dc6989b3c3caeb",
+    "iosapp/BzrApp/Provider/ProviderJourneyViews.swift": "65d1ef3d6e57f8a3fb1a7688f4a82fb2bfc04fb545e7bfba0b94a19667d0b3ae",
+    "docs/31-API-CONTRACT.md": "22f4ae224c49c4d012e93c40703b974376409b11fa6760f92445b9879bec41f1",
+    "docs/10-ORDER-LIFECYCLE.md": "5a46297d2593907e8ca59bb0e97a1fb24434db6edd7ac1f9ee5a269b8d30c3f8",
+    "docs/39-OPERATING-MODES.md": "57f12c8e4ddb1b0aa3f07cb4f0fff6341edf6a93c40a2a9b08e779d3aa470e06",
+    "docs/36-FUTURE-ROADMAP.md": "d4261e6b695bcdbc7035098d17afb8db58c65e1b3f65e8ac0b75f466541f5222",
+    "tests/Feature/ArrivalVerificationTest.php": "edde40c03f2fc4f75384ad2c869d5fc5eb33c488b5635fab18fbee8f6eae9e37",
+    "tests/TestCase.php": "02fd0543c632aa6405c2cc54a09343183864cb9ce9c96fd906a9255926c3ea0b"
+  },
+  "artifacts": {
+    "apk": {
+      "path": "androidapp/app/build/outputs/apk/debug/app-debug.apk",
+      "sha256": "a9dfc34ac581087a26ceb17d128f964f90148acaddc8c44f9a0e81382e28bb59"
+    },
+    "validation": {
+      "reports/prd-review/validation/staff-gaps-android-summary.json": "4345c5845d34238ba92a966dff774b0b1d6f0afab13a6e1b754c1581fbf56ce0",
+      "reports/prd-review/validation/staff-gaps-android-tests.log": "a737801c0a4d0224f4bd098db4c666ad3c9d3902d2c6e869d4bff0fc7fc0a8e7",
+      "reports/prd-review/validation/staff-gaps-backend-tests.json": "4334070140f9262557538f388a2c25abcd30bd96b27337c9b2a2ba82c3bbcd4b",
+      "reports/prd-review/validation/staff-gaps-cancellation-current.json": "2fa5c179ff693ced72112080224b315ffceb3cfce0f9e926c0c9171a808c47ef",
+      "reports/prd-review/validation/staff-gaps-design.log": "622e3323b44aaefde7b43bfb08e2bbb0b89cc666b9dd73cf64528f13089aa994",
+      "reports/prd-review/validation/staff-gaps-diff-check.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "reports/prd-review/validation/staff-gaps-migrations.log": "b98a5399c54e80c74509e283d538892462524d358010d353b51a5fdcd8077b01",
+      "reports/prd-review/validation/staff-gaps-nginx-patch-check.log": "f831bdfcc254587d44227a00af0c1a6c0d8a842ea7a6405bb755217adc42d8f8",
+      "reports/prd-review/validation/staff-gaps-parity.log": "26b12ed936b740c924b03669ff8f6667b3479f2a8f7a017e5e7ec22c2983937e",
+      "reports/prd-review/validation/staff-gaps-pint.log": "cd1a94fc2cf6a965b86e1a4809d6c7fb9148b1ee374e1010ed2ac96ff4876ec2",
+      "reports/prd-review/validation/staff-gaps-policy-publish.log": "69b101476d10eeb26330e6ffd237f1e28d3fc557e8ec61bcea1eab8fd4e97df9",
+      "reports/prd-review/validation/staff-gaps-policy-tests.json": "6d4011107579f5c9ed0eda30fc5bb8398446b6f7d52b7be3091e1c6e1c5d9725",
+      "reports/prd-review/validation/staff-gaps-privacy-current.json": "0e333a9ef51de5595b63b8f588b59d8f2c1b670849bc958b3418ec0bf5d9dce1",
+      "reports/prd-review/validation/staff-gaps-screenshots.json": "ccc9fb845833727da334e910ba99a3bf5cf077035f44d83a8d39ad6e85eaf866",
+      "reports/prd-review/validation/staff-gaps-swift-format.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "reports/prd-review/validation/staff-gaps-swift-tests.log": "eb56415cc2b053a1d0230e4b753e7d7a3f9463ba121757b91586183fa75cda45",
+      "reports/prd-review/validation/staff-gaps-swiftui-parse.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "reports/prd-review/validation/staff-gaps-terms-current.json": "28a6d737d2d3e24cdb423fbaf0475ef5d7636c74807b7ef0e1c3f2d65b80de01",
+      "reports/prd-review/validation/staff-gaps-arrival-recheck-tests.json": "d3f4e6a035459b2a8d1af7d3543ac21802142fbb3b410ae8f8538c5386246d76",
+      "reports/prd-review/validation/release-backend-tests.json": "6daa5ebddd2c69ce2888b41566da98db8612e73b96c544d65ca4a82b9bab0d14",
+      "reports/prd-review/validation/release-fixes-tests.json": "91e6e71a4acdd09d27cf95491e9becf4912475e653ba0426c2cf3b39083caa59",
+      "reports/prd-review/validation/release-android-tests.log": "baac5c77a8b482d2e7b4c7f6128b4605e22d58cdd2166c9bf050bd80482720f8"
+    },
+    "reports": {
+      "reports/prd-review/CURRENT-STATUS.md": "fdabc3c985551e17f7eb7e82d1319838b9fb0ab32fbf2d13db99a6ea237896b1",
+      "reports/prd-review/Bremo_Current_Status_AR.html": "e0e961a9f00319e9de29b5fccd60d70b7268eea9ada9016d25cb3e6830dc190c",
+      "reports/prd-review/ASSESSMENT.md": "bca21ffedfd4ca9a47456d243cc1024d7c023af0bc60b4af9f81632e6ba72d49",
+      "reports/prd-review/REPORT.md": "6304ceac330079ad6153bdb4b5c7fea9cacdbbdfb89e74226278eca9cbf10de6"
+    }
+  },
+  "final_verified_at": "2026-10-15T06:34:58.064371+00:00"
+}

@@ -1,0 +1,352 @@
+{
+  "title": "تقرير مقارنة Bremo PRD بالتطبيق الحالي",
+  "images": 71,
+  "failedImages": [],
+  "fontReady": "loaded",
+  "pages": [
+    {
+      "id": "cover",
+      "page": 1,
+      "width": 793.6875,
+      "height": 1122.515625,
+      "footerGap": 146.33,
+      "overflow": 0
+    },
+    {
+      "id": "summary",
+      "page": 2,
+      "width": 793.6875,
+      "height": 1122.515625,
+      "footerGap": 173.36,
+      "overflow": 0
+    },
+    {
+      "id": "method",
+      "page": 3,
+      "width": 793.6875,
+      "height": 1122.515625,
+      "footerGap": 302.38,
+      "overflow": 0
+    },
+    {
+      "id": "workflow",
+      "page": 4,
+      "width": 793.6875,
+      "height": 1122.515625,
+      "footerGap": 188.77,
+      "overflow": 0
+    },
+    {
+      "id": "index-1",
+      "page": 5,
+      "width": 793.6875,
+      "height": 1122.515625,
+      "footerGap": 160.03,
+      "overflow": 0
+    },
+    {
+      "id": "index-2",
+      "page": 6,
+      "width": 793.6875,
+      "height": 1122.515625,
+      "footerGap": 123.66,
+      "overflow": 0
+    },
+    {
+      "id": "D01",
+      "page": 7,
+      "width": 793.6875,
+      "height": 1122.515625,
+      "footerGap": 108.08,
+      "overflow": 0
+    },
+    {
+      "id": "D02",
+      "page": 8,
+      "width": 793.6875,
+      "height": 1122.515625,
+      "footerGap": 129.39,
+      "overflow": 0
+    },
+    {
+      "id": "D03",
+      "page": 9,
+      "width": 793.6875,
+      "height": 1122.515625,
+      "footerGap": 138.09,
+      "overflow": 0
+    },
+    {
+      "id": "D04",
+      "page": 10,
+      "width": 793.6875,
+      "height": 1122.515625,
+      "footerGap": 108.08,
+      "overflow": 0
+    },
+    {
+      "id": "D05",
+      "page": 11,
+      "width": 793.6875,
+      "height": 1122.515625,
+      "footerGap": 108.08,
+      "overflow": 0
+    },
+    {
+      "id": "D06",
+      "page": 12,
+      "width": 793.6875,
+      "height": 1122.515625,
+      "footerGap": 8.14,
+      "overflow": 0
+    },
+    {
+      "id": "D07",
+      "page": 13,
+      "width": 793.6875,
+      "height": 1122.515625,
+      "footerGap": 108.08,
+      "overflow": 0
+    },
+    {
+      "id": "D08",
+      "page": 14,
+      "width": 793.6875,
+      "height": 1122.515625,
+      "footerGap": 70.95,
+      "overflow": 0
+    },
+    {
+      "id": "D09",
+      "page": 15,
+      "width": 793.6875,
+      "height": 1122.515625,
+      "footerGap": 108.08,
+      "overflow": 0
+    },
+    {
+      "id": "D10",
+      "page": 16,
+      "width": 793.6875,
+      "height": 1122.515625,
+      "footerGap": 146.44,
+      "overflow": 0
+    },
+    {
+      "id": "D11",
+      "page": 17,
+      "width": 793.6875,
+      "height": 1122.515625,
+      "footerGap": 160.83,
+      "overflow": 0
+    },
+    {
+      "id": "D12",
+      "page": 18,
+      "width": 793.6875,
+      "height": 1122.515625,
+      "footerGap": 85.34,
+      "overflow": 0
+    },
+    {
+      "id": "D13",
+      "page": 19,
+      "width": 793.6875,
+      "height": 1122.515625,
+      "footerGap": 182.14,
+      "overflow": 0
+    },
+    {
+      "id": "D14",
+      "page": 20,
+      "width": 793.6875,
+      "height": 1122.515625,
+      "footerGap": 182.14,
+      "overflow": 0
+    },
+    {
+      "id": "D15",
+      "page": 21,
+      "width": 793.6875,
+      "height": 1122.515625,
+      "footerGap": 182.14,
+      "overflow": 0
+    },
+    {
+      "id": "D16",
+      "page": 22,
+      "width": 793.6875,
+      "height": 1122.515625,
+      "footerGap": 129.39,
+      "overflow": 0
+    },
+    {
+      "id": "D17",
+      "page": 23,
+      "width": 793.6875,
+      "height": 1122.515625,
+      "footerGap": 138.09,
+      "overflow": 0
+    },
+    {
+      "id": "D18",
+      "page": 24,
+      "width": 793.6875,
+      "height": 1122.515625,
+      "footerGap": 93.69,
+      "overflow": 0
+    },
+    {
+      "id": "D19",
+      "page": 25,
+      "width": 793.6875,
+      "height": 1122.515625,
+      "footerGap": 182.14,
+      "overflow": 0
+    },
+    {
+      "id": "D20",
+      "page": 26,
+      "width": 793.6875,
+      "height": 1122.515625,
+      "footerGap": 182.14,
+      "overflow": 0
+    },
+    {
+      "id": "D21",
+      "page": 27,
+      "width": 793.6875,
+      "height": 1122.515625,
+      "footerGap": 182.14,
+      "overflow": 0
+    },
+    {
+      "id": "D22",
+      "page": 28,
+      "width": 793.6875,
+      "height": 1122.515625,
+      "footerGap": 129.39,
+      "overflow": 0
+    },
+    {
+      "id": "D23",
+      "page": 29,
+      "width": 793.6875,
+      "height": 1122.515625,
+      "footerGap": 129.39,
+      "overflow": 0
+    },
+    {
+      "id": "D24",
+      "page": 30,
+      "width": 793.6875,
+      "height": 1122.515625,
+      "footerGap": 85.34,
+      "overflow": 0
+    },
+    {
+      "id": "D25",
+      "page": 31,
+      "width": 793.6875,
+      "height": 1122.515625,
+      "footerGap": 93.69,
+      "overflow": 0
+    },
+    {
+      "id": "D26",
+      "page": 32,
+      "width": 793.6875,
+      "height": 1122.515625,
+      "footerGap": 108.08,
+      "overflow": 0
+    },
+    {
+      "id": "code-proof",
+      "page": 33,
+      "width": 793.6875,
+      "height": 1122.515625,
+      "footerGap": 235.03,
+      "overflow": 0
+    },
+    {
+      "id": "rules-1",
+      "page": 34,
+      "width": 793.6875,
+      "height": 1122.515625,
+      "footerGap": 358,
+      "overflow": 0
+    },
+    {
+      "id": "rules-2",
+      "page": 35,
+      "width": 793.6875,
+      "height": 1122.515625,
+      "footerGap": 358,
+      "overflow": 0
+    },
+    {
+      "id": "admin",
+      "page": 36,
+      "width": 793.6875,
+      "height": 1122.515625,
+      "footerGap": 235.58,
+      "overflow": 0
+    },
+    {
+      "id": "coverage-1",
+      "page": 37,
+      "width": 793.6875,
+      "height": 1122.515625,
+      "footerGap": 25,
+      "overflow": 0
+    },
+    {
+      "id": "coverage-2",
+      "page": 38,
+      "width": 793.6875,
+      "height": 1122.515625,
+      "footerGap": 25,
+      "overflow": 0
+    },
+    {
+      "id": "coverage-3",
+      "page": 39,
+      "width": 793.6875,
+      "height": 1122.515625,
+      "footerGap": 25,
+      "overflow": 0
+    },
+    {
+      "id": "coverage-4",
+      "page": 40,
+      "width": 793.6875,
+      "height": 1122.515625,
+      "footerGap": 70.53,
+      "overflow": 0
+    },
+    {
+      "id": "sources-1",
+      "page": 41,
+      "width": 793.6875,
+      "height": 1122.515625,
+      "footerGap": 96.33,
+      "overflow": 0
+    },
+    {
+      "id": "sources-2",
+      "page": 42,
+      "width": 793.6875,
+      "height": 1122.515625,
+      "footerGap": 96.33,
+      "overflow": 0
+    },
+    {
+      "id": "sources-3",
+      "page": 43,
+      "width": 793.6875,
+      "height": 1122.515625,
+      "footerGap": 636.17,
+      "overflow": 0
+    }
+  ]
+}

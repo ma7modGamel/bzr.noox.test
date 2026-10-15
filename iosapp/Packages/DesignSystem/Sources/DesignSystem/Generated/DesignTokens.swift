@@ -14,55 +14,104 @@ public struct BzrTextStyle {
 }
 
 public enum DesignColors {
-    public static let primary600 = Color(red: 0.0314, green: 0.4980, blue: 0.4706, opacity: 1.0000)
-    public static let primary500 = Color(red: 0.0667, green: 0.5490, blue: 0.5176, opacity: 1.0000)
-    public static let primary400 = Color(red: 0.1490, green: 0.6627, blue: 0.6157, opacity: 1.0000)
-    public static let primary700 = Color(red: 0.0235, green: 0.4000, blue: 0.3725, opacity: 1.0000)
-    public static let primary50 = Color(red: 0.9176, green: 0.9647, blue: 0.9529, opacity: 1.0000)
-    public static let primary50Info = Color(red: 0.9176, green: 0.9647, blue: 0.9529, opacity: 1.0000)
-    public static let primary50Available = Color(red: 0.9176, green: 0.9647, blue: 0.9529, opacity: 1.0000)
-    public static let navy900 = Color(red: 0.0784, green: 0.1804, blue: 0.1961, opacity: 1.0000)
-    public static let navy800 = Color(red: 0.1255, green: 0.2275, blue: 0.2431, opacity: 1.0000)
-    public static let slate500 = Color(red: 0.3255, green: 0.4039, blue: 0.4157, opacity: 1.0000)
-    public static let slate400 = Color(red: 0.3686, green: 0.4510, blue: 0.4627, opacity: 1.0000)
-    public static let slate300 = Color(red: 0.4000, green: 0.4784, blue: 0.4902, opacity: 1.0000)
-    public static let border = Color(red: 0.8627, green: 0.9020, blue: 0.8902, opacity: 1.0000)
+    public static let primary600 = Color(red: 0.0000, green: 0.3294, blue: 0.8353, opacity: 1.0000)
+    public static let primary500 = Color(red: 0.0000, green: 0.3294, blue: 0.8353, opacity: 1.0000)
+    public static let primary400 = Color(red: 0.1216, green: 0.4118, blue: 0.8549, opacity: 1.0000)
+    public static let primary700 = Color(red: 0.0118, green: 0.2863, blue: 0.7059, opacity: 1.0000)
+    public static let primary50 = Color(red: 0.9412, green: 0.9608, blue: 0.9882, opacity: 1.0000)
+    public static let primary50Info = Color(red: 0.9412, green: 0.9608, blue: 0.9882, opacity: 1.0000)
+    public static let primary50Available = Color(red: 0.9255, green: 0.9922, blue: 0.9529, opacity: 1.0000)
+    public static let navy900 = Color(red: 0.0510, green: 0.1098, blue: 0.1804, opacity: 1.0000)
+    public static let navy800 = Color(red: 0.0510, green: 0.1098, blue: 0.1804, opacity: 1.0000)
+    public static let slate500 = Color(red: 0.2784, green: 0.3333, blue: 0.4118, opacity: 1.0000)
+    public static let slate400 = Color(red: 0.2784, green: 0.3333, blue: 0.4118, opacity: 1.0000)
+    public static let slate300 = Color(red: 0.3922, green: 0.4549, blue: 0.5451, opacity: 1.0000)
+    public static let border = Color(red: 0.8863, green: 0.9098, blue: 0.9412, opacity: 1.0000)
     public static let surface = Color(red: 1.0000, green: 1.0000, blue: 1.0000, opacity: 1.0000)
-    public static let surfaceAlt = Color(red: 0.9529, green: 0.9686, blue: 0.9608, opacity: 1.0000)
-    public static let surfaceAlt2 = Color(red: 0.9294, green: 0.9569, blue: 0.9451, opacity: 1.0000)
-    public static let scrim = Color(red: 0.0431, green: 0.0706, blue: 0.1255, opacity: 0.7020)
+    public static let surfaceAlt = Color(red: 0.9686, green: 0.9725, blue: 0.9804, opacity: 1.0000)
+    public static let surfaceAlt2 = Color(red: 0.9451, green: 0.9608, blue: 0.9765, opacity: 1.0000)
+    public static let scrim = Color(red: 0.0510, green: 0.1098, blue: 0.1804, opacity: 0.6000)
     public static let onPrimary = Color(red: 1.0000, green: 1.0000, blue: 1.0000, opacity: 1.0000)
-    public static let star = Color(red: 0.9412, green: 0.6745, blue: 0.1725, opacity: 1.0000)
-    public static let amber500 = Color(red: 0.9882, green: 0.7373, blue: 0.2510, opacity: 1.0000)
-    public static let amber50 = Color(red: 0.9882, green: 0.9412, blue: 0.8627, opacity: 1.0000)
-    public static let warningBg = Color(red: 0.9882, green: 0.9412, blue: 0.8314, opacity: 1.0000)
-    public static let warningText = Color(red: 0.4157, green: 0.2863, blue: 0.0824, opacity: 1.0000)
-    public static let badgeBg = Color(red: 0.9882, green: 0.9255, blue: 0.8000, opacity: 1.0000)
-    public static let badgeText = Color(red: 0.4627, green: 0.3255, blue: 0.1020, opacity: 1.0000)
-    public static let danger = Color(red: 0.7059, green: 0.2392, blue: 0.2784, opacity: 1.0000)
-    public static let brandPrimary = Color(red: 0.0000, green: 0.6745, blue: 0.7137, opacity: 1.0000)
-    public static let brandSecondary = Color(red: 0.0784, green: 0.6118, blue: 0.5804, opacity: 1.0000)
-    public static let brandTint = Color(red: 0.9098, green: 0.9569, blue: 0.9569, opacity: 1.0000)
-    public static let brandBackdrop = Color(red: 0.0000, green: 0.4157, blue: 0.4392, opacity: 1.0000)
+    public static let star = Color(red: 0.7176, green: 0.4745, blue: 0.0431, opacity: 1.0000)
+    public static let starEmpty = Color(red: 0.3922, green: 0.4549, blue: 0.5451, opacity: 1.0000)
+    public static let amber500 = Color(red: 0.5725, green: 0.2510, blue: 0.0549, opacity: 1.0000)
+    public static let amber50 = Color(red: 1.0000, green: 0.9843, blue: 0.9216, opacity: 1.0000)
+    public static let warningBg = Color(red: 1.0000, green: 0.9843, blue: 0.9216, opacity: 1.0000)
+    public static let warningText = Color(red: 0.5725, green: 0.2510, blue: 0.0549, opacity: 1.0000)
+    public static let badgeBg = Color(red: 1.0000, green: 0.9843, blue: 0.9216, opacity: 1.0000)
+    public static let badgeText = Color(red: 0.5725, green: 0.2510, blue: 0.0549, opacity: 1.0000)
+    public static let danger = Color(red: 0.7294, green: 0.1020, blue: 0.1020, opacity: 1.0000)
+    public static let brandPrimary = Color(red: 0.0000, green: 0.3294, blue: 0.8353, opacity: 1.0000)
+    public static let brandSecondary = Color(red: 0.1216, green: 0.4118, blue: 0.8549, opacity: 1.0000)
+    public static let brandTint = Color(red: 0.9412, green: 0.9608, blue: 0.9882, opacity: 1.0000)
+    public static let brandBackdrop = Color(red: 0.0118, green: 0.2863, blue: 0.7059, opacity: 1.0000)
     public static let onHeroWell = Color(red: 1.0000, green: 1.0000, blue: 1.0000, opacity: 0.2000)
     public static let onHeroBody = Color(red: 1.0000, green: 1.0000, blue: 1.0000, opacity: 0.8784)
-    public static let urgentText = Color(red: 0.3608, green: 0.2314, blue: 0.0235, opacity: 1.0000)
-    public static let dangerTint = Color(red: 0.9922, green: 0.9255, blue: 0.9333, opacity: 1.0000)
+    public static let urgentText = Color(red: 0.5725, green: 0.2510, blue: 0.0549, opacity: 1.0000)
+    public static let dangerTint = Color(red: 0.9961, green: 0.9490, blue: 0.9490, opacity: 1.0000)
+    public static let surfaceContainer = Color(red: 0.9451, green: 0.9608, blue: 0.9765, opacity: 1.0000)
+    public static let surfaceContainerHigh = Color(red: 0.9451, green: 0.9608, blue: 0.9765, opacity: 1.0000)
+    public static let success = Color(red: 0.0863, green: 0.3961, blue: 0.2039, opacity: 1.0000)
+    public static let successTint = Color(red: 0.9255, green: 0.9922, blue: 0.9529, opacity: 1.0000)
+    public static let surfaceContainerHighest = Color(red: 0.9451, green: 0.9608, blue: 0.9765, opacity: 1.0000)
+    public static let primaryWellSelected = Color(red: 0.8000, green: 0.8667, blue: 0.9647, opacity: 1.0000)
+    public static let heroScrim = Color(red: 0.0510, green: 0.1098, blue: 0.1804, opacity: 0.9020)
+    public static let heroScrimMid = Color(red: 0.0510, green: 0.1098, blue: 0.1804, opacity: 0.4000)
+    public static let heroBadgeText = Color(red: 1.0000, green: 1.0000, blue: 1.0000, opacity: 1.0000)
+    public static let heroBadgeBg = Color(red: 0.0000, green: 0.3294, blue: 0.8353, opacity: 0.7490)
+    public static let statusPillBg = Color(red: 0.9412, green: 0.9608, blue: 0.9882, opacity: 1.0000)
+    public static let avatarRing = Color(red: 0.0000, green: 0.3294, blue: 0.8353, opacity: 0.2000)
+    public static let secondaryButtonBg = Color(red: 0.9451, green: 0.9608, blue: 0.9765, opacity: 1.0000)
+    public static let secondaryButtonText = Color(red: 0.2784, green: 0.3333, blue: 0.4118, opacity: 1.0000)
+    public static let chipBg = Color(red: 1.0000, green: 1.0000, blue: 1.0000, opacity: 1.0000)
+    public static let chipText = Color(red: 0.2784, green: 0.3333, blue: 0.4118, opacity: 1.0000)
+    public static let chipSelectedBg = Color(red: 0.9412, green: 0.9608, blue: 0.9882, opacity: 1.0000)
+    public static let chipSelectedText = Color(red: 0.0000, green: 0.3294, blue: 0.8353, opacity: 1.0000)
+    public static let infoText = Color(red: 0.0000, green: 0.3294, blue: 0.8353, opacity: 1.0000)
+    public static let infoBg = Color(red: 0.9412, green: 0.9608, blue: 0.9882, opacity: 1.0000)
+    public static let neutralText = Color(red: 0.2784, green: 0.3333, blue: 0.4118, opacity: 1.0000)
+    public static let neutralBg = Color(red: 0.9451, green: 0.9608, blue: 0.9765, opacity: 1.0000)
+    public static let verifiedText = Color(red: 0.0863, green: 0.3961, blue: 0.2039, opacity: 1.0000)
+    public static let verifiedBg = Color(red: 0.9255, green: 0.9922, blue: 0.9529, opacity: 1.0000)
 }
 
 public enum DesignType {
-    public static let screenTitle = BzrTextStyle(size: 22, fontName: DesignFont.bold, color: DesignColors.navy900)
+    public static let screenTitle = BzrTextStyle(size: 19, fontName: DesignFont.bold, color: DesignColors.navy900)
     public static let displayNumber = BzrTextStyle(size: 32, fontName: DesignFont.bold, color: DesignColors.primary700)
-    public static let price = BzrTextStyle(size: 25, fontName: DesignFont.bold, color: DesignColors.primary700)
-    public static let sectionTitle = BzrTextStyle(size: 18, fontName: DesignFont.bold, color: DesignColors.navy900)
-    public static let cardTitle = BzrTextStyle(size: 18, fontName: DesignFont.bold, color: DesignColors.navy900)
-    public static let body = BzrTextStyle(size: 16, fontName: DesignFont.medium, color: DesignColors.navy800)
-    public static let button = BzrTextStyle(size: 17, fontName: DesignFont.bold, color: DesignColors.onPrimary)
-    public static let secondary = BzrTextStyle(size: 15, fontName: DesignFont.regular, color: DesignColors.slate500)
+    public static let price = BzrTextStyle(size: 22, fontName: DesignFont.bold, color: DesignColors.primary600)
+    public static let sectionTitle = BzrTextStyle(size: 19, fontName: DesignFont.semibold, color: DesignColors.navy900)
+    public static let cardTitle = BzrTextStyle(size: 17, fontName: DesignFont.semibold, color: DesignColors.navy900)
+    public static let body = BzrTextStyle(size: 15, fontName: DesignFont.medium, color: DesignColors.navy800)
+    public static let button = BzrTextStyle(size: 17, fontName: DesignFont.semibold, color: DesignColors.onPrimary)
+    public static let secondary = BzrTextStyle(size: 14, fontName: DesignFont.regular, color: DesignColors.slate500)
     public static let caption = BzrTextStyle(size: 13, fontName: DesignFont.medium, color: DesignColors.slate500)
     public static let badge = BzrTextStyle(size: 12, fontName: DesignFont.medium, color: DesignColors.badgeText)
-    public static let placeholder = BzrTextStyle(size: 16, fontName: DesignFont.regular, color: DesignColors.slate400)
-    public static let heroTitle = BzrTextStyle(size: 28, fontName: DesignFont.bold, color: DesignColors.navy900)
+    public static let placeholder = BzrTextStyle(size: 14, fontName: DesignFont.regular, color: DesignColors.slate400)
+    public static let heroTitle = BzrTextStyle(size: 22, fontName: DesignFont.bold, color: DesignColors.navy900)
+    public static let stepLabel = BzrTextStyle(size: 13, fontName: DesignFont.semibold, color: DesignColors.primary600)
+    public static let hint = BzrTextStyle(size: 12, fontName: DesignFont.regular, color: DesignColors.slate400)
+    public static let tileTitle = BzrTextStyle(size: 15, fontName: DesignFont.semibold, color: DesignColors.navy900)
+    public static let amountDisplay = BzrTextStyle(size: 32, fontName: DesignFont.bold, color: DesignColors.navy900)
+    public static let linkSmall = BzrTextStyle(size: 13, fontName: DesignFont.semibold, color: DesignColors.primary600)
+    public static let navLabel = BzrTextStyle(size: 12, fontName: DesignFont.medium, color: DesignColors.slate500)
+    public static let subtitle = BzrTextStyle(size: 14, fontName: DesignFont.medium, color: DesignColors.slate500)
+    public static let homeSection = BzrTextStyle(size: 17, fontName: DesignFont.bold, color: DesignColors.navy900)
+    public static let tileLabel = BzrTextStyle(size: 12, fontName: DesignFont.medium, color: DesignColors.navy900)
+    public static let amountSmall = BzrTextStyle(size: 15, fontName: DesignFont.bold, color: DesignColors.navy900)
+    public static let buttonSmall = BzrTextStyle(size: 15, fontName: DesignFont.semibold, color: DesignColors.onPrimary)
+    public static let urgentLink = BzrTextStyle(size: 13, fontName: DesignFont.bold, color: DesignColors.warningText)
+    public static let heroOnImage = BzrTextStyle(size: 19, fontName: DesignFont.bold, color: DesignColors.onPrimary)
+    public static let heroBody = BzrTextStyle(size: 14, fontName: DesignFont.regular, color: DesignColors.onHeroBody)
+    public static let statusPill = BzrTextStyle(size: 12, fontName: DesignFont.semibold, color: DesignColors.primary600)
+    public static let offerName = BzrTextStyle(size: 17, fontName: DesignFont.bold, color: DesignColors.navy900)
+    public static let offerPrice = BzrTextStyle(size: 22, fontName: DesignFont.bold, color: DesignColors.primary600)
+    public static let quote = BzrTextStyle(size: 14, fontName: DesignFont.regular, color: DesignColors.slate500)
+    public static let detailStrong = BzrTextStyle(size: 13, fontName: DesignFont.semibold, color: DesignColors.navy900)
+    public static let profileName = BzrTextStyle(size: 22, fontName: DesignFont.bold, color: DesignColors.navy900)
+    public static let statValue = BzrTextStyle(size: 17, fontName: DesignFont.bold, color: DesignColors.navy900)
+    public static let secondaryButton = BzrTextStyle(size: 14, fontName: DesignFont.semibold, color: DesignColors.secondaryButtonText)
+    public static let chip = BzrTextStyle(size: 13, fontName: DesignFont.medium, color: DesignColors.chipText)
+    public static let currency = BzrTextStyle(size: 14, fontName: DesignFont.medium, color: DesignColors.slate500)
 }
 
 public enum DesignSpace {
@@ -88,25 +137,28 @@ public enum DesignSpace {
 }
 
 public enum DesignRadius {
-    public static let button: CGFloat = 16
-    public static let card: CGFloat = 20
-    public static let field: CGFloat = 16
-    public static let chip: CGFloat = 12
+    public static let button: CGFloat = 14
+    public static let card: CGFloat = 16
+    public static let field: CGFloat = 14
+    public static let chip: CGFloat = 999
     public static let badge: CGFloat = 8
     public static let checkbox: CGFloat = 4
     public static let heroCard: CGFloat = 24
     public static let sheetTop: CGFloat = 24
-    public static let menuIconBox: CGFloat = 16
+    public static let menuIconBox: CGFloat = 12
     public static let full: CGFloat = 999
+    public static let homeTile: CGFloat = 20
+    public static let currentCard: CGFloat = 22
+    public static let homeSearch: CGFloat = 16
 }
 
 public enum DesignSize {
     public static let mobileContentWidth: CGFloat = 400
     public static let topBarHeight: CGFloat = 56
-    public static let primaryButtonHeight: CGFloat = 52
-    public static let secondaryButtonHeight: CGFloat = 48
+    public static let primaryButtonHeight: CGFloat = 48
+    public static let secondaryButtonHeight: CGFloat = 44
     public static let compactButtonHeight: CGFloat = 48
-    public static let chatSquareButtonW: CGFloat = 56
+    public static let chatSquareButtonW: CGFloat = 48
     public static let chatSquareButtonH: CGFloat = 48
     public static let categoryTileW: CGFloat = 118
     public static let categoryTileH: CGFloat = 112
@@ -114,11 +166,11 @@ public enum DesignSize {
     public static let homeServiceTileW: CGFloat = 118
     public static let homeServiceTileH: CGFloat = 86
     public static let homeServiceTileColumns: Int = 3
-    public static let tileIcon: CGFloat = 40
-    public static let chipHeight: CGFloat = 40
+    public static let tileIcon: CGFloat = 24
+    public static let chipHeight: CGFloat = 36
     public static let sortChipHeight: CGFloat = 36
     public static let touchTargetMin: CGFloat = 48
-    public static let fieldHeight: CGFloat = 56
+    public static let fieldHeight: CGFloat = 48
     public static let currencyBoxWidth: CGFloat = 50
     public static let textAreaHeight: CGFloat = 112
     public static let checkbox: CGFloat = 20
@@ -137,7 +189,7 @@ public enum DesignSize {
     public static let avatarSmall: CGFloat = 64
     public static let avatarMedium: CGFloat = 72
     public static let avatarLarge: CGFloat = 88
-    public static let verifiedShield: CGFloat = 28
+    public static let verifiedShield: CGFloat = 24
     public static let statusDot: CGFloat = 8
     public static let statDivider: CGFloat = 48
     public static let ratingBarHeight: CGFloat = 8
@@ -150,7 +202,7 @@ public enum DesignSize {
     public static let sheetHandleH: CGFloat = 4
     public static let skeletonLine: CGFloat = 12
     public static let progressStroke: CGFloat = 2
-    public static let bottomNavHeight: CGFloat = 72
+    public static let bottomNavHeight: CGFloat = 64
     public static let icon: CGFloat = 24
     public static let iconSmall: CGFloat = 16
     public static let iconXs: CGFloat = 12
@@ -161,15 +213,58 @@ public enum DesignSize {
     public static let brandAuthLogo: CGFloat = 96
     public static let brandLoaderLogo: CGFloat = 64
     public static let brandLaunchLogo: CGFloat = 112
-    public static let tileIconWell: CGFloat = 64
+    public static let tileIconWell: CGFloat = 40
     public static let heroIcon: CGFloat = 56
+    public static let stepSegmentHeight: CGFloat = 6
+    public static let stepSegmentGap: CGFloat = 6
+    public static let serviceTileColumns: Int = 2
+    public static let serviceTileMinHeight: CGFloat = 112
+    public static let checkBadge: CGFloat = 20
+    public static let searchFieldHeight: CGFloat = 44
+    public static let optionWell: CGFloat = 48
+    public static let radioCheck: CGFloat = 24
+    public static let actionPillHeight: CGFloat = 40
+    public static let attachmentTile: CGFloat = 104
+    public static let reviewWell: CGFloat = 44
+    public static let homeHeaderHeight: CGFloat = 64
+    public static let avatarHeader: CGFloat = 44
+    public static let notificationDot: CGFloat = 10
+    public static let homeSearchHeight: CGFloat = 52
+    public static let heroBannerHeight: CGFloat = 188
+    public static let homeTileWell: CGFloat = 48
+    public static let homeButtonHeight: CGFloat = 44
+    public static let cardButtonHeight: CGFloat = 40
+    public static let emergencyIcon: CGFloat = 32
+    public static let orderWell: CGFloat = 40
+    public static let actionPillMinWidth: CGFloat = 96
+    public static let homeTileColumns: Int = 4
+    public static let homeTileMinWidth: CGFloat = 72
+    public static let offerAvatar: CGFloat = 56
+    public static let onlineDot: CGFloat = 10
+    public static let successRing: CGFloat = 88
+    public static let successCore: CGFloat = 64
+    public static let nearbyAvatar: CGFloat = 32
+    public static let progressTrack: CGFloat = 6
+    public static let profileAvatar: CGFloat = 96
+    public static let verifiedBadge: CGFloat = 24
+    public static let sectionBar: CGFloat = 4
+    public static let sectionBarHeight: CGFloat = 18
+    public static let portfolioTile: CGFloat = 104
+    public static let reviewAvatar: CGFloat = 40
+    public static let verticalStepDot: CGFloat = 24
+    public static let ratingStarLarge: CGFloat = 36
+    public static let ratingStar: CGFloat = 20
+    public static let badgeHeight: CGFloat = 26
+    public static let badgeIcon: CGFloat = 14
+    public static let secondaryButtonVisualHeight: CGFloat = 40
+    public static let unreadBadge: CGFloat = 20
 }
 
 public enum DesignBorder {
     public static let width: CGFloat = 1
     public static let selectedWidth: CGFloat = 1.5
     public static let selectedColor = DesignColors.primary600
-    public static let selectedFill = DesignColors.primary50
+    public static let selectedFill = DesignColors.primaryWellSelected
 }
 
 public enum DesignIcon {
@@ -201,11 +296,11 @@ public enum DesignMotion {
 }
 public enum DesignA11y { public static let maxFontScale: CGFloat = 1.3 }
 public enum DesignFont {
-    public static let family = "Cairo"
-    public static let regular = "Cairo-Regular"
-    public static let medium = "Cairo-Medium"
-    public static let semibold = "Cairo-SemiBold"
-    public static let bold = "Cairo-Bold"
-    public static let files = ["Cairo-Regular", "Cairo-Medium", "Cairo-SemiBold", "Cairo-Bold"]
+    public static let family = "IBM Plex Sans Arabic"
+    public static let regular = "IBMPlexSansArabic-Regular"
+    public static let medium = "IBMPlexSansArabic-Medium"
+    public static let semibold = "IBMPlexSansArabic-SemiBold"
+    public static let bold = "IBMPlexSansArabic-Bold"
+    public static let files = ["IBMPlexSansArabic-Regular", "IBMPlexSansArabic-Medium", "IBMPlexSansArabic-SemiBold", "IBMPlexSansArabic-Bold"]
 }
-public enum DesignMeta { public static let tokensSha256 = "5bb01266d27537bb30959a2bbbcf117df987920c9759433d0ce9662259ff0995" }
+public enum DesignMeta { public static let tokensSha256 = "b1e390301aba2423ba44ac9c84569117cc1ac0ab9d6031c659042dfa8ad9d51e" }

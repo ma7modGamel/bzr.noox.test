@@ -46,17 +46,20 @@ public struct APIClient: Sendable {
     private let baseURL: URL
     private let token: String?
     private let appMode: String?
+    private let language: String?
     private let transport: any HTTPTransport
 
     public init(
         baseURL: URL,
         token: String? = nil,
         appMode: String? = nil,
+        language: String? = nil,
         transport: any HTTPTransport = URLSessionTransport()
     ) {
         self.baseURL = baseURL
         self.token = token
         self.appMode = appMode
+        self.language = language.map { AppLanguage.resolve([$0]) }
         self.transport = transport
     }
 
@@ -129,6 +132,13 @@ public struct APIClient: Sendable {
         return try BzrJSON.decoder().decode(Value.self, from: result.data)
     }
 
+    public func download(_ path: String) async throws -> Data {
+        guard let url = URL(string: path), url.scheme == baseURL.scheme, url.host == baseURL.host, url.port == baseURL.port else {
+            throw APIClientError.invalidResponse
+        }
+        return try await request(path, method: "GET").data
+    }
+
     private func request<Value: Decodable & Sendable>(
         _ path: String,
         method: String,
@@ -152,6 +162,7 @@ public struct APIClient: Sendable {
         var request = URLRequest(url: url)
         request.httpMethod = method
         request.setValue("application/json", forHTTPHeaderField: "Accept")
+        request.setValue(language ?? AppLanguage.current, forHTTPHeaderField: "Accept-Language")
         if let body {
             request.httpBody = body
             request.setValue(contentType, forHTTPHeaderField: "Content-Type")
@@ -167,6 +178,9 @@ public struct APIClient: Sendable {
         }
 
         let result = try await transport.send(request)
+        if result.statusCode == 401, token != nil, !relativePath.hasSuffix("auth/logout") {
+            SessionExpiry.shared.expire()
+        }
         guard (200..<300).contains(result.statusCode) else {
             if result.statusCode == 422,
                 let body = try? JSONSerialization.jsonObject(with: result.data) as? [String: Any],
@@ -177,5 +191,35 @@ public struct APIClient: Sendable {
             throw APIClientError.httpStatus(result.statusCode)
         }
         return result
+    }
+}
+
+/// DEC-065: a 401 on a request that carried a token means the session is over (revoked, blocked, server reset).
+/// Posts `SessionExpiry.notification` once per session, however many requests fail together.
+public final class SessionExpiry: @unchecked Sendable {
+    public static let shared = SessionExpiry()
+    public static let notification = Notification.Name("BremoSessionExpired")
+
+    private let lock = NSLock()
+    private var notified = false
+
+    public init() {}
+
+    /// Called when a new token is saved, so the next expiry is reported again.
+    public func reset() {
+        lock.lock()
+        notified = false
+        lock.unlock()
+    }
+
+    /// True for the first expiry of a session only.
+    @discardableResult
+    public func expire(center: NotificationCenter = .default) -> Bool {
+        lock.lock()
+        let first = !notified
+        notified = true
+        lock.unlock()
+        if first { center.post(name: Self.notification, object: nil) }
+        return first
     }
 }

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Middleware;
 
+use App\Support\Localization;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
@@ -29,13 +30,20 @@ final class EnsureIdempotency
 
         $cacheKey = 'idempotency:'.sha1(implode('|', [
             $key,
-            (string) $request->user()?->getAuthIdentifier(),
+            (string) $request->user('sanctum')?->getAuthIdentifier(),
             $request->path(),
         ]));
 
         $cached = Cache::get($cacheKey);
 
         if (is_array($cached)) {
+            if (($cached['locale'] ?? 'ar') !== Localization::locale()) {
+                return response()->json(['error' => [
+                    'code' => 'IDEMPOTENCY_LOCALE_MISMATCH',
+                    'message' => Localization::text('messages.idempotency_locale'),
+                ]], 409);
+            }
+
             return response($cached['body'], $cached['status'])
                 ->header('Content-Type', 'application/json')
                 ->header('Idempotent-Replay', 'true');
@@ -47,6 +55,7 @@ final class EnsureIdempotency
             Cache::put($cacheKey, [
                 'status' => $response->getStatusCode(),
                 'body' => $response->getContent(),
+                'locale' => Localization::locale(),
             ], now()->addHours(self::TTL_HOURS));
         }
 

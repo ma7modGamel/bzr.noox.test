@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     tools:parentTag="android.widget.LinearLayout">
-    <!-- DEC-063: the icon sits in a well tinted with its category's hue. -->
+    <!-- DEC-070: Figma service tile — icon well, name, one-line hint; the chosen tile adds a check badge. -->
     <FrameLayout
         android:id="@+id/iconWell"
         android:layout_width="@dimen/bremo_size_tile_icon_well"
@@ -17,7 +17,7 @@
             android:importantForAccessibility="no"
             android:scaleType="fitCenter"
             app:srcCompat="@drawable/ic_home"
-            app:tint="@color/bremo_navy800" />
+            app:tint="@color/bremo_primary600" />
     </FrameLayout>
 
     <TextView
@@ -27,7 +27,15 @@
         android:gravity="center"
         android:maxLines="2"
         android:ellipsize="end"
-        android:textAppearance="@style/TextAppearance.Bremo.Secondary"
-        android:textColor="@color/bremo_navy800"
-        android:textStyle="bold" />
+        android:textAppearance="@style/TextAppearance.Bremo.TileTitle" />
+
+    <TextView
+        android:id="@+id/detail"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:maxLines="1"
+        android:ellipsize="end"
+        android:textAppearance="@style/TextAppearance.Bremo.Hint"
+        android:visibility="gone" />
 </merge>

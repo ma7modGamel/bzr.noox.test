@@ -13,9 +13,17 @@ class C22ElectronicPaymentView(context: Context) : CustomerScreenView(context) {
     var onCreate: () -> Unit = {}
     var onOpenCheckout: () -> Unit = {}
     var onCopyCode: () -> Unit = {}
+    var onReceipt: () -> Unit = {}
+    var onReferenceChange: (String) -> Unit = {}
+    var onRefresh: () -> Unit = {}
     private val channels = RadioOptions(binding.channels, resources.getDimensionPixelSize(R.dimen.bremo_space_s), string(R.string.payment_option_body)) { onChannelSelect(it) }
 
     init {
+        pinAction(binding.create)
+        binding.instapayDetails.editText = null
+        binding.receipt.onClick = { onReceipt() }
+        binding.transferReference.onValueChange = { onReferenceChange(it) }
+        binding.refresh.onClick = { onRefresh() }
         binding.total.editText = null
         binding.kioskReference.editText = null
         binding.copyCode.onClick = { onCopyCode() }
@@ -29,7 +37,19 @@ class C22ElectronicPaymentView(context: Context) : CustomerScreenView(context) {
         val status = state.itemStates.firstOrNull()
         binding.total.rows = listOf(R.drawable.ic_check to state.items.getOrElse(0) { "" })
         binding.channels.isVisible = state.options.isNotEmpty()
-        channels.submit(state.options, state.selectedOptionIndex, status.isNullOrBlank() && !state.isBusy)
+        channels.submit(state.options, state.selectedOptionIndex, (status.isNullOrBlank() || status in listOf("FAILED", "EXPIRED")) && !state.isBusy)
+        val editable = status.isNullOrBlank() || status in listOf("FAILED", "EXPIRED")
+        val form = state.isInstapay && editable
+        binding.instapayDetails.isVisible = state.isInstapay
+        binding.instapayDetails.rows = state.fieldValues.drop(1).take(3).filter(String::isNotBlank).map { R.drawable.ic_info to it }
+        binding.instapayInstructions.isVisible = form
+        binding.transferReference.isVisible = form
+        binding.transferReference.value = state.fieldValues.firstOrNull().orEmpty()
+        binding.receipt.isVisible = form
+        binding.receipt.text = string(if (state.hasPhoto) R.string.payment_instapay_receipt_attached else R.string.payment_instapay_receipt)
+        binding.receipt.enabled = !state.isBusy
+        binding.transferPending.isVisible = status == "PENDING_VERIFICATION"
+        binding.refresh.enabled = !state.isBusy
         binding.creating.isVisible = state.messageKey == "payment.creating"
         val kiosk = status == "PENDING" && state.items.getOrElse(1) { "" }.isNotBlank()
         binding.kioskReady.isVisible = kiosk
@@ -43,9 +63,12 @@ class C22ElectronicPaymentView(context: Context) : CustomerScreenView(context) {
         binding.checkoutReady.isVisible = status == "PENDING" && !kiosk
         binding.openCheckout.isVisible = status == "PENDING" && !kiosk
         binding.success.isVisible = status == "SUCCEEDED"
-        binding.failed.isVisible = status == "FAILED"
+        binding.failed.isVisible = status == "FAILED" || state.messageKey == "media.upload_error"
+        binding.failed.text = string(if (state.messageKey == "media.upload_error") R.string.media_upload_error else if (state.isInstapay) R.string.payment_instapay_retry else R.string.payment_failed)
+        if (status == "FAILED" && state.fieldValues.getOrElse(4) { "" }.isNotBlank()) binding.failed.text = state.fieldValues[4] + "\n" + binding.failed.text
         binding.expired.isVisible = status == "EXPIRED"
-        binding.create.isVisible = "pay_electronic" in state.visibleActions && (status.isNullOrBlank() || status in listOf("FAILED", "EXPIRED"))
+        binding.create.isVisible = ("pay_electronic" in state.visibleActions || "submit_instapay_transfer" in state.visibleActions) && editable
+        binding.create.text = string(if (state.isInstapay) R.string.payment_instapay_submit else R.string.payment_create)
         binding.create.state = if (state.isBusy) ButtonVisualState.Loading else continueState(state)
     }
 }

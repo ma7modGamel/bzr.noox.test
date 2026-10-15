@@ -6,6 +6,7 @@
 - الدخول من: C09 بعد T-13 أو T-15 أو T-17 · الخروج إلى: C22 عند الدفع الإلكتروني، أو C09 أثناء انتظار تأكيد الاستلام النقدي.
 - القواعد: BR-044، BR-050..BR-055، 14، 19، T-19/T-20.
 - الـ API: `GET /orders/{order}` و`PATCH /orders/{order}/payment-method`.
+- تحديث DEC-076 (Figma «إنهاء الخدمة والدفع» 3002:4134): الترتيب البصري بقى: علامة الإتمام و`completion.heading` باسم الفني، ثم كارت الفني (التوثيق، والمشكلة، والعنوان)، ثم كارت `completion.invoice` (`proposal.base` و`completion.extra` و`completion.total`)، ثم `confirm.payment` بطرق الدفع اللي الخادم بيرجّعها بس (B-06)، ثم في الشريط السفلي `completion.pay` بالمبلغ ورابط `completion.problem`. صور «قبل / بعد» مش ظاهرة (B-05). القواعد تحت زي ما هي، والعناصر القديمة اللي مش في الترتيب ده اتشالت.
 - التخطيط (من أعلى لأسفل):
   1. `AppTopBar` بعنوان `payment.summary.title`.
   2. `ScreenHeading` بالمفتاح `payment.summary.heading`.

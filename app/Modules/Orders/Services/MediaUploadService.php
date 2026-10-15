@@ -7,6 +7,7 @@ namespace App\Modules\Orders\Services;
 use App\Modules\Identity\Models\User;
 use App\Modules\Orders\Models\OrderMedia;
 use App\Support\Exceptions\BusinessRuleViolationException;
+use App\Support\Localization;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -15,6 +16,8 @@ use Symfony\Component\Process\Process;
 /** BR-014 — تحقق من المحتوى الفعلي وتخزين خاص بأسماء عشوائية. */
 final class MediaUploadService
 {
+    public const int VIDEO_MAX_SECONDS = 30;
+
     /** @var array<string, string> */
     private const TYPES = [
         'image/jpeg' => 'IMAGE', 'image/png' => 'IMAGE', 'image/webp' => 'IMAGE',
@@ -39,7 +42,7 @@ final class MediaUploadService
         $type = self::TYPES[$mime] ?? null;
 
         if ($type === null) {
-            throw BusinessRuleViolationException::rule('BR-014', 'نوع الملف غير مدعوم.');
+            throw BusinessRuleViolationException::rule('BR-014', Localization::text('copy.this_file_type_is_not_supported'));
         }
 
         $size = (int) $file->getSize();
@@ -50,7 +53,7 @@ final class MediaUploadService
         };
 
         if ($maxBytes !== null && $size > $maxBytes) {
-            throw BusinessRuleViolationException::rule('BR-014', 'حجم الملف أكبر من الحد المسموح.');
+            throw BusinessRuleViolationException::rule('BR-014', Localization::text('copy.the_file_exceeds_the_size_limit'));
         }
 
         $duration = match ($type) {
@@ -58,17 +61,20 @@ final class MediaUploadService
             'VIDEO' => $this->durationInSeconds($file),
             'AUDIO' => $this->validatedAudioDuration($file),
         };
-        $maxDuration = $type === 'VIDEO' ? 60 : 120;
+        if ($type === 'VIDEO') {
+            self::assertVideoDurationAllowed($duration);
+        }
+        $maxDuration = $type === 'VIDEO' ? self::VIDEO_MAX_SECONDS : 120;
 
         if ($duration !== null && $duration > $maxDuration) {
-            throw BusinessRuleViolationException::rule('BR-014', 'مدة الملف أكبر من الحد المسموح.');
+            throw BusinessRuleViolationException::rule('BR-014', Localization::text('copy.the_file_exceeds_the_duration_limit'));
         }
 
         $path = 'order-media/'.Str::uuid().'.'.self::EXTENSIONS[$mime];
         $contents = $type === 'IMAGE' ? $this->sanitizedImage($file, $mime) : file_get_contents($file->getRealPath());
 
         if ($contents === false || ! Storage::disk('local')->put($path, $contents)) {
-            throw BusinessRuleViolationException::rule('BR-014', 'تعذر حفظ الملف.');
+            throw BusinessRuleViolationException::rule('BR-014', Localization::text('copy.the_file_could_not_be_saved'));
         }
 
         return OrderMedia::query()->create([
@@ -81,6 +87,16 @@ final class MediaUploadService
         ]);
     }
 
+    public static function assertVideoDurationAllowed(?int $duration): void
+    {
+        if ($duration === null || $duration <= 0) {
+            throw BusinessRuleViolationException::rule('BR-014', Localization::text('copy.the_file_duration_could_not_be_verified'));
+        }
+        if ($duration > self::VIDEO_MAX_SECONDS) {
+            throw BusinessRuleViolationException::rule('BR-014', Localization::text('copy.video_duration_limit', ['seconds' => self::VIDEO_MAX_SECONDS]));
+        }
+    }
+
     private function durationInSeconds(UploadedFile $file): int
     {
         $process = new Process([
@@ -91,7 +107,7 @@ final class MediaUploadService
         $process->run();
 
         if (! $process->isSuccessful() || ! is_numeric(trim($process->getOutput()))) {
-            throw BusinessRuleViolationException::rule('BR-014', 'تعذر التحقق من مدة الملف.');
+            throw BusinessRuleViolationException::rule('BR-014', Localization::text('copy.the_file_duration_could_not_be_verified'));
         }
 
         return (int) ceil((float) trim($process->getOutput()));
@@ -100,7 +116,7 @@ final class MediaUploadService
     private function validatedAudioDuration(UploadedFile $file): int
     {
         if (strtolower($file->getClientOriginalExtension()) !== 'm4a') {
-            throw BusinessRuleViolationException::rule('BR-014', 'التسجيل الصوتي يجب أن يكون AAC بامتداد m4a.');
+            throw BusinessRuleViolationException::rule('BR-014', Localization::text('copy.the_audio_recording_must_use_aac_with_an_m4a'));
         }
 
         $process = new Process([
@@ -112,13 +128,13 @@ final class MediaUploadService
         $process->run();
 
         if (! $process->isSuccessful()) {
-            throw BusinessRuleViolationException::rule('BR-014', 'تعذر التحقق من التسجيل الصوتي.');
+            throw BusinessRuleViolationException::rule('BR-014', Localization::text('copy.the_audio_recording_could_not_be_verified'));
         }
 
         try {
             $probe = json_decode($process->getOutput(), true, flags: JSON_THROW_ON_ERROR);
         } catch (\JsonException) {
-            throw BusinessRuleViolationException::rule('BR-014', 'تعذر التحقق من التسجيل الصوتي.');
+            throw BusinessRuleViolationException::rule('BR-014', Localization::text('copy.the_audio_recording_could_not_be_verified'));
         }
 
         $streams = is_array($probe['streams'] ?? null) ? $probe['streams'] : [];
@@ -137,7 +153,7 @@ final class MediaUploadService
             && $bitRate <= self::AUDIO_MAX_BIT_RATE;
 
         if (! $isM4a || ! $isValidAudio || ! is_numeric($duration)) {
-            throw BusinessRuleViolationException::rule('BR-014', 'التسجيل يجب أن يكون AAC/m4a، قناة واحدة، وبمعدل 64kbps.');
+            throw BusinessRuleViolationException::rule('BR-014', Localization::text('copy.the_recording_must_be_aac_m4a_mono_at_64kbps'));
         }
 
         return (int) ceil((float) $duration);
@@ -152,7 +168,7 @@ final class MediaUploadService
         };
 
         if ($source === false) {
-            throw BusinessRuleViolationException::rule('BR-014', 'ملف الصورة تالف.');
+            throw BusinessRuleViolationException::rule('BR-014', Localization::text('copy.the_image_file_is_damaged'));
         }
 
         ob_start();
@@ -165,7 +181,7 @@ final class MediaUploadService
         imagedestroy($source);
 
         if (! is_string($contents)) {
-            throw BusinessRuleViolationException::rule('BR-014', 'تعذر معالجة الصورة.');
+            throw BusinessRuleViolationException::rule('BR-014', Localization::text('copy.the_image_could_not_be_processed'));
         }
 
         return $contents;

@@ -2,6 +2,8 @@
 
 كل ملف SVG في هذا المجلد يستخدم `viewBox="0 0 24 24"` ومسارًا واحدًا (`<path d="…"/>`).
 
+**المصدر (DEC-070):** أيقونات Google Material Symbols Outlined (وزن 400، Apache 2.0)، نفس العائلة اللي في ملف Figma «Primo App». بتتحوّل من شبكة `0 -960 960 960` لشبكة 24، وبتتسجّل كأيقونات مملوءة. جدول الربط بين اسم الملف واسم الرمز موجود في `reports/batch-figma-a/REPORT.md`.
+
 - **خطية (الافتراضي):** `fill="none"` وخط مستدير. سُمك الخط ولونه الافتراضي من `tokens.json → icon`.
 - **مملوءة:** `fill="currentColor" stroke="none"` (مثل `star-filled` و`warning-filled`)، و`fill-rule="evenodd"` لو فيها فراغات داخلية.
 

@@ -16,10 +16,26 @@ public enum ProviderInputValue: Equatable, Sendable {
 }
 
 public struct ProviderUIState: Equatable, Sendable {
+    public var imageGroups: [[String]] = []
+    public var arrivalCodeRequired = false
+    public var arrivalExceptionPending = false
+    public var arrivalError = ""
+    public var earningsFilterLabels: [String] = []
+    public var earningsFilterCodes: [String] = []
+    public var earningsTypeIndex = 0
+    public var earningsDateFrom = ""
+    public var earningsDateTo = ""
+    public var earningsHasMore = false
+    public var earningsDuesBlocked = false
+    public var earningsEmployee = false
+    public var earningsFiltersDirty = false
+    public var warrantyCoverage = ""
+    public var beforePhotoCount = 0
+    public var afterPhotoCount = 0
     public let screen: String
     public let phase: ProviderPhase
     public let canContinue: Bool
-    public let messageKey: String?
+    public var messageKey: String?
     public let fieldErrors: [String]
     public let visibleActions: [String]
     public let items: [String]
@@ -203,8 +219,8 @@ public struct ProviderHomeLocation: Codable, Equatable, Sendable {
     public let floor: String?
     public let apartment: String?
     public let landmark: String?
-    public let lat: Double?
-    public let lng: Double?
+    @FlexibleDouble public var lat: Double?
+    @FlexibleDouble public var lng: Double?
 
     enum CodingKeys: String, CodingKey {
         case area, city, building, floor, apartment, landmark, lat, lng
@@ -287,7 +303,16 @@ public struct ProviderPriceGuide: Codable, Equatable, Sendable {
     public let currency: String
 }
 
+public struct ProviderWorkPhoto: Codable, Equatable, Sendable { public let id: Int; public let purpose: String }
+
 public struct ProviderOrder: Codable, Equatable, Sendable {
+    public var workPhotos: [ProviderWorkPhoto]? = nil
+    public var completionEstimate: CustomerCompletionEstimate? = nil
+    public var arrivalCodeRequired: Bool? = nil
+    public var arrivalExceptionPending: Bool? = nil
+    public var warrantyCoverage: String? = nil
+    public var proposalTypeOptions: [ProviderReason]? = nil
+    public var customerRatingTagOptions: [ProviderReason]? = nil
     public let id: Int
     public let number: Int
     public let version: Int
@@ -310,10 +335,19 @@ public struct ProviderOrder: Codable, Equatable, Sendable {
     public let materialsResponsibility: String?
     public let materialsResponsibilityLabel: String?
     public let budgetAmount: String?
+    public let absenceReportPending: Bool?
     public let deadlines: ProviderOrderDeadlines?
 
     enum CodingKeys: String, CodingKey {
         case id, number, version, status, category, location, timing, customer, amounts, stepper
+        case absenceReportPending = "absence_report_pending"
+        case workPhotos = "work_photos"
+        case completionEstimate = "completion_estimate"
+        case arrivalCodeRequired = "arrival_code_required"
+        case arrivalExceptionPending = "arrival_exception_pending"
+        case warrantyCoverage = "warranty_coverage_text"
+        case proposalTypeOptions = "proposal_type_options"
+        case customerRatingTagOptions = "customer_rating_tag_options"
         case description, deadlines
         case displayStatus = "display_status"
         case problemType = "problem_type"
@@ -435,11 +469,13 @@ public struct ProviderOfferSubmission: Encodable, Sendable {
 public struct ProviderEmptySubmission: Encodable, Sendable {}
 
 public struct ProviderPortfolioItem: Codable, Equatable, Sendable {
+    public var imageURL: String? = nil
     public let id: Int
     public let imagePath: String
     public let caption: String?
     enum CodingKeys: String, CodingKey {
         case id, caption
+        case imageURL = "image_url"
         case imagePath = "image_path"
     }
 }
@@ -496,13 +532,58 @@ public struct ProviderEarningsTransaction: Codable, Equatable, Sendable {
     public let detail: String
 }
 
+/// DEC-068 — BR-063: `limit` is nil in employee mode or before OD-02 sets CFG-061.
+public struct ProviderEarningsDues: Codable, Equatable, Sendable {
+    public let blocked: Bool
+    public let debt: String
+    public let limit: String?
+
+    public init(blocked: Bool = false, debt: String = "0.00", limit: String? = nil) {
+        self.blocked = blocked
+        self.debt = debt
+        self.limit = limit
+    }
+}
+
+public struct ProviderEarningsMeta: Codable, Equatable, Sendable {
+    public let currentPage: Int
+    public let lastPage: Int
+    enum CodingKeys: String, CodingKey { case currentPage = "current_page", lastPage = "last_page" }
+}
+
 public struct ProviderEarningsPayload: Codable, Equatable, Sendable {
     public let operatingMode: String
     public let summary: ProviderEarningsSummary
+    public let dues: ProviderEarningsDues
+    public var filterOptions: [ProviderReason] = []
+    public var meta: ProviderEarningsMeta? = nil
     public let transactions: [ProviderEarningsTransaction]
     enum CodingKeys: String, CodingKey {
-        case summary, transactions
+        case summary, transactions, dues, meta
+        case filterOptions = "filter_options"
         case operatingMode = "operating_mode"
+    }
+
+    public init(
+        operatingMode: String, summary: ProviderEarningsSummary, dues: ProviderEarningsDues = ProviderEarningsDues(),
+        transactions: [ProviderEarningsTransaction], filterOptions: [ProviderReason] = [], meta: ProviderEarningsMeta? = nil
+    ) {
+        self.operatingMode = operatingMode
+        self.summary = summary
+        self.dues = dues
+        self.transactions = transactions
+        self.filterOptions = filterOptions
+        self.meta = meta
+    }
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        operatingMode = try container.decode(String.self, forKey: .operatingMode)
+        summary = try container.decode(ProviderEarningsSummary.self, forKey: .summary)
+        dues = try container.decodeIfPresent(ProviderEarningsDues.self, forKey: .dues) ?? ProviderEarningsDues()
+        transactions = try container.decode([ProviderEarningsTransaction].self, forKey: .transactions)
+        filterOptions = try container.decodeIfPresent([ProviderReason].self, forKey: .filterOptions) ?? []
+        meta = try container.decodeIfPresent(ProviderEarningsMeta.self, forKey: .meta)
     }
 }
 
@@ -528,7 +609,11 @@ public struct ProviderPortfolioSubmission: Encodable, Sendable {
     }
 }
 
-public struct ProviderRatingSubmission: Encodable, Sendable { public let stars: Int }
+public struct ProviderRatingSubmission: Encodable, Sendable {
+    public let stars: Int
+    public var tags: [String] = []
+    public var comment: String? = nil
+}
 public struct ProviderMessageSubmission: Encodable, Sendable {
     public let body: String?
     public let mediaIDs: [Int]
@@ -542,10 +627,20 @@ public struct ProviderLocationAction: Encodable, Sendable {
     public let expectedVersion: Int
     public let lat: Double
     public let lng: Double
+    public var arrivalCode: String? = nil
     enum CodingKeys: String, CodingKey {
         case expectedVersion = "expected_version"
         case lat, lng
+        case arrivalCode = "arrival_code"
     }
+}
+
+private struct ProviderArrivalExceptionAction: Encodable, Sendable {
+    let expectedVersion: Int
+    let lat: Double
+    let lng: Double
+    let note: String
+    enum CodingKeys: String, CodingKey { case lat, lng, note; case expectedVersion = "expected_version" }
 }
 
 public struct ProviderVersionAction: Encodable, Sendable {
@@ -615,6 +710,9 @@ public struct ProviderApplicationSubmission: Encodable, Sendable {
 }
 
 public protocol ProviderAPI: Sendable {
+    func verifiedArrival(order: ProviderOrder, latitude: Double, longitude: Double, code: String?) async throws -> ProviderOrder
+    func reportArrivalException(order: ProviderOrder, latitude: Double, longitude: Double, note: String) async throws -> ProviderOrder
+    func privateImage(url: String) async throws -> Data
     func notifications() async throws -> [CustomerNotification]
     func markNotificationsRead(ids: [String]) async throws
     func application() async throws -> ProviderApplication
@@ -623,6 +721,7 @@ public protocol ProviderAPI: Sendable {
     func cities() async throws -> [ProviderChoice]
     func areas(cityID: Int) async throws -> [ProviderChoice]
     func payoutOptions() async throws -> [ProviderPayoutOption]
+    func attachWorkPhoto(orderID: Int, mediaID: Int, purpose: String, expectedVersion: Int) async throws -> ProviderOrder
     func uploadImage(_ upload: CustomerMediaUpload) async throws -> Int
     func home() async throws -> ProviderHome
     func setAvailability(_ availableNow: Bool) async throws -> ProviderHome
@@ -641,6 +740,7 @@ public protocol ProviderAPI: Sendable {
         -> ProviderOrder
     func startWork(order: ProviderOrder) async throws -> ProviderOrder
     func completeInspection(order: ProviderOrder) async throws -> ProviderOrder
+    func updateCompletionEstimate(order: ProviderOrder, minutes: Int) async throws -> ProviderOrder
     func completeWork(order: ProviderOrder) async throws -> ProviderOrder
     func confirmCash(order: ProviderOrder) async throws -> ProviderOrder
     func backOut(order: ProviderOrder, reasonCode: String) async throws -> ProviderOrder
@@ -648,7 +748,10 @@ public protocol ProviderAPI: Sendable {
         -> ProviderOrder
     func reportNoShow(order: ProviderOrder) async throws -> ProviderOrder
     func submitProposal(order: ProviderOrder, body: ProviderProposalSubmission) async throws
+    func rateCustomerWithFeedback(orderID: Int, stars: Int, tags: [String], comment: String?) async throws
     func rateCustomer(orderID: Int, stars: Int) async throws
+    func filteredEarnings(page: Int, type: String?, dateFrom: String?, dateTo: String?) async throws -> ProviderEarningsPayload
+    func exportEarnings(type: String?, dateFrom: String?, dateTo: String?) async throws -> Data
     func earnings() async throws -> ProviderEarningsPayload
     func profile() async throws -> ProviderProfilePayload
     func updateProfile(_ body: ProviderProfileUpdate) async throws -> ProviderProfilePayload
@@ -660,14 +763,32 @@ public protocol ProviderAPI: Sendable {
     func sendMessage(conversationID: Int, body: String?, mediaIDs: [Int]) async throws
 }
 
+private struct ProviderCompletionEstimateAction: Encodable, Sendable {
+    let expectedVersion: Int
+    let minutes: Int
+    enum CodingKeys: String, CodingKey { case expectedVersion = "expected_version"; case minutes }
+}
+
 public struct LiveProviderAPI: ProviderAPI {
+    private let baseURL: URL
     private let client: APIClient
 
     public init(baseURL: URL, token: String, transport: any HTTPTransport = URLSessionTransport()) {
+        self.baseURL = baseURL
         client = APIClient(baseURL: baseURL, token: token, appMode: "PROVIDER", transport: transport)
     }
 
     /// C32 in provider mode: the server filters by `X-App-Mode` (DEC-058).
+    public func verifiedArrival(order: ProviderOrder, latitude: Double, longitude: Double, code: String?) async throws -> ProviderOrder {
+        var body = ProviderLocationAction(expectedVersion: order.version, lat: latitude, lng: longitude)
+        body.arrivalCode = code
+        return try await orderAction("provider/orders/\(order.id)/arrived", body)
+    }
+    public func reportArrivalException(order: ProviderOrder, latitude: Double, longitude: Double, note: String) async throws -> ProviderOrder {
+        try await orderAction(
+            "provider/orders/\(order.id)/arrival-exception", ProviderArrivalExceptionAction(expectedVersion: order.version, lat: latitude, lng: longitude, note: note))
+    }
+    public func privateImage(url: String) async throws -> Data { try await client.download(url) }
     public func notifications() async throws -> [CustomerNotification] {
         let response: ProviderNotificationsEnvelope = try await client.get("notifications")
         return response.data
@@ -707,6 +828,12 @@ public struct LiveProviderAPI: ProviderAPI {
     public func payoutOptions() async throws -> [ProviderPayoutOption] {
         let response: ProviderConfig = try await client.get("config")
         return response.optionLists.providerPayoutMethods
+    }
+
+    public func attachWorkPhoto(orderID: Int, mediaID: Int, purpose: String, expectedVersion: Int) async throws -> ProviderOrder {
+        let response: ProviderOrderEnvelope = try await client.post(
+            "provider/orders/\(orderID)/work-photos", body: ProviderWorkPhotoBody(mediaID: mediaID, purpose: purpose, expectedVersion: expectedVersion))
+        return response.data
     }
 
     public func uploadImage(_ upload: CustomerMediaUpload) async throws -> Int {
@@ -806,6 +933,10 @@ public struct LiveProviderAPI: ProviderAPI {
             ProviderVersionAction(expectedVersion: order.version))
     }
 
+    public func updateCompletionEstimate(order: ProviderOrder, minutes: Int) async throws -> ProviderOrder {
+        try await orderAction("provider/orders/\(order.id)/completion-estimate", ProviderCompletionEstimateAction(expectedVersion: order.version, minutes: minutes))
+    }
+
     public func completeWork(order: ProviderOrder) async throws -> ProviderOrder {
         try await orderAction(
             "provider/orders/\(order.id)/complete", ProviderVersionAction(expectedVersion: order.version))
@@ -843,9 +974,34 @@ public struct LiveProviderAPI: ProviderAPI {
             "provider/orders/\(order.id)/proposals", body: body)
     }
 
+    public func rateCustomerWithFeedback(orderID: Int, stars: Int, tags: [String], comment: String?) async throws {
+        let _: ProviderRatingEnvelope = try await client.post(
+            "provider/orders/\(orderID)/customer-rating", body: ProviderRatingSubmission(stars: stars, tags: tags, comment: comment))
+    }
+
     public func rateCustomer(orderID: Int, stars: Int) async throws {
         let _: ProviderRatingEnvelope = try await client.post(
             "provider/orders/\(orderID)/customer-rating", body: ProviderRatingSubmission(stars: stars))
+    }
+
+    private func earningsPath(page: Int?, type: String?, dateFrom: String?, dateTo: String?, exporting: Bool = false) -> String {
+        var query = URLComponents()
+        query.queryItems = [
+            URLQueryItem(name: "page", value: page.map(String.init)), URLQueryItem(name: "type", value: type), URLQueryItem(name: "date_from", value: dateFrom),
+            URLQueryItem(name: "date_to", value: dateTo),
+        ].filter { $0.value != nil }
+        return "provider/earnings" + (exporting ? "/export" : "") + (query.percentEncodedQuery.map { "?" + $0 } ?? "")
+    }
+
+    public func filteredEarnings(page: Int, type: String?, dateFrom: String?, dateTo: String?) async throws -> ProviderEarningsPayload {
+        let response: ProviderEarningsEnvelope = try await client.get(earningsPath(page: page, type: type, dateFrom: dateFrom, dateTo: dateTo))
+        return response.data
+    }
+
+    public func exportEarnings(type: String?, dateFrom: String?, dateTo: String?) async throws -> Data {
+        let path = earningsPath(page: nil, type: type, dateFrom: dateFrom, dateTo: dateTo, exporting: true)
+        guard let url = URL(string: path, relativeTo: baseURL)?.absoluteURL else { throw APIClientError.invalidResponse }
+        return try await client.download(url.absoluteString)
     }
 
     public func earnings() async throws -> ProviderEarningsPayload {
@@ -908,6 +1064,36 @@ public struct LiveProviderAPI: ProviderAPI {
 
 private struct ProviderApplicationEnvelope: Decodable, Sendable { let data: ProviderApplication }
 private struct ProviderHomeEnvelope: Decodable, Sendable { let data: ProviderHome }
+extension ProviderAPI {
+    public func verifiedArrival(order: ProviderOrder, latitude: Double, longitude: Double, code: String?) async throws -> ProviderOrder {
+        guard order.arrivalCodeRequired != true else { throw URLError(.unsupportedURL) }
+        return try await markArrived(order: order, latitude: latitude, longitude: longitude)
+    }
+    public func reportArrivalException(order: ProviderOrder, latitude: Double, longitude: Double, note: String) async throws -> ProviderOrder { throw URLError(.unsupportedURL) }
+
+    public func privateImage(url: String) async throws -> Data { throw URLError(.unsupportedURL) }
+    public func updateCompletionEstimate(order: ProviderOrder, minutes: Int) async throws -> ProviderOrder { throw URLError(.unsupportedURL) }
+    public func filteredEarnings(page: Int, type: String?, dateFrom: String?, dateTo: String?) async throws -> ProviderEarningsPayload {
+        guard page == 1, type == nil, dateFrom == nil, dateTo == nil else { throw URLError(.unsupportedURL) }
+        return try await earnings()
+    }
+    public func exportEarnings(type: String?, dateFrom: String?, dateTo: String?) async throws -> Data { throw URLError(.unsupportedURL) }
+
+    public func rateCustomerWithFeedback(orderID: Int, stars: Int, tags: [String], comment: String?) async throws {
+        guard tags.isEmpty, comment?.isEmpty != false else { throw URLError(.unsupportedURL) }
+        try await rateCustomer(orderID: orderID, stars: stars)
+    }
+
+    public func attachWorkPhoto(orderID: Int, mediaID: Int, purpose: String, expectedVersion: Int) async throws -> ProviderOrder { throw URLError(.unsupportedURL) }
+}
+
+private struct ProviderWorkPhotoBody: Encodable, Sendable {
+    let mediaID: Int
+    let purpose: String
+    let expectedVersion: Int
+    enum CodingKeys: String, CodingKey { case mediaID = "media_id"; case purpose; case expectedVersion = "expected_version" }
+}
+
 private struct ProviderOrderEnvelope: Decodable, Sendable { let data: ProviderOrder }
 private struct ProviderOrderListEnvelope: Decodable, Sendable { let data: [ProviderOrder] }
 private struct ProviderMarketRequestEnvelope: Decodable, Sendable { let data: ProviderMarketRequest }
@@ -996,6 +1182,8 @@ public final class ProviderViewModel {
     private var unableNote = ""
     private var requestedUnableAction = ""
     private var ratingStars = 0
+    private var ratingComment = ""
+    private var ratingTags: Set<Int> = []
     private var workspaceProfileValue: ProviderProfilePayload?
     private var workspaceSpecialtyIDs: Set<Int> = []
     private var workspaceAreaIDs: Set<Int> = []
@@ -1064,11 +1252,15 @@ public final class ProviderViewModel {
     }
 
     /// ACTIVE, PENDING (any submitted application), or NONE — the input DeepLinkRouter needs.
-    public func providerStatus() async -> String {
-        switch (try? await api.application())?.status ?? "NOT_STARTED" {
-        case "ACTIVE": "ACTIVE"
-        case "NOT_STARTED": "NONE"
-        default: "PENDING"
+    /// `unknownOnFailure`: a failed check reports UNKNOWN instead of NONE, so DEC-067 keeps the remembered mode.
+    public func providerStatus(unknownOnFailure: Bool = false) async -> String {
+        guard let status = (try? await api.application())?.status else {
+            return unknownOnFailure ? "UNKNOWN" : "NONE"
+        }
+        switch status {
+        case "ACTIVE": return "ACTIVE"
+        case "NOT_STARTED": return "NONE"
+        default: return "PENDING"
         }
     }
 
@@ -1117,6 +1309,7 @@ public final class ProviderViewModel {
         case "SCR-P11": await loadMarketOffers()
         case "SCR-P18": await loadEarnings()
         case "SCR-P07": await loadApplication()
+        case "SCR-P08": await loadHome()  // DEC-067: restoring the last mode of an active provider
         case "PROVIDER_ORDER", "SCR-C19", "SCR-P17": await openOrderLink(target)
         default: await loadNotifications(notificationsDenied: notificationsDenied)
         }
@@ -1135,6 +1328,8 @@ public final class ProviderViewModel {
             await openChat()
         } else if target.target == "SCR-P17" && order.availableActions.contains("rate_customer") {
             ratingStars = 0
+            ratingComment = ""
+            ratingTags = []
             state = ratingState(event: "loaded")
         } else if ["CANCELLED", "EXPIRED", "OPEN"].contains(order.status) {
             await loadHome()
@@ -1333,6 +1528,7 @@ public final class ProviderViewModel {
                 await loadHome()
                 return
             }
+            if activeOrderValue?.id != value.id { arrivalCode = ""; arrivalExceptionNote = "" }
             activeOrderValue = value
             state = activeOrderState(value)
         } catch {
@@ -1340,22 +1536,47 @@ public final class ProviderViewModel {
         }
     }
 
+    private var arrivalCode = ""
+    private var arrivalExceptionNote = ""
+    public func updateArrivalCode(_ value: String) { arrivalCode = value.compactMap(\.wholeNumberValue).map(String.init).joined().prefix(6).description }
+    public func updateArrivalExceptionNote(_ value: String) { arrivalExceptionNote = value }
+
     public func performLocationAction(_ action: String, latitude: Double, longitude: Double) async {
         guard let order = activeOrderValue, order.availableActions.contains(action), !state.isBusy
         else { return }
+        if action == "start_trip" { arrivalCode = ""; arrivalExceptionNote = "" }
         state = activeOrderState(order, event: "submitting", currentAction: action)
         do {
             let updated =
                 if action == "start_trip" {
                     try await api.startTrip(order: order, latitude: latitude, longitude: longitude)
+                } else if action == "report_arrival_exception" {
+                    try await api.reportArrivalException(order: order, latitude: latitude, longitude: longitude, note: arrivalExceptionNote)
                 } else {
-                    try await api.markArrived(order: order, latitude: latitude, longitude: longitude)
+                    try await api.verifiedArrival(order: order, latitude: latitude, longitude: longitude, code: arrivalCode.isEmpty ? nil : arrivalCode)
                 }
             activeOrderValue = updated
             state = activeOrderState(updated)
         } catch {
-            state = ProviderLogic.reduce(screen: screen(for: order), input: ["event": .text("error")])
+            state = activeOrderState(order)
+            state.arrivalError = (error as? APIClientError)?.serverMessage ?? "arrival.verification.failed"
         }
+    }
+
+    public func updateCompletionEstimate(_ value: String) async {
+        guard let minutes = Int(value.trimmingCharacters(in: .whitespacesAndNewlines)), (1...1440).contains(minutes), let order = activeOrderValue else { return }
+        await perform(order, action: "update_completion_estimate") { try await api.updateCompletionEstimate(order: $0, minutes: minutes) }
+    }
+
+    public func uploadWorkPhoto(before: Bool, upload: CustomerMediaUpload) async {
+        guard let order = activeOrderValue, !state.isBusy, order.availableActions.contains(before ? "upload_repair_before" : "upload_repair_after") else { return }
+        state = activeOrderState(order, event: "submitting")
+        do {
+            let mediaID = try await api.uploadImage(upload)
+            let fresh = try await api.attachWorkPhoto(orderID: order.id, mediaID: mediaID, purpose: before ? "REPAIR_BEFORE" : "REPAIR_AFTER", expectedVersion: order.version)
+            activeOrderValue = fresh
+            state = activeOrderState(fresh)
+        } catch { state = activeOrderState(order); state.messageKey = "media.upload_error" }
     }
 
     public func handleOrderAction(_ action: String) async {
@@ -1377,8 +1598,20 @@ public final class ProviderViewModel {
     }
 
     public func selectCustomerRating(_ index: Int) {
-        guard (0..<5).contains(index) else { return }
+        guard !state.isBusy, state.visibleActions.contains("rate_customer"), (0..<5).contains(index) else { return }
         ratingStars = index + 1
+        state = ratingState(event: "loaded")
+    }
+
+    public func toggleCustomerRatingTag(_ index: Int) {
+        guard !state.isBusy, state.visibleActions.contains("rate_customer"), (activeOrderValue?.customerRatingTagOptions ?? []).indices.contains(index) else { return }
+        if ratingTags.contains(index) { ratingTags.remove(index) } else { ratingTags.insert(index) }
+        state = ratingState(event: "loaded")
+    }
+
+    public func updateCustomerRatingComment(_ value: String) {
+        guard !state.isBusy else { return }
+        ratingComment = String(value.prefix(501))
         state = ratingState(event: "loaded")
     }
 
@@ -1391,32 +1624,107 @@ public final class ProviderViewModel {
         }
         state = ratingState(event: "submitting")
         do {
-            try await api.rateCustomer(orderID: order.id, stars: ratingStars)
+            try await api.rateCustomerWithFeedback(
+                orderID: order.id, stars: ratingStars,
+                tags: ratingTags.sorted().compactMap { index in
+                    guard let choices = order.customerRatingTagOptions, choices.indices.contains(index) else { return nil }
+                    return choices[index].code
+                },
+                comment: ratingComment.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : ratingComment.trimmingCharacters(in: .whitespacesAndNewlines))
             state = ratingState(event: "success", actions: [])
         } catch {
-            state = ProviderLogic.reduce(screen: "SCR-P17", input: ["event": .text("error")])
+            state = ratingState(event: "loaded")
+            state.messageKey = "error.body"
         }
     }
+
+    @ObservationIgnored private var earningsPayload: ProviderEarningsPayload?
+    @ObservationIgnored private var earningsType: String?
+    @ObservationIgnored private var earningsFrom = ""
+    @ObservationIgnored private var earningsTo = ""
+    @ObservationIgnored private var appliedEarningsType: String?
+    @ObservationIgnored private var appliedEarningsFrom = ""
+    @ObservationIgnored private var appliedEarningsTo = ""
+    @ObservationIgnored private var earningsBusy = false
+    private var earningsDirty: Bool { earningsType != appliedEarningsType || earningsFrom != appliedEarningsFrom || earningsTo != appliedEarningsTo }
 
     public func loadEarnings() async {
         state = ProviderLogic.reduce(screen: "SCR-P18", input: ["event": .text("loading")])
         do {
-            let value = try await api.earnings()
-            state = ProviderLogic.reduce(
-                screen: "SCR-P18",
-                input: [
-                    "event": .text("loaded"), "operating_mode": .text(value.operatingMode),
-                    "summary": .strings([
-                        formatAmount(value.summary.balance), formatAmount(value.summary.available),
-                        formatAmount(value.summary.pending),
-                    ]),
-                    "transaction_titles": .strings(value.transactions.map(\.title)),
-                    "transaction_details": .strings(value.transactions.map(\.detail)),
-                    "transaction_states": .strings(value.transactions.map(\.type)),
-                ])
-        } catch {
-            state = ProviderLogic.reduce(screen: "SCR-P18", input: ["event": .text("error")])
+            let value = try await api.filteredEarnings(
+                page: 1, type: appliedEarningsType, dateFrom: appliedEarningsFrom.isEmpty ? nil : appliedEarningsFrom, dateTo: appliedEarningsTo.isEmpty ? nil : appliedEarningsTo)
+            guard state.screen == "SCR-P18" else { return }
+            earningsPayload = value
+            earningsType = appliedEarningsType; earningsFrom = appliedEarningsFrom; earningsTo = appliedEarningsTo
+            state = earningsState()
+        } catch { if state.screen == "SCR-P18" { state = ProviderLogic.reduce(screen: "SCR-P18", input: ["event": .text("error")]) } }
+    }
+
+    public func updateEarningsFilters(typeIndex: Int? = nil, dateFrom: String? = nil, dateTo: String? = nil) {
+        guard !earningsBusy else { return }
+        if let typeIndex {
+            guard let choices = earningsPayload?.filterOptions, choices.indices.contains(typeIndex) else { return }
+            earningsType = choices[typeIndex].code
         }
+        if let dateFrom { earningsFrom = String(dateFrom.prefix(10)) }
+        if let dateTo { earningsTo = String(dateTo.prefix(10)) }
+        state = earningsState()
+    }
+
+    public func applyEarningsFilters(reset: Bool = false, more: Bool = false) async {
+        guard !earningsBusy, let previous = earningsPayload else { return }
+        if reset { earningsType = nil; earningsFrom = ""; earningsTo = "" }
+        let type = more ? appliedEarningsType : earningsType
+        let from = more ? appliedEarningsFrom : earningsFrom
+        let to = more ? appliedEarningsTo : earningsTo
+        let page = more ? (previous.meta?.currentPage ?? 1) + 1 : 1
+        guard !more || page <= (previous.meta?.lastPage ?? 1) else { return }
+        earningsBusy = true; state = earningsState()
+        do {
+            let loaded = try await api.filteredEarnings(page: page, type: type, dateFrom: from.isEmpty ? nil : from, dateTo: to.isEmpty ? nil : to)
+            guard state.screen == "SCR-P18" else { earningsBusy = false; return }
+            earningsPayload =
+                more
+                ? ProviderEarningsPayload(
+                    operatingMode: loaded.operatingMode, summary: loaded.summary, dues: loaded.dues, transactions: previous.transactions + loaded.transactions,
+                    filterOptions: loaded.filterOptions, meta: loaded.meta) : loaded
+            appliedEarningsType = type; appliedEarningsFrom = from; appliedEarningsTo = to
+            earningsBusy = false; state = earningsState()
+        } catch { earningsBusy = false; if state.screen == "SCR-P18" { state = earningsState(error: "provider.earnings.filter_error") } }
+    }
+
+    public func exportEarnings() async -> Data? {
+        guard !earningsBusy, !earningsDirty else { return nil }
+        earningsBusy = true; state = earningsState()
+        defer { earningsBusy = false }
+        do {
+            let data = try await api.exportEarnings(
+                type: appliedEarningsType, dateFrom: appliedEarningsFrom.isEmpty ? nil : appliedEarningsFrom, dateTo: appliedEarningsTo.isEmpty ? nil : appliedEarningsTo)
+            guard state.screen == "SCR-P18" else { return nil }
+            earningsBusy = false; state = earningsState(); return data
+        } catch { earningsBusy = false; if state.screen == "SCR-P18" { state = earningsState(error: "provider.earnings.export_error") }; return nil }
+    }
+
+    private func earningsState(error: String? = nil) -> ProviderUIState {
+        guard let value = earningsPayload else { return ProviderLogic.reduce(screen: "SCR-P18", input: ["event": .text("loading")]) }
+        var result = ProviderLogic.reduce(
+            screen: "SCR-P18",
+            input: [
+                "event": .text(earningsBusy ? "loading_more" : "loaded"), "operating_mode": .text(value.operatingMode),
+                "summary": .strings([formatAmount(value.summary.balance), formatAmount(value.summary.available), formatAmount(value.summary.pending)]),
+                "transaction_titles": .strings(value.transactions.map(\.title)), "transaction_details": .strings(value.transactions.map(\.detail)),
+                "transaction_states": .strings(value.transactions.map(\.type)),
+                "dues_blocked": .bool(value.dues.blocked), "dues_debt": .text(formatAmount(value.dues.debt)), "dues_limit": .text(value.dues.limit.map(formatAmount) ?? ""),
+            ])
+        if let error { result.messageKey = error }
+        result.earningsDuesBlocked = value.dues.blocked && value.operatingMode == "MARKETPLACE"
+        result.earningsEmployee = value.operatingMode == "EMPLOYEE"
+        result.earningsFilterLabels = value.filterOptions.map(\.label); result.earningsFilterCodes = value.filterOptions.map(\.code)
+        result.earningsTypeIndex = max(0, value.filterOptions.firstIndex { $0.code == earningsType } ?? 0)
+        result.earningsDateFrom = earningsFrom; result.earningsDateTo = earningsTo
+        result.earningsHasMore = (value.meta?.currentPage ?? 1) < (value.meta?.lastPage ?? 1)
+        result.earningsFiltersDirty = earningsDirty
+        return result
     }
 
     public func loadProviderProfile() async {
@@ -1683,6 +1991,7 @@ public final class ProviderViewModel {
                 await loadHome()
             } else {
                 state = activeOrderState(updated)
+                if requestedUnableAction == "report_no_show" { state.messageKey = "provider.no_show.pending" }
             }
         } catch {
             state = ProviderLogic.reduce(screen: "SCR-P21", input: ["event": .text("error")])
@@ -1708,7 +2017,7 @@ public final class ProviderViewModel {
         return (latitude, longitude)
     }
 
-    public var activeCustomerPhone: String? { activeOrderValue?.customer?.phone }
+    public var activeCustomerPhone: String? { nil }
 
     public func showProfile() { state = profileState(event: "validate") }
     public func updateExperience(_ value: String) {
@@ -1859,7 +2168,9 @@ public final class ProviderViewModel {
         guard let order = activeOrderValue else { return }
         state = ProviderLogic.reduce(screen: "SCR-P20", input: ["event": .text("loading")])
         do {
-            proposalTypesValue = try await api.proposalTypes().filter {
+            let types: [ProviderReason]
+            if let providedTypes = order.proposalTypeOptions { types = providedTypes } else { types = try await api.proposalTypes() }
+            proposalTypesValue = types.filter {
                 action == "submit_execution_quote"
                     ? $0.code == "EXECUTION_QUOTE" : $0.code != "EXECUTION_QUOTE"
             }
@@ -1898,6 +2209,8 @@ public final class ProviderViewModel {
             activeOrderValue = updated
             if updated.status == "CLOSED" && updated.availableActions.contains("rate_customer") {
                 ratingStars = 0
+                ratingComment = ""
+                ratingTags = []
                 state = ratingState(event: "loaded")
             } else if ["OPEN", "CLOSED", "CANCELLED", "EXPIRED"].contains(updated.status) {
                 await loadHome()
@@ -1946,7 +2259,12 @@ public final class ProviderViewModel {
                 "event": .text(event), "current_action": .text(currentAction),
                 "display_status": .text(order.displayStatus),
                 "customer_name": .text(order.customer?.name ?? ""),
+                "warranty_coverage": .text(order.warrantyCoverage ?? ""),
                 "customer_rating": .text(order.customer?.ratingAverage ?? ""),
+                "completion_estimate_at": .text(order.completionEstimate?.estimatedAt ?? ""),
+                "arrival_code_required": .bool(order.arrivalCodeRequired == true), "arrival_exception_pending": .bool(order.arrivalExceptionPending == true),
+                "before_photo_count": .integer(order.workPhotos?.filter { $0.purpose == "REPAIR_BEFORE" }.count ?? 0),
+                "after_photo_count": .integer(order.workPhotos?.filter { $0.purpose == "REPAIR_AFTER" }.count ?? 0),
                 "order_summary": .strings([
                     "#\(order.number)", service, address.isEmpty ? (order.location.area ?? "") : address,
                     timingLabel(order),
@@ -1959,7 +2277,7 @@ public final class ProviderViewModel {
                 "price_guide_max": .text(
                     order.executionPriceGuide?.maximum.split(separator: ".").first.map(String.init) ?? ""),
                 "price_review_required": .bool(order.priceGuideReviewRequired == true),
-                "message_key": .text(message),
+                "message_key": .text(order.absenceReportPending == true ? "provider.no_show.pending" : message),
             ])
     }
 
@@ -2003,6 +2321,10 @@ public final class ProviderViewModel {
             screen: "SCR-P17",
             input: [
                 "event": .text(event), "stars": .integer(ratingStars),
+                "tag_labels": .strings((order?.customerRatingTagOptions ?? []).map(\.label)),
+                "tag_codes": .strings((order?.customerRatingTagOptions ?? []).map(\.code)),
+                "selected_tags": .strings(ratingTags.sorted().map(String.init)),
+                "comment": .text(ratingComment),
                 "order_summary": .strings([
                     "#\(order?.number ?? 0)", order?.customer?.name ?? "",
                     [order?.category.name ?? "", order?.problemType.name ?? ""]
@@ -2044,6 +2366,8 @@ public final class ProviderViewModel {
             secondary: workspaceAreas.indices.filter { workspaceAreaIDs.contains(workspaceAreas[$0].id) })
     }
 
+    public func loadChatImage(url: String) async -> Data? { try? await api.privateImage(url: url) }
+
     private func chatState(event: String) -> ProviderUIState {
         guard let chat = chatValue else {
             return ProviderLogic.reduce(screen: "SCR-C19", input: ["event": .text("error")])
@@ -2059,6 +2383,7 @@ public final class ProviderViewModel {
                 "order_summary": .text(
                     "\(conversation.order.category ?? "") #\(conversation.order.number ?? "") · \(conversation.order.statusLabel ?? "")"
                 ),
+                "image_groups": .strings(messages.map { $0.media.compactMap(\.contentURL).joined(separator: "\n") }),
                 "message_bodies": .strings(messages.map { $0.body ?? "" }),
                 "message_kinds": .strings(
                     messages.map {
@@ -2103,7 +2428,7 @@ public final class ProviderViewModel {
     }
 
     private func formatAmount(_ value: String?) -> String {
-        "\((value ?? "0").split(separator: ".").first ?? "0") \(currencyLabel)"
+        BzrFormatter.money(value ?? "0", currency: currencyLabel)
     }
 
     private func displayDateTime(_ value: String?) -> String {
@@ -2111,7 +2436,7 @@ public final class ProviderViewModel {
             return value ?? ""
         }
         let formatter = DateFormatter()
-        formatter.locale = Locale(identifier: "ar_EG")
+        formatter.locale = Locale(identifier: AppLanguage.current + "_EG")
         formatter.dateFormat = "yyyy-MM-dd · h:mm a"
         return formatter.string(from: date)
     }
@@ -2353,8 +2678,18 @@ private enum ProviderWorkspaceError: Error {
 
 /// Pure provider state and validation, shared by Linux tests and the SwiftUI presentation layer.
 public enum ProviderLogic {
-    // swiftlint:disable:next cyclomatic_complexity
     public static func reduce(screen: String, input: [String: ProviderInputValue]) -> ProviderUIState {
+        var resolved = input
+        resolved["available_actions"] = .strings(input.strings("available_actions").filter { $0 != "call" })
+        var state = reduceScreen(screen: screen, input: resolved)
+        state.warrantyCoverage = input.text("warranty_coverage")
+        state.arrivalCodeRequired = input.bool("arrival_code_required")
+        state.arrivalExceptionPending = input.bool("arrival_exception_pending")
+        return state
+    }
+
+    // swiftlint:disable:next cyclomatic_complexity
+    private static func reduceScreen(screen: String, input: [String: ProviderInputValue]) -> ProviderUIState {
         switch input.text("event") {
         case "loading": return ProviderUIState(screen: screen, phase: .loading)
         case "error": return ProviderUIState(screen: screen, phase: .error, messageKey: "error.body")
@@ -2585,14 +2920,14 @@ public enum ProviderLogic {
         let busy = input.text("event") == "submitting"
         let reviewRequired = input.bool("price_review_required")
         let explicitMessage = input.text("message_key")
-        return ProviderUIState(
+        var state = ProviderUIState(
             screen: screen, phase: .content,
             canContinue: !busy && !input.strings("available_actions").isEmpty,
             messageKey: !explicitMessage.isEmpty
                 ? explicitMessage : (reviewRequired ? "provider.price_guide.other_review" : nil),
             visibleActions: input.strings("available_actions"),
             items: input.strings("order_summary"),
-            secondaryOptions: input.strings("amount_summary"), isBusy: busy,
+            secondaryOptions: input.strings("amount_summary"), isBusy: busy, fieldValues: [input.text("completion_estimate_at")],
             displayStatus: input.text("display_status"), stepStates: input.strings("step_states"),
             showPriceGuide: !input.text("price_guide_min").isEmpty
                 && !input.text("price_guide_max").isEmpty,
@@ -2600,6 +2935,9 @@ public enum ProviderLogic {
             priceGuideMinimum: input.text("price_guide_min"),
             priceGuideMaximum: input.text("price_guide_max"),
             customerName: input.text("customer_name"), customerRating: input.text("customer_rating"))
+        state.beforePhotoCount = input.integer("before_photo_count")
+        state.afterPhotoCount = input.integer("after_photo_count")
+        return state
     }
 
     private static func proposal(_ input: [String: ProviderInputValue]) -> ProviderUIState {
@@ -2669,29 +3007,41 @@ public enum ProviderLogic {
         let stars = input.integer("stars")
         let busy = input.text("event") == "submitting"
         let success = input.text("event") == "success"
-        let valid = (1...5).contains(stars)
+        let valid = (1...5).contains(stars) && input.text("comment").count <= 500
         let explicit = input.text("message_key")
         return ProviderUIState(
             screen: "SCR-P17", phase: .content,
             canContinue: valid && !busy && !success
                 && input.strings("available_actions").contains("rate_customer"),
             messageKey: success ? "provider.rating.success" : (explicit.isEmpty ? nil : explicit),
-            fieldErrors: !valid && input.text("event") == "validate" ? ["provider.rating.required"] : [],
+            fieldErrors: input.text("comment").count > 500 ? ["provider.rating.comment_limit"] : (!valid && input.text("event") == "validate" ? ["provider.rating.required"] : []),
             visibleActions: input.strings("available_actions"), items: input.strings("order_summary"),
-            isBusy: busy, selectedOptionIndex: stars - 1)
+            options: input.strings("tag_labels"), selectedPrimaryIndices: input.strings("selected_tags").compactMap(Int.init),
+            isBusy: busy, fieldValues: [input.text("comment")], selectedOptionIndex: stars - 1, optionCodes: input.strings("tag_codes"))
     }
 
     private static func earnings(_ input: [String: ProviderInputValue]) -> ProviderUIState {
         let titles = input.strings("transaction_titles")
         let busy = input.text("event") == "loading_more"
         let empty = titles.isEmpty
+        // DEC-068 — BR-063 applies in marketplace mode only (BR-065); debt and limit follow the summary.
+        let duesBlocked = input.bool("dues_blocked") && input.text("operating_mode") == "MARKETPLACE"
+        let messageKey: String? =
+            if duesBlocked {
+                "provider.earnings.dues_blocked"
+            } else if empty {
+                "provider.earnings.empty"
+            } else {
+                input.text("operating_mode") == "EMPLOYEE" ? "provider.earnings.employee.info" : nil
+            }
         return ProviderUIState(
             screen: "SCR-P18", phase: empty ? .empty : .content,
             canContinue: !empty && !busy,
-            messageKey: empty
-                ? "provider.earnings.empty"
-                : (input.text("operating_mode") == "EMPLOYEE" ? "provider.earnings.employee.info" : nil),
-            items: titles, secondaryOptions: input.strings("summary"), isBusy: busy,
+            messageKey: messageKey,
+            items: titles,
+            secondaryOptions: input.strings("summary")
+                + (duesBlocked ? [input.text("dues_debt"), input.text("dues_limit")] : []),
+            isBusy: busy,
             itemDetails: input.strings("transaction_details"),
             itemStates: input.strings("transaction_states"))
     }
@@ -2741,7 +3091,7 @@ public enum ProviderLogic {
         let counterpart =
             input.text("counterpart_name").isEmpty
             ? input.text("provider_name") : input.text("counterpart_name")
-        return ProviderUIState(
+        var state = ProviderUIState(
             screen: "SCR-C19", phase: messages.isEmpty ? .empty : .content,
             canContinue: status == "OPEN" && !draft.isEmpty && draft.count <= 1000 && !busy,
             messageKey: status == "READ_ONLY"
@@ -2752,6 +3102,8 @@ public enum ProviderLogic {
             options: [counterpart, input.text("order_summary"), status, input.text("viewer_role")],
             isBusy: busy, fieldValues: [draft], itemDetails: input.strings("message_times"),
             itemStates: input.strings("message_kinds"))
+        state.imageGroups = input.strings("image_groups").map { $0.components(separatedBy: "\n").filter { !$0.isEmpty } }
+        return state
     }
 
     private static func statusKey(_ status: String) -> String? {

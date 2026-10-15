@@ -24,6 +24,7 @@ final class CustomerSharedFixtureTests: XCTestCase {
             "design/fixtures/SCR-C32/cases.json", "design/fixtures/SCR-C33/cases.json",
             "design/fixtures/SCR-C34/cases.json", "design/fixtures/SCR-C35/cases.json",
             "design/fixtures/SCR-C36/cases.json",
+            "design/fixtures/SCR-C37/cases.json", "design/fixtures/SCR-C38/cases.json",
         ]
         for path in fixturePaths {
             let url = repositoryRoot().appendingPathComponent(path)
@@ -67,7 +68,7 @@ final class CustomerSharedFixtureTests: XCTestCase {
                 count += 1
             }
         }
-        XCTAssertEqual(count, 227)
+        XCTAssertEqual(count, 240)
     }
 
     private func optional<T: Equatable>(_ expected: T?, _ actual: T, _ label: String) {

@@ -1,0 +1,40 @@
+{
+  "tests": 18,
+  "suites": [
+    {
+      "name": "noox.bzr.provider.ProviderSharedFixtureTest",
+      "tests": "1",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "noox.bzr.customer.StaticDataSourcesViewsTest",
+      "tests": "7",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "noox.bzr.customer.StaffMediaAndArrivalApiTest",
+      "tests": "2",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "noox.bzr.customer.StaffMediaAndArrivalViewsTest",
+      "tests": "7",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "noox.bzr.customer.CustomerSharedFixtureTest",
+      "tests": "1",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    }
+  ]
+}

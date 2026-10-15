@@ -7,6 +7,27 @@ import org.junit.Test
 
 class ScreenHistoryTest {
     @Test
+    fun legalDateUsesTheEgyptianEffectiveDay() {
+        assertEquals("2026-10-12", noox.bzr.design.BzrFormat.legalDate("2026-10-11T23:00:00+00:00"))
+        assertEquals("2026-10-11", noox.bzr.design.BzrFormat.legalDate("2026-10-11"))
+    }
+    @Test
+    fun languageChangeClearsPreviouslyLocalizedSnapshots() {
+        val history = ScreenHistory<String>("home") { it }
+        history.show("home")
+        history.show("arabic-notifications")
+        history.clear()
+        history.show("english-notifications")
+        assertEquals("home", history.back { "home" })
+    }
+
+    @Test
+    fun moneyPreservesPiastersWithoutFloatingPointRounding() {
+        assertEquals("123.45 EGP", noox.bzr.design.BzrFormat.money("123.45", "EGP"))
+        assertEquals("100 EGP", noox.bzr.design.BzrFormat.money("100.00", "EGP"))
+        assertEquals("0.01 EGP", noox.bzr.design.BzrFormat.money("0.01", "EGP"))
+    }
+    @Test
     fun historyMatchesSharedFixture() {
         val fixture = JSONObject(repositoryFile("design/fixtures/navigation/history.json").readText())
         val root = fixture.getString("root")

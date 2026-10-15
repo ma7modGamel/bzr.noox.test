@@ -12,7 +12,7 @@ final class OrderMedia extends Model
 {
     protected $table = 'order_media';
 
-    protected $fillable = ['order_id', 'uploaded_by', 'expires_at', 'type', 'path', 'size_bytes', 'duration_sec'];
+    protected $fillable = ['order_id', 'uploaded_by', 'expires_at', 'type', 'purpose', 'path', 'size_bytes', 'duration_sec'];
 
     protected function casts(): array
     {

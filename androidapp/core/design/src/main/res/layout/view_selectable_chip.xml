@@ -13,5 +13,5 @@
         android:gravity="center"
         android:paddingStart="@dimen/bremo_space_m"
         android:paddingEnd="@dimen/bremo_space_m"
-        android:textAppearance="@style/TextAppearance.Bremo.Body" />
+        android:textAppearance="@style/TextAppearance.Bremo.Chip" />
 </merge>

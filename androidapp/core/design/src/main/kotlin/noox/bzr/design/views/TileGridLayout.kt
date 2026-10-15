@@ -15,13 +15,30 @@ import noox.bzr.design.R
  */
 class TileGridLayout @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) : ViewGroup(context, attrs) {
     private val gap = px(R.dimen.bremo_space_m)
-    private val maxColumns = resources.getInteger(R.integer.bremo_size_home_service_tile_columns)
+    /** The widest the grid may get; DEC-070 uses two columns for the request service tiles. */
+    var maxColumns: Int = resources.getInteger(R.integer.bremo_size_home_service_tile_columns)
+        set(value) {
+            field = value
+            requestLayout()
+        }
     private var columns = 1
+
+    /** The narrowest a column may be at font scale 1 (DEC-073: the home tiles fit four columns). */
+    private var minColumnWidth = resources.getDimension(R.dimen.bremo_size_category_column_min_width)
+
+    init {
+        context.obtainStyledAttributes(attrs, R.styleable.TileGridLayout).apply {
+            try {
+                maxColumns = getInt(R.styleable.TileGridLayout_bremoMaxColumns, maxColumns)
+                minColumnWidth = getDimension(R.styleable.TileGridLayout_bremoMinColumnWidth, minColumnWidth)
+            } finally { recycle() }
+        }
+    }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         val width = MeasureSpec.getSize(widthMeasureSpec)
         val inner = width - paddingStart - paddingEnd
-        val minCell = resources.getDimension(R.dimen.bremo_size_category_column_min_width) * resources.configuration.fontScale
+        val minCell = minColumnWidth * resources.configuration.fontScale
         columns = ((inner + gap) / (minCell + gap)).toInt().coerceIn(1, maxColumns)
         val cell = (inner - gap * (columns - 1)) / columns
         val visible = (0 until childCount).map(::getChildAt).filter { it.visibility != GONE }

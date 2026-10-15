@@ -5,12 +5,14 @@ declare(strict_types=1);
 namespace App\Modules\Providers\Actions;
 
 use App\Modules\Identity\Models\Admin;
+use App\Modules\Notifications\Data\LocalizedMessage;
 use App\Modules\Notifications\Services\AccountNotifications;
 use App\Modules\Offers\Enums\OfferStatus;
 use App\Modules\Providers\Enums\EmploymentType;
 use App\Modules\Providers\Enums\ProviderStatus;
 use App\Modules\Providers\Models\ProviderProfile;
 use App\Support\Exceptions\BusinessRuleViolationException;
+use App\Support\Localization;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -31,9 +33,9 @@ final class ReviewProviderAction
 
     public function approve(ProviderProfile $profile, Admin $admin, EmploymentType $employmentType): ProviderProfile
     {
-        $this->assertStatus($profile, ProviderStatus::PendingReview, 'الطلب ليس بانتظار المراجعة.');
+        $this->assertStatus($profile, ProviderStatus::PendingReview, Localization::text('copy.this_application_is_not_awaiting_review'));
         if ($profile->phone_verified_at === null) {
-            throw BusinessRuleViolationException::rule('BR-022', 'سجّل توثيق الهاتف بعد الاتصال قبل القبول.');
+            throw BusinessRuleViolationException::rule('BR-022', Localization::text('copy.record_phone_verification_after_calling_before_approving_the_application'));
         }
 
         $profile->forceFill([
@@ -50,7 +52,7 @@ final class ReviewProviderAction
 
     public function reject(ProviderProfile $profile, Admin $admin, string $reason): ProviderProfile
     {
-        $this->assertStatus($profile, ProviderStatus::PendingReview, 'الطلب ليس بانتظار المراجعة.');
+        $this->assertStatus($profile, ProviderStatus::PendingReview, Localization::text('copy.this_application_is_not_awaiting_review'));
 
         $profile->forceFill([
             'status' => ProviderStatus::Rejected,
@@ -67,7 +69,7 @@ final class ReviewProviderAction
     /** BR-131: يكمل طلباته النشطة، ولا يستقبل جديدًا، وعروضه المقدمة تُغلق. */
     public function suspend(ProviderProfile $profile, Admin $admin, string $reason): ProviderProfile
     {
-        $this->assertStatus($profile, ProviderStatus::Active, 'الإيقاف لفني نشط فقط.');
+        $this->assertStatus($profile, ProviderStatus::Active, Localization::text('copy.only_an_active_technician_can_be_suspended'));
 
         DB::transaction(function () use ($profile, $admin, $reason): void {
             $profile->forceFill([
@@ -82,7 +84,7 @@ final class ReviewProviderAction
                 ->update(['status' => OfferStatus::Closed->value, 'decided_at' => now()]);
         });
         DB::afterCommit(fn () => $this->notifications->accountStatusChanged(
-            $profile->user, 'تم إيقاف حسابك كمقدم خدمة', 'السبب: '.trim($reason).' يمكنك إكمال طلباتك الحالية فقط، وللاستفسار تواصل مع الدعم.',
+            $profile->user, new LocalizedMessage('notifications.provider_suspended_title'), new LocalizedMessage('notifications.provider_suspended_body', ['reason' => trim($reason)]),
         ));
 
         return $profile;
@@ -90,7 +92,7 @@ final class ReviewProviderAction
 
     public function reactivate(ProviderProfile $profile, Admin $admin): ProviderProfile
     {
-        $this->assertStatus($profile, ProviderStatus::Suspended, 'إعادة التفعيل لفني موقوف فقط.');
+        $this->assertStatus($profile, ProviderStatus::Suspended, Localization::text('copy.only_a_suspended_technician_can_be_reactivated'));
 
         $profile->forceFill([
             'status' => ProviderStatus::Active,
@@ -99,7 +101,7 @@ final class ReviewProviderAction
             'reviewed_at' => now(),
         ])->save();
         DB::afterCommit(fn () => $this->notifications->accountStatusChanged(
-            $profile->user, 'أُعيد تفعيل حسابك كمقدم خدمة', 'يمكنك الآن تفعيل «متاح الآن» واستقبال الطلبات.',
+            $profile->user, new LocalizedMessage('notifications.provider_active_title'), new LocalizedMessage('notifications.provider_active_body'),
         ));
 
         return $profile;

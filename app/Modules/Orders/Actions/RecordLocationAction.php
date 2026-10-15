@@ -12,6 +12,7 @@ use App\Modules\Providers\Models\ProviderProfile;
 use App\Modules\Settings\Enums\Cfg;
 use App\Modules\Settings\Services\SettingsRepository;
 use App\Support\Exceptions\BusinessRuleViolationException;
+use App\Support\Localization;
 
 /**
  * BR-110 — الفني يرسل موقعه كل CFG-080 في `ON_THE_WAY` **فقط**، ويراه العميل صاحب الطلب وحده.
@@ -27,13 +28,13 @@ final readonly class RecordLocationAction
     public function execute(Order $order, ProviderProfile $provider, float $lat, float $lng): TrackingPoint
     {
         if ($order->provider_profile_id !== $provider->getKey()) {
-            throw BusinessRuleViolationException::rule('BR-110', 'هذا الطلب غير مسنَد إليك.');
+            throw BusinessRuleViolationException::rule('BR-110', Localization::text('copy.this_request_is_not_assigned_to_you'));
         }
 
         if ($order->status !== OrderStatus::OnTheWay) {
             throw BusinessRuleViolationException::rule(
                 'BR-110',
-                'إرسال الموقع متاح أثناء "في الطريق" فقط.',
+                Localization::text('copy.location_sharing_is_only_available_while_on_the_way'),
             );
         }
 
@@ -43,7 +44,7 @@ final readonly class RecordLocationAction
             ->exists();
 
         if ($wasRecordedTooRecently) {
-            throw BusinessRuleViolationException::rule('BR-110', 'تحديث الموقع أسرع من المعدل المسموح.');
+            throw BusinessRuleViolationException::rule('BR-110', Localization::text('copy.location_updates_are_being_sent_too_frequently'));
         }
 
         $point = TrackingPoint::query()->create([

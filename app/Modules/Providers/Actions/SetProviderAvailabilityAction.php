@@ -9,6 +9,7 @@ use App\Modules\Identity\Models\User;
 use App\Modules\Providers\Enums\ProviderStatus;
 use App\Modules\Providers\Models\ProviderProfile;
 use App\Support\Exceptions\BusinessRuleViolationException;
+use App\Support\Localization;
 use Illuminate\Support\Facades\DB;
 
 final class SetProviderAvailabilityAction
@@ -24,7 +25,7 @@ final class SetProviderAvailabilityAction
             if ($user->status !== UserStatus::Active || $profile?->status !== ProviderStatus::Active) {
                 throw BusinessRuleViolationException::rule(
                     'BR-022',
-                    'الإتاحة متاحة للفني النشط فقط.',
+                    Localization::text('copy.only_an_active_technician_can_change_availability'),
                 );
             }
 

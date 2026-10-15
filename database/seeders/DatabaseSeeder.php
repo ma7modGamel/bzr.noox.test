@@ -12,6 +12,7 @@ final class DatabaseSeeder extends Seeder
     {
         $this->call([
             SettingsSeeder::class,
+            ReviewTagSeeder::class,
             AdminSeeder::class,
             CatalogSeeder::class,
             LegalPagesSeeder::class, // DEC-051 — مسودات حتى ينشرها المدير العام

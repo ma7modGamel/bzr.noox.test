@@ -30,7 +30,7 @@ final class AuthSharedFixtureTests: XCTestCase {
                 count += 1
             }
         }
-        XCTAssertEqual(count, 29)
+        XCTAssertEqual(count, 30)
     }
 
     private func repositoryRoot() -> URL {

@@ -1,0 +1,15 @@
+{
+    "data": {
+        "id": 1000,
+        "status": "PENDING",
+        "amount": "700.00",
+        "gateway": "FAWRY",
+        "channel": "KIOSK",
+        "transfer_reference": null,
+        "submitted_at": null,
+        "failure_reason": null,
+        "reference_number": "7919732126",
+        "checkout_url": null,
+        "expires_at": "2026-10-06T19:51:55+00:00"
+    }
+}

@@ -93,6 +93,12 @@ public enum AuthLogic {
         case "network_error":
             state.phase = .error
             state.messageKey = "error.body"
+        // DEC-065: a refused token brings the user back here; the reason is a notice, not a form error.
+        case "session_expired":
+            state.canSubmit = false
+            state.emailError = nil
+            state.passwordError = nil
+            state.messageKey = "auth.error.session_expired"
         case "login_succeeded":
             state.phase = .success
             state.canSubmit = false
@@ -308,6 +314,12 @@ public final class AuthViewModel {
             screen: screen, input: ["event": .text("show"), "email": .text(session.email ?? "")])
     }
 
+    /// DEC-065: the server refused the saved token; back to login with the email kept and the reason shown.
+    public func showSessionExpired(email: String) {
+        state = AuthLogic.reduce(
+            screen: "SCR-C10", input: ["event": .text("session_expired"), "email": .text(email)])
+    }
+
     public func submit() async {
         state = AuthLogic.reduce(
             screen: state.screen, input: values().merging(["event": .text("submit")]) { _, new in new })
@@ -390,6 +402,7 @@ public final class AuthViewModel {
     }
 
     private func accept(_ authSession: AuthSession, event: String) {
+        SessionExpiry.shared.reset()
         session.token = authSession.token
         session.email = authSession.email
         transition(event, extra: ["is_verified": .bool(authSession.isVerified)])
@@ -436,6 +449,11 @@ private struct EmailBody: Encodable { let email: String }
 private struct AuthUser: Decodable, Sendable {
     let email: String
     let isVerified: Bool
+
+    enum CodingKeys: String, CodingKey {
+        case email
+        case isVerified = "is_verified"
+    }
 }
 private struct AuthResponse: Decodable, Sendable {
     let user: AuthUser

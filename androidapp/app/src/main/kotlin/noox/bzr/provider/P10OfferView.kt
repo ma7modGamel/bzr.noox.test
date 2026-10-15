@@ -59,7 +59,7 @@ class P10OfferView(context: Context) : ProviderScreenView(context) {
         binding.etaTitle.isVisible = state.showPriceGuide
         binding.eta.isVisible = state.showPriceGuide
         etaAdapter.submitList(state.options.mapIndexed { index, label ->
-            Eta(index, string(R.string.format_minutes).replace("{n}", label), index == state.selectedOptionIndex, !state.isBusy)
+            Eta(index, noox.bzr.design.BzrFormat.quantity(context, R.plurals.plural_format_minutes, label.toIntOrNull() ?: 0), index == state.selectedOptionIndex, !state.isBusy)
         })
         binding.deductibleTitle.isVisible = state.showOutsideReason
         binding.deductible.isVisible = state.showOutsideReason

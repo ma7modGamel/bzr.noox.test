@@ -55,7 +55,7 @@
   "service_hours": {"from":"08:00","to":"22:00"},
   "slots": {"duration_minutes": 120, "minimum_lead_minutes": 90, "booking_horizon_days": 7},
   "limits": {"max_offers": 10, "min_offer_amount": "50.00", "offer_window_minutes": 30},
-  "media_limits": {"images":5,"image_mb":10,"video_seconds":60,"video_mb":50,"audio_seconds":120,"audio_mb":5,"audio_mime":"audio/mp4","audio_channels":1,"audio_bitrate_bps":64000},
+  "media_limits": {"images":5,"image_mb":10,"video_seconds":30,"video_mb":50,"audio_seconds":120,"audio_mb":5,"audio_mime":"audio/mp4","audio_channels":1,"audio_bitrate_bps":64000},
   "option_lists": {
     "customer_cancellation_reasons": [{"code":"FOUND_ANOTHER","label":"وجدت فنيًا آخر"}],
     "provider_cancellation_reasons": [{"code":"EMERGENCY","label":"ظرف طارئ"}],
@@ -86,7 +86,7 @@
 كل تمثيل تفاصيل للطلب يتضمن حقول العرض المحسوبة من منظور الطرف الطالب:
 ```json
 {
-  "available_actions": ["start_trip", "back_out", "call", "chat"],
+  "available_actions": ["start_trip", "back_out", "chat"],
   "deadlines": {
     "offers_close_at": null,
     "selection_deadline_at": null,
@@ -110,13 +110,14 @@
 
 - `available_actions` تُحسب من جدول الانتقالات (10) والصلاحيات (23) للطرف الطالب، وتُستخدم نفس الدالة في التحقق عند تنفيذ الإجراء (مصدر واحد).
 - أسماء إجراءات العميل الثابتة: `accept_offer`, `edit_request`, `republish`, `cancel`, `change_payment_method`, `pay_electronic`, `approve_proposal`, `reject_proposal`, `confirm_completion`, `open_dispute`, `rate`, `share_visit`, `call`, `chat`, `report_provider`.
-- أسماء إجراءات الفني الثابتة: `submit_offer`, `withdraw_offer`, `start_trip`, `back_out`, `mark_arrived`, `start_work`, `submit_execution_quote`, `complete_inspection_only`, `submit_proposal`, `withdraw_proposal`, `complete_work`, `report_unable`, `report_no_show`, `confirm_cash`, `open_dispute`, `rate_customer`, `navigate`, `call`, `chat`.
+- أسماء إجراءات الفني الثابتة: `submit_offer`, `withdraw_offer`, `start_trip`, `back_out`, `mark_arrived`, `start_work`, `submit_execution_quote`, `complete_inspection_only`, `submit_proposal`, `withdraw_proposal`, `complete_work`, `report_unable`, `report_no_show`, `confirm_cash`, `open_dispute`, `rate_customer`, `navigate`, `chat`.
 
 ## العميل
 | الطريقة | المسار | الإجراء | الانتقال |
 |---|---|---|---|
 | GET/POST/PATCH/DELETE | `/addresses` | العناوين؛ الحذف ناعم ويعيد `deleted_id` و`default_address` البديل أو `null` | — |
 | POST | `/media` | رفع وسيط مؤقت ← `media_id` | — |
+| GET | `/orders/availability?customer_address_id={id}&category_id={id}` | `{now_available: bool}`؛ عنوان يخص العميل، وساعات المدينة وأهلية الموظفين | — |
 | POST | `/orders` | `publishRequest` | T-01 |
 | GET | `/orders?scope=current|past` | طلباتي | — |
 | GET | `/orders/{id}` | التفاصيل (+ الملخص الزمني) | — |
@@ -132,7 +133,7 @@
 | GET | `/orders/{id}/proposals` | المقترحات، ومنها `projected_total` للإجمالي المتوقع عند الموافقة | — |
 | POST | `/orders/{id}/proposals/{pid}/decide` | `{approve, expected_version}` | T-14/15/28 |
 | POST | `/orders/{id}/payments` | إنشاء دفع فوري ← بيانات SDK/الكود (قناة `FAWRY` مفعّلة) | — |
-| POST | `/orders/{id}/instapay-transfers` | `{transfer_reference, receipt_media_id?, expected_version}` ← محاولة `PENDING_VERIFICATION` (BR-057) | — (T-20 عند تأكيد الإدارة) |
+| POST | `/orders/{id}/instapay-transfers` | `{transfer_reference, receipt_media_id, expected_version}` ← محاولة `PENDING_VERIFICATION` (BR-057) | — (T-20 عند تأكيد الإدارة) |
 | POST | `/orders/{id}/confirm-completion` | | T-21 |
 | POST | `/orders/{id}/review` | BR-090 | — |
 | GET/POST | `/orders/{id}/disputes` | متابعة الملفات / فتح مشكلة `{reason_code, description, media_ids[]}` | T-22 أو نزاع بعد الإغلاق |
@@ -195,7 +196,7 @@
 
 ### `POST /orders/{id}/instapay-transfers` (DEC-050)
 - متاح فقط والطلب `AWAITING_PAYMENT` وقناة `INSTAPAY_MANUAL` مفعّلة (وإلا `FEATURE_DISABLED`)، ولا توجد محاولة معلّقة أخرى (`PAYMENT_PENDING`).
-- `transfer_reference` إلزامي (4–64 حرفًا/رقمًا)، و`receipt_media_id` اختياري لوسيط صورة مرفوع من العميل نفسه.
+- `transfer_reference` إلزامي (4–64 حرفًا/رقمًا)، و`receipt_media_id` إلزامي لوسيط صورة مرفوع من العميل نفسه.
 - الاستجابة: `payment` بحالة `PENDING_VERIFICATION`، والطلب يبقى `AWAITING_PAYMENT` و`display_status = order.status.customer.AWAITING_TRANSFER_VERIFICATION`.
 - `GET /config` يعيد `payment_gateways` (القنوات المفعّلة `[{code, label}]`) و`instapay` (`address`، `display_name`، `link`، ويظهر فقط إذا كانت القناة مفعّلة). كل طلب فيه `payment_reference` = رقم الطلب الذي يُكتب في ملاحظة التحويل.
 
@@ -241,7 +242,7 @@
 
 ### الوسائط
 - `POST /media` يستقبل `multipart/form-data` في الحقل `file` ويعيد `media.id`. يتحقق الخادم من MIME الفعلي والحجم والمدة، ويعيد ترميز الصور لإزالة EXIF، ويحفظ الملفات على التخزين الخاص باسم عشوائي.
-- الصور: JPEG/PNG/WebP، حتى 10MB. الفيديو: MP4/MOV/WebM، حتى 60 ثانية و50MB. الصوت: AAC داخل `.m4a` فقط، قناة واحدة، 64kbps، حتى 120 ثانية و5MB؛ يتحقق الخادم بـ `ffprobe` ويرفض غير ذلك.
+- الصور: JPEG/PNG/WebP، حتى 10MB. الفيديو: MP4/MOV/WebM، حتى 30 ثانية و50MB. الصوت: AAC داخل `.m4a` فقط، قناة واحدة، 64kbps، حتى 120 ثانية و5MB؛ يتحقق الخادم بـ `ffprobe` ويرفض غير ذلك.
 - الرفع المؤقت ينتهي بعد 24 ساعة ويُحذف كل ساعة إن لم يُربط بطلب أو رسالة. `GET /media/{id}` للأطراف المخوّلة فقط، و`DELETE /media/{id}` لصاحب رفع مؤقت فقط.
 - عند نشر الطلب: حتى 5 صور + فيديو واحد + تسجيل واحد، وكل المعرفات يجب أن تكون صالحة ومملوكة لنفس العميل.
 
@@ -302,3 +303,78 @@
 | POST | `/orders/{id}/instapay-transfers` | BR-057 |
 
 صفحات الويب (ليست API): `/terms`، `/privacy`، `/cancellation-policy`، `/faq` (SCR-W03)، و`/email/verify/{id}/{hash}` و`/password/reset/{token}` (SCR-W02).
+
+## تحديث قرارات الرحلة — 13 أكتوبر 2026
+- `absence_report_pending` في الطلب يدل على بلاغ غياب ينتظر الإدارة. يظل الطلب ARRIVED، ولا تتاح انتقالات للفني حتى المتابعة.
+- `POST /provider/orders/{id}/customer-no-show` يبلّغ الإدارة بعد مهلة الانتظار؛ لا يلغي الطلب. التكرار خلال البلاغ المعلق لا ينشئ بلاغًا أو إشعارًا إضافيًا.
+- الهاتف للطرف المقابل يرجع `null`، ولا يظهر `call` ضمن الإجراءات المتاحة. الرسائل تحجب بيانات التواصل حتى بعد التأكيد.
+- نشر وتعديل طلب NOW في وضع الموظفين يعيدان فحص توفر موظف مؤهل؛ عدم التوفر يرجع BR-017 مع اقتراح موعد مجدول. طلب السوق أو الموعد المجدول لا يشترط موظفًا متاحًا الآن عند النشر.
+
+
+### إضافة إجابات المستخدم — 13 أكتوبر 2026
+
+- `POST /provider/orders/{id}/work-photos`: `{media_id, purpose, expected_version}`؛ `purpose` هو `REPAIR_BEFORE` أو `REPAIR_AFTER`. الصور مملوكة للفني المسند، صور فقط، غير منتهية أو مرتبطة بكيان آخر. حد خمس صور لكل مرحلة. الإنهاء يتطلب وجود المرحلتين.
+- `POST /orders/{id}/review` يقبل `media_ids[]` اختياريًا، حتى خمس صور مملوكة للعميل.
+- `GET/POST /orders/{id}/warranty-claims`: الطلب `{description}` من صاحب الإصلاح المكتمل خلال 14 يومًا من `completed_at` الأصلي، مع بدء عمل فعلي؛ لا تقبل زيارة الضمان مطالبة جديدة. لا يغيّر حالة الطلب الأصلي أو المدفوعات أو مهلة النزاع. المتابعة تعيد اسم البديل وموعده و`visit_order_id` و`open_warranty_visit` ضمن الإجراءات عند وجود زيارة، والحالات `REQUESTED` / `ASSIGNED` / `COMPLETED` / `CANCELLED`.
+- `work_photos` و`review_photo_ids` و`warranty_until` حقول إضافية في الطلب. `failure_reason_label` من الخادم في محاولة الدفع.
+- `config.option_lists.electronic_payment_gateways` يعيد القنوات الإلكترونية المفعلة فقط، و`payment_methods` يعيد الطرق التي لها قناة مفعلة. بيانات المستلم تأتي من `config.instapay`.
+- عنوان إنستاباي واسم المستلم يُضافان من إعدادات لوحة التحكم؛ القناة لا تظهر قبل ضبط عنوان استقبال.
+- التعيين الإداري ينشئ أو يعيد تعيين زيارة مرتبطة بالإصلاح عبر `warranty_claim_id`. حقول الطلب: `is_warranty_visit` و`warranty_coverage_text` المترجم و`warranty_original_order_number`؛ تطبيق الفني يتلقى `proposal_type_options` من الخادم، وتقتصر على الخامات في زيارة الضمان.
+- الزيارة والمصنعية مجانًا والعمولة صفر. مقترحات الخامات فقط، والاعتماد من صاحب الطلب فقط؛ إكمال الزيارة المجانية يغلقها بلا دفعة (T-31 / EVT-051)، ومع خامات معتمدة يطلب تكلفة الخامات وحدها بالدفع المعتاد. `warranty_until` يظل موعد نهاية ضمان الإصلاح الأصلي، دون تمديد بزيارة الضمان.
+
+### استكمال إجابات 7–9 — 13 أكتوبر 2026
+
+- في الطلب العادي `IN_PROGRESS`، المقترح المعلّق للخامات أو الأعمال الإضافية يتيح `approve_proposal` و`reject_proposal` لصاحب الطلب قبل انتهاء مهلته. القرار يبقي مرحلة التنفيذ ويزيد `version`؛ الإنهاء ممنوع حتى حسم المقترح. عقد المقترح يضيف `current_total` إلى `projected_total` لتوضيح الإجمالي قبل الإضافة وبعدها.
+- `POST /orders/{id}/share-links` من صاحب الطلب يرجع `{data: {id, url, expires_at, revoked_at}}`. المهلة القصوى 24 ساعة، ولا تتمدد عند إعادة استخدام الرابط. إنشاء الرابط غير متاح في `OPEN` أو حالة نهائية أو دون فني. `DELETE /share-links/{id}` يسحبه. الصفحة العامة لا تعرض هاتف الطرفين أو اسم العميل أو العنوان التفصيلي أو الموقع الحي أو المبالغ، وتعيد 410 عند عدم صلاحية الرابط.
+- الطلب المفتوح يضيف `waiting: {message, deadline_label, deadline_at}`؛ غير المفتوح يعيد `null`. الرسالة والمهلة من وضع الطلب وحالته الفعلية: تعيين للموظفين، استقبال عروض ثم اختيار في السوق، أو عدم وصول عروض. تنسيق ضمان دون مهلة لا يحصل على موعد افتراضي. التطبيقان يعرضان هذه البيانات دون عدد أو تقدم أو توقع وصول ثابت.
+
+### استكمال إجابات 10–12 — 13 أكتوبر 2026
+
+- `GET /me` يضيف `user.order_statistics: {completed, active}` و`user.addresses_count`. المكتملة حالتها `CLOSED`، والنشطة تستبعد `CLOSED` و`CANCELLED` و`EXPIRED`، ويُحسب إجمالي طلبات المستخدم دون حد صفحة. لا يظهر تقييم العميل في الحساب.
+- `GET /providers/{id}?order_id=...` يضيف `avatar_url` و`portfolio[].image_url`. الصور تُجلب مصادقًا عليها من `GET /providers/{provider}/images/{image}?order_id=...`؛ `image` إما `avatar` أو معرف عنصر من معرض الفني نفسه. يشترط ملكية العميل للطلب وارتباط الفني به، وتُرسل الصور من التخزين الخاص مع `Cache-Control: no-store, private`. التطبيقات ترفض تنزيل الصور من مضيف مختلف قبل إرسال رمز الحساب.
+- قائمة المحادثات وبيانات المحادثة تضيف `unread_count` و`provider.available_now`. العدد يخص الوارد غير المقروء فقط؛ جلب صفحة الرسائل يسجل `read_at` للوارد في تلك الصفحة دون الصادر أو الرسائل التي لم تُجلب. الرسائل تعيد `read_at`، وغير المشارك لا يمكنه تعليمها مقروءة. `available_now` توفر للخدمة، لا حضور لحظي داخل التطبيق.
+
+
+## استكمال قرارات الشات 13–15 — 13 أكتوبر 2026
+
+- `GET /orders/{id}/proposals`: يضيف كل مقترح `server_time` و`expiry_message` بجانب `expires_at`. يحسب التطبيق المتبقي من فرق وقت الخادم ثم يخصم الوقت المنقضي، دون اعتماد مهلة ثابتة. الرسالة تشرح نتيجة انتهاء عرض التنفيذ وفق رسوم المعاينة، أو رفض الإضافة وحدها دون إلغاء الطلب أو زيادة المبلغ. القرار المتأخر مرفوض من الخادم.
+- `deadlines.auto_close_at`: أحدث دفعة ناجحة `paid_at` + `CFG-051` لطلب `AWAITING_CONFIRMATION`؛ المهمة المجدولة تعيد فحص المهلة تحت القفل. لا تستخدم `completed_at` بديلًا عن إثبات استلام الدفع.
+- `GET /config`: قائمة `option_lists.customer_rating_tags` تتضمن `{code,label}` من الخادم. تفاصيل الطلب بوضع الفني تضيف `customer_rating_tag_options` بالقائمة نفسها؛ لا تظهر في عرض العميل.
+- `POST /provider/orders/{id}/customer-rating`: `{stars:1..5,tags?:[code],comment?:string|null}`؛ الوسوم اختيارية، مميزة، بحد ستة أكواد معروفة، والتعليق اختياري حتى 500 حرف. الرد 201: `{data:{id,stars,tags,comment}}`. المجهول أو التكرار أو تجاوز الحد يرد 422 ضمن `error.fields` دون حفظ جزئي. تُزال المسافات المحيطة بالتعليق ويُحفظ الفارغ كـ`null`. لا تغيير في شرط الفني المعيّن وإغلاق الطلب ونافذة التقييم ومرة واحدة فقط.
+- أكواد الوسوم الحالية: `COOPERATIVE`, `CLEAR_DESCRIPTION`, `PUNCTUAL`, `RESPECTFUL`, `SLOW_RESPONSE`, `UNPREPARED_SITE`. التطبيقات تعرض عناوين الخادم وتعيد الكود، ولا تُنشئ القائمة محليًا. التفاصيل متاحة للإدارة، ولا تُضاف إلى واجهات العميل عن نفسه.
+
+
+## استكمال قرارات الشات 16–18 — 14 أكتوبر 2026
+
+- `GET /provider/earnings`: يقبل `page>=1`، و`type` من `ALL|ORDER|PAYOUT|REMITTANCE`، و`date_from/date_to` الاختياريين بصيغة `Y-m-d`. الفترة شاملة يومَي البداية والنهاية بتوقيت التطبيق (`UTC` حاليًا)، ولا يسبق تاريخ النهاية البداية. الخطأ 422 ضمن `error.fields`. يعود `filter_options:[{code,label}]` و`filters:{type,date_from,date_to,timezone}`، و`meta.total/current_page/last_page`. `summary` يظل الحساب الكامل؛ التصفية تخص الحركات.
+- `GET /provider/earnings/export`: المصادقة نفسها والفلتر نفسه، دون معرّف فني قابل للاختيار. يرجع كل الحركات المطابقة في CSV UTF-8 مع BOM و`Content-Disposition: attachment` و`Cache-Control: private, no-store`؛ لا يقتصر على الصفحة الحالية. الأعمدة: ID، التاريخ بصيغة ISO، النوع، الوصف، التفاصيل، المبلغ بالجنيه، وقابلية التسوية. يدعم كشفًا فارغًا بعناوين فقط. لا يغيّر المبالغ أو التسويات.
+- `notifications:push-check --json`: فحص محلي للإعدادات دون إرسال أو إخراج مفاتيح. لا يثبت ربط APNs أو عمل العامل أو وصول جهاز. `notifications:push-test USER --mode=CUSTOMER|PROVIDER --order=ID` يحفظ إشعار اختبار برابط الطلب فقط إذا ارتبط بالمستلم والوضع؛ التحقق الفعلي ينتظر إعدادات وأجهزة المستخدم.
+- لا وعد برد رسوم التأخير أو إصدار فاتورة ضريبية في الإصدار الحالي. عنوان ملخص الدفع «تفاصيل المبلغ»؛ ضمان الإصلاح السابق لا يتغيّر.
+
+
+## قرار الشات 23 — حد الفيديو، 14 أكتوبر 2026
+
+`media_limits.video_seconds=30` يطابق فحص الملف في `/media`. يعتمد الخادم على المدة المقاسة من المحتوى ويرفض تجاوز 30 ثانية برسالة واضحة و`BR-014`؛ لا يثق بمدة مقدّمة من العميل. نشر الطلب وتعديله يعيدان التحقق من مدة الفيديو المؤقت عند ربطه. العدد والصور والصوت وحدود الأحجام لا تتغير.
+
+## معالجة الأجزاء الثابتة — 14 أكتوبر 2026
+
+- `/catalog`: كل نوع مشكلة يضيف `customer_price_guide`، أو `null` عند غياب نطاق صالح. الحقول `minimum` و`maximum` و`suggested_amounts` قيم مالية نصية؛ الشرائح مشتقة من الحدين ومتوسطهما، دون تكرار. المصدر حقلا `customer_price_min/max` في لوحة الكتالوج، منفصلان عن دليل الموظفين. غياب النطاق لا يولّد أسعارًا افتراضية.
+- `/config.option_lists`: `offer_sorts` يحدد أكواد الفرز وتسمياتها، و`service_review_tags` يعيد الوسوم الفعالة المرتبة من لوحة «وسوم تقييم الخدمة». `OrderResource.review_tag_options` يوفّر القائمة للعميل أيضًا، وتُقرأ مرة واحدة لكل طلب HTTP عند تسلسل عدة طلبات.
+- `GET /orders/{id}/offers?sort=best`: ترتيب فعلي من التقييم والسعر ومدة الوصول في العرض. الأوزان قابلة للتعديل في الإعدادات، افتراضيًا 50/30/20، ومجموعها 100. مساهمة التقييم `rating/5`، والسعر `minimum_price/price`، والوصول `minimum_eta/eta`. العرض المجاني يحصل على مساهمة السعر كاملة إذا كان أقل سعر صفرًا؛ لا يمنح ETA الغائب مساهمة سرعة. المجدول يستبعد ETA وتبقى نسبة التقييم والسعر متناسبة. التعادل يُحسم بالسعر ثم المعرّف. `rating|price|eta` باقية؛ كود مجهول أو قيمة غير نصية مرفوضان. `OfferResource.provider.available_now` هو التوفر للخدمة، وليس حضورًا داخل التطبيق.
+- `POST /orders/{id}/review`: إضافة `tags?:[code]` حتى عشرة أكواد فعالة مميزة، طول الكود حتى 48 حرفًا؛ تُحفظ في `reviews.tags` منفصلة عن `comment`. تبقى الصور الاختيارية وحقول النجوم وشروط التقييم الحالية. تعطيل الوسم يمنع اختياره في تقييم جديد دون تغيير السجلات السابقة. الإدارة تعدل النص والترتيب والتفعيل؛ الكود ثابت بعد الإنشاء. التقييمات القديمة لا تُحلّل لاستخراج وسوم من التعليقات.
+- `OrderResource.execution_steps`: مراحل `{key,label,state,occurred_at}` من أوقات الطلب وأحداثه في التعيين الحالي. مراحل الفحص وموافقة عرض التنفيذ لا تُعرض دون أحداثها، ولا تُفترض في زيارة الضمان أو التنفيذ المباشر. لا يُستنتج اكتمال المراحل الفرعية كلها من `IN_PROGRESS`.
+- `POST /provider/orders/{id}/completion-estimate`: `{minutes:1..1440|null,expected_version}`. للفني المعيّن أثناء `IN_PROGRESS` فقط، دون بلاغ غياب معلّق. تُحفظ نهاية تقديرية من وقت الخادم وسجل `EVT-031` مع زيادة الإصدار، دون تغيير الحالة أو المبلغ. `null` يمسح التقدير عبر الـAPI؛ واجهة الفني تتيح إدخال الدقائق وتحديثها. الاختلاف في الإصدار 409؛ الإدخال غير الصالح 422. الصلاحية تُفحص تحت قفل الطلب أيضًا.
+- `completion_estimate`: `{estimated_at,updated_at,overdue}` أو `null`. تظهر أثناء التنفيذ فقط إذا أدخل الفني تقديرًا؛ انقضاء الوقت لا يغيّر حالة الطلب ولا يجدده آليًا. واجهة العميل تميّز التقدير المتجاوز وتقرأ التحديث عند تحديث التفاصيل.
+- أُزيل وعد الوصول الثابت من C04؛ التتبع ووقت القيادة يظهران أثناء `ON_THE_WAY`. التكامل الموجود مع Google Routes يستخدم المرور الفعلي عند ضبط مفتاحه، ويعلن التقريب إذا استُخدم تقدير المسافة البديل. تقدير الوصول الذي يدخله الفني في عرض السوق ليس تتبعًا لموقعه قبل التعيين.
+
+## صور الطلب وكود وصول الموظف والسياسات — 15 أكتوبر 2026
+
+- الصورة الاختيارية في مقترح التكلفة تخص العطل الحالي. `ProposalResource.photo_url` يربط `GET /orders/{order}/proposals/{proposal}/image`؛ القراءة لصاحب الطلب أو الفني المعيّن فقط، مع مطابقة المقترح للطلب. غياب الصورة لا يعرض بديلًا يوحي بإنجاز الإصلاح.
+- كل مرفق صورة في المحادثة يضيف `content_url`: `GET /conversations/{conversation}/messages/{message}/images/{media}`. يلزم انتماء الصورة للرسالة والرسالة للمحادثة ومشاركة المستخدم فيها؛ غير المشارك أو الربط غير الصحيح 404. القراءة ممكنة في المحادثة المؤرشفة. مسار `/media/{id}` يحترم مشاركة المحادثة أيضًا، فلا يحصل الفني البديل على صور محادثة سابقة لم يشارك فيها.
+- `OrderResource.work_photos` يضيف `content_url` لكل صورة. لا تُعاد صور إثبات الإصلاح للعميل ولا يقرأ محتواها قبل وجود `completed_at`. تظهر له في الدفع وتأكيد الإنهاء وتفاصيل الطلب المنتهي. الفني يحتفظ بقراءة صور زيارته وفق صلاحيات الطلب.
+- آراء `ProviderResource` تضيف `photos:[{id,content_url}]` و`area` من منطقة طلب التقييم، دون عنوان تفصيلي. `GET /providers/{provider}/reviews/{review}/photos/{media}?order_id=` يتطلب سياق طلب يملكه المشاهد وله علاقة بالفني، وتقييمًا ظاهرًا لهذا الفني وصورة تقييم رفعها صاحبه. إخفاء التقييم يوقف قراءة الصور. `tag_statistics:[{code,label,count}]` تحسب كل التقييمات الظاهرة، وتُبقي أسماء الوسوم التاريخية المعطّلة دون إتاحتها لاختيار جديد.
+- كل قراءة صورة مصادق عليها، بترويسات `Cache-Control: no-store, private` و`X-Content-Type-Options: nosniff`. التطبيقان يستخدمان تحميلًا مصادقًا عليه من المضيف نفسه، مع معاينة وفشل وإعادة محاولة وفتح وتكبير.
+- في وضع الموظفين يرسل الطلب أثناء الطريق `arrival_code_required=true`. `POST /orders/{order}/arrival-code` لصاحب الطلب فقط، بجسم `{refresh?:bool}`؛ الرد `{data:{code,expires_at,server_time}}`. الكود ستة أرقام عشوائية، مرتبط بالفني ورحلة التحرك، مخزن مشفرًا، ولا يخرج في تفاصيل الطلب أو سجل الأحداث أو روابط المشاركة. التحديث الصريح يبدّل الكود ويبطل السابق. لا يُصدر قبل التحرك أو بعد الوصول أو في الحالات النهائية.
+- `POST /provider/orders/{order}/arrived` يتطلب `expected_version` و`lat/lng`، و`arrival_code` في الموظفين. تحقق الكود يمر داخل قفل الطلب مع الانتقال. الكود الخاطئ لا يغير الحالة لكنه يسجل محاولة؛ بعد الحد تُقفل المحاولات، ويُمنع إصدار كود جديد أثناء القفل. الافتراضي: صلاحية 10 دقائق، خمس محاولات، قفل خمس دقائق؛ CFG-034/035/036 قابلة للتعديل من اللوحة.
+- تعذّر الكود: `POST /provider/orders/{order}/arrival-exception` بجسم `{lat,lng,note,expected_version}`. للفني المعيّن أثناء الطريق، السبب 5–500 حرف. يسجل EVT-023 ويزيد الإصدار دون تأكيد الوصول أو إلغاء الطلب. `arrival_exception_pending=true` يوضح انتظار الإدارة. الإدارة النشطة تسجل نتيجة الاتصال والتحقق وسبب الاستثناء من صفحة الطلب؛ T-32 يسجل الوصول ببيانات الموقع و`arrival_verification=ADMIN_EXCEPTION` وسببها واسم المسؤول. تبدأ مهلة غياب العميل من الوصول المؤكد، ثم يستمر مسار الإدارة القائم. ليس الاستثناء موافقة على السعر أو إثبات انتهاء الإصلاح.
+- نُشرت محليًا النسخ العربية: الشروط v4 (نسخة قبول الشروط 2)، والخصوصية v2، والإلغاء v2. عقد الصفحات نفسه باقٍ؛ قبول نسخة أقدم يستلزم قبول الجديدة عند الطلب التالي. إعداد Firebase/APNs واختبار Push على الأجهزة مؤجّلان لما قبل الإطلاق بقرار المستخدم.

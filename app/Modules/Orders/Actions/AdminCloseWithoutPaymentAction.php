@@ -11,6 +11,7 @@ use App\Modules\Orders\Services\OrderClosure;
 use App\Modules\Orders\StateMachine\OrderStateMachine;
 use App\Modules\Payments\Enums\OrderPaymentStatus;
 use App\Support\Exceptions\BusinessRuleViolationException;
+use App\Support\Localization;
 
 /** T-25 — إغلاق بدون دفع بقرار الإدارة مع سبب؛ العمولة = 0 (BR-055). */
 final readonly class AdminCloseWithoutPaymentAction
@@ -23,7 +24,7 @@ final readonly class AdminCloseWithoutPaymentAction
     public function execute(Order $order, Admin $admin, string $reason): Order
     {
         if (mb_strlen(trim($reason)) < 5) {
-            throw BusinessRuleViolationException::rule('BR-055', 'سبب الإغلاق بدون دفع إلزامي.');
+            throw BusinessRuleViolationException::rule('BR-055', Localization::text('copy.a_reason_for_closing_without_payment_is_required'));
         }
 
         return $this->stateMachine->apply(

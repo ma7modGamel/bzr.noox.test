@@ -1,0 +1,47 @@
+{
+  "tests": 26,
+  "suites": [
+    {
+      "name": "noox.bzr.customer.CustomerApiTypedCallsTest",
+      "tests": "10",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "noox.bzr.customer.CustomerSharedFixtureTest",
+      "tests": "1",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "noox.bzr.customer.StaticDataSourcesApiTest",
+      "tests": "2",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "noox.bzr.customer.StaticDataSourcesViewsTest",
+      "tests": "7",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "noox.bzr.provider.ProviderModelsDecodeTest",
+      "tests": "5",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "noox.bzr.provider.ProviderSharedFixtureTest",
+      "tests": "1",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    }
+  ]
+}

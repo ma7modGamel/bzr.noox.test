@@ -57,7 +57,7 @@ class ProviderSharedFixtureTest {
                 count++
             }
         }
-        assertEquals(148, count)
+        assertEquals(149, count)
     }
 
     private fun assertOptional(label: String, expected: JSONObject, key: String, actual: Any?) {

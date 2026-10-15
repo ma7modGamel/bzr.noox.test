@@ -1,0 +1,286 @@
+const assetPathPrefix = "https://www.figma.com/api/mcp/asset/a9494e6a-2d64-4f56-a7f4-73cae4d654ca";
+const imgAb6AXuBeslzJsQ0CDlBr4Ge9DYtu5K6H0IIqF771Cohx0CAkJlLb0NpuAsLtWkcduHuNiWDxNiGEcbS2MjYrpE2HBvWDlHwfOrtyyBiLv67DsLr4T6AYp7ZKvzxW0QUFzNZg5ZenyNtRrF7QLwp1T5YrnARfGHm5IiGehpIda4ZXs0ESkHxBKs1V51AW6ToLgLdEcKeWwc3MYPf1EAefzBx5Rb3TovZ8Lm9Xvoe37J9AvBhv9ObGa = `${assetPathPrefix}/e35b9.png`;
+const imgContainer = `${assetPathPrefix}/dbc2d.svg`;
+const imgContainer1 = `${assetPathPrefix}/65a50.svg`;
+const imgContainer2 = `${assetPathPrefix}/9b965.svg`;
+const imgContainer3 = `${assetPathPrefix}/794b2.svg`;
+const imgContainer4 = `${assetPathPrefix}/35955.svg`;
+const imgContainer5 = `${assetPathPrefix}/b2e36.svg`;
+const imgContainer6 = `${assetPathPrefix}/803ca.svg`;
+const imgContainer7 = `${assetPathPrefix}/baa80.svg`;
+const imgContainer8 = `${assetPathPrefix}/5fd4c.svg`;
+const imgContainer9 = `${assetPathPrefix}/02025.svg`;
+const imgContainer10 = `${assetPathPrefix}/8230d.svg`;
+const imgContainer11 = `${assetPathPrefix}/b78ec.svg`;
+const imgContainer12 = `${assetPathPrefix}/ae0b9.svg`;
+const imgContainer13 = `${assetPathPrefix}/770a2.svg`;
+
+export default function Component() {
+  return (
+    <div className="bg-[#f8f9ff] content-stretch flex flex-col items-start relative size-full" data-node-id="3002:144" data-name="وصّفي المشكلة - حريف">
+      <div className="bg-[#f8f9ff] content-stretch flex flex-col items-start justify-between pt-[64px] relative shrink-0 w-full" data-node-id="3002:145" data-name="Main">
+        <div className="content-stretch flex flex-col items-start relative shrink-0 w-full" data-node-id="3002:146" data-name="Container">
+          <div className="content-stretch flex flex-col gap-[16px] items-start px-[22px] relative shrink-0 w-full" data-node-id="3002:147" data-name="Container">
+            <div className="content-stretch flex flex-col items-start pt-[8px] relative shrink-0 w-full" data-node-id="3002:148" data-name="Progress Indicator & Step Count:margin">
+              <div className="content-stretch flex flex-col gap-[4px] items-start relative shrink-0 w-full" data-node-id="3002:149" data-name="Progress Indicator & Step Count">
+                <div className="content-stretch flex items-center justify-between relative shrink-0 w-full" data-node-id="3002:150" data-name="Container">
+                  <div className="content-stretch flex flex-col items-end relative shrink-0" data-node-id="3002:151" data-name="Container">
+                    <div className="[word-break:break-word] flex flex-col font-['IBM_Plex_Sans_Arabic:Medium'] justify-center leading-[0] not-italic relative shrink-0 text-[#49607c] text-[11px] text-right whitespace-nowrap" data-node-id="3002:152">
+                      <p className="leading-[16px]">تحديد التفاصيل</p>
+                    </div>
+                  </div>
+                  <div className="content-stretch flex flex-col items-end relative shrink-0" data-node-id="3002:153" data-name="Container">
+                    <div className="[word-break:break-word] flex flex-col font-['IBM_Plex_Sans_Arabic:Medium'] justify-center leading-[0] not-italic relative shrink-0 text-[#3c4947] text-[13px] text-right whitespace-nowrap" data-node-id="3002:154">
+                      <p className="leading-[18px]">الخطوة ٢ من ٥</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="bg-[#dce9ff] content-stretch flex gap-[6px] h-[6px] items-start justify-center overflow-clip relative rounded-[9999px] shrink-0 w-full" data-node-id="3002:155" data-name="Background">
+                  <div className="bg-[#d4e4fc] flex-[1_0_0] h-full min-w-px relative rounded-[9999px]" data-node-id="3002:156" data-name="Background" />
+                  <div className="bg-[#d4e4fc] flex-[1_0_0] h-full min-w-px relative rounded-[9999px]" data-node-id="3002:157" data-name="Background" />
+                  <div className="bg-[#d4e4fc] flex-[1_0_0] h-full min-w-px relative rounded-[9999px]" data-node-id="3002:158" data-name="Background" />
+                  <div className="bg-[#006a61] flex-[1_0_0] h-full min-w-px relative rounded-[9999px]" data-node-id="3002:159" data-name="Background" />
+                  <div className="bg-[#006a61] flex-[1_0_0] h-full min-w-px relative rounded-[9999px]" data-node-id="3002:160" data-name="Background" />
+                </div>
+              </div>
+            </div>
+            <div className="bg-white content-stretch drop-shadow-[0px_1px_4px_rgba(0,0,0,0.04)] flex items-center justify-between px-[16px] py-[10px] relative rounded-[12px] shrink-0 w-full" data-node-id="3002:161" data-name="Selected Service Context Pill">
+              <div className="content-stretch flex gap-[4px] items-center px-[10px] py-[4px] relative rounded-[9999px] shrink-0" data-node-id="3002:162" data-name="Button">
+                <div className="relative shrink-0 size-[11.25px]" data-node-id="3002:163" data-name="Container">
+                  <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgContainer} />
+                </div>
+                <div className="content-stretch flex flex-col items-center relative shrink-0" data-node-id="3002:165" data-name="Container">
+                  <div className="[word-break:break-word] flex flex-col font-['Noto_Sans_Arabic:Medium'] font-medium justify-center leading-[0] relative shrink-0 text-[#006a61] text-[11px] text-center whitespace-nowrap" data-node-id="3002:166" style={{ fontVariationSettings: '"wdth" 100' }}>
+                    <p className="leading-[16px]">تعديل</p>
+                  </div>
+                </div>
+              </div>
+              <div className="content-stretch flex gap-[8px] items-center relative shrink-0" data-node-id="3002:167" data-name="Container">
+                <div className="content-stretch flex gap-[6px] items-center relative shrink-0" data-node-id="3002:168" data-name="Container">
+                  <div className="content-stretch flex flex-col items-end relative shrink-0" data-node-id="3002:169" data-name="Container">
+                    <div className="[word-break:break-word] flex flex-col font-['IBM_Plex_Sans_Arabic:Semi_Bold'] justify-center leading-[0] not-italic relative shrink-0 text-[#0d1c2e] text-[13px] text-right whitespace-nowrap" data-node-id="3002:170">
+                      <p className="leading-[18px]">سباكة وصيانة مياه</p>
+                    </div>
+                  </div>
+                  <div className="content-stretch flex flex-col items-end relative shrink-0" data-node-id="3002:171" data-name="Container">
+                    <div className="[word-break:break-word] flex flex-col font-['IBM_Plex_Sans_Arabic:Medium'] justify-center leading-[0] not-italic relative shrink-0 text-[#3c4947] text-[11px] text-right whitespace-nowrap" data-node-id="3002:172">
+                      <p className="leading-[16px]">الخدمة المختارة:</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="h-[16.292px] relative shrink-0 w-[13.583px]" data-node-id="3002:173" data-name="Container">
+                  <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgContainer1} />
+                </div>
+              </div>
+            </div>
+            <div className="content-stretch flex flex-col gap-[8px] items-start relative shrink-0 w-full" data-node-id="3002:175" data-name="Problem Description Area">
+              <div className="h-[24px] relative shrink-0 w-full" data-node-id="3002:176" data-name="Container">
+                <div className="absolute content-stretch flex flex-col items-end left-0 top-[6px]" data-node-id="3002:177" data-name="Container">
+                  <div className="[word-break:break-word] flex flex-col font-['IBM_Plex_Sans_Arabic:Medium'] justify-center leading-[0] not-italic relative shrink-0 text-[#49607c] text-[11px] text-right whitespace-nowrap" data-node-id="3002:178">
+                    <p className="leading-[16px]">٠ / ٥٠٠</p>
+                  </div>
+                </div>
+                <div className="absolute content-stretch flex flex-col items-end left-[250.03px] top-0" data-node-id="3002:179" data-name="Label">
+                  <div className="[word-break:break-word] flex flex-col font-['IBM_Plex_Sans_Arabic:Semi_Bold'] justify-center leading-[0] not-italic relative shrink-0 text-[#0d1c2e] text-[17px] text-right whitespace-nowrap" data-node-id="3002:180">
+                    <p className="leading-[24px]">تفاصيل العطل</p>
+                  </div>
+                </div>
+              </div>
+              <div className="bg-white content-stretch drop-shadow-[0px_2px_8px_rgba(16,42,67,0.04)] flex flex-col gap-[7px] items-start relative rounded-[20px] shrink-0 w-full" data-node-id="3002:181" data-name="Background+Shadow">
+                <div className="content-stretch flex items-start justify-center overflow-auto pb-[36.75px] pt-[12.875px] px-[14px] relative shrink-0 w-full" data-node-id="3002:182" data-name="Textarea">
+                  <div className="content-stretch flex flex-[1_0_0] flex-col items-end min-w-px pb-[0.625px] relative" data-node-id="3002:183" data-name="Container">
+                    <div className="[word-break:break-word] flex flex-col font-['Noto_Sans_Arabic:Regular'] font-normal justify-center leading-[0] relative shrink-0 text-[#bbcac6] text-[14px] text-right whitespace-nowrap" data-node-id="3002:184" style={{ fontVariationSettings: '"wdth" 100' }}>
+                      <p className="leading-[22.75px] mb-0 whitespace-pre">{`اشرحي المشكلة بالتفصيل… مثلًا: فيه تسريب تحت `}</p>
+                      <p className="leading-[22.75px] whitespace-pre">الحوض وبيزيد عند فتح المياه</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="content-stretch flex items-center justify-between pb-[12px] pt-[4px] px-[16px] relative shrink-0 w-full" data-node-id="3002:185" data-name="Container">
+                  <div className="content-stretch flex flex-col items-center justify-center relative shrink-0" data-node-id="3002:186" data-name="Button">
+                    <div className="[word-break:break-word] flex flex-col font-['IBM_Plex_Sans_Arabic:Medium'] justify-center leading-[0] not-italic relative shrink-0 text-[#006a61] text-[11px] text-center whitespace-nowrap" data-node-id="3002:187">
+                      <p className="leading-[16px]">نص مقترح</p>
+                    </div>
+                  </div>
+                  <div className="content-stretch flex gap-[4px] items-center relative shrink-0" data-node-id="3002:188" data-name="Container">
+                    <div className="[word-break:break-word] flex flex-col font-['IBM_Plex_Sans_Arabic:Medium'] justify-center leading-[0] not-italic relative shrink-0 text-[#49607c] text-[11px] text-right whitespace-nowrap" data-node-id="3002:189">
+                      <p className="leading-[16px]">كل ما وصفك يكون أوضح، العروض هتكون أدق</p>
+                    </div>
+                    <div className="h-[12.5px] relative shrink-0 w-[9.375px]" data-node-id="3002:190" data-name="Container">
+                      <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgContainer2} />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="content-stretch flex flex-col gap-[8px] items-start relative shrink-0 w-full" data-node-id="3002:192" data-name="Unified Media & Voice Notes">
+              <div className="content-stretch flex items-center justify-between relative shrink-0 w-full" data-node-id="3002:193" data-name="Container">
+                <div className="content-stretch flex flex-col items-end relative shrink-0" data-node-id="3002:194" data-name="Container">
+                  <div className="[word-break:break-word] flex flex-col font-['IBM_Plex_Sans_Arabic:Medium'] justify-center leading-[0] not-italic relative shrink-0 text-[#49607c] text-[11px] text-right whitespace-nowrap" data-node-id="3002:195">
+                    <p className="leading-[16px]">اختياري (بيسهّل المعاينة)</p>
+                  </div>
+                </div>
+                <div className="content-stretch flex flex-col items-end relative shrink-0" data-node-id="3002:196" data-name="Heading 2">
+                  <div className="[word-break:break-word] flex flex-col font-['IBM_Plex_Sans_Arabic:Semi_Bold'] justify-center leading-[0] not-italic relative shrink-0 text-[#0d1c2e] text-[17px] text-right whitespace-nowrap" data-node-id="3002:197">
+                    <p className="leading-[24px]">صورة، فيديو أو رسالة صوتية</p>
+                  </div>
+                </div>
+              </div>
+              <div className="content-stretch flex gap-[10px] items-start relative shrink-0 w-full" data-node-id="3002:198" data-name="Quick Action Buttons">
+                <div className="bg-white content-stretch drop-shadow-[0px_1px_4px_rgba(0,0,0,0.04)] flex gap-[6px] items-center justify-center pl-[14.12px] pr-[14.13px] py-[10px] relative rounded-[12px] shrink-0" data-node-id="3002:199" data-name="Button">
+                  <div className="content-stretch flex flex-col items-center relative shrink-0" data-node-id="3002:200" data-name="Container">
+                    <div className="[word-break:break-word] flex flex-col font-['IBM_Plex_Sans_Arabic:Medium'] justify-center leading-[0] not-italic relative shrink-0 text-[#0d1c2e] text-[11px] text-center whitespace-nowrap" data-node-id="3002:201">
+                      <p className="leading-[16px]">تسجيل صوتي</p>
+                    </div>
+                  </div>
+                  <div className="h-[14.25px] relative shrink-0 w-[10.5px]" data-node-id="3002:202" data-name="Container">
+                    <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgContainer3} />
+                  </div>
+                </div>
+                <div className="bg-white content-stretch drop-shadow-[0px_1px_4px_rgba(0,0,0,0.04)] flex gap-[6px] items-center justify-center pl-[16.69px] pr-[16.67px] py-[10px] relative rounded-[12px] shrink-0" data-node-id="3002:204" data-name="Button">
+                  <div className="content-stretch flex flex-col items-center relative shrink-0" data-node-id="3002:205" data-name="Container">
+                    <div className="[word-break:break-word] flex flex-col font-['IBM_Plex_Sans_Arabic:Medium'] justify-center leading-[0] not-italic relative shrink-0 text-[#0d1c2e] text-[11px] text-center whitespace-nowrap" data-node-id="3002:206">
+                      <p className="leading-[16px]">إضافة فيديو</p>
+                    </div>
+                  </div>
+                  <div className="h-[12px] relative shrink-0 w-[15px]" data-node-id="3002:207" data-name="Container">
+                    <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgContainer4} />
+                  </div>
+                </div>
+                <div className="bg-white content-stretch drop-shadow-[0px_1px_4px_rgba(0,0,0,0.04)] flex gap-[6.01px] items-center justify-center pl-[16.75px] pr-[16.73px] py-[10px] relative rounded-[12px] shrink-0" data-node-id="3002:209" data-name="Button">
+                  <div className="content-stretch flex flex-col items-center relative shrink-0" data-node-id="3002:210" data-name="Container">
+                    <div className="[word-break:break-word] flex flex-col font-['IBM_Plex_Sans_Arabic:Medium'] justify-center leading-[0] not-italic relative shrink-0 text-[#0d1c2e] text-[11px] text-center whitespace-nowrap" data-node-id="3002:211">
+                      <p className="leading-[16px]">إضافة صورة</p>
+                    </div>
+                  </div>
+                  <div className="h-[13.5px] relative shrink-0 w-[15px]" data-node-id="3002:212" data-name="Container">
+                    <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgContainer5} />
+                  </div>
+                </div>
+              </div>
+              <div className="content-stretch flex flex-col items-start pt-[4px] relative shrink-0 w-full" data-node-id="3002:214" data-name="Attached Thumbnails Preview Tray:margin">
+                <div className="content-stretch flex flex-col gap-[8px] items-start relative shrink-0 w-full" data-node-id="3002:215" data-name="Attached Thumbnails Preview Tray">
+                  <div className="content-stretch flex flex-col items-end relative shrink-0 w-full" data-node-id="3002:216" data-name="Container">
+                    <div className="[word-break:break-word] flex flex-col font-['IBM_Plex_Sans_Arabic:Medium'] justify-center leading-[0] not-italic relative shrink-0 text-[#3c4947] text-[11px] text-right whitespace-nowrap" data-node-id="3002:217">
+                      <p className="leading-[16px]">المرفقات الحالية (١)</p>
+                    </div>
+                  </div>
+                  <div className="content-stretch flex gap-[12px] items-center overflow-auto pb-[4px] pl-[110px] relative shrink-0 w-full" data-node-id="3002:218" data-name="Container">
+                    <div className="bg-[#eff4ff] content-stretch flex flex-col gap-[4px] items-center justify-center relative rounded-[16px] shrink-0 size-[112px]" data-node-id="3002:219" data-name="Button - Add More Placeholder Slot">
+                      <div className="relative shrink-0 size-[14px]" data-node-id="3002:220" data-name="Container">
+                        <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgContainer6} />
+                      </div>
+                      <div className="content-stretch flex flex-col items-center relative shrink-0" data-node-id="3002:222" data-name="Container">
+                        <div className="[word-break:break-word] flex flex-col font-['IBM_Plex_Sans_Arabic:Medium'] justify-center leading-[0] not-italic relative shrink-0 text-[#49607c] text-[11px] text-center whitespace-nowrap" data-node-id="3002:223">
+                          <p className="leading-[16px]">إضافة مرفق</p>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="bg-[#e5eeff] content-stretch flex flex-col items-start justify-center overflow-clip relative rounded-[16px] shadow-[0px_4px_14px_0px_rgba(16,42,67,0.08)] shrink-0 size-[112px]" data-node-id="3002:224" data-name="Attached Leaking Pipe Preview Item">
+                      <div className="flex-[1_0_0] min-h-px relative w-full" data-node-id="3002:225" data-name="AB6AXuBeslzJsQ0CDlBR4-Ge9DYtu5k6H0iIq-F77-1COHX0cAKJlLb0npuASLtWkcduHUNi_wDxNiGEcbS2mjYRP-e2hBv-wDlHWFOrtyyBILv67dsLR4T6a_YP7zKvzxW0qUFzNZg5zenyNtRrF7QLwp1t5yrnARfGHm5IIGehpIDA4ZXs0eSKHxB_ks1V51aW6toLgLdECKeWWC3mYPf1E-AEFZBx5Rb3tovZ8lm9xvoe37j9AVBhv9ObGA">
+                        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                          <img alt="" className="absolute h-full left-[-41.76%] max-w-none top-0 w-[183.51%]" src={imgAb6AXuBeslzJsQ0CDlBr4Ge9DYtu5K6H0IIqF771Cohx0CAkJlLb0NpuAsLtWkcduHuNiWDxNiGEcbS2MjYrpE2HBvWDlHwfOrtyyBiLv67DsLr4T6AYp7ZKvzxW0QUFzNZg5ZenyNtRrF7QLwp1T5YrnARfGHm5IiGehpIda4ZXs0ESkHxBKs1V51AW6ToLgLdEcKeWwc3MYPf1EAefzBx5Rb3TovZ8Lm9Xvoe37J9AvBhv9ObGa} />
+                        </div>
+                      </div>
+                      <div className="absolute bg-[#ba1a1a] content-stretch flex items-center justify-center left-[6px] rounded-[9999px] size-[24px] top-[6px]" data-node-id="3002:226" data-name="Button - حذف الصورة">
+                        <div className="absolute bg-[rgba(255,255,255,0)] left-0 rounded-[9999px] shadow-[0px_4px_6px_-1px_rgba(0,0,0,0.1),0px_2px_4px_-2px_rgba(0,0,0,0.1)] size-[24px] top-0" data-node-id="3002:227" data-name="Button - حذف الصورة:shadow" />
+                        <div className="relative shrink-0 size-[8.75px]" data-node-id="3002:228" data-name="Container">
+                          <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgContainer7} />
+                        </div>
+                      </div>
+                      <div className="absolute backdrop-blur-[6px] bg-[rgba(34,49,68,0.8)] bottom-[6px] content-stretch flex items-center justify-center left-[6px] px-[6px] py-[2px] right-[6px] rounded-[8px]" data-node-id="3002:230" data-name="Overlay+OverlayBlur">
+                        <div className="content-stretch flex flex-col items-end overflow-clip relative shrink-0" data-node-id="3002:231" data-name="Container">
+                          <div className="[word-break:break-word] flex flex-col font-['IBM_Plex_Sans_Arabic:Medium'] justify-center leading-[0] not-italic relative shrink-0 text-[11px] text-right text-white tracking-[-0.275px] whitespace-nowrap" data-node-id="3002:232">
+                            <p className="leading-[16px]">ماسورة.jpg</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="content-stretch flex gap-[6px] items-center justify-center py-[4px] relative shrink-0 w-full" data-node-id="3002:233" data-name="Reassurance / Trust Badge Banner">
+              <div className="content-stretch flex flex-col items-end relative shrink-0" data-node-id="3002:234" data-name="Container">
+                <div className="[word-break:break-word] flex flex-col font-['IBM_Plex_Sans_Arabic:Medium'] justify-center leading-[0] not-italic relative shrink-0 text-[#3c4947] text-[11px] text-right whitespace-nowrap" data-node-id="3002:235">
+                  <p className="leading-[16px]">مرفقاتك بتظهر للفنيين الموثّقين فقط</p>
+                </div>
+              </div>
+              <div className="h-[13.333px] relative shrink-0 w-[10.667px]" data-node-id="3002:236" data-name="Container">
+                <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgContainer8} />
+              </div>
+            </div>
+          </div>
+          <div className="content-stretch flex flex-col items-start pt-[24px] relative shrink-0 w-full" data-node-id="3002:238" data-name="Sticky Bottom Action Dock:margin">
+            <div className="backdrop-blur-[6px] bg-[rgba(248,249,255,0.95)] content-stretch flex items-center p-[22px] relative shadow-[0px_-8px_24px_0px_rgba(16,42,67,0.05)] shrink-0 w-full" data-node-id="3002:239" data-name="Sticky Bottom Action Dock">
+              <div className="bg-[#006a61] content-stretch drop-shadow-[0px_6px_10px_rgba(0,106,97,0.25)] flex flex-[1_0_0] gap-[8px] h-[48px] items-center justify-center min-w-px relative rounded-[16px]" data-node-id="3002:240" data-name="Button">
+                <div className="relative shrink-0 size-[13.333px]" data-node-id="3002:241" data-name="Container">
+                  <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgContainer9} />
+                </div>
+                <div className="content-stretch flex flex-col items-center relative shrink-0" data-node-id="3002:243" data-name="Container">
+                  <div className="[word-break:break-word] flex flex-col font-['IBM_Plex_Sans_Arabic:Semi_Bold'] justify-center leading-[0] not-italic relative shrink-0 text-[17px] text-center text-white whitespace-nowrap" data-node-id="3002:244">
+                    <p className="leading-[24px]">التالي: المكان والموعد</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="content-stretch flex h-[24px] items-center justify-center relative shrink-0 w-full" data-node-id="3002:245" data-name="Container">
+          <div className="bg-[rgba(13,28,46,0.2)] h-[4px] relative rounded-[9999px] shrink-0 w-[144px]" data-node-id="3002:246" data-name="Overlay" />
+        </div>
+      </div>
+      <div className="absolute backdrop-blur-[12px] bg-[rgba(248,249,255,0.85)] content-stretch flex flex-col isolate items-start left-0 shadow-[0px_1px_8px_0px_rgba(0,0,0,0.04)] top-0 w-[390px]" data-node-id="3002:247" data-name="Header">
+        <div className="content-stretch flex h-[44px] items-center justify-between px-[22px] relative shrink-0 w-full z-[2]" data-node-id="3002:248" data-name="Container">
+          <div className="content-stretch flex gap-[6px] items-center justify-end relative shrink-0 w-[66px]" data-node-id="3002:249" data-name="Container">
+            <div className="h-[16.667px] relative shrink-0 w-[8.333px]" data-node-id="3002:250" data-name="Container">
+              <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgContainer10} />
+            </div>
+            <div className="h-[12.042px] relative shrink-0 w-[17px]" data-node-id="3002:252" data-name="Container">
+              <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgContainer11} />
+            </div>
+            <div className="relative shrink-0 size-[14.167px]" data-node-id="3002:254" data-name="Container">
+              <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgContainer12} />
+            </div>
+          </div>
+          <div className="-translate-x-1/2 absolute bg-[#223144] content-stretch flex h-[34px] items-center justify-between left-1/2 px-[12px] rounded-[9999px] top-[6px] w-[122px]" data-node-id="3002:256" data-name="Background">
+            <div className="bg-[#08121f] relative rounded-[9999px] shrink-0 size-[12px]" data-node-id="3002:257" data-name="Background" />
+            <div className="bg-[rgba(0,106,97,0.4)] relative rounded-[9999px] shrink-0 size-[10px]" data-node-id="3002:258" data-name="Overlay" />
+          </div>
+          <div className="content-stretch flex flex-col items-end relative shrink-0 w-[48px]" data-node-id="3002:259" data-name="Container">
+            <div className="[word-break:break-word] flex flex-col font-['IBM_Plex_Sans_Arabic:Semi_Bold'] justify-center leading-[0] not-italic relative shrink-0 text-[#0d1c2e] text-[13px] text-right tracking-[-0.325px] whitespace-nowrap" data-node-id="3002:260">
+              <p className="leading-[18px]">9:41</p>
+            </div>
+          </div>
+        </div>
+        <div className="content-stretch flex h-[64px] items-center justify-between px-[22px] relative shrink-0 w-full z-[1]" data-node-id="3002:261" data-name="Container">
+          <div className="content-stretch flex flex-col items-end relative shrink-0" data-node-id="3002:262" data-name="Container">
+            <div className="[word-break:break-word] flex flex-col font-['IBM_Plex_Sans_Arabic:Medium'] justify-center leading-[0] not-italic relative shrink-0 text-[#49607c] text-[13px] text-right whitespace-nowrap" data-node-id="3002:263">
+              <p className="leading-[18px]">الخطوة ٢ من ٥</p>
+            </div>
+          </div>
+          <div className="content-stretch flex gap-[8px] items-center relative shrink-0" data-node-id="3002:264" data-name="Container">
+            <div className="content-stretch flex flex-col items-end relative shrink-0" data-node-id="3002:265" data-name="Heading 1">
+              <div className="[word-break:break-word] flex flex-col font-['IBM_Plex_Sans_Arabic:Semi_Bold'] justify-center leading-[0] not-italic relative shrink-0 text-[#0d1c2e] text-[19px] text-right whitespace-nowrap" data-node-id="3002:266">
+                <p className="leading-[28px]">وصّفي المشكلة</p>
+              </div>
+            </div>
+            <div className="content-stretch flex items-center justify-center relative rounded-[9999px] shrink-0 size-[44px]" data-node-id="3002:267" data-name="Button - رجوع">
+              <div className="relative shrink-0 size-[16px]" data-node-id="3002:268" data-name="Container">
+                <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgContainer13} />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+SUPER CRITICAL: The generated React+Tailwind code MUST be converted to match the target project's technology stack and styling system.
+1. Analyze the target codebase to identify: technology stack, styling approach, component patterns, and design tokens
+2. Convert React syntax to the target framework/library
+3. Transform all Tailwind classes to the target styling system while preserving exact visual design
+4. Follow the project's existing patterns and conventions
+DO NOT install any Tailwind as a dependency unless the user instructs you to do so.
+Node ids have been added to the code as data attributes, e.g. `data-node-id="1:2"`.
+Images and SVGs will be stored as constants, e.g. const image = `${assetPathPrefix}/<asset file name>`, where assetPathPrefix is declared once at the top of the code and every asset URL interpolates it. These constants will be used in the code as the source for the image, ex: <img src={image} />. Image assets are stored on a remote server for 7 days and can be fetched using the provided URLs until they expire.
+[Image: source: /home/tro/.claude/projects/-var-www-html-bzr-noox-test/17d77327-4b1f-490d-9805-36dce7dc3713/tool-results/mcp-figma-blob-1791577647688-xup0b9.png]

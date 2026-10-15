@@ -1,0 +1,45 @@
+{
+  "captured_at": "2026-10-13T10:00:01.341793+00:00",
+  "screenshots": [
+    {
+      "test_snapshot": "actual-staff-assignment-deadline",
+      "file": "reports/prd-review/assets/after-workflow-staff-wait.png",
+      "source_run": "androidapp/app/build/reports/paparazzi/debug/runs/20261013130115_f7ac44.js",
+      "sha256": "f4d65b2c8674d6926822d2b9cc632d5d92775d4ea73b33b39b386e7f7f84a859",
+      "source": "Android native views rendered by Paparazzi using test data"
+    },
+    {
+      "test_snapshot": "actual-market-offer-deadline",
+      "file": "reports/prd-review/assets/after-workflow-market-wait.png",
+      "source_run": "androidapp/app/build/reports/paparazzi/debug/runs/20261013130115_f7ac44.js",
+      "sha256": "e1d2712395c45543899a1272b1f87322994b24dc9af17cf145c858241f542f2c",
+      "source": "Android native views rendered by Paparazzi using test data"
+    },
+    {
+      "test_snapshot": "visit-share-preparation",
+      "file": "reports/prd-review/assets/after-workflow-share-prepare.png",
+      "source_run": "androidapp/app/build/reports/paparazzi/debug/runs/20261013130114_c10fb9.js",
+      "sha256": "d5b7f1c4ff65e806a1699ed805402545d253fb25e42fe73cc77729e3294f27d6",
+      "source": "Android native views rendered by Paparazzi using test data"
+    },
+    {
+      "test_snapshot": "customer-approve-extra-cost",
+      "file": "reports/prd-review/assets/after-workflow-cost-approval.png",
+      "source_run": "androidapp/app/build/reports/paparazzi/debug/runs/20261013130112_c586fa.js",
+      "sha256": "462171cc6f1f3f1ed2a68c7f646eed4ba3e5213be5096e255ce71e399817bddd",
+      "source": "Android native views rendered by Paparazzi using test data"
+    }
+  ],
+  "validation": {
+    "backend_tests": 43,
+    "backend_assertions": 483,
+    "android_tests": 12,
+    "swift_core_tests": 55
+  },
+  "limits": [
+    "No physical device sharing test",
+    "No Xcode build",
+    "No production deployment",
+    "Original PDF and HTML remain historical review artifacts"
+  ]
+}

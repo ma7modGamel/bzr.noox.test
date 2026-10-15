@@ -1,12 +1,13 @@
 package noox.bzr.customer
 
+import noox.bzr.auth.AccountUser
 import noox.bzr.network.ApiError
 import noox.bzr.network.ApiException
-import noox.bzr.network.BremoApiClient
 import noox.bzr.network.BremoHttp
 import noox.bzr.network.bremoExecute
-import org.json.JSONArray
-import org.json.JSONObject
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.MultipartBody
+import okhttp3.RequestBody.Companion.toRequestBody
 import retrofit2.Call
 
 data class CustomerHomePayload(
@@ -24,11 +25,12 @@ data class CustomerHomePayload(
     /** The default address's city: C16 slots and the category check need it without opening C14 (6ب). */
     val addressCityId: Int? = null,
     val orders: List<CustomerOrder> = emptyList(),
+    val instapay: InstapayDetails? = null,
 )
 
 data class CustomerOption(val code: String, val label: String)
 
-data class CustomerProblemType(val id: Int, val name: String, val isOther: Boolean)
+data class CustomerProblemType(val id: Int, val name: String, val isOther: Boolean, val customerPriceGuide: CustomerPriceGuide? = null)
 
 data class CustomerCategory(
     val id: Int,
@@ -45,50 +47,68 @@ data class CustomerTrackingPayload(
 )
 
 interface CustomerApi {
+    fun submitStructuredReview(token: String, orderId: Int, quality: Int, punctuality: Int, conduct: Int, comment: String?, mediaIds: List<Int>, tags: List<String>) {
+        require(tags.isEmpty()) { "Structured review tags are not supported by this API implementation." }
+        submitReviewWithPhotos(token, orderId, quality, punctuality, conduct, comment, mediaIds)
+    }
+    fun arrivalCode(token: String, orderId: Int, refresh: Boolean = false): ArrivalCode = throw UnsupportedOperationException()
+    fun profileImage(token: String, url: String): ByteArray = throw UnsupportedOperationException()
+    fun shareVisit(token: String, orderId: Int): VisitShareLink = throw UnsupportedOperationException()
+    fun warrantyClaims(token: String, orderId: Int): List<CustomerDispute> = throw UnsupportedOperationException()
+    fun requestWarranty(token: String, orderId: Int, description: String): CustomerDispute = throw UnsupportedOperationException()
+    fun requestAvailability(token: String, addressId: Int, categoryId: Int): Boolean = throw UnsupportedOperationException()
+
+    fun submitInstapay(token: String, orderId: Int, reference: String, receiptMediaId: Int, expectedVersion: Int): PaymentAttempt = throw UnsupportedOperationException()
+    fun submitReviewWithPhotos(token: String, orderId: Int, quality: Int, punctuality: Int, conduct: Int, comment: String?, mediaIds: List<Int>) {
+        if (mediaIds.isNotEmpty()) throw UnsupportedOperationException()
+        submitReview(token, orderId, quality, punctuality, conduct, comment)
+    }
+
     fun home(token: String): CustomerHomePayload
     fun catalogCategoryIds(cityId: Int): Set<Int>
     fun order(token: String, orderId: Int): CustomerOrder
     fun tracking(token: String, orderId: Int): CustomerTrackingPayload
     fun orders(token: String, scope: String, page: Int = 1): OrdersPage
-    fun conversations(token: String, page: Int = 1): JSONObject
-    fun conversationMessages(token: String, conversationId: Int, page: Int = 1): JSONObject
-    fun sendMessage(token: String, conversationId: Int, body: String, mediaIds: List<Int> = emptyList()): JSONObject
-    fun offers(token: String, orderId: Int, sort: String = "rating"): JSONArray
-    fun provider(token: String, providerId: Int, orderId: Int): JSONObject
-    fun publish(token: String, body: JSONObject, idempotencyKey: String): CustomerOrder
-    fun updateOrder(token: String, orderId: Int, body: JSONObject): CustomerOrder
+    fun conversations(token: String, page: Int = 1): ConversationsPage
+    fun conversationMessages(token: String, conversationId: Int, page: Int = 1): ConversationMessagesPage
+    fun sendMessage(token: String, conversationId: Int, body: String, mediaIds: List<Int> = emptyList()): CustomerMessage
+    fun offers(token: String, orderId: Int, sort: String = "rating"): List<CustomerOffer>
+    fun provider(token: String, providerId: Int, orderId: Int): ProviderContext
+    fun publish(token: String, body: PublishOrderBody, idempotencyKey: String): CustomerOrder
+    fun updateOrder(token: String, orderId: Int, body: PublishOrderBody): CustomerOrder
     fun acceptOffer(token: String, orderId: Int, offerId: Int, expectedVersion: Int, paymentMethod: String): CustomerOrder
     fun cancelOrder(token: String, orderId: Int, reasonCode: String, note: String?, expectedVersion: Int): CustomerOrder
-    fun proposals(token: String, orderId: Int): JSONArray
+    fun proposals(token: String, orderId: Int): List<CustomerProposal>
     fun decideProposal(token: String, orderId: Int, proposalId: Int, approve: Boolean, expectedVersion: Int): CustomerOrder
     fun changePaymentMethod(token: String, orderId: Int, method: String, expectedVersion: Int): CustomerOrder
-    fun createPayment(token: String, orderId: Int, channel: String, expectedVersion: Int): JSONObject
+    fun createPayment(token: String, orderId: Int, channel: String, expectedVersion: Int): PaymentAttempt
     fun confirmCompletion(token: String, orderId: Int, expectedVersion: Int): CustomerOrder
-    fun submitReview(token: String, orderId: Int, quality: Int, punctuality: Int, conduct: Int, comment: String?): JSONObject
-    fun addresses(token: String): JSONArray
-    fun cities(): JSONArray
-    fun areas(cityId: Int): JSONArray
-    fun saveAddress(token: String, addressId: Int?, body: JSONObject): JSONObject
+    fun submitReview(token: String, orderId: Int, quality: Int, punctuality: Int, conduct: Int, comment: String?)
+    fun addresses(token: String): List<CustomerAddress>
+    fun cities(): List<IdName>
+    fun areas(cityId: Int): List<IdName>
+    fun saveAddress(token: String, addressId: Int?, body: AddressBody): CustomerAddress
     fun deleteAddress(token: String, addressId: Int)
-    fun slots(cityId: Int, date: String): JSONArray
-    fun uploadMedia(token: String, upload: CustomerMediaUpload): JSONObject
+    fun slots(cityId: Int, date: String): List<SlotRange>
+    fun uploadMedia(token: String, upload: CustomerMediaUpload): UploadedMedia
     fun deleteMedia(token: String, mediaId: Int)
-    fun disputes(token: String, orderId: Int): JSONArray
-    fun openDispute(token: String, orderId: Int, reasonCode: String, description: String, mediaIds: List<Int>): JSONObject
-    fun reportProvider(token: String, providerId: Int, orderId: Int, reasonCode: String, description: String?): JSONObject
-    fun faqs(): JSONArray
+    fun disputes(token: String, orderId: Int): List<CustomerDispute>
+    fun openDispute(token: String, orderId: Int, reasonCode: String, description: String, mediaIds: List<Int>): CustomerDispute
+    fun reportProvider(token: String, providerId: Int, orderId: Int, reasonCode: String, description: String?)
+    fun faqs(): List<FaqItem>
     fun sendSupportMessage(token: String, subject: String, message: String)
-    fun notifications(token: String): JSONObject
+    fun notifications(token: String): List<NotificationItem>
     fun markNotificationsRead(token: String, ids: List<String>)
     fun registerDevice(token: String, deviceToken: String)
     fun unregisterDevice(token: String, deviceToken: String)
     fun logout(token: String)
-    fun updateRatingReminders(token: String, enabled: Boolean): JSONObject
-    fun account(token: String): JSONObject
-    fun updateAccount(token: String, name: String, phone: String): JSONObject
+    fun updateRatingReminders(token: String, enabled: Boolean): AccountUser
+    fun account(token: String): AccountUser
+    fun updateAccount(token: String, name: String, phone: String): AccountUser
+    fun updateLocale(token: String, locale: String)
     fun changePassword(token: String, currentPassword: String, password: String, confirmation: String)
     fun deleteAccount(token: String)
-    fun terms(): JSONObject
+    fun terms(): TermsPage
     fun republish(token: String, orderId: Int): CustomerOrder
 }
 
@@ -96,6 +116,12 @@ data class CustomerMediaUpload(val fileName: String, val mimeType: String, val b
 
 class UrlConnectionCustomerApi(private val baseUrl: String) : CustomerApi {
     private val service = BremoHttp.typed(baseUrl, CustomerService::class.java, appMode = "CUSTOMER")
+
+    override fun warrantyClaims(token: String, orderId: Int): List<CustomerDispute> = typed { service.warrantyClaims(bearer(token), orderId) }.data
+    override fun requestWarranty(token: String, orderId: Int, description: String): CustomerDispute = typed { service.requestWarranty(bearer(token), orderId, WarrantyBody(description)) }.data
+
+    override fun requestAvailability(token: String, addressId: Int, categoryId: Int): Boolean =
+        typed { service.requestAvailability(bearer(token), addressId, categoryId) }.nowAvailable
 
     override fun catalogCategoryIds(cityId: Int): Set<Int> = typed { service.catalog(cityId) }.data.map(CatalogCategory::id).toSet()
 
@@ -119,7 +145,7 @@ class UrlConnectionCustomerApi(private val baseUrl: String) : CustomerApi {
                     id = category.id,
                     name = category.name,
                     iconKey = category.iconPath?.takeIf(String::isNotBlank)?.substringAfterLast('/')?.substringBeforeLast('.'),
-                    problemTypes = category.problemTypes.map { CustomerProblemType(it.id, it.name, it.isOther) },
+                    problemTypes = category.problemTypes.map { CustomerProblemType(it.id, it.name, it.isOther, it.customerPriceGuide) },
                 )
             },
             config.optionLists.mapValues { (_, items) -> items.map { CustomerOption(it.code, it.label) } },
@@ -130,10 +156,22 @@ class UrlConnectionCustomerApi(private val baseUrl: String) : CustomerApi {
             addressLabel = address?.let(::addressLabel).orEmpty(),
             addressCityId = cityId,
             orders = orders,
+            instapay = config.instapay,
         )
     }
 
     override fun order(token: String, orderId: Int): CustomerOrder = typed { service.order(bearer(token), orderId) }.data
+
+    override fun shareVisit(token: String, orderId: Int): VisitShareLink = typed { service.shareVisit(bearer(token), orderId) }.data
+
+    override fun arrivalCode(token: String, orderId: Int, refresh: Boolean): ArrivalCode = typed { service.arrivalCode(bearer(token), orderId, ArrivalCodeRequest(refresh)) }.data
+
+    override fun profileImage(token: String, url: String): ByteArray {
+        val expected = java.net.URI(baseUrl)
+        val actual = java.net.URI(url)
+        require(actual.scheme == expected.scheme && actual.host == expected.host && actual.port == expected.port)
+        return typed { service.profileImage(bearer(token), url) }.use { it.bytes() }
+    }
 
     override fun tracking(token: String, orderId: Int): CustomerTrackingPayload {
         val payload = typed { service.tracking(bearer(token), orderId) }
@@ -147,30 +185,25 @@ class UrlConnectionCustomerApi(private val baseUrl: String) : CustomerApi {
 
     override fun orders(token: String, scope: String, page: Int): OrdersPage = typed { service.orders(bearer(token), scope, page) }
 
-    override fun conversations(token: String, page: Int): JSONObject =
-        request("conversations?page=$page", token = token, method = "GET")
+    override fun conversations(token: String, page: Int): ConversationsPage = typed { service.conversations(bearer(token), page) }
 
-    override fun conversationMessages(token: String, conversationId: Int, page: Int): JSONObject =
-        request("conversations/$conversationId/messages?page=$page", token = token, method = "GET")
+    override fun conversationMessages(token: String, conversationId: Int, page: Int): ConversationMessagesPage =
+        typed { service.conversationMessages(bearer(token), conversationId, page) }
 
-    override fun sendMessage(token: String, conversationId: Int, body: String, mediaIds: List<Int>): JSONObject =
-        request(
-            "conversations/$conversationId/messages",
-            JSONObject().put("body", body.ifBlank { JSONObject.NULL }).put("media_ids", JSONArray(mediaIds)),
-            token,
-        ).getJSONObject("data")
+    override fun sendMessage(token: String, conversationId: Int, body: String, mediaIds: List<Int>): CustomerMessage =
+        typed { service.sendMessage(bearer(token), conversationId, SendMessageBody(body.ifBlank { null }, mediaIds)) }.data
 
-    override fun offers(token: String, orderId: Int, sort: String): JSONArray =
-        request("orders/$orderId/offers?sort=$sort", token = token, method = "GET").getJSONArray("data")
+    override fun offers(token: String, orderId: Int, sort: String): List<CustomerOffer> =
+        typed { service.offers(bearer(token), orderId, sort) }.data
 
-    override fun provider(token: String, providerId: Int, orderId: Int): JSONObject =
-        request("providers/$providerId?order_id=$orderId", token = token, method = "GET").getJSONObject("data")
+    override fun provider(token: String, providerId: Int, orderId: Int): ProviderContext =
+        typed { service.provider(bearer(token), providerId, orderId) }.data
 
-    override fun publish(token: String, body: JSONObject, idempotencyKey: String): CustomerOrder =
-        typed { service.publish(bearer(token), idempotencyKey, body.toJsonElement()) }.data
+    override fun publish(token: String, body: PublishOrderBody, idempotencyKey: String): CustomerOrder =
+        typed { service.publish(bearer(token), idempotencyKey, body) }.data
 
-    override fun updateOrder(token: String, orderId: Int, body: JSONObject): CustomerOrder =
-        typed { service.updateOrder(bearer(token), orderId, body.toJsonElement()) }.data
+    override fun updateOrder(token: String, orderId: Int, body: PublishOrderBody): CustomerOrder =
+        typed { service.updateOrder(bearer(token), orderId, body) }.data
 
     override fun acceptOffer(token: String, orderId: Int, offerId: Int, expectedVersion: Int, paymentMethod: String): CustomerOrder =
         typed { service.acceptOffer(bearer(token), orderId, offerId, AcceptOfferRequest(expectedVersion, paymentMethod)) }.data
@@ -178,8 +211,8 @@ class UrlConnectionCustomerApi(private val baseUrl: String) : CustomerApi {
     override fun cancelOrder(token: String, orderId: Int, reasonCode: String, note: String?, expectedVersion: Int): CustomerOrder =
         typed { service.cancelOrder(bearer(token), orderId, CancelOrderRequest(reasonCode, note, expectedVersion)) }.data
 
-    override fun proposals(token: String, orderId: Int): JSONArray =
-        request("orders/$orderId/proposals", token = token, method = "GET").getJSONArray("data")
+    override fun proposals(token: String, orderId: Int): List<CustomerProposal> =
+        typed { service.proposals(bearer(token), orderId) }.data
 
     override fun decideProposal(token: String, orderId: Int, proposalId: Int, approve: Boolean, expectedVersion: Int): CustomerOrder =
         typed { service.decideProposal(bearer(token), orderId, proposalId, DecideProposalRequest(approve, expectedVersion)) }.data
@@ -187,137 +220,110 @@ class UrlConnectionCustomerApi(private val baseUrl: String) : CustomerApi {
     override fun changePaymentMethod(token: String, orderId: Int, method: String, expectedVersion: Int): CustomerOrder =
         typed { service.changePaymentMethod(bearer(token), orderId, PaymentMethodRequest(method, expectedVersion)) }.data
 
-    override fun createPayment(token: String, orderId: Int, channel: String, expectedVersion: Int): JSONObject =
-        request(
-            "orders/$orderId/payments",
-            JSONObject().put("channel", channel).put("expected_version", expectedVersion),
-            token,
-        ).getJSONObject("data")
+    override fun submitInstapay(token: String, orderId: Int, reference: String, receiptMediaId: Int, expectedVersion: Int): PaymentAttempt =
+        typed { service.submitInstapay(bearer(token), orderId, InstapayTransferBody(reference, receiptMediaId, expectedVersion)) }.data
+
+    override fun submitStructuredReview(token: String, orderId: Int, quality: Int, punctuality: Int, conduct: Int, comment: String?, mediaIds: List<Int>, tags: List<String>) {
+        typed { service.submitReview(bearer(token), orderId, ReviewBody(quality, punctuality, conduct, comment, mediaIds, tags)) }
+    }
+
+    override fun submitReviewWithPhotos(token: String, orderId: Int, quality: Int, punctuality: Int, conduct: Int, comment: String?, mediaIds: List<Int>) {
+        typed { service.submitReview(bearer(token), orderId, ReviewBody(quality, punctuality, conduct, comment, mediaIds)) }
+    }
+
+    override fun createPayment(token: String, orderId: Int, channel: String, expectedVersion: Int): PaymentAttempt =
+        typed { service.createPayment(bearer(token), orderId, CreatePaymentBody(channel, expectedVersion)) }.data
 
     override fun confirmCompletion(token: String, orderId: Int, expectedVersion: Int): CustomerOrder =
         typed { service.confirmCompletion(bearer(token), orderId, ExpectedVersionRequest(expectedVersion)) }.data
 
-    override fun submitReview(
-        token: String,
-        orderId: Int,
-        quality: Int,
-        punctuality: Int,
-        conduct: Int,
-        comment: String?,
-    ): JSONObject = request(
-        "orders/$orderId/review",
-        JSONObject().put("quality", quality).put("punctuality", punctuality).put("conduct", conduct).put("comment", comment),
-        token,
-    ).getJSONObject("data")
+    override fun submitReview(token: String, orderId: Int, quality: Int, punctuality: Int, conduct: Int, comment: String?) {
+        typed { service.submitReview(bearer(token), orderId, ReviewBody(quality, punctuality, conduct, comment)) }
+    }
 
-    override fun addresses(token: String): JSONArray =
-        request("addresses", token = token, method = "GET").getJSONArray("data")
+    override fun addresses(token: String): List<CustomerAddress> = typed { service.addresses(bearer(token)) }.data
 
-    override fun cities(): JSONArray = request("cities", method = "GET").getJSONArray("data")
+    override fun cities(): List<IdName> = typed { service.cities() }.data
 
-    override fun areas(cityId: Int): JSONArray = request("cities/$cityId/areas", method = "GET").getJSONArray("data")
+    override fun areas(cityId: Int): List<IdName> = typed { service.areas(cityId) }.data
 
-    override fun saveAddress(token: String, addressId: Int?, body: JSONObject): JSONObject = request(
-        if (addressId == null) "addresses" else "addresses/$addressId",
-        body,
-        token,
-        method = if (addressId == null) "POST" else "PATCH",
-    ).getJSONObject("data")
+    override fun saveAddress(token: String, addressId: Int?, body: AddressBody): CustomerAddress = typed {
+        if (addressId == null) service.createAddress(bearer(token), body) else service.updateAddress(bearer(token), addressId, body)
+    }.data
 
     override fun deleteAddress(token: String, addressId: Int) {
-        request("addresses/$addressId", token = token, method = "DELETE")
+        typed { service.deleteAddress(bearer(token), addressId) }
     }
 
-    override fun slots(cityId: Int, date: String): JSONArray =
-        request("slots?city_id=$cityId&date=$date", method = "GET").getJSONArray("data")
+    override fun slots(cityId: Int, date: String): List<SlotRange> = typed { service.slots(cityId, date) }.data
 
-    override fun uploadMedia(token: String, upload: CustomerMediaUpload): JSONObject =
-        multipart("media", token, upload).getJSONObject("media")
+    override fun uploadMedia(token: String, upload: CustomerMediaUpload): UploadedMedia = typed {
+        val file = upload.bytes.toRequestBody(upload.mimeType.toMediaType())
+        service.uploadMedia(bearer(token), MultipartBody.Part.createFormData("file", upload.fileName, file))
+    }.media
 
     override fun deleteMedia(token: String, mediaId: Int) {
-        request("media/$mediaId", token = token, method = "DELETE")
+        typed { service.deleteMedia(bearer(token), mediaId) }
     }
 
-    override fun disputes(token: String, orderId: Int): JSONArray =
-        request("orders/$orderId/disputes", token = token, method = "GET").getJSONArray("data")
+    override fun disputes(token: String, orderId: Int): List<CustomerDispute> = typed { service.disputes(bearer(token), orderId) }.data
 
-    override fun openDispute(
-        token: String,
-        orderId: Int,
-        reasonCode: String,
-        description: String,
-        mediaIds: List<Int>,
-    ): JSONObject = request(
-        "orders/$orderId/disputes",
-        JSONObject().put("reason_code", reasonCode).put("description", description).put("media_ids", JSONArray(mediaIds)),
-        token,
-    ).getJSONObject("data")
+    override fun openDispute(token: String, orderId: Int, reasonCode: String, description: String, mediaIds: List<Int>): CustomerDispute =
+        typed { service.openDispute(bearer(token), orderId, OpenDisputeBody(reasonCode, description, mediaIds)) }.data
 
-    override fun reportProvider(
-        token: String,
-        providerId: Int,
-        orderId: Int,
-        reasonCode: String,
-        description: String?,
-    ): JSONObject = request(
-        "providers/$providerId/reports",
-        JSONObject().put("order_id", orderId).put("reason_code", reasonCode).put("description", description),
-        token,
-    ).getJSONObject("data")
+    override fun reportProvider(token: String, providerId: Int, orderId: Int, reasonCode: String, description: String?) {
+        typed { service.reportProvider(bearer(token), providerId, ProviderReportBody(orderId, reasonCode, description)) }
+    }
 
-    override fun faqs(): JSONArray = request("support/faqs", method = "GET").getJSONArray("data")
+    override fun faqs(): List<FaqItem> = typed { service.faqs() }.data
 
     override fun sendSupportMessage(token: String, subject: String, message: String) {
-        request("support/messages", JSONObject().put("subject", subject).put("message", message), token)
+        typed { service.sendSupportMessage(bearer(token), SupportMessageBody(subject, message)) }
     }
 
-    override fun notifications(token: String): JSONObject = request("notifications", token = token, method = "GET")
+    override fun notifications(token: String): List<NotificationItem> = typed { service.notifications(bearer(token)) }.data
 
     override fun markNotificationsRead(token: String, ids: List<String>) {
-        request("notifications/read", JSONObject().put("notification_ids", JSONArray(ids)), token)
+        typed { service.markNotificationsRead(bearer(token), NotificationsReadBody(ids)) }
     }
 
     // DEC-058 — رمز FCM للجهاز؛ Push يصل لكل رموز الحساب أيًّا كان الوضع.
     override fun registerDevice(token: String, deviceToken: String) {
-        request("me/devices", JSONObject().put("token", deviceToken).put("platform", "ANDROID"), token)
+        typed { service.registerDevice(bearer(token), RegisterDeviceBody(deviceToken, "ANDROID")) }
     }
 
     override fun unregisterDevice(token: String, deviceToken: String) {
-        request("me/devices", JSONObject().put("token", deviceToken), token, method = "DELETE")
+        typed { service.unregisterDevice(bearer(token), DeviceTokenBody(deviceToken)) }
     }
 
     override fun logout(token: String) {
-        request("auth/logout", JSONObject(), token)
+        typed { service.logout(bearer(token)) }
     }
 
-    override fun updateRatingReminders(token: String, enabled: Boolean): JSONObject = request(
-        "me", JSONObject().put("rating_reminders_enabled", enabled), token, method = "PATCH",
-    ).getJSONObject("user")
+    override fun updateRatingReminders(token: String, enabled: Boolean): AccountUser =
+        typed { service.updateRatingReminders(bearer(token), RatingRemindersBody(enabled)) }.user
 
-    override fun account(token: String): JSONObject = request("me", token = token, method = "GET").getJSONObject("user")
+    override fun account(token: String): AccountUser = typed { service.me(bearer(token)) }.user
 
-    override fun updateAccount(token: String, name: String, phone: String): JSONObject = request(
-        "me", JSONObject().put("name", name).put("phone", phone), token, method = "PATCH",
-    ).getJSONObject("user")
+    override fun updateLocale(token: String, locale: String) {
+        typed { service.updateLocale(bearer(token), LocaleUpdateBody(locale)) }
+    }
+
+    override fun updateAccount(token: String, name: String, phone: String): AccountUser =
+        typed { service.updateAccount(bearer(token), AccountUpdateBody(name, phone)) }.user
 
     override fun changePassword(token: String, currentPassword: String, password: String, confirmation: String) {
-        request(
-            "me/password",
-            JSONObject().put("current_password", currentPassword).put("password", password)
-                .put("password_confirmation", confirmation),
-            token,
-        )
+        typed { service.changePassword(bearer(token), PasswordChangeBody(currentPassword, password, confirmation)) }
     }
 
     override fun deleteAccount(token: String) {
-        request("me", token = token, method = "DELETE")
+        typed { service.deleteAccount(bearer(token)) }
     }
 
-    override fun terms(): JSONObject = request("terms/current", method = "GET").getJSONObject("data")
+    override fun terms(): TermsPage = typed { service.terms() }.data
 
     override fun republish(token: String, orderId: Int): CustomerOrder = typed { service.republish(bearer(token), orderId) }.data
 
-    private val client = BremoApiClient(baseUrl, appMode = "CUSTOMER")
 
     private fun bearer(token: String) = "Bearer $token"
 
@@ -328,35 +334,10 @@ class UrlConnectionCustomerApi(private val baseUrl: String) : CustomerApi {
         throw CustomerApiException(exception.status, exception.message.orEmpty(), exception.error)
     }
 
-    /** Stage 3 types the C03–C05 request body; until then it is passed through as built. */
-    private fun JSONObject.toJsonElement() = BremoHttp.json.parseToJsonElement(toString())
-
-    private fun request(
-        path: String,
-        body: JSONObject? = null,
-        token: String? = null,
-        method: String = "POST",
-        idempotencyKey: String? = null,
-    ): JSONObject {
-        val response = client.send(path, method, body, token, idempotencyKey)
-        if (!response.isSuccessful) throw CustomerApiException(response.status, response.text)
-        return response.json()
-    }
-
-    private fun multipart(path: String, token: String, upload: CustomerMediaUpload): JSONObject {
-        val response = client.upload(path, token, upload.fileName, upload.mimeType, upload.bytes)
-        if (!response.isSuccessful) throw CustomerApiException(response.status, response.text)
-        return JSONObject(response.text)
-    }
 }
 
-/** [error] is the decoded server error of a typed call; legacy calls keep the raw body in the message. */
 class CustomerApiException(val status: Int, message: String, val error: ApiError? = null) : RuntimeException(message)
 
 /** C04 address row: the saved label and area, as the C14 row shows them. */
-internal fun addressLabel(address: JSONObject): String =
-    listOf(address.optString("label"), address.optJSONObject("area")?.optString("name").orEmpty())
-        .filter(String::isNotBlank).joinToString(" · ")
-
 internal fun addressLabel(address: CustomerAddress): String =
     listOf(address.label, address.area.name.orEmpty()).filter(String::isNotBlank).joinToString(" · ")

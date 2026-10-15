@@ -14,7 +14,6 @@ use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Filament\Pages\Dashboard;
 use Filament\Panel;
 use Filament\PanelProvider;
-use Filament\Support\Colors\Color;
 use Filament\Support\Enums\Width;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
@@ -40,14 +39,7 @@ final class AdminPanelProvider extends PanelProvider
             // ASM-14، DEC-060 — TOTP إلزامي؛ الحساب بلا إعداد يُحوَّل لإعداده قبل أي صفحة.
             ->multiFactorAuthentication([AppAuthentication::make()->recoverable()], isRequired: true)
             ->brandName(config('app.name').' — لوحة التشغيل')
-            ->colors([
-                'primary' => Color::hex('#149C94'), // primary-600 (38 §1)
-                'info' => Color::hex('#00ACB6'),    // primary-500
-                'warning' => Color::hex('#F0AC2C'), // star — التنبيه والتقييم
-                'danger' => Color::hex('#C64F53'),  // الإلغاء فقط
-                'success' => Color::hex('#1E8C8C'), // primary-700
-                'gray' => Color::Slate,
-            ])
+            ->colors(config('design.colors'))
             ->font('Cairo')                 // 38 §2 (OD-07)
             ->viteTheme('resources/css/filament/admin/theme.css')
             ->defaultThemeMode(ThemeMode::Light)

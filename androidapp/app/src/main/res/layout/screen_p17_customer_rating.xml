@@ -16,6 +16,24 @@
         android:layout_height="wrap_content"
         layout="@layout/item_rating_row" />
 
+    <TextView
+        android:id="@+id/tagLabel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/provider_rating_tags"
+        android:textAppearance="@style/TextAppearance.Bremo.SectionTitle" />
+
+    <noox.bzr.design.views.TileGridLayout
+        android:id="@+id/tagChoices"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <noox.bzr.design.views.TextAreaFieldView
+        android:id="@+id/comment"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:bremoLabel="@string/provider_rating_comment" />
+
     <noox.bzr.design.views.InfoBannerView
         android:id="@+id/notice"
         android:layout_width="match_parent"

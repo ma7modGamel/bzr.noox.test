@@ -5,8 +5,8 @@
     tools:parentTag="android.widget.LinearLayout">
     <ImageView
         android:id="@+id/icon"
-        android:layout_width="@dimen/bremo_size_icon_small"
-        android:layout_height="@dimen/bremo_size_icon_small"
+        android:layout_width="@dimen/bremo_size_badge_icon"
+        android:layout_height="@dimen/bremo_size_badge_icon"
         android:importantForAccessibility="no"
         android:scaleType="fitCenter"
         app:srcCompat="@drawable/ic_star_filled"

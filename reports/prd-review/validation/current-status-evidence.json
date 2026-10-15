@@ -1,0 +1,322 @@
+{
+  "generated_at": "2026-10-14T01:00:14.043692+03:00",
+  "source_pdf": {
+    "path": "/home/tro/Downloads/Bremo_PRD.pdf",
+    "sha256": "7b1532e5170c88e7bae3373166498fe06e689e16bf6c4f4e3cca40d96db9996f",
+    "pages": 29
+  },
+  "git_head": "856752d9b5d190535e503583b022c3c7410350b6",
+  "working_tree_included": true,
+  "method": [
+    "Existing static-values and PRD comparison reports and decision follow-ups",
+    "Original PDF text and selected page renders, with original extracted screen assets",
+    "Current Laravel, Android and iOS source inspection",
+    "Read-only local database queries, with explicit JSON null checks",
+    "Current notifications:push-check --json; no push sent"
+  ],
+  "static_open_groups": [
+    "S01",
+    "S02",
+    "S03",
+    "S04",
+    "S05",
+    "S06",
+    "S07"
+  ],
+  "prd_incomplete_items": [
+    "P01",
+    "P02",
+    "P03",
+    "P04",
+    "P05",
+    "P06",
+    "P07",
+    "P08",
+    "P09"
+  ],
+  "outside_prd_items": [
+    "G01",
+    "G02",
+    "G03",
+    "G04",
+    "G05",
+    "G06",
+    "G07",
+    "G08"
+  ],
+  "counts_are_not_additive": true,
+  "local_state_file": "current-status-local-state.json",
+  "push_check_file": "current-status-push-readiness.json",
+  "source_evidence": [
+    {
+      "file": "androidapp/app/src/main/kotlin/noox/bzr/customer/C38BudgetView.kt",
+      "sha256": "2929d7e20a247bb9b75972fc46576742927aa489273636e62231e4a516f4ceed",
+      "line": 76,
+      "needle": "STATIC_QUICK_AMOUNTS",
+      "excerpt": "        binding.quickAmounts.removeAllViews()\n        STATIC_QUICK_AMOUNTS.forEach { amount ->\n            binding.quickAmounts.addView(\n                noox.bzr.design.views.SelectableChipView(context).apply {\n                    text = noox.bzr.design.BzrFormat.fill(string(R.string.customer_home_offers_amount), \"amount\" to amount)\n                    state = if (budget == amount) noox.bzr.design.SelectionState.Selected else noox.bzr.design.SelectionState.Unselected\n                    setOnClickListener { onBudgetChange(amount) }"
+    },
+    {
+      "file": "iosapp/BzrApp/Customer/C38BudgetView.swift",
+      "sha256": "b17b157a24c8d508652e02b10f858f763fd48b7dee4f867784ce48f9a8594ef0",
+      "line": 13,
+      "needle": "staticQuickAmounts",
+      "excerpt": "\n    private static let staticQuickAmounts = [\"250\", \"300\", \"400\"]\n\n    public init(\n        state: CustomerUIState, onMaterialSelect: @escaping (Int) -> Void = { _ in },\n        onPricingSelect: @escaping (Int) -> Void = { _ in }, onBudgetChange: @escaping (String) -> Void = { _ in },\n        onOpen: @escaping (String) -> Void = { _ in }"
+    },
+    {
+      "file": "design/strings.ar.json",
+      "sha256": "cc0bef7ffd7114b3400fbfaa4d7d1ffa0cdc2a3b590b42b58edbcef9106661b6",
+      "line": 863,
+      "needle": "request.timing.now.eta",
+      "excerpt": "  \"request.budget.area_average\": \"متوسط المنطقة\",\n  \"request.timing.now.eta\": \"خلال 30–45 دقيقة\",\n  \"offers.available\": \"{count} عروض متاحة\",\n  \"offers.request\": \"طلب: {title}\",\n  \"offers.headline\": \"قارن السعر والتقييم ووقت الوصول واختر الأنسب\",\n  \"offers.payment_note\": \"الدفع لا يتم قبل تأكيد استلام الخدمة\",\n  \"sort.best\": \"الأنسب\","
+    },
+    {
+      "file": "androidapp/app/src/main/kotlin/noox/bzr/customer/C04TimingView.kt",
+      "sha256": "01845d2130064da4b824d358543dac15e78bc2d44bbb875c0c016e6516091272",
+      "line": 70,
+      "needle": "request_timing_now_eta",
+      "excerpt": "                            !state.nowAvailable -> R.string.request_timing_now_unavailable\n                            else -> R.string.request_timing_now_eta\n                        })\n                        else -> state.fieldValues.getOrNull(2).orEmpty().ifBlank { string(R.string.request_timing_body_scheduled) }\n                    }\n                    isEnabled = code != \"NOW\" || state.nowAvailable\n                    alpha = if (isEnabled) 1f else 0.55f"
+    },
+    {
+      "file": "androidapp/app/src/main/kotlin/noox/bzr/customer/C09TrackingView.kt",
+      "sha256": "1874ab59f41977bfb7942bae23da672f2c85142e707cbb89cecaad0f4454d81f",
+      "line": 162,
+      "needle": "STATIC_FINISH_MINUTES",
+      "excerpt": "        // STATIC (DEC-074, BACKEND-NOTES B-07): no expected finish time in the API.\n        binding.sections.addView(inset(R.drawable.ic_clock, BzrFormat.quantity(context, R.plurals.plural_tracking_finish_title, STATIC_FINISH_MINUTES), string(R.string.tracking_finish_body)))\n        val labels = listOf(R.string.tracking_exec_arrived, R.string.tracking_exec_inspected, R.string.tracking_exec_approved, R.string.tracking_exec_repairing, R.string.tracking_exec_finish).map(::string)\n        // The API's stepper has no inspection/approval sub-steps; IN_PROGRESS means the first three are behind it.\n        stepperCard(\n            string(R.string.tracking_exec_steps),\n            BzrFormat.fill(string(R.string.tracking_stage), \"current\" to BzrFormat.number(EXEC_CURRENT), \"total\" to BzrFormat.number(labels.size)),"
+    },
+    {
+      "file": "iosapp/BzrApp/Customer/C09TrackingView.swift",
+      "sha256": "9d73ee7f3bb7c791e1e13a7c1653bd0c54104d2a201ae30c7c558f95b07e656a",
+      "line": 20,
+      "needle": "staticFinishMinutes",
+      "excerpt": "    private static let completed = 7, category = 8, total = 9, slot = 10\n    private static let staticFinishMinutes = 30\n    private static let execCurrent = 4\n    private static let metersPerKm = 1000.0\n\n    public init(\n        state: CustomerUIState,"
+    },
+    {
+      "file": "app/Modules/Orders/Services/OrderPresentation.php",
+      "sha256": "112e526cbc18b923a04d59e8e0396be8b7c46c94d7fc0a3d2b4c94a33482abba",
+      "line": 140,
+      "needle": "public function stepper",
+      "excerpt": "    /** @return list<array{key: string, state: string}>|null */\n    public function stepper(Order $order): ?array\n    {\n        if (in_array($order->status, [\n            OrderStatus::Open,\n            OrderStatus::Cancelled,\n            OrderStatus::Expired,"
+    },
+    {
+      "file": "androidapp/app/src/main/kotlin/noox/bzr/customer/CustomerViewModel.kt",
+      "sha256": "7958313dc9aaf64625ffa5406a4206d2ecf96ac0b5b4a68ca6c9539bdbfc80fb",
+      "line": 1736,
+      "needle": "private fun offerSortCode",
+      "excerpt": "    // STATIC (DEC-074, BACKEND-NOTES B-18): the API has no best-match sort, so «الأنسب» asks for rating.\n    private fun offerSortCode(): String = listOf(\"rating\", \"price\", \"eta\", \"rating\").getOrElse(offersSortIndex) { \"rating\" }\n\n    private fun offersInput(order: CustomerOrder): Map<String, Any?> = mapOf(\n        \"waiting_info\" to waitingInfo(order),\n        \"event\" to \"loaded\",\n        \"order_title\" to \"${order.category.name.orEmpty()} — ${order.problemType.name.orEmpty()} · #${order.number}\","
+    },
+    {
+      "file": "androidapp/app/src/main/kotlin/noox/bzr/customer/CustomerViewModel.kt",
+      "sha256": "7958313dc9aaf64625ffa5406a4206d2ecf96ac0b5b4a68ca6c9539bdbfc80fb",
+      "line": 1292,
+      "needle": "private fun ratingCommentToSend",
+      "excerpt": "    // STATIC (DEC-074, BACKEND-NOTES B-04): `POST rating` has no tags field, so the chosen tags lead the comment.\n    private fun ratingCommentToSend(): String =\n        listOf(ratingTags.values.joinToString(\" · \"), ratingComment.trim()).filter(String::isNotBlank).joinToString(\"\\n\")\n\n    fun updateRatingComment(value: String) {\n        ratingComment = value\n        state = reduce(\"SCR-C24\", ratingInput(\"loaded\"))"
+    },
+    {
+      "file": "iosapp/Core/Sources/BzrCore/CustomerJourney.swift",
+      "sha256": "09ad8de95aea557c9b5c4f5291f18a36074e3276363cee2fff895f8001253104",
+      "line": 3723,
+      "needle": "private var ratingCommentToSend",
+      "excerpt": "    // STATIC (DEC-074, BACKEND-NOTES B-04): `POST rating` has no tags field, so the chosen tags lead the comment.\n    private var ratingCommentToSend: String {\n        [\n            ratingTags.keys.sorted().compactMap { ratingTags[$0] }.joined(separator: \" · \"),\n            ratingComment.trimmingCharacters(in: .whitespacesAndNewlines),\n        ].filter { !$0.isEmpty }.joined(separator: \"\\n\")\n    }"
+    },
+    {
+      "file": "app/Http/Api/V1/Controllers/RatingController.php",
+      "sha256": "4f07ead9996ac548c912483adc85a4308382e73f43fff3e02e88b4ac899be8e5",
+      "line": 19,
+      "needle": "public function review",
+      "excerpt": "{\n    public function review(Request $request, Order $order, CreateProviderReviewAction $action): JsonResponse\n    {\n        abort_unless($order->customer_id === $request->user()->getKey(), 404);\n\n        $data = $request->validate([\n            'quality' => ['required', 'integer', 'between:1,5'],"
+    },
+    {
+      "file": "app/Http/Api/V1/Controllers/ReferenceController.php",
+      "sha256": "88a8f3a7c4fa4f1b0ad665970626f03b35a471b631ae2ae44fdeee0ad0db3e2c",
+      "line": 35,
+      "needle": "public function catalog",
+      "excerpt": "    /** BR-011 — الفئات المفعّلة في مدينة الطلب، وأنواع المشاكل المفعّلة. */\n    public function catalog(Request $request): JsonResponse\n    {\n        $cityId = (int) $request->query('city_id');\n\n        $categories = Category::query()\n            ->where('is_active', true)"
+    },
+    {
+      "file": "app/Http/Api/V1/Controllers/OrderController.php",
+      "sha256": "8faa0c0f415176453ab459afadc832f0ae3ec00d87e41778603a95037ceb0477",
+      "line": 123,
+      "needle": "public function offers",
+      "excerpt": "    /** العروض — قائمة فارغة في وضع الموظفين لأن `offers()` يستبعد صف التعيين (BR-007). */\n    public function offers(Request $request, Order $order): AnonymousResourceCollection\n    {\n        Gate::authorize('view', $order);\n\n        $sort = $request->query('sort', 'rating');\n"
+    },
+    {
+      "file": "app/Http/Api/V1/Resources/OfferResource.php",
+      "sha256": "e8c40c546a26c43e1feaae3e36be0b518009a1efd66f55a7c19212825c4161d4",
+      "line": 33,
+      "needle": "'provider' =>",
+      "excerpt": "            'submitted_at' => $this->submitted_at?->toIso8601String(),\n            'provider' => [\n                'id' => $provider?->id,\n                'name' => $provider?->user->name,\n                'avatar_path' => $provider?->user->avatar_path,\n                'is_verified' => (bool) $provider?->isVerified(),\n                'rating_avg' => $provider?->rating_avg,"
+    },
+    {
+      "file": "androidapp/core/design/src/main/res/layout/view_offer_card.xml",
+      "sha256": "941e7cddcebd57c92799d3c9f11d71c7adf2d1dd6cecb17488163c3ce63470bd",
+      "line": 30,
+      "needle": "BACKEND-NOTES B-17",
+      "excerpt": "\n            <!-- STATIC (DEC-074, BACKEND-NOTES B-17): offers carry no online state yet. -->\n            <View\n                android:layout_width=\"@dimen/bremo_size_online_dot\"\n                android:layout_height=\"@dimen/bremo_size_online_dot\"\n                android:layout_gravity=\"bottom|start\"\n                android:background=\"@drawable/bremo_bg_online_dot\" />"
+    },
+    {
+      "file": "iosapp/Packages/DesignSystem/Sources/DesignSystem/BzrComponents.swift",
+      "sha256": "def279b013e349f8a804cfe309f348d9e71322e4c4f4634f88bb3c6e2b2f13be",
+      "line": 1265,
+      "needle": "BACKEND-NOTES B-17",
+      "excerpt": "                    .overlay(alignment: .bottomLeading) {\n                        // STATIC (DEC-074, BACKEND-NOTES B-17): offers carry no online state yet.\n                        Circle().fill(DesignColors.success)\n                            .overlay(Circle().strokeBorder(DesignColors.surface, lineWidth: DesignSize.controlStroke))\n                            .frame(width: DesignSize.onlineDot, height: DesignSize.onlineDot)\n                    }\n                    .accessibilityHidden(true)"
+    },
+    {
+      "file": "androidapp/app/src/main/kotlin/noox/bzr/customer/ProposalDecisionView.kt",
+      "sha256": "78502117ee517eda768a46461c164c2a2361c04a292058df75f53808be72f2b1",
+      "line": 242,
+      "needle": "private fun photo()",
+      "excerpt": "\n    private fun photo() = FrameLayout(context).apply {\n        setBackgroundResource(R.drawable.bremo_bg_stat_strip)\n        addView(icon(R.drawable.ic_camera, R.color.bremo_slate400), FrameLayout.LayoutParams(px(R.dimen.bremo_size_icon), px(R.dimen.bremo_size_icon), Gravity.CENTER))\n        layoutParams = LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, px(R.dimen.bremo_size_map_card_height))\n        contentDescription = string(R.string.proposal_photo)\n    }"
+    },
+    {
+      "file": "iosapp/BzrApp/Customer/ProposalDecisionViews.swift",
+      "sha256": "3df1cbd2f5f1d8c5428f4da2b3f63370cf3dc5ea209cbe60a1cb1b2f49e175c9",
+      "line": 178,
+      "needle": "private var photo",
+      "excerpt": "\n    private var photo: some View {\n        BzrIcon(.camera, tint: DesignColors.slate400)\n            .frame(maxWidth: .infinity)\n            .frame(height: DesignSize.mapCardHeight)\n            .background(RoundedRectangle(cornerRadius: DesignRadius.menuIconBox).fill(DesignColors.surfaceAlt2))\n            .accessibilityLabel(bzrString(\"proposal.photo\"))"
+    },
+    {
+      "file": "app/Http/Api/V1/Resources/ProposalResource.php",
+      "sha256": "55bd8a638b18f16e7eea0ffe94bae0fdfe632b2f11130972799b2b53f78b1e74",
+      "line": 30,
+      "needle": "'photo_path'",
+      "excerpt": "            'reason' => $this->reason,\n            'photo_path' => $this->photo_path,\n            'price_guide' => $this->price_guide_min === null && $this->price_guide_max === null ? null : [\n                'minimum' => $this->price_guide_min,\n                'maximum' => $this->price_guide_max,\n            ],\n            'outside_price_guide' => $this->outside_price_guide,"
+    },
+    {
+      "file": "androidapp/core/design/src/main/kotlin/noox/bzr/design/views/ChatBubbleView.kt",
+      "sha256": "fa39a9492ce13f3cfb6209fbe64aacedfba4db5582409e25d7bc881a3bbefacc",
+      "line": 41,
+      "needle": "private fun render",
+      "excerpt": "\n    private fun render() {\n        val blocked = kind == ChatKind.Blocked\n        val foreground = when {\n            blocked -> R.color.bremo_danger\n            sent -> R.color.bremo_on_primary\n            else -> R.color.bremo_navy800"
+    },
+    {
+      "file": "androidapp/app/src/main/kotlin/noox/bzr/customer/C19ChatView.kt",
+      "sha256": "3bc354dc35533e435d627f035d30c13f5a79a717a57918277e00c1dd365b1aff",
+      "line": 32,
+      "needle": "row.descriptor.endsWith(\"_image\")",
+      "excerpt": "            val item = ItemChatMessageBinding.bind(view)\n            item.bubble.text = row.text.ifBlank { if (row.descriptor.endsWith(\"_image\")) string(R.string.chat_image) else \"\" }\n            item.bubble.sent = row.descriptor.startsWith(\"sent_\")\n            item.bubble.kind = when {\n                row.descriptor.endsWith(\"_image\") -> ChatKind.Image\n                row.descriptor.endsWith(\"_blocked\") -> ChatKind.Blocked\n                else -> ChatKind.Text"
+    },
+    {
+      "file": "iosapp/BzrApp/Customer/C19ChatView.swift",
+      "sha256": "dfeb6ebc7aebc19bb945dc4ff478aa0ab5ab97fdb6c2583975cf218f9eb50a2e",
+      "line": 49,
+      "needle": "descriptor.hasSuffix(\"_image\")",
+      "excerpt": "                    ChatBubble(\n                        text: state.items[index].isEmpty && descriptor.hasSuffix(\"_image\")\n                            ? bzrString(\"chat.image\") : state.items[index],\n                        sent: descriptor.hasPrefix(\"sent_\"),\n                        kind: descriptor.hasSuffix(\"_image\")\n                            ? .image\n                            : (descriptor.hasSuffix(\"_blocked\") ? .blocked : .text))"
+    },
+    {
+      "file": "app/Http/Api/V1/Resources/OrderResource.php",
+      "sha256": "b4cf09f3c203d21b355c1f7bf17d5ca70570960b0364e45d64802f9509230769",
+      "line": 159,
+      "needle": "'work_photos'",
+      "excerpt": "\n            'work_photos' => $this->resource->media->whereIn('purpose', ['REPAIR_BEFORE', 'REPAIR_AFTER'])\n                ->map(fn ($media): array => ['id' => $media->getKey(), 'purpose' => $media->purpose])->values(),\n            'review_photo_ids' => $this->resource->media->where('purpose', 'CUSTOMER_REVIEW')->pluck('id')->values(),\n            'warranty_until' => $this->resource->warrantyExpiresAt()?->toIso8601String(),\n\n            'available_actions' => $request->user() === null"
+    },
+    {
+      "file": "androidapp/app/src/main/kotlin/noox/bzr/customer/FinishServiceBlocks.kt",
+      "sha256": "8941778e039ecf0f095b0fd4c4fe3610c976ff778e0b3d8c4b72efe87a9433f2",
+      "line": 23,
+      "needle": "Before/after photos",
+      "excerpt": " * The shared blocks of Figma «إنهاء الخدمة والدفع» 3002:4134 (DEC-076) for SCR-C21 (payment) and SCR-C23 (confirm):\n * the completion hero, the provider and job card, and the invoice. Before/after photos are left out — the API has none\n * and a stock picture would misrepresent the customer's own job (BACKEND-NOTES B-05).\n */\ninternal class FinishServiceBlocks(private val context: Context) {\n    private val resources = context.resources\n"
+    },
+    {
+      "file": "iosapp/BzrApp/Customer/FinishServiceBlocks.swift",
+      "sha256": "3609584fb6b07eb91959814798235f587a550633ba7c3fc10285052ab71eea41",
+      "line": 6,
+      "needle": "Before/after photos",
+      "excerpt": "/// The shared blocks of Figma «إنهاء الخدمة والدفع» 3002:4134 (DEC-076) for SCR-C21 (payment) and SCR-C23 (confirm):\n/// the completion hero, the provider and job card, and the invoice. Before/after photos are left out — the API has none\n/// and a stock picture would misrepresent the customer's own job (BACKEND-NOTES B-05).\nenum FinishServiceBlocks {\n    static func amount(_ value: String) -> String {\n        BzrFormatter.fill(bzrString(\"customer.home.offers.amount\"), values: [(\"amount\", value)])\n    }"
+    },
+    {
+      "file": "app/Http/Api/V1/Controllers/ProviderController.php",
+      "sha256": "74effa7c14e95aef73144a5fb71cb2343db116efd7b0d5beaa42c57c0e4c725f",
+      "line": 29,
+      "needle": "latest()->limit(10)",
+      "excerpt": "            'user', 'categories:id,name,name_en', 'specialties:id,name,name_en', 'portfolioItems',\n            'reviews' => fn ($query) => $query->visible()->with('customer:id,name')->latest()->limit(10),\n        ]);\n\n        $actions = $presentation->availableActions($order, $request->user(), ActorType::Customer);\n        $providerOfferIsSelectable = $order->offers->contains(\n            fn ($offer): bool => $offer->provider_profile_id === $provider->getKey()"
+    },
+    {
+      "file": "app/Http/Api/V1/Resources/ProviderResource.php",
+      "sha256": "3f680de903db7a82be8a3249c0edd23b712e4cd979e7267783407d453a17f0df",
+      "line": 47,
+      "needle": "'reviews' =>",
+      "excerpt": "            ])->values(),\n            'reviews' => $this->reviews->map(fn ($review): array => [\n                'id' => $review->id,\n                'customer_name' => $review->customer->shortName(),\n                'quality' => $review->quality,\n                'punctuality' => $review->punctuality,\n                'conduct' => $review->conduct,"
+    },
+    {
+      "file": "app/Modules/Payments/Services/PaymentChannels.php",
+      "sha256": "3d5d5c6a32be38154b0253116edd82dde4c70e6d1048cfad8d3c470dddaa0d0e",
+      "line": 20,
+      "needle": "public function isEnabled",
+      "excerpt": "\n    public function isEnabled(PaymentGatewayChannel $channel): bool\n    {\n        if ($channel === PaymentGatewayChannel::InstapayManual && $this->instapayAddress() === null) {\n            return false; // لا تُعرض القناة قبل أن يُدخل المدير العام عنوان المنصة\n        }\n"
+    },
+    {
+      "file": "app/Modules/Payments/Services/StagingPaymentGateway.php",
+      "sha256": "241e47f76604e10877ba03adb07b239c455391e498c30650d35f0e7a9a865286",
+      "line": 17,
+      "needle": "final readonly class",
+      "excerpt": "/** محاكي staging يحاكي عقد فوري، بما فيه webhook موقّع، بلا اتصال خارجي. */\nfinal readonly class StagingPaymentGateway implements PaymentGateway\n{\n    public function __construct(private FawryWebhookSignature $signature) {}\n\n    public function create(\n        Payment $payment,"
+    },
+    {
+      "file": "app/Providers/AppServiceProvider.php",
+      "sha256": "d7c32a188073b2df176e05cb02dee3799048f50219cb1257a3b72b5a73ccd24c",
+      "line": 38,
+      "needle": "real Fawry gateway",
+      "excerpt": "            if (config('services.fawry.driver') !== 'staging') {\n                throw new RuntimeException('The real Fawry gateway is not enabled until OD-10 is resolved.');\n            }\n\n            return app(StagingPaymentGateway::class);\n        });\n        // DEC-058 — `log` للتطوير والاختبار فقط؛ production يرفض أي مسار غير FCM."
+    },
+    {
+      "file": "app/Http/Api/V1/Controllers/PageController.php",
+      "sha256": "a11950f36d1a13cd2ce16ee74afb2142af297269202ae4d119b69f4a01c449a7",
+      "line": 24,
+      "needle": "PAGE_NOT_PUBLISHED",
+      "excerpt": "        if ($version === null) {\n            return new JsonResponse(['error' => ['code' => 'PAGE_NOT_PUBLISHED', 'message' => Localization::text('messages.page_not_published')]], 404);\n        }\n\n        return new JsonResponse(['data' => self::payload($version)]);\n    }\n"
+    },
+    {
+      "file": "docs/34-DECISION-LOG.md",
+      "sha256": "c59460557cdab52bc7e6603c3d2a5b8491710c2c2d3bd344edd634ca3073d369",
+      "line": 81,
+      "needle": "| DEC-077 |",
+      "excerpt": "| DEC-076 | ⏳ مقترح 2026-10-10 — الدفعة figma-d: المتابعة، والفحص، والدفع، والتقييم، والرسائل، وطلباتي، والإشعارات، وحسابي مطابقين لـ Figma | (1) **C09 بحالاتها الأربع** ← 3002:1631 (تم التأكيد)، و1903 (في الطريق)، و2055 (وصل)، و2540 (جاري التنفيذ). كود الوصول وزرار «تأكيد الوصول» مش ظاهرين (B-22)، و«الوقت المتوقع للانتهاء» ثابت 30 دقيقة (B-07، DEC-074). (2) **C30/C31** ← 3002:2264 و3002:4029. (3) **C21/C23** ← 3002:4134، من غير صور «قبل / بعد» (B-05)، وطرق الدفع هي اللي الخادم بيرجّعها بس (B-06). (4) **C24** ← 3002:4475: النجوم العامة بتحط البنود التلاتة مرة واحدة، والوسوم السريعة بتتبعت في أول التعليق (B-04)، وزرار «إضافة صورة» مش ظاهر. (5) **C18** ← 3002:2924: بحث محلي، و«الكل / طلبات نشطة»، وصف «دعم بريمو» بيفتح C29. «غير مقروءة» وعدد الرسائل مش ظاهرين (B-02)، ونقطة «متصل» ثابتة (B-03). (6) **C25** ← 3002:3889: «الحالية / السابقة / الملغاة»، و«الملغاة» هي الطلبات السابقة الملغية أو المنتهية. (7) **C32** ← 3002:3608: «اليوم / سابق»، والأيقونة من `code` الإشعار. (8) **C02** ← 3002:4654: «متوسط التقييم» ثابت (B-09)، و«طرق الدفع» مش ظاهرة (ASM-05)، و«تقييماتي» مش ظاهرة (B-10). |\n| DEC-077 | ✅ معتمد 2026-10-10 — تقسيم القيم الثابتة والعناصر المحذوفة: خادم / تصميم / تطبيق | (1) **التقسيم** في `reports/static-values-review/REPORT.md` §1 معتمد كما هو: دفعة خادم، وتعديلات تصميم، ودفعة تطبيق. (2) **دليل الأسعار (B-14):** إدارة التطبيق هي اللي بتحدد السعر الاسترشادي اللي بيظهر للعميل لكل نوع مشكلة من لوحة الإدارة، منفصل عن دليل الموظفين. الـ API بيرجّعه، والشرائح والشارة («السعر المعتاد») بتتبني عليه. (3) **تقييم العميل (B-09):** ما بيظهرش للعميل أبدًا. بيظهر للموظفين (الفنيين الموظفين في تطبيق الفني) وللإدارة بس. خانة «متوسط التقييم» في حسابي بتتشال من التصميم وتتبدّل بخانة تانية، و`/me` للعميل ما بيرجّعش تقييمه. (4) **كود الوصول و«تأكيد وصول الفني» (B-22):** متأجلين للمرحلة التالية، ومتسجّلين في 36. |\n\n## افتراضات معتمدة ضمنيًا (قابلة للتغيير)\n| المعرّف | الافتراض |\n|---|---|\n| ASM-01 | أقل مبلغ عرض 50 جنيه |"
+    },
+    {
+      "file": "docs/36-FUTURE-ROADMAP.md",
+      "sha256": "6c11ccf4b665a4813b2c85715c4fe0492603d03de1270b32e1a3ad21f3462fe7",
+      "line": 25,
+      "needle": "كود تأكيد وصول الفني",
+      "excerpt": "| تقارير تحليلية | لوحة قراءة فقط |\n| كود تأكيد وصول الفني (DEC-077، B-22، Figma 3002:2055) | الخادم بيولّد كود لكل زيارة، والعميل بيشوفه في C09 «وصل»، والفني بيدخله في تطبيق الفني قبل بدء الشغل؛ وزرار «تأكيد وصول الفني» للعميل. محتاج قواعد: صلاحية الكود، وعدد المحاولات، والتصرف لو العميل مش موجود |"
+    }
+  ],
+  "images": [
+    {
+      "file": "reports/static-values-review/img/s-b14-quick-amounts.png",
+      "sha256": "77046ef21ca483f122083ee1df7f6adcc76e2d05b45433323994767d50cf1c73",
+      "newly_captured": false
+    },
+    {
+      "file": "reports/static-values-review/img/s-b07-finish-time.png",
+      "sha256": "853e8e2caffc2491aeddbeb2ac7559d57cd15096ce817a3dd0a2c2e6a717692d",
+      "newly_captured": false
+    },
+    {
+      "file": "reports/prd-review/assets/after-workflow-staff-wait.png",
+      "sha256": "f4d65b2c8674d6926822d2b9cc632d5d92775d4ea73b33b39b386e7f7f84a859",
+      "newly_captured": false
+    },
+    {
+      "file": "reports/prd-review/assets/after-trust-account.png",
+      "sha256": "d1bfaef82aa02933103700a4d80215d080f2293a854d6b02072f4c58b520b4c6",
+      "newly_captured": false
+    },
+    {
+      "file": "reports/prd-review/assets/after-trust-messages.png",
+      "sha256": "072dcdfb17f524298c51da9fe0032d3391a2ad931d014d1a84680f56bf75c63a",
+      "newly_captured": false
+    }
+  ],
+  "fresh_app_tests_run": false,
+  "device_e2e_run": false,
+  "xcode_build_run": false,
+  "application_code_changed": false,
+  "production_state_inspected": false,
+  "original_prd_modified": false,
+  "limitations": [
+    "Some items are deferred or require settings rather than application code; see report status.",
+    "Photographs and interface screenshots are prior test artifacts, not newly captured device evidence.",
+    "Database state describes the local workspace only.",
+    "A populated settings row with JSON null is missing data; earlier provisional configured classification was corrected."
+  ]
+}

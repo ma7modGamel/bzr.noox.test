@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\Notifications\Services;
 
 use App\Modules\Identity\Models\User;
+use App\Modules\Notifications\Data\LocalizedMessage;
 use App\Modules\Notifications\Data\NotificationContent;
 use App\Modules\Notifications\Enums\NotificationCode;
 
@@ -18,17 +19,17 @@ final class AccountNotifications
     {
         $this->notifier->send($user, new NotificationContent(
             NotificationCode::ApplicationReviewed,
-            $approved ? 'تم قبول طلب انضمامك' : 'تعذّر قبول طلب انضمامك',
+            $approved ? new LocalizedMessage('notifications.application_approved_title') : new LocalizedMessage('notifications.application_rejected_title'),
             $approved
-                ? 'يمكنك الآن تفعيل «متاح الآن» واستقبال الطلبات.'
-                : 'السبب: '.$reason.' يمكنك تعديل بياناتك وإعادة التقديم من التطبيق.',
+                ? new LocalizedMessage('notifications.application_approved_body')
+                : new LocalizedMessage('notifications.application_rejected_body', ['reason' => $reason ?? '']),
             'provider/application',
             NotificationContent::PROVIDER,
         ));
     }
 
     /** NTF-26 — إيقاف/حظر/إعادة تفعيل؛ بريد فقط (17). */
-    public function accountStatusChanged(User $user, string $title, string $body): void
+    public function accountStatusChanged(User $user, string|LocalizedMessage $title, string|LocalizedMessage $body): void
     {
         $this->notifier->send($user, new NotificationContent(
             NotificationCode::AccountStatusChanged, $title, $body, null, NotificationContent::CUSTOMER,

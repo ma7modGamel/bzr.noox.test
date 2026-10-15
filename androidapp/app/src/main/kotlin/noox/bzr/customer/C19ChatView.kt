@@ -12,11 +12,12 @@ import noox.bzr.gallery.databinding.ScreenC19ChatBinding
 /** SCR-C19 (DEC-047): conversation with masking notice, images, read-only state. */
 class C19ChatView(context: Context) : CustomerScreenView(context) {
     private val binding = ScreenC19ChatBinding.inflate(inflater, content)
+    var loadImage: (String, (android.graphics.Bitmap?) -> Unit) -> Unit = { _, ready -> ready(null) }
     var onDraftChange: (String) -> Unit = {}
     var onSend: () -> Unit = {}
     var onAddPhoto: () -> Unit = {}
 
-    private data class Row(val index: Int, val text: String, val descriptor: String, val time: String)
+    private data class Row(val index: Int, val text: String, val descriptor: String, val time: String, val photos: List<String>)
 
     private val adapter = RowAdapter<Row, LinearLayout>(
         create = { parent ->
@@ -25,6 +26,7 @@ class C19ChatView(context: Context) : CustomerScreenView(context) {
                 dividerDrawable = ContextCompat.getDrawable(context, R.drawable.bremo_gap_xs)
                 showDividers = LinearLayout.SHOW_DIVIDER_MIDDLE
                 ItemChatMessageBinding.inflate(inflater, this)
+                addView(LinearLayout(context).apply { orientation = LinearLayout.VERTICAL; tag = "message-photos" })
             }
         },
         bind = { view, row, _ ->
@@ -36,6 +38,9 @@ class C19ChatView(context: Context) : CustomerScreenView(context) {
                 row.descriptor.endsWith("_blocked") -> ChatKind.Blocked
                 else -> ChatKind.Text
             }
+            val photos = view.findViewWithTag<LinearLayout>("message-photos")
+            photos.removeAllViews()
+            row.photos.forEach { url -> photos.addView(AuthenticatedPhotoView(context).apply { loadImage = this@C19ChatView.loadImage; bind(url) }) }
             item.time.text = row.time
         },
         key = { it.index },
@@ -59,13 +64,13 @@ class C19ChatView(context: Context) : CustomerScreenView(context) {
     override fun renderContent(state: CustomerUiState) {
         binding.header.name = state.options.firstOrNull().orEmpty()
         binding.header.verifiedLabel = string(R.string.provider_verified).takeIf { state.providerVerified }
-        binding.subtitle.text = state.options.getOrElse(1) { "" }
+        binding.subtitle.text = listOf(state.options.getOrElse(1) { "" }, if (state.providerAvailable) string(R.string.provider_available_now) else "").filter(String::isNotBlank).joinToString(" · ")
         binding.masking.isVisible = state.messageKey == "chat.masking.notice"
         binding.empty.isVisible = state.phase == CustomerPhase.Empty
         binding.messages.isVisible = state.items.isNotEmpty()
         adapter.submitList(
             state.items.indices.map { index ->
-                Row(index, state.items[index], state.itemStates.getOrElse(index) { "received_text" }, state.itemDetails.getOrElse(index) { "" })
+                Row(index, state.items[index], state.itemStates.getOrElse(index) { "received_text" }, state.itemDetails.getOrElse(index) { "" }, state.imageGroups.getOrElse(index) { emptyList() })
             },
         )
         val readOnly = state.options.getOrElse(2) { "" } == "READ_ONLY"

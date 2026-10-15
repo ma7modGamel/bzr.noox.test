@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- C37 attachment tile (Figma 3002:144): the kind's icon and name; the last tile adds one more. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="@dimen/bremo_size_attachment_tile"
+    android:layout_height="wrap_content"
+    android:minHeight="@dimen/bremo_size_attachment_tile"
+    android:background="@drawable/bremo_bg_card"
+    android:divider="@drawable/bremo_gap_xs"
+    android:foreground="?attr/selectableItemBackground"
+    android:gravity="center"
+    android:orientation="vertical"
+    android:padding="@dimen/bremo_space_s"
+    android:showDividers="middle">
+
+    <ImageView
+        android:id="@+id/icon"
+        android:layout_width="@dimen/bremo_size_icon"
+        android:layout_height="@dimen/bremo_size_icon"
+        android:importantForAccessibility="no"
+        app:tint="@color/bremo_primary600" />
+
+    <TextView
+        android:id="@+id/label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:maxLines="3"
+        android:textAppearance="@style/TextAppearance.Bremo.Hint" />
+</LinearLayout>

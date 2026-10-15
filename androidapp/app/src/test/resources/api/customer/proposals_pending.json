@@ -1,0 +1,24 @@
+{
+    "data": [
+        {
+            "id": 1000,
+            "type": "EXECUTION_QUOTE",
+            "type_label": "عرض تنفيذ",
+            "amount": "450.00",
+            "projected_total": "450.00",
+            "reason": "تغيير خرطوم وصيانة الخلاط",
+            "photo_path": null,
+            "price_guide": {
+                "minimum": "300.00",
+                "maximum": "500.00"
+            },
+            "outside_price_guide": false,
+            "price_review_reason": null,
+            "outside_price_guide_reason": null,
+            "status": "PENDING",
+            "status_label": "بانتظار الرد",
+            "expires_at": "2026-10-05T07:00:31+00:00",
+            "decided_at": null
+        }
+    ]
+}

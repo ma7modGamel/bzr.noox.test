@@ -7,6 +7,7 @@ namespace App\Http\Controllers;
 use App\Modules\Orders\Enums\OrderStatus;
 use App\Modules\Orders\Models\ShareLink;
 use App\Modules\Orders\Services\OrderPresentation;
+use App\Support\Localization;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -41,7 +42,7 @@ final class ShareVisitController extends Controller
                 'avatar_url' => $provider->user->avatar_path === null
                     ? null
                     : Storage::disk('public')->url($provider->user->avatar_path),
-                'category_name' => $order->category->name,
+                'category_name' => Localization::field($order->category),
             ],
             'display_status' => $order->statusLabel(),
             'status' => $order->status,
@@ -57,7 +58,7 @@ final class ShareVisitController extends Controller
                 ? $this->designString('status.reviewing')
                 : null,
             'order_number' => $order->number,
-            'area_name' => $order->area->name,
+            'area_name' => Localization::field($order->area),
         ];
 
         return $this->response('share-visit', ['expired' => false, 'visit' => $viewModel]);
@@ -77,14 +78,6 @@ final class ShareVisitController extends Controller
 
     private function designString(string $key): string
     {
-        static $strings;
-
-        $strings ??= json_decode(
-            (string) file_get_contents(base_path('design/strings.ar.json')),
-            true,
-            flags: JSON_THROW_ON_ERROR,
-        );
-
-        return (string) ($strings[$key] ?? $key);
+        return Localization::design($key);
     }
 }

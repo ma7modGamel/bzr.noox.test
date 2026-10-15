@@ -14,6 +14,7 @@ use Filament\Actions\CreateAction;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\RichEditor;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Resources\RelationManagers\RelationManager;
@@ -33,6 +34,7 @@ final class VersionsRelationManager extends RelationManager
     public function form(Schema $schema): Schema
     {
         return $schema->components([
+            Select::make('locale')->label('لغة الوثيقة')->options(['ar' => 'العربية', 'en' => 'English'])->default('ar')->required(),
             TextInput::make('title')->label('العنوان')->required()->maxLength(150),
             DateTimePicker::make('effective_at')
                 ->label('تاريخ السريان')
@@ -53,6 +55,7 @@ final class VersionsRelationManager extends RelationManager
             ->columns([
                 TextColumn::make('version')->label('النسخة'),
                 TextColumn::make('title')->label('العنوان'),
+                TextColumn::make('locale')->label('اللغة'),
                 TextColumn::make('status')->label('الحالة')->badge(),
                 IconColumn::make('requires_legal_review')->label('تحتاج مراجعة قانونية')->boolean()
                     ->trueColor('warning')->falseColor('gray'),

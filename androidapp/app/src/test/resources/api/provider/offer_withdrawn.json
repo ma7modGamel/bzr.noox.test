@@ -1,0 +1,27 @@
+{
+    "data": {
+        "id": 1000,
+        "status": "WITHDRAWN",
+        "display_status": "مسحوب",
+        "price": "350.00",
+        "net_amount": "315.00",
+        "eta_minutes": 30,
+        "inspection_fee_deductible": true,
+        "includes_text": "المصنعية فقط",
+        "note": null,
+        "submitted_at": "2026-10-05T06:00:00+00:00",
+        "available_actions": [
+            "open_available_request"
+        ],
+        "order": {
+            "id": 1000,
+            "number": 2,
+            "version": 1,
+            "category": "سباكة",
+            "problem_type": "تسريب مياه",
+            "area": "الحي الأول",
+            "timing_type": "NOW",
+            "slot_start": null
+        }
+    }
+}

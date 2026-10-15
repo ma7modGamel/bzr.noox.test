@@ -6,6 +6,7 @@ namespace App\Filament\Resources\Disputes\Pages;
 
 use App\Filament\Resources\Disputes\DisputeResource;
 use App\Modules\Identity\Models\Admin;
+use App\Modules\Payments\Actions\RecordRefundAction;
 use App\Modules\Support\Actions\ResolveDisputeAction;
 use App\Modules\Support\Enums\DisputeResolution;
 use App\Modules\Support\Enums\DisputeStatus;
@@ -14,13 +15,14 @@ use App\Support\Exceptions\DomainException;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Support\Icons\Heroicon;
 
 /**
  * قرار النزاع — 16 §قرار النزاع، 23: مدير التشغيل يحسم بلا استرداد، والمدير العام وحده يختار الاسترداد.
- * تسجيل مبلغ الاسترداد نفسه في دفعة المال (7).
+ * وبعد قرار باسترداد يسجل المدير العام مبلغ الاسترداد نفسه (DEC-066).
  */
 final class ViewDispute extends ViewRecord
 {
@@ -70,6 +72,40 @@ final class ViewDispute extends ViewRecord
                     $this->refreshFormData([]);
                     Notification::make()->success()->title('تم تسجيل القرار وإبلاغ الطرفين (NTF-17).')->send();
                 }),
+
+            // DEC-019، DEC-066 — بعد تنفيذ الاسترداد فعلًا في البوابة أو البنك؛ للمدير العام وحده.
+            Action::make('recordRefund')
+                ->label('تسجيل الاسترداد')
+                ->icon(Heroicon::OutlinedReceiptRefund)
+                ->color('warning')
+                ->visible(fn (): bool => $this->refundable() !== null)
+                ->modalDescription(fn (): string => 'المتبقي للاسترداد: '.($this->refundable()['total'] ?? '0.00')
+                    .' جنيه. سجّل بعد تنفيذ الاسترداد في فوري أو من حساب المنصة؛ العمولة تُعاد حسابها (BR-060).')
+                ->fillForm(fn (): array => [
+                    'labor_amount' => $this->refundable()['labor'] ?? '0.00',
+                    'materials_amount' => $this->refundable()['materials'] ?? '0.00',
+                ])
+                ->schema([
+                    TextInput::make('labor_amount')->label('جزء المصنعية (جنيه)')->numeric()->minValue(0)->step('0.01')->required(),
+                    TextInput::make('materials_amount')->label('جزء الخامات (جنيه)')->numeric()->minValue(0)->step('0.01')->required(),
+                    TextInput::make('reference')->label('الرقم المرجعي للاسترداد')->required()->maxLength(64),
+                    Textarea::make('reason')->label('السبب')->required()->minLength(5)->maxLength(500),
+                ])
+                ->action(function (array $data): void {
+                    try {
+                        app(RecordRefundAction::class)->execute(
+                            $this->dispute(), $this->admin(), (string) $data['labor_amount'], (string) $data['materials_amount'],
+                            (string) $data['reference'], (string) $data['reason'],
+                        );
+                    } catch (DomainException $e) {
+                        Notification::make()->danger()->title($e->errorCode())->body($e->getMessage())->send();
+
+                        return;
+                    }
+
+                    $this->record->refresh();
+                    Notification::make()->success()->title('تم تسجيل الاسترداد (EVT-082).')->send();
+                }),
         ];
     }
 
@@ -91,6 +127,26 @@ final class ViewDispute extends ViewRecord
             $refunds ? DisputeResolution::CloseWithRefund : null,
             $refunds ? DisputeResolution::CancelFullRefund : null,
         ]));
+    }
+
+    /** @return array{labor: string, materials: string, total: string}|null ما يمكن استرداده الآن، أو null إن لم يكن الإجراء متاحًا. */
+    private function refundable(): ?array
+    {
+        $dispute = $this->dispute();
+
+        if (! $this->admin()->isSuper()
+            || $dispute->status !== DisputeStatus::Resolved
+            || ! in_array($dispute->resolution, RecordRefundAction::REFUND_RESOLUTIONS, true)) {
+            return null;
+        }
+
+        try {
+            $remaining = app(RecordRefundAction::class)->remaining($dispute->order()->firstOrFail());
+        } catch (DomainException) {
+            return null;
+        }
+
+        return bccomp($remaining['total'], '0.00', 2) > 0 ? $remaining : null;
     }
 
     private function dispute(): Dispute

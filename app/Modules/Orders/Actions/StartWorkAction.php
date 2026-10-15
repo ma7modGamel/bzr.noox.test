@@ -10,6 +10,7 @@ use App\Modules\Orders\Models\Order;
 use App\Modules\Orders\StateMachine\OrderStateMachine;
 use App\Modules\Providers\Models\ProviderProfile;
 use App\Support\Exceptions\BusinessRuleViolationException;
+use App\Support\Localization;
 
 /**
  * T-11 — بدء التنفيذ مباشرة بعد الوصول.
@@ -22,13 +23,13 @@ final readonly class StartWorkAction
     public function execute(Order $order, ProviderProfile $provider): Order
     {
         if ($order->provider_profile_id !== $provider->getKey()) {
-            throw BusinessRuleViolationException::rule('BR-022', 'هذا الطلب غير مسنَد إليك.');
+            throw BusinessRuleViolationException::rule('BR-022', Localization::text('copy.this_request_is_not_assigned_to_you'));
         }
 
         if ($order->pricing_mode !== PricingMode::Execution) {
             throw BusinessRuleViolationException::rule(
                 'BR-042',
-                'طلب المعاينة يبدأ التنفيذ بعد موافقة العميل على عرض التنفيذ.',
+                Localization::text('copy.work_on_an_inspection_request_starts_after_the_customer'),
             );
         }
 

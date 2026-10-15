@@ -1,0 +1,22 @@
+{
+    "user": {
+        "id": 1000,
+        "name": "منى حسن",
+        "email": "fahmy.mohamed@example.org",
+        "phone": "01011111111",
+        "avatar_url": null,
+        "is_verified": true,
+        "rating_reminders_enabled": false,
+        "terms": {
+            "current_version": 1,
+            "accepted_version": null,
+            "acceptance_required": true
+        },
+        "available_actions": [
+            "update_account",
+            "change_password",
+            "delete_account",
+            "logout"
+        ]
+    }
+}

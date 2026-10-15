@@ -11,6 +11,7 @@ use App\Http\Api\V1\Resources\ProviderRequestResource;
 use App\Modules\Offers\Actions\SubmitOfferAction;
 use App\Modules\Offers\Actions\WithdrawOfferAction;
 use App\Modules\Offers\Models\Offer;
+use App\Modules\Orders\Actions\AttachWorkPhotoAction;
 use App\Modules\Orders\Actions\BackOutAction;
 use App\Modules\Orders\Actions\CompleteInspectionOnlyAction;
 use App\Modules\Orders\Actions\CompleteWorkAction;
@@ -19,6 +20,7 @@ use App\Modules\Orders\Actions\RecordLocationAction;
 use App\Modules\Orders\Actions\ReportUnableAction;
 use App\Modules\Orders\Actions\StartTripAction;
 use App\Modules\Orders\Actions\StartWorkAction;
+use App\Modules\Orders\Actions\UpdateCompletionEstimateAction;
 use App\Modules\Orders\Enums\ActorType;
 use App\Modules\Orders\Enums\CancelReason;
 use App\Modules\Orders\Models\Order;
@@ -30,6 +32,7 @@ use App\Modules\Pricing\Enums\ProposalType;
 use App\Modules\Providers\Models\ProviderProfile;
 use App\Modules\Settings\Services\FeatureGate;
 use App\Support\Exceptions\BusinessRuleViolationException;
+use App\Support\Localization;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
@@ -194,9 +197,11 @@ final class ProviderOrderController
         Gate::authorize('perform', $order);
 
         $data = $request->validate([
+            'expected_version' => ['required', 'integer', 'min:1'],
             'lat' => ['required', 'numeric', 'between:-90,90'],
             'lng' => ['required', 'numeric', 'between:-180,180'],
             'confirm_far_arrival' => ['boolean'],
+            'arrival_code' => ['nullable', 'string', 'regex:/^[0-9]{6}$/'],
         ]);
 
         return new OrderResource($action->execute(
@@ -205,6 +210,8 @@ final class ProviderOrderController
             (float) $data['lat'],
             (float) $data['lng'],
             $request->boolean('confirm_far_arrival'),
+            $data['arrival_code'] ?? null,
+            $request->integer('expected_version'),
         ));
     }
 
@@ -213,6 +220,14 @@ final class ProviderOrderController
         Gate::authorize('perform', $order);
 
         return new OrderResource($action->execute($order, $this->profile($request)));
+    }
+
+    public function completionEstimate(Request $request, Order $order, UpdateCompletionEstimateAction $action): OrderResource
+    {
+        Gate::authorize('perform', $order);
+        $data = $request->validate(['minutes' => ['present', 'nullable', 'integer', 'between:1,1440'], 'expected_version' => ['required', 'integer', 'min:1']]);
+
+        return new OrderResource($action->execute($order, $this->profile($request), isset($data['minutes']) ? (int) $data['minutes'] : null, (int) $data['expected_version'])->load($this->resourceRelations()));
     }
 
     /** T-12 / خامات / أعمال إضافية — 12. */
@@ -241,7 +256,7 @@ final class ProviderOrderController
 
             if (isset($data['photo_media_id']) && $media === null) {
                 throw ValidationException::withMessages([
-                    'photo_media_id' => 'الصورة غير صالحة أو غير مملوكة للحساب.',
+                    'photo_media_id' => Localization::text('copy.the_photo_is_invalid_or_does_not_belong_to'),
                 ]);
             }
 
@@ -280,6 +295,18 @@ final class ProviderOrderController
         Gate::authorize('perform', $order);
 
         return new OrderResource($action->execute($order, $this->profile($request)));
+    }
+
+    public function workPhoto(Request $request, Order $order, AttachWorkPhotoAction $action): OrderResource
+    {
+        Gate::authorize('perform', $order);
+        $data = $request->validate([
+            'media_id' => ['required', 'integer'],
+            'purpose' => ['required', 'in:REPAIR_BEFORE,REPAIR_AFTER'],
+        ]);
+
+        return new OrderResource($action->execute($order, $this->profile($request), (int) $data['media_id'], $data['purpose'])
+            ->load($this->resourceRelations()));
     }
 
     /** T-19 — BR-053. */
@@ -353,7 +380,7 @@ final class ProviderOrderController
         $profile = $request->user()->providerProfile;
 
         if ($profile === null) {
-            throw BusinessRuleViolationException::rule('BR-022', 'لا يوجد ملف فني لهذا الحساب.');
+            throw BusinessRuleViolationException::rule('BR-022', Localization::text('copy.there_is_no_technician_profile_for_this_account'));
         }
 
         return $profile;
@@ -363,10 +390,10 @@ final class ProviderOrderController
     private function resourceRelations(): array
     {
         return [
-            'category', 'problemType', 'area', 'city', 'customer', 'providerProfile.user',
+            'events', 'category', 'problemType', 'area', 'city', 'customer', 'providerProfile.user',
             'offers', 'pendingProposalRecord', 'latestSuccessfulPayment', 'review',
             'customerRating', 'conversations',
-            'disputes',
+            'disputes', 'latestNoShowEvent', 'media', 'warrantyClaim.order',
         ];
     }
 }

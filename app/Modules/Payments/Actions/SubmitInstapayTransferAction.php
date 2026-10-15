@@ -19,11 +19,12 @@ use App\Modules\Payments\Services\PaymentChannels;
 use App\Modules\Settings\Enums\Cfg;
 use App\Support\Exceptions\BusinessRuleViolationException;
 use App\Support\Exceptions\FeatureDisabledException;
+use App\Support\Localization;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 /**
- * BR-057 — العميل حوّل المبلغ من تطبيق البنك ويرسل الرقم المرجعي للتحويل (وإيصالًا اختياريًا).
+ * BR-057 — العميل يرسل الرقم المرجعي وصورة التحويل الإلزامية؛ الإدارة تؤكد الاستلام.
  * الطلب يبقى AWAITING_PAYMENT؛ الدفعة PENDING_VERIFICATION حتى يقرر المدير العام.
  */
 final readonly class SubmitInstapayTransferAction
@@ -40,22 +41,21 @@ final readonly class SubmitInstapayTransferAction
             $fresh = Order::query()->lockForUpdate()->findOrFail($order->getKey());
 
             if ($fresh->customer_id !== $customer->getKey() || $fresh->status !== OrderStatus::AwaitingPayment) {
-                throw BusinessRuleViolationException::rule('BR-057', 'تحويل إنستاباي غير متاح لهذا الطلب الآن.');
+                throw BusinessRuleViolationException::rule('BR-057', Localization::text('copy.an_instapay_transfer_is_currently_unavailable_for_this_request'));
             }
 
             if ($this->channels->pendingTransfer($fresh) !== null) {
-                throw BusinessRuleViolationException::rule('BR-057', 'تم إرسال تحويل لهذا الطلب وهو بانتظار تأكيد الإدارة.');
+                throw BusinessRuleViolationException::rule('BR-057', Localization::text('copy.a_transfer_has_already_been_submitted_for_this_request'));
             }
 
-            if ($receiptMediaId !== null) {
-                $media = OrderMedia::query()->find($receiptMediaId);
+            $media = OrderMedia::query()->lockForUpdate()->find($receiptMediaId);
 
-                if ($media === null || $media->uploaded_by !== $customer->getKey()) {
-                    throw BusinessRuleViolationException::rule('BR-057', 'صورة الإيصال غير صالحة.');
-                }
-
-                $media->forceFill(['order_id' => $fresh->getKey(), 'expires_at' => null])->save();
+            if ($media === null || $media->uploaded_by !== $customer->getKey() || $media->type !== 'IMAGE'
+                || $media->order_id !== null || $media->expires_at?->isPast()) {
+                throw BusinessRuleViolationException::rule('BR-057', Localization::text('copy.the_receipt_image_is_invalid'));
             }
+
+            $media->forceFill(['order_id' => $fresh->getKey(), 'purpose' => 'PAYMENT_RECEIPT', 'expires_at' => null])->save();
 
             // تحويل إنستاباي دفع إلكتروني (BR-050)؛ أي محاولة فوري معلّقة تُلغى.
             Payment::query()

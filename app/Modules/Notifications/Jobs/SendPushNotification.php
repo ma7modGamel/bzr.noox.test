@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\Notifications\Jobs;
 
 use App\Modules\Notifications\Contracts\PushSender;
+use App\Modules\Notifications\Data\NotificationContent;
 use App\Modules\Notifications\Enums\NotificationCode;
 use App\Modules\Notifications\Models\DeviceToken;
 use App\Modules\Notifications\Push\PushMessage;
@@ -49,7 +50,7 @@ final class SendPushNotification implements ShouldQueue
             return;
         }
 
-        $result = $sender->send($device->token, $this->message($notification));
+        $result = $sender->send($device->token, $this->message($notification, $device->locale ?? 'ar'));
 
         match ($result) {
             PushResult::Sent => null,
@@ -59,10 +60,10 @@ final class SendPushNotification implements ShouldQueue
         };
     }
 
-    private function message(DatabaseNotification $notification): PushMessage
+    private function message(DatabaseNotification $notification, string $locale): PushMessage
     {
         /** @var array<string, mixed> $data */
-        $data = $notification->data;
+        $data = NotificationContent::localized($notification->data, $locale);
         $code = NotificationCode::tryFrom((string) ($data['code'] ?? ''));
         $orderId = $data['order_id'] ?? null;
 

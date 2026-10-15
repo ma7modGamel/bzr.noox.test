@@ -6,6 +6,7 @@ namespace App\Modules\Pricing\Actions;
 
 use App\Modules\Orders\Enums\ActorType;
 use App\Modules\Orders\Enums\OrderEventCode;
+use App\Modules\Orders\Enums\OrderStatus;
 use App\Modules\Orders\Models\Order;
 use App\Modules\Orders\Models\OrderEvent;
 use App\Modules\Orders\StateMachine\OrderStateMachine;
@@ -15,6 +16,7 @@ use App\Modules\Pricing\Enums\ProposalType;
 use App\Modules\Pricing\Models\PriceProposal;
 use App\Modules\Pricing\Services\OrderAmounts;
 use App\Support\Exceptions\BusinessRuleViolationException;
+use App\Support\Localization;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -31,6 +33,10 @@ final readonly class DecideProposalAction
     public function approve(Order $order, PriceProposal $proposal, ActorType $actor, ?int $actorId = null): Order
     {
         $this->assertDecidable($order, $proposal);
+        $this->assertWarrantyConsent($order, $proposal, $actor, $actorId);
+        if ($order->isWarrantyVisit() && $actor !== ActorType::Customer) {
+            throw BusinessRuleViolationException::rule('WARRANTY-14', Localization::text('copy.warranty_materials_consent_required'));
+        }
 
         if ($proposal->type === ProposalType::ExecutionQuote) {
             return $this->stateMachine->apply(
@@ -71,6 +77,7 @@ final readonly class DecideProposalAction
         OrderEventCode $event,
     ): Order {
         $this->assertDecidable($order, $proposal);
+        $this->assertWarrantyConsent($order, $proposal, $actor, $actorId);
 
         if ($proposal->type !== ProposalType::ExecutionQuote) {
             return $this->decideInPlace($order, $proposal, $status, $actor, $actorId, $event);
@@ -127,7 +134,21 @@ final readonly class DecideProposalAction
         OrderEventCode $event,
     ): Order {
         DB::transaction(function () use ($order, $proposal, $status, $actor, $actorId, $event): void {
+            $order = Order::query()->lockForUpdate()->findOrFail($order->id);
+            $proposal = PriceProposal::query()->lockForUpdate()->findOrFail($proposal->id);
+            $this->assertDecidable($order, $proposal);
+            $this->assertWarrantyConsent($order, $proposal, $actor, $actorId);
+            if ($order->status !== OrderStatus::InProgress
+                || ($actor !== ActorType::System && ($actor !== ActorType::Customer || $actorId !== $order->customer_id))
+                || ($status === ProposalStatus::Approved && $actor !== ActorType::Customer)
+                || ($actor === ActorType::Customer && ! $proposal->expires_at->isFuture())) {
+                throw BusinessRuleViolationException::rule('BR-041', Localization::text('copy.proposal_customer_decision_required'));
+            }
+            if ($order->isWarrantyVisit() && $status === ProposalStatus::Approved && $actor !== ActorType::Customer) {
+                throw BusinessRuleViolationException::rule('WARRANTY-14', Localization::text('copy.warranty_materials_consent_required'));
+            }
             $this->settle($proposal, $status, $actor);
+            $order->increment('version');
 
             OrderEvent::query()->create([
                 'order_id' => $order->getKey(),
@@ -155,14 +176,23 @@ final readonly class DecideProposalAction
         ])->save();
     }
 
+    private function assertWarrantyConsent(Order $order, PriceProposal $proposal, ActorType $actor, ?int $actorId): void
+    {
+        if ($order->isWarrantyVisit() && ($proposal->type !== ProposalType::Materials
+            || $order->status !== OrderStatus::InProgress
+            || ($actor !== ActorType::System && ($actor !== ActorType::Customer || $actorId !== $order->customer_id)))) {
+            throw BusinessRuleViolationException::rule('WARRANTY-14', Localization::text('copy.warranty_materials_consent_required'));
+        }
+    }
+
     private function assertDecidable(Order $order, PriceProposal $proposal): void
     {
         if ($proposal->order_id !== $order->getKey()) {
-            throw BusinessRuleViolationException::rule('BR-041', 'المقترح لا يخص هذا الطلب.');
+            throw BusinessRuleViolationException::rule('BR-041', Localization::text('copy.the_proposal_does_not_belong_to_this_request'));
         }
 
         if (! $proposal->isPending()) {
-            throw BusinessRuleViolationException::rule('BR-041', 'المقترح لم يعد معلّقًا.');
+            throw BusinessRuleViolationException::rule('BR-041', Localization::text('copy.the_proposal_is_no_longer_pending'));
         }
     }
 }

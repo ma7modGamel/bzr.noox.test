@@ -4,6 +4,7 @@ import PhotosUI
 import SwiftUI
 
 public struct C19ChatView: View {
+    let loadImage: (String) async -> Data?
     let state: CustomerUIState
     let onDraftChange: (String) -> Void
     let onSend: () -> Void
@@ -14,11 +15,13 @@ public struct C19ChatView: View {
 
     public init(
         state: CustomerUIState,
+        loadImage: @escaping (String) async -> Data? = { _ in nil },
         onDraftChange: @escaping (String) -> Void = { _ in },
         onSend: @escaping () -> Void = {},
         onPhotoSelected: @escaping (CustomerMediaUpload) -> Void = { _ in },
         onBack: @escaping () -> Void = {}
     ) {
+        self.loadImage = loadImage
         self.state = state
         self.onDraftChange = onDraftChange
         self.onSend = onSend
@@ -35,6 +38,7 @@ public struct C19ChatView: View {
                 name: providerName, rating: "", services: nil, size: .small,
                 verifiedLabel: state.providerVerified ? bzrString("provider.verified") : nil)
             BzrText(value(state.options, 1), style: DesignType.secondary)
+            if state.providerAvailable { BzrText(bzrString("provider.available_now"), style: DesignType.hint) }
             if state.messageKey == "chat.masking.notice" {
                 InfoBanner(text: bzrString("chat.masking.notice"))
             }
@@ -51,6 +55,7 @@ public struct C19ChatView: View {
                         kind: descriptor.hasSuffix("_image")
                             ? .image
                             : (descriptor.hasSuffix("_blocked") ? .blocked : .text))
+                    ServicePhotoSection(title: "", urls: state.imageGroups.indices.contains(index) ? state.imageGroups[index] : [], loadImage: loadImage)
                     BzrText(value(state.itemDetails, index), style: DesignType.caption)
                 }
             }

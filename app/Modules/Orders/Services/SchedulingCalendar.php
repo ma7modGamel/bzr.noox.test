@@ -8,6 +8,7 @@ use App\Modules\Geography\Models\City;
 use App\Modules\Settings\Enums\Cfg;
 use App\Modules\Settings\Services\SettingsRepository;
 use App\Support\Exceptions\BusinessRuleViolationException;
+use App\Support\Localization;
 use Carbon\CarbonImmutable;
 
 /**
@@ -33,9 +34,7 @@ final readonly class SchedulingCalendar
         if (! $this->isWithinServiceHours($city, $at)) {
             throw BusinessRuleViolationException::rule(
                 'BR-017',
-                'طلبات "الآن" متاحة داخل ساعات الخدمة فقط ('
-                    .$this->settings->string(Cfg::ServiceHoursFrom).' – '
-                    .$this->settings->string(Cfg::ServiceHoursTo).').',
+                Localization::text('dynamic.service_hours', ['from' => $this->settings->string(Cfg::ServiceHoursFrom), 'to' => $this->settings->string(Cfg::ServiceHoursTo)]),
             );
         }
     }
@@ -85,7 +84,7 @@ final readonly class SchedulingCalendar
         if ($slotStart->gt($now->addDays($this->schedulingHorizonDays()))) {
             throw BusinessRuleViolationException::rule(
                 'BR-017',
-                'الجدولة متاحة حتى '.$this->schedulingHorizonDays().' أيام من اليوم.',
+                Localization::text('dynamic.scheduling_horizon', ['days' => $this->schedulingHorizonDays()]),
             );
         }
 
@@ -97,8 +96,7 @@ final readonly class SchedulingCalendar
 
         throw BusinessRuleViolationException::rule(
             'BR-017',
-            'الفترة المختارة غير متاحة: يجب أن تكون من الفترات المعتمدة وتبدأ بعد '
-                .$this->settings->int(Cfg::MinLeadMinutesBeforeSlot).' دقيقة على الأقل.',
+            Localization::text('dynamic.slot_lead', ['minutes' => $this->settings->int(Cfg::MinLeadMinutesBeforeSlot)]),
         );
     }
 

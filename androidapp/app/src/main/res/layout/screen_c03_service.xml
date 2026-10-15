@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- SCR-C03 step 1 of 5 — the service (DEC-071, Figma 3002:2). -->
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:parentTag="android.widget.LinearLayout">
+
+    <noox.bzr.design.views.SearchFieldView
+        android:id="@+id/search"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:bremoPlaceholder="@string/request_service_search" />
+
+    <TextView
+        android:id="@+id/sectionTitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/request_service_section"
+        android:textAppearance="@style/TextAppearance.Bremo.SectionTitle" />
+
+    <noox.bzr.design.views.InfoBannerView
+        android:id="@+id/noResults"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone" />
+
+    <noox.bzr.design.views.TileGridLayout
+        android:id="@+id/categoryGrid"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:bremoMaxColumns="@integer/bremo_size_service_tile_columns" />
+
+    <!-- Pinned to the bottom dock with the button. -->
+    <LinearLayout
+        android:id="@+id/selectedRow"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/request_service_selected"
+            android:textAlignment="viewStart"
+            android:textAppearance="@style/TextAppearance.Bremo.Caption" />
+
+        <TextView
+            android:id="@+id/selectedName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="@style/TextAppearance.Bremo.TileTitle"
+            android:textColor="@color/bremo_primary600" />
+    </LinearLayout>
+
+    <noox.bzr.design.views.PrimaryButtonView
+        android:id="@+id/next"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:bremoIcon="@drawable/ic_arrow_forward"
+        app:bremoText="@string/common_next" />
+</merge>

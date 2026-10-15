@@ -15,7 +15,7 @@ final class Category extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'icon_path', 'sort', 'is_active'];
+    protected $fillable = ['name', 'name_en', 'icon_path', 'sort', 'is_active'];
 
     protected function casts(): array
     {

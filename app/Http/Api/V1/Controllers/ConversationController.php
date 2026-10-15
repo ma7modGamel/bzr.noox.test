@@ -8,9 +8,13 @@ use App\Modules\Communication\Models\Conversation;
 use App\Modules\Communication\Models\Message;
 use App\Modules\Communication\Services\ConversationService;
 use App\Modules\Orders\Models\Order;
+use App\Modules\Orders\Models\OrderMedia;
 use App\Modules\Providers\Models\ProviderProfile;
+use App\Support\Localization;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 final class ConversationController
 {
@@ -20,6 +24,7 @@ final class ConversationController
         $profileId = $user->providerProfile?->getKey();
 
         $conversations = Conversation::query()
+            ->withCount(['messages as unread_count' => fn ($query) => $query->where('sender_user_id', '!=', $user->getKey())->whereNull('read_at')])
             ->with([
                 'order.category', 'order.problemType', 'order.area', 'providerProfile.user', 'customer',
                 'messages' => fn ($query) => $query->reorder()->latest('id')->limit(1),
@@ -54,6 +59,7 @@ final class ConversationController
             Order::query()->findOrFail($data['order_id']),
             ProviderProfile::query()->findOrFail($data['provider_profile_id']),
         );
+        $conversation->loadCount(['messages as unread_count' => fn ($query) => $query->where('sender_user_id', '!=', $request->user()->getKey())->whereNull('read_at')]);
 
         return new JsonResponse([
             'data' => $this->conversation(
@@ -69,6 +75,13 @@ final class ConversationController
 
         $conversation->load(['order.category', 'order.problemType', 'order.area', 'providerProfile.user', 'customer']);
         $messages = $conversation->messages()->with('media')->reorder()->latest('id')->paginate(50);
+        $unread = $messages->getCollection()->filter(fn (Message $message): bool => $message->sender_user_id !== $request->user()->getKey() && $message->read_at === null);
+        if ($unread->isNotEmpty()) {
+            $readAt = now();
+            $conversation->messages()->whereIn('id', $unread->modelKeys())->whereNull('read_at')->update(['read_at' => $readAt]);
+            $unread->each(fn (Message $message) => $message->setAttribute('read_at', $readAt));
+        }
+        $conversation->loadCount(['messages as unread_count' => fn ($query) => $query->where('sender_user_id', '!=', $request->user()->getKey())->whereNull('read_at')]);
 
         return new JsonResponse([
             'conversation' => $this->conversation($conversation, $request->user()->getKey()),
@@ -98,6 +111,15 @@ final class ConversationController
         return new JsonResponse(['data' => $this->message($message, $request->user()->getKey())], 201);
     }
 
+    public function image(Request $request, Conversation $conversation, Message $message, OrderMedia $media, ConversationService $service): StreamedResponse
+    {
+        $service->assertParticipant($conversation, $request->user());
+        abort_unless($message->conversation_id === $conversation->id && $message->media()->whereKey($media->id)->where('type', 'IMAGE')->exists(), 404);
+        abort_unless(Storage::disk('local')->exists($media->path), 404);
+
+        return Storage::disk('local')->response($media->path, headers: ['Cache-Control' => 'no-store, private', 'X-Content-Type-Options' => 'nosniff']);
+    }
+
     /** @return array<string, mixed> */
     private function conversation(Conversation $conversation, int $viewerId): array
     {
@@ -108,23 +130,25 @@ final class ConversationController
                 'number' => $conversation->order?->number,
                 'status' => $conversation->order?->status?->value,
                 'status_label' => $conversation->order?->statusLabel(),
-                'category' => $conversation->order?->category?->name,
-                'problem_type' => $conversation->order?->problemType?->name,
-                'area' => $conversation->order?->area?->name,
+                'category' => Localization::field($conversation->order?->category),
+                'problem_type' => Localization::field($conversation->order?->problemType),
+                'area' => Localization::field($conversation->order?->area),
             ],
             'provider' => [
                 'id' => $conversation->provider_profile_id,
                 'name' => $conversation->providerProfile?->user?->name,
                 'avatar_path' => $conversation->providerProfile?->user?->avatar_path,
                 'is_verified' => $conversation->providerProfile?->isVerified() ?? false,
+                'available_now' => (bool) $conversation->providerProfile?->available_now,
             ],
             'customer' => [
                 'id' => $conversation->customer_id,
                 'name' => $conversation->customer?->name,
                 'avatar_path' => $conversation->customer?->avatar_path,
-                'rating_avg' => $conversation->customer?->customer_rating_avg,
+                ...($viewerId !== $conversation->customer_id ? ['rating_avg' => $conversation->customer?->customer_rating_avg] : []),
             ],
             'status' => $conversation->status->value,
+            'unread_count' => (int) ($conversation->unread_count ?? 0),
             'last_message' => $conversation->relationLoaded('messages') && $conversation->messages->isNotEmpty()
                 ? $this->message($conversation->messages->first(), $viewerId)
                 : null,
@@ -143,8 +167,10 @@ final class ConversationController
             'media' => $message->relationLoaded('media') ? $message->media->map(fn ($media) => [
                 'id' => $media->getKey(),
                 'type' => $media->type,
+                'content_url' => route('api.conversations.image', ['conversation' => $message->conversation_id, 'message' => $message->id, 'media' => $media->id]),
             ])->values() : [],
             'created_at' => $message->created_at?->toIso8601String(),
+            'read_at' => $message->read_at?->toIso8601String(),
         ];
     }
 }

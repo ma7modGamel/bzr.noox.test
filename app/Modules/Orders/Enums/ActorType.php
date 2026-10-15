@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Orders\Enums;
 
+use App\Support\Localization;
 use Filament\Support\Contracts\HasLabel;
 
 /** `order_events.actor_type` — 24. */
@@ -16,11 +17,6 @@ enum ActorType: string implements HasLabel
 
     public function getLabel(): string
     {
-        return match ($this) {
-            self::Customer => 'العميل',
-            self::Provider => 'مقدم الخدمة',
-            self::Admin => 'الإدارة',
-            self::System => 'النظام',
-        };
+        return Localization::enum($this);
     }
 }

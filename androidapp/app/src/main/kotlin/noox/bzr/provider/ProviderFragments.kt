@@ -130,6 +130,8 @@ class P11OffersFragment : ProviderFragment<P11OffersView>(R.id.scr_p11) {
 
 abstract class ProviderActiveOrderFragment<V : ProviderActiveOrderView>(destination: Int) : ProviderFragment<V>(destination) {
     private var pendingLocationAction: String? = null
+    private val before = imagePicker("before-repair.jpg") { viewModel.uploadWorkPhoto(true, it) }
+    private val after = imagePicker("after-repair.jpg") { viewModel.uploadWorkPhoto(false, it) }
     private val locationPermission = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { result ->
         if (result.values.any { it }) pendingLocationAction?.let(::resolveLocation)
         pendingLocationAction = null
@@ -137,9 +139,14 @@ abstract class ProviderActiveOrderFragment<V : ProviderActiveOrderView>(destinat
 
     protected fun V.bindOrderActions() {
         bindBack()
+        onCompletionEstimate = viewModel::updateCompletionEstimate
+        onArrivalCodeChange = viewModel::updateArrivalCode
+        onArrivalExceptionNoteChange = viewModel::updateArrivalExceptionNote
+        onPickWorkPhoto = { isBefore -> if (isBefore) before.launch("image/*") else after.launch("image/*") }
         onAction = { action ->
             when (action) {
-                "start_trip", "mark_arrived" -> requestLocation(action)
+                "start_trip", "mark_arrived", "report_arrival_exception" -> requestLocation(action)
+                "refresh_order" -> viewModel.loadActiveOrder()
                 "navigate" -> navigate()
                 "call" -> call()
                 else -> viewModel.handleOrderAction(action)
@@ -236,13 +243,33 @@ class P17CustomerRatingFragment : ProviderFragment<P17CustomerRatingView>(R.id.s
     override fun P17CustomerRatingView.bind() {
         bindBack()
         onRate = viewModel::selectCustomerRating
+        onTag = viewModel::toggleCustomerRatingTag
+        onComment = viewModel::updateCustomerRatingComment
         onSubmit = viewModel::submitCustomerRating
     }
 }
 
 class P18EarningsFragment : ProviderFragment<P18EarningsView>(R.id.scr_p18) {
     override fun create() = P18EarningsView(requireContext())
-    override fun P18EarningsView.bind() = bindBack()
+    override fun P18EarningsView.bind() {
+        bindBack()
+        onType = { viewModel.updateEarningsFilters(typeIndex = it) }
+        onFrom = { viewModel.updateEarningsFilters(dateFrom = it) }
+        onTo = { viewModel.updateEarningsFilters(dateTo = it) }
+        onApply = { viewModel.applyEarningsFilters() }
+        onReset = { viewModel.applyEarningsFilters(reset = true) }
+        onMore = { viewModel.applyEarningsFilters(more = true) }
+        onExport = { viewModel.exportEarnings { data ->
+            val context = context ?: return@exportEarnings
+            runCatching {
+                val directory = java.io.File(context.cacheDir, "statements").apply { mkdirs() }
+                val file = java.io.File.createTempFile("bremo-statement-", ".csv", directory).apply { writeBytes(data) }
+                val uri = androidx.core.content.FileProvider.getUriForFile(context, "${context.packageName}.files", file)
+                val intent = android.content.Intent(android.content.Intent.ACTION_SEND).setType("text/csv").putExtra(android.content.Intent.EXTRA_STREAM, uri).addFlags(android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                startActivity(android.content.Intent.createChooser(intent, getString(noox.bzr.design.R.string.provider_earnings_export)))
+            }.onFailure { android.widget.Toast.makeText(context, noox.bzr.design.R.string.provider_earnings_export_error, android.widget.Toast.LENGTH_LONG).show() }
+        } }
+    }
 }
 
 class P19ProfileFragment : ProviderFragment<P19ProfileView>(R.id.scr_p19) {
@@ -295,6 +322,7 @@ class ProviderChatFragment : ScreenFragment<ProviderUiState, C19ChatView>() {
     override val states get() = viewModel.stateFlow
     override fun create() = C19ChatView(requireContext())
     override fun C19ChatView.bind() {
+        loadImage = viewModel::loadChatImage
         onBack = viewModel::goBack
         onDraftChange = viewModel::updateChatDraft
         onSend = viewModel::sendChatMessage
@@ -305,6 +333,7 @@ class ProviderChatFragment : ScreenFragment<ProviderUiState, C19ChatView>() {
 }
 
 private fun ProviderUiState.asCustomerChatState() = CustomerUiState(
+    imageGroups = imageGroups,
     screen = screen,
     phase = when (phase) {
         ProviderPhase.Empty -> CustomerPhase.Empty

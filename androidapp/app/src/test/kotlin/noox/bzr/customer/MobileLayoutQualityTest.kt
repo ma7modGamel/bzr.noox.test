@@ -14,10 +14,12 @@ import noox.bzr.auth.AuthLogic
 import noox.bzr.auth.AuthPhase
 import noox.bzr.auth.authScreenView
 import noox.bzr.design.views.SnapshotMode
+import noox.bzr.gallery.R
 import noox.bzr.provider.ProviderLogic
 import noox.bzr.provider.ProviderPhase
 import noox.bzr.provider.providerScreenView
 import noox.bzr.screens.ScreenSnapshots
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
@@ -49,10 +51,49 @@ class MobileLayoutQualityTest(
     private val clipping = mutableListOf<String>()
 
     @Test
+    fun legal_html_renders_formatted_text_in_the_selected_direction() {
+        ScreenSnapshots.prepare(paparazzi)
+        val heading = if (locale == "ar") "الشروط" else "Terms"
+        val paragraph = if (locale == "ar") "نص الوثيقة" else "Document text"
+        val state = CustomerLogic.reduce("SCR-C34", mapOf(
+            "event" to "loaded", "version" to "1", "effective_at" to "2026-10-11",
+            "body" to "<h2>$heading</h2><p><strong>$paragraph</strong></p><ul><li>$paragraph</li></ul><ol><li>$paragraph</li><li>$paragraph</li></ol>",
+        ))
+        val view = C34TermsView(paparazzi.context).apply { render(state) }
+        paparazzi.snapshot(view, name = "legal-html-$width-$locale-$fontScale")
+        val texts = mutableListOf<TextView>()
+        fun collect(node: View) {
+            if (node is TextView) texts += node
+            if (node is ViewGroup) (0 until node.childCount).forEach { collect(node.getChildAt(it)) }
+        }
+        collect(view)
+        val document = texts.first { it.text.contains(paragraph) }
+        assertTrue(document.text.contains(heading))
+        assertTrue(!document.text.contains("<h2>") && !document.text.contains("<p>"))
+        assertTrue(document.text is android.text.Spanned)
+        assertTrue(document.text.contains("1. $paragraph") && document.text.contains("2. $paragraph"))
+        assertEquals(if (locale == "ar") View.LAYOUT_DIRECTION_RTL else View.LAYOUT_DIRECTION_LTR, document.layoutDirection)
+        assertTextFits(document, "SCR-C34-html")
+        assertTrue(clipping.joinToString("\n"), clipping.isEmpty())
+    }
+
+    @Test
+    fun native_plurals_select_singular_dual_and_other_categories() {
+        val context = paparazzi.context
+        val quantity = noox.bzr.design.R.plurals.plural_offers_available
+        val one = noox.bzr.design.BzrFormat.quantity(context, quantity, 1)
+        val two = noox.bzr.design.BzrFormat.quantity(context, quantity, 2)
+        val three = noox.bzr.design.BzrFormat.quantity(context, quantity, 3)
+        assertEquals(if (locale == "ar") "عرض واحد متاح" else "1 offer available", one)
+        assertEquals(if (locale == "ar") "عرضان متاحان" else "2 offers available", two)
+        assertEquals(if (locale == "ar") "3 عروض متاحة" else "3 offers available", three)
+    }
+
+    @Test
     fun screens_accommodate_localization_and_text_scaling() {
         SnapshotMode.enabled = true
         paparazzi.context.applicationInfo.flags = paparazzi.context.applicationInfo.flags or ApplicationInfo.FLAG_SUPPORTS_RTL
-        val screens = ((1..9) + (14..36)).map { "SCR-C%02d".format(it) }
+        val screens = ((1..9) + (14..38)).map { "SCR-C%02d".format(it) }
         screens.forEach { screen ->
             val state = ScreenSnapshots.cases(screen).map { CustomerLogic.reduce(screen, it.second) }
                 .filter { it.phase != CustomerPhase.Loading && it.phase != CustomerPhase.Error }
@@ -76,6 +117,26 @@ class MobileLayoutQualityTest(
             paparazzi.snapshot(view, name = "$screen-$width-$locale-$fontScale")
             assertTextFits(view, screen)
         }
+        assertTrue(clipping.joinToString("\n"), clipping.isEmpty())
+    }
+
+    @Test
+    fun home_hero_photo_covers_content_without_current_order() {
+        ScreenSnapshots.prepare(paparazzi)
+        val input = ScreenSnapshots.cases("SCR-C01").first { it.first == "empty" }.second
+        val view = C01HomeView(paparazzi.context).apply { render(CustomerLogic.reduce("SCR-C01", input)) }
+
+        paparazzi.snapshot(view, name = "home-empty-$width-$locale-$fontScale")
+
+        val hero = view.findViewById<View>(R.id.hero)
+        val photo = view.findViewById<View>(R.id.heroImage)
+        val content = view.findViewById<View>(R.id.heroContent)
+        assertEquals("The photo must cover the full banner height", hero.height, photo.height)
+        assertEquals("The photo must start at the top of the banner", 0, photo.top)
+        assertEquals("The content must determine the banner height", content.height, hero.height)
+        assertTrue("Services must retain their height below the banner", view.findViewById<View>(R.id.services).height > 0)
+        assertTrue("The emergency row must retain its height below the banner", view.findViewById<View>(R.id.urgent).height > 0)
+        assertTextFits(hero, "SCR-C01-empty")
         assertTrue(clipping.joinToString("\n"), clipping.isEmpty())
     }
 

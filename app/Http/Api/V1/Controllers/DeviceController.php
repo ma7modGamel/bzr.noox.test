@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Api\V1\Controllers;
 
 use App\Modules\Notifications\Models\DeviceToken;
+use App\Support\Localization;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -27,8 +28,11 @@ final class DeviceController
                 'platform' => $data['platform'],
                 'app_mode' => $request->attributes->get('app_mode', 'CUSTOMER'),
                 'last_used_at' => now(),
+                'locale' => Localization::locale(),
             ],
         );
+
+        $request->user()->forceFill(['locale' => Localization::locale()])->save();
 
         return new JsonResponse(status: 204);
     }

@@ -23,7 +23,7 @@ final class ProviderApplicationController
         }
 
         $profile = $user->providerProfile()
-            ->with(['user', 'categories:id,name', 'specialties:id,name', 'areas:id,name', 'documents'])
+            ->with(['user', 'categories:id,name,name_en', 'specialties:id,name,name_en', 'areas:id,name', 'documents'])
             ->first();
 
         return new ProviderApplicationResource($profile);

@@ -1,0 +1,49 @@
+name: Backend localization contracts
+
+on:
+  pull_request:
+  push:
+
+jobs:
+  localization:
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_DATABASE: bzr_ddb_test
+          MYSQL_ROOT_PASSWORD: localization-test-password
+          MYSQL_ROOT_HOST: "%"
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+    env:
+      DB_HOST: 127.0.0.1
+      DB_PORT: 3306
+      DB_USERNAME: root
+      DB_PASSWORD: localization-test-password
+      CACHE_STORE: array
+      QUEUE_CONNECTION: sync
+      MAIL_MAILER: array
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.4"
+          extensions: dom, gd, intl, mbstring, pdo_mysql
+      - name: Prepare test environment
+        run: cp .env.example .env
+      - name: Install locked dependencies
+        run: composer install --no-interaction --prefer-dist
+      - name: Generate test encryption key
+        run: php artisan key:generate --no-interaction
+      - name: Validate bilingual catalogs, plural forms and generated resources
+        run: php tools/gen-design --check
+      - name: Detect missing keys, platform drift and hardcoded UI copy
+        run: php tools/check-parity && php tools/lint-design
+      - name: Test API languages, recipient notifications and safe legal rendering
+        run: php artisan test --compact tests/Feature/LocalizationTest.php tests/Feature/LegalPagesTest.php tests/Feature/NotificationDeliveryTest.php tests/Feature/MailAndAccountLinksTest.php tests/Feature/SupportReasonsApiTest.php tests/Feature/ShareVisitTest.php

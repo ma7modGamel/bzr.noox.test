@@ -15,6 +15,17 @@ public struct DateText: Equatable, Sendable {
 }
 
 public enum BzrFormatter {
+    public static func ltrValue(_ value: String) -> String { "\u{2066}\(value)\u{2069}" }
+
+    public static func legalDate(_ value: String) -> String {
+        guard let date = ISO8601DateFormatter().date(from: value) else { return value }
+        let formatter = DateFormatter()
+        formatter.locale = posix
+        formatter.timeZone = TimeZone(identifier: "Africa/Cairo")
+        formatter.dateFormat = "yyyy-MM-dd"
+        return formatter.string(from: date)
+    }
+
     private static let posix = Locale(identifier: "en_US_POSIX")
 
     public static func number(_ value: Double) -> String {
@@ -29,6 +40,11 @@ public enum BzrFormatter {
 
     public static func amount(_ value: Double, currency: String) -> String {
         "\(number(value)) \(currency)"
+    }
+
+    public static func money(_ value: String, currency: String) -> String {
+        let number = Decimal(string: value, locale: posix).map { NSDecimalNumber(decimal: $0).stringValue } ?? value
+        return "\(number) \(currency)"
     }
 
     public static func fill(_ template: String, values: [(String, String)]) -> String {

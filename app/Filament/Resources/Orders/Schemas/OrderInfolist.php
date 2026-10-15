@@ -4,10 +4,14 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Orders\Schemas;
 
+use App\Filament\Resources\Orders\OrderResource;
 use App\Modules\Customers\Services\CustomerInspectionMetrics;
 use App\Modules\Orders\Enums\OrderStatus;
 use App\Modules\Orders\Models\Order;
 use App\Modules\Pricing\Enums\PriceReviewReason;
+use App\Modules\Reviews\Enums\CustomerRatingTag;
+use App\Modules\Reviews\Models\ReviewTag;
+use Filament\Infolists\Components\ImageEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
@@ -19,6 +23,42 @@ final class OrderInfolist
     public static function configure(Schema $schema): Schema
     {
         return $schema->components([
+            Section::make('تقييم الفني للعميل')->visible(fn (Order $record): bool => $record->loadMissing('customerRating')->customerRating !== null)->schema([
+                TextEntry::make('customerRating.stars')->label('النجوم'),
+                TextEntry::make('customer_rating_tags')->label('الوسوم')->state(fn (Order $record): array => array_map(
+                    fn (string $tag): string => CustomerRatingTag::tryFrom($tag)?->getLabel() ?? $tag, $record->customerRating?->tags ?? [],
+                )),
+                TextEntry::make('customerRating.comment')->label('تعليق الفني')->placeholder('—'),
+            ]),
+            Section::make('متابعة ضمان الإصلاح')->schema([
+                TextEntry::make('warranty_until')->label('نهاية مدة الضمان')
+                    ->state(fn (Order $record): ?string => $record->warrantyExpiresAt()?->timezone(config('app.display_timezone'))->format('Y-m-d H:i')),
+                TextEntry::make('warranty_follow_up')->label('آخر طلب ضمان')->state(fn (Order $record): ?string => $record->warrantyClaims()->latest('id')->first()?->description),
+                TextEntry::make('warranty_visit')->label('طلب زيارة الضمان')
+                    ->state(fn (Order $record): ?string => ($visit = $record->loadMissing('latestWarrantyClaim.visit')->latestWarrantyClaim?->visit) === null ? null : '#'.$visit->number)
+                    ->url(fn (Order $record): ?string => ($visit = $record->loadMissing('latestWarrantyClaim.visit')->latestWarrantyClaim?->visit) === null
+                        ? null : OrderResource::getUrl('view', ['record' => $visit->id])),
+                TextEntry::make('warranty_original')->label('طلب الإصلاح الأصلي')
+                    ->visible(fn (Order $record): bool => $record->isWarrantyVisit())
+                    ->state(fn (Order $record): ?string => $record->isWarrantyVisit() ? '#'.$record->warrantyClaim->order->number : null)
+                    ->url(fn (Order $record): ?string => $record->isWarrantyVisit()
+                        ? OrderResource::getUrl('view', ['record' => $record->warrantyClaim->order_id]) : null),
+            ]),
+            Section::make('تقييم العميل للخدمة')->visible(fn (Order $record): bool => $record->review !== null)->schema([
+                TextEntry::make('review.quality')->label('الجودة'),
+                TextEntry::make('review.punctuality')->label('الموعد'),
+                TextEntry::make('review.conduct')->label('التعامل'),
+                TextEntry::make('service_review_tags')->label('الوسوم')->state(fn (Order $record): array => ReviewTag::query()->whereIn('code', $record->review?->tags ?? [])->pluck('label')->all()),
+                TextEntry::make('review.comment')->label('تعليق العميل')->placeholder('—'),
+            ]),
+            Section::make('صور الإصلاح والتقييم')->columns(3)->schema([
+                ImageEntry::make('repair_before')->label('قبل الإصلاح')->disk('local')->visibility('private')
+                    ->state(fn (Order $record): array => $record->media->where('purpose', 'REPAIR_BEFORE')->pluck('path')->all()),
+                ImageEntry::make('repair_after')->label('بعد الإصلاح')->disk('local')->visibility('private')
+                    ->state(fn (Order $record): array => $record->media->where('purpose', 'REPAIR_AFTER')->pluck('path')->all()),
+                ImageEntry::make('review_photos')->label('صور العميل مع التقييم')->disk('local')->visibility('private')
+                    ->state(fn (Order $record): array => $record->media->where('purpose', 'CUSTOMER_REVIEW')->pluck('path')->all()),
+            ]),
             Section::make('الطلب')
                 ->columns(3)
                 ->schema([
@@ -109,6 +149,16 @@ final class OrderInfolist
 
                             return $reasons === '' ? null : $reasons;
                         }),
+                ]),
+
+            Section::make('بلاغ غياب العميل')
+                ->visible(fn (Order $record): bool => $record->hasPendingNoShowReport())
+                ->description('الفني بلّغ عن غياب العميل. الإدارة مسؤولة عن الاتصال وحسم الحالة؛ الطلب لم يُلغَ.')
+                ->schema([
+                    TextEntry::make('absence_customer_phone')->label('اتصال الإدارة بالعميل')
+                        ->state(fn (Order $record): ?string => $record->customer?->phone)
+                        ->url(fn (Order $record): ?string => $record->customer?->phone
+                            ? 'tel:'.preg_replace('/[^+0-9]/', '', $record->customer->phone) : null),
                 ]),
 
             Section::make('المبالغ')

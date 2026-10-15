@@ -9,6 +9,7 @@ use App\Modules\Content\Enums\LegalPageStatus;
 use App\Modules\Content\Models\LegalPageVersion;
 use App\Modules\Identity\Models\Admin;
 use App\Support\Exceptions\BusinessRuleViolationException;
+use App\Support\Localization;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Facades\DB;
 
@@ -21,14 +22,14 @@ final class PublishLegalPageVersionAction
     public function execute(LegalPageVersion $version, Admin $admin): LegalPageVersion
     {
         if (! $admin->isSuper()) {
-            throw new AuthorizationException('نشر الصفحات للمدير العام فقط.');
+            throw new AuthorizationException(Localization::text('copy.only_the_general_manager_may_publish_pages'));
         }
 
         return DB::transaction(function () use ($version, $admin): LegalPageVersion {
             $fresh = LegalPageVersion::query()->lockForUpdate()->findOrFail($version->getKey());
 
             if ($fresh->status === LegalPageStatus::Published) {
-                throw BusinessRuleViolationException::rule('DEC-051', 'هذه النسخة منشورة بالفعل.');
+                throw BusinessRuleViolationException::rule('DEC-051', Localization::text('copy.this_version_has_already_been_published'));
             }
 
             $effectiveAt = $fresh->effective_at ?? now();

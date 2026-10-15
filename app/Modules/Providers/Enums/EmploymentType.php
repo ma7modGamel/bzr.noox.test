@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Providers\Enums;
 
+use App\Support\Localization;
 use Filament\Support\Contracts\HasColor;
 use Filament\Support\Contracts\HasLabel;
 
@@ -18,10 +19,7 @@ enum EmploymentType: string implements HasColor, HasLabel
 
     public function getLabel(): string
     {
-        return match ($this) {
-            self::Employee => 'موظف لدى المنصة',
-            self::Independent => 'مقدم خدمة مستقل',
-        };
+        return Localization::enum($this);
     }
 
     public function getColor(): string

@@ -1,16 +1,14 @@
-# خط الواجهة
+# خطوط التصميم
 
-- `Cairo-Regular.ttf` / `Cairo-Medium.ttf` / `Cairo-SemiBold.ttf` / `Cairo-Bold.ttf`: ملف ثابت لكل وزن مستخدم (43 §2)، وهي اللي بتتضمّن في التطبيقين والويب عن طريق `tools/gen-design`.
-- `Cairo-Variable.ttf`: الملف المتغيّر الأصلي (Google Fonts، OFL)، ومنه اتولّدت الملفات الثابتة. مش بيتضمّن في التطبيقات، لأن تطبيق أوزان الخط المتغيّر مش مضمون بنفس الطريقة في Compose وSwiftUI.
-- `OFL.txt`: الرخصة.
+## خط الواجهة: IBM Plex Sans Arabic (DEC-070)
 
-إعادة توليد الأوزان (بعد تغيير الخط، OD-07):
+- `IBMPlexSansArabic-Regular.ttf` / `-Medium` / `-SemiBold` / `-Bold`: ملف ثابت لكل وزن مستخدم (43 §2)، من Google Fonts (`ofl/ibmplexsansarabic`، إصدار 1.101). هي اللي بتتضمّن في التطبيقين والويب عن طريق `tools/gen-design`.
+- `OFL.txt`: رخصة IBM Plex، وبتتنسخ لتطبيق iOS.
+- مصدر الاختيار: ملف Figma «Primo App». المالك اعتمده في 2026-10-09، وده قفل OD-07.
 
-```bash
-pip install fonttools
-for w in 400:Regular 500:Medium 600:SemiBold 700:Bold; do
-  fonttools varLib.instancer Cairo-Variable.ttf wght=${w%%:*} slnt=0 --update-name-table -o Cairo-${w##*:}.ttf
-done
-```
+لو اتغيّر اسم الخط أو الأوزان، لازم `tokens.json → font` يتحدّث في نفس التغيير.
 
-لو اتغيّر اسم الخط أو الأوزان، يتحدّث `tokens.json → font` في نفس التغيير.
+## خط الشعار: Cairo
+
+- `Cairo-*.ttf` و`Cairo-Variable.ttf`: الشعار النصي بس (`tools/gen-brand-assets`). مش بيتضمّن في التطبيقات.
+- `OFL-Cairo.txt`: رخصة Cairo.

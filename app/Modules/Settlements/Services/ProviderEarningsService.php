@@ -9,6 +9,8 @@ use App\Modules\Orders\Models\Order;
 use App\Modules\Payments\Enums\PaymentMethod;
 use App\Modules\Providers\Models\ProviderProfile;
 use App\Modules\Settings\Enums\OperatingMode;
+use App\Support\Localization;
+use Carbon\CarbonImmutable;
 use Illuminate\Support\Collection;
 
 final class ProviderEarningsService
@@ -31,7 +33,7 @@ final class ProviderEarningsService
             return [
                 'id' => 'order-'.$order->getKey(),
                 'type' => 'ORDER',
-                'title' => 'طلب #'.$order->number,
+                'title' => Localization::text('earnings.order', ['number' => $order->number]),
                 'detail' => $this->orderDetail($order, $amount),
                 'amount' => $this->money($amount),
                 'occurred_at' => $order->closed_at?->toIso8601String(),
@@ -42,8 +44,8 @@ final class ProviderEarningsService
         $payoutRows = $profile->payouts()->latest('paid_at')->get()->map(fn ($payout): array => [
             'id' => 'payout-'.$payout->getKey(),
             'type' => 'PAYOUT',
-            'title' => 'تحويل من المنصة',
-            'detail' => 'تم التحويل · '.$this->money((float) $payout->amount).' جنيه',
+            'title' => Localization::text('copy.transfer_from_the_platform'),
+            'detail' => Localization::text('earnings.payout', ['amount' => $this->money((float) $payout->amount)]),
             'amount' => $this->money(-((float) $payout->amount)),
             'occurred_at' => $payout->paid_at?->toIso8601String(),
             'available' => true,
@@ -51,8 +53,8 @@ final class ProviderEarningsService
         $remittanceRows = $profile->remittances()->latest('received_at')->get()->map(fn ($remittance): array => [
             'id' => 'remittance-'.$remittance->getKey(),
             'type' => 'REMITTANCE',
-            'title' => 'توريد نقدية',
-            'detail' => 'تم التوريد · '.$this->money((float) $remittance->amount).' جنيه',
+            'title' => Localization::text('copy.cash_remittance'),
+            'detail' => Localization::text('earnings.remittance', ['amount' => $this->money((float) $remittance->amount)]),
             'amount' => $this->money((float) $remittance->amount),
             'occurred_at' => $remittance->received_at?->toIso8601String(),
             'available' => true,
@@ -74,11 +76,35 @@ final class ProviderEarningsService
         ];
     }
 
+    /**
+     * @param  Collection<int, array<string, mixed>>  $transactions
+     * @param  array{type?: string, date_from?: string|null, date_to?: string|null, page?: int}  $filters
+     * @return Collection<int, array<string, mixed>>
+     */
+    public function filter(Collection $transactions, array $filters): Collection
+    {
+        $from = empty($filters['date_from']) ? null : CarbonImmutable::parse($filters['date_from'], config('app.timezone'))->startOfDay();
+        $to = empty($filters['date_to']) ? null : CarbonImmutable::parse($filters['date_to'], config('app.timezone'))->endOfDay();
+
+        return $transactions->filter(function (array $row) use ($filters, $from, $to): bool {
+            if (($filters['type'] ?? 'ALL') !== 'ALL' && $row['type'] !== $filters['type']) {
+                return false;
+            }
+            $date = isset($row['occurred_at']) ? CarbonImmutable::parse($row['occurred_at']) : null;
+
+            return ($from === null || ($date !== null && $date->greaterThanOrEqualTo($from)))
+                && ($to === null || ($date !== null && $date->lessThanOrEqualTo($to)));
+        })->values();
+    }
+
     private function orderContribution(Order $order): float
     {
         $cash = $order->payment_method === PaymentMethod::Cash;
         if ($order->operating_mode === OperatingMode::Employee) {
-            return $cash ? -((float) $order->labor_total) : (float) $order->materials_total;
+            // DEC-066 — ما استُرد من الخامات للعميل لا يُرد للموظف.
+            $materialsRefunded = (float) $order->refunded_total - (float) $order->labor_refunded;
+
+            return $cash ? -((float) $order->labor_total) : (float) $order->materials_total - $materialsRefunded;
         }
 
         if ($cash) {
@@ -91,10 +117,15 @@ final class ProviderEarningsService
     private function orderDetail(Order $order, float $amount): string
     {
         if ($order->operating_mode === OperatingMode::Employee) {
-            return $amount < 0 ? 'مطلوب توريده · '.$this->money(abs($amount)).' جنيه' : 'رد خامات · '.$this->money($amount).' جنيه';
+            return $amount < 0 ? Localization::text('earnings.cash_due', ['amount' => $this->money(abs($amount))]) : Localization::text('earnings.materials', ['amount' => $this->money($amount)]);
         }
 
-        return 'صافي الطلب · '.$this->money($amount).' جنيه';
+        // DEC-068 — النقدي في وضع السوق دين عمولة على الفني، لا «صافي» له.
+        if ($order->payment_method === PaymentMethod::Cash) {
+            return Localization::text('earnings.commission', ['amount' => $this->money(abs($amount))]);
+        }
+
+        return Localization::text('earnings.net', ['amount' => $this->money($amount)]);
     }
 
     private function money(float $amount): string

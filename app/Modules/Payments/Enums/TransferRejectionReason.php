@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Payments\Enums;
 
+use App\Support\Localization;
 use Filament\Support\Contracts\HasLabel;
 
 /** أسباب رفض تحويل إنستاباي — BR-057. */
@@ -14,9 +15,6 @@ enum TransferRejectionReason: string implements HasLabel
 
     public function getLabel(): string
     {
-        return match ($this) {
-            self::NotReceived => 'لم يصل التحويل إلى حساب المنصة',
-            self::AmountMismatch => 'المبلغ المحوَّل مختلف عن المطلوب',
-        };
+        return Localization::enum($this);
     }
 }

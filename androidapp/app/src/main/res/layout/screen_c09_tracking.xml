@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- SCR-C09 C09TrackingScreen content (DEC-047). -->
+<!-- SCR-C09 — Figma «Primo App» tracking: 3002:1631 confirmed, 1903 on the way, 2055 arrived, 2540 in progress (DEC-076). -->
 <merge xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -9,64 +9,86 @@
         android:id="@+id/offline"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:visibility="gone"
-        app:bremoText="@string/offline_message" />
-
-    <noox.bzr.design.views.BadgeView
-        android:id="@+id/status"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:badgeKind="status" />
-
-    <noox.bzr.design.views.InfoBannerView
-        android:id="@+id/cancelled"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:visibility="gone"
-        app:bremoText="@string/tracking_status_cancelled" />
-
-    <noox.bzr.design.views.EtaCardView
-        android:id="@+id/eta"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
         android:visibility="gone" />
 
-    <noox.bzr.design.views.MapCardView
-        android:id="@+id/map"
+    <FrameLayout
+        android:id="@+id/mapBlock"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:visibility="gone"
-        app:bremoTitle="@string/map_title" />
+        android:visibility="gone">
 
-    <noox.bzr.design.views.InfoBannerView
-        android:id="@+id/waiting"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:visibility="gone"
-        app:bremoText="@string/tracking_waiting" />
+        <noox.bzr.design.views.MapCardView
+            android:id="@+id/map"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
 
-    <noox.bzr.design.views.StatusStepperView
-        android:id="@+id/stepper"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:visibility="gone" />
+        <!-- ETA card floating over the map (Figma 3002:1903). -->
+        <LinearLayout
+            android:id="@+id/etaCard"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top"
+            android:layout_margin="@dimen/bremo_space_m"
+            android:background="@drawable/bremo_bg_card"
+            android:orientation="vertical"
+            android:padding="@dimen/bremo_space_m">
 
-    <noox.bzr.design.views.WarningBoxView
-        android:id="@+id/reviewing"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:visibility="gone"
-        app:bremoText="@string/status_reviewing" />
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/tracking_eta_title"
+                android:textAlignment="viewStart"
+                android:textAppearance="@style/TextAppearance.Bremo.Hint" />
 
-    <noox.bzr.design.views.SummaryCardView
-        android:id="@+id/summary"
+            <TextView
+                android:id="@+id/etaValue"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textAlignment="viewStart"
+                android:textAppearance="@style/TextAppearance.Bremo.ScreenTitle"
+                android:textColor="@color/bremo_primary600" />
+
+            <TextView
+                android:id="@+id/etaDistance"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textAlignment="viewStart"
+                android:textAppearance="@style/TextAppearance.Bremo.Hint" />
+        </LinearLayout>
+    </FrameLayout>
+
+    <LinearLayout
+        android:id="@+id/sections"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:bremoTitle="@string/summary_title"
-        app:editText="@string/common_edit" />
+        android:divider="@drawable/bremo_gap_l"
+        android:orientation="vertical"
+        android:showDividers="middle" />
 
     <noox.bzr.customer.ActionButtonsView
         android:id="@+id/actions"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
+
+    <!-- Bottom dock (pinned). -->
+    <LinearLayout
+        android:id="@+id/dock"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:divider="@drawable/bremo_gap_xs"
+        android:orientation="vertical"
+        android:showDividers="middle">
+
+        <noox.bzr.design.views.PrimaryButtonView
+            android:id="@+id/primary"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <LinearLayout
+            android:id="@+id/links"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="horizontal" />
+    </LinearLayout>
 </merge>

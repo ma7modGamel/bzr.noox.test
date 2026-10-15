@@ -21,6 +21,7 @@ use App\Modules\Payments\Services\PaymentChannels;
 use App\Modules\Settings\Enums\Cfg;
 use App\Support\Exceptions\BusinessRuleViolationException;
 use App\Support\Exceptions\FeatureDisabledException;
+use App\Support\Localization;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Throwable;
@@ -49,11 +50,11 @@ final readonly class CreateElectronicPaymentAction
             if ($fresh->customer_id !== $customer->getKey()
                 || $fresh->status !== OrderStatus::AwaitingPayment
                 || $fresh->payment_method !== PaymentMethod::Electronic) {
-                throw BusinessRuleViolationException::rule('BR-051', 'الدفع الإلكتروني غير متاح لهذا الطلب.');
+                throw BusinessRuleViolationException::rule('BR-051', Localization::text('copy.electronic_payment_is_unavailable_for_this_request'));
             }
 
             if (app(PaymentChannels::class)->pendingTransfer($fresh) !== null) {
-                throw BusinessRuleViolationException::rule('BR-057', 'يوجد تحويل إنستاباي بانتظار تأكيد الإدارة لهذا الطلب.');
+                throw BusinessRuleViolationException::rule('BR-057', Localization::text('copy.an_instapay_transfer_for_this_request_is_awaiting_administration'));
             }
 
             Payment::query()

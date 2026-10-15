@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- DEC-070: Figma option card — icon well at the start, title (+ badge) and body, the radio at the end. -->
 <merge xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -13,17 +14,19 @@
         android:showDividers="middle">
 
         <FrameLayout
-            android:id="@+id/radio"
-            android:layout_width="@dimen/bremo_size_radio"
-            android:layout_height="@dimen/bremo_size_radio"
-            android:background="@drawable/bremo_bg_radio">
+            android:id="@+id/iconWell"
+            android:layout_width="@dimen/bremo_size_option_well"
+            android:layout_height="@dimen/bremo_size_option_well"
+            android:background="@drawable/bremo_bg_well_round"
+            android:visibility="gone">
 
-            <View
-                android:id="@+id/dot"
-                android:layout_width="@dimen/bremo_size_radio_dot"
-                android:layout_height="@dimen/bremo_size_radio_dot"
+            <ImageView
+                android:id="@+id/icon"
+                android:layout_width="@dimen/bremo_size_icon"
+                android:layout_height="@dimen/bremo_size_icon"
                 android:layout_gravity="center"
-                android:background="@drawable/bremo_dot_primary" />
+                android:importantForAccessibility="no"
+                app:tint="@color/bremo_primary600" />
         </FrameLayout>
 
         <LinearLayout
@@ -34,11 +37,27 @@
             android:orientation="vertical"
             android:showDividers="middle">
 
-            <TextView
-                android:id="@+id/title"
+            <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textAppearance="@style/TextAppearance.Bremo.CardTitle" />
+                android:divider="@drawable/bremo_gap_s"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:showDividers="middle">
+
+                <TextView
+                    android:id="@+id/title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="@style/TextAppearance.Bremo.CardTitle" />
+
+                <noox.bzr.design.views.BadgeView
+                    android:id="@+id/badge"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:visibility="gone"
+                    app:badgeKind="status" />
+            </LinearLayout>
 
             <TextView
                 android:id="@+id/body"
@@ -46,5 +65,21 @@
                 android:layout_height="wrap_content"
                 android:textAppearance="@style/TextAppearance.Bremo.Secondary" />
         </LinearLayout>
+
+        <FrameLayout
+            android:id="@+id/radio"
+            android:layout_width="@dimen/bremo_size_radio_check"
+            android:layout_height="@dimen/bremo_size_radio_check"
+            android:background="@drawable/bremo_bg_radio">
+
+            <ImageView
+                android:id="@+id/dot"
+                android:layout_width="@dimen/bremo_size_icon_small"
+                android:layout_height="@dimen/bremo_size_icon_small"
+                android:layout_gravity="center"
+                android:importantForAccessibility="no"
+                app:srcCompat="@drawable/ic_check"
+                app:tint="@color/bremo_on_primary" />
+        </FrameLayout>
     </LinearLayout>
 </merge>

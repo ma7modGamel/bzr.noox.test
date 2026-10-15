@@ -22,6 +22,7 @@ use App\Modules\Settings\Services\FeatureGate;
 use App\Modules\Settings\Services\SettingsRepository;
 use App\Support\Exceptions\BusinessRuleViolationException;
 use App\Support\Exceptions\DomainException;
+use App\Support\Localization;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
 
@@ -65,7 +66,7 @@ final readonly class SubmitOfferAction
                 'price' => $price,
                 'eta_minutes' => $etaMinutes,
                 'inspection_fee_deductible' => $inspectionFeeDeductible,
-                'includes_text' => $includesText ?? 'المصنعية فقط',
+                'includes_text' => $includesText ?? Localization::text('copy.labor_only'),
                 // BR-032 — الأرقام والروابط تُحجب من ملاحظة العرض
                 'note' => $note === null ? null : $this->masker->mask($note)['body'],
                 'status' => OfferStatus::Submitted,
@@ -116,18 +117,21 @@ final readonly class SubmitOfferAction
     /** BR-031 — الطلب مفتوح، قبل إغلاق النافذة، وعدد العروض أقل من CFG-011. */
     private function assertWindowIsOpen(Order $order): void
     {
+        if ($order->isWarrantyVisit()) {
+            throw BusinessRuleViolationException::rule('WARRANTY-14', Localization::text('copy.warranty_assignment_invalid'));
+        }
         if ($order->status !== OrderStatus::Open) {
-            throw BusinessRuleViolationException::rule('BR-031', 'الطلب لم يعد يستقبل عروضًا.');
+            throw BusinessRuleViolationException::rule('BR-031', Localization::text('copy.this_request_is_no_longer_receiving_offers'));
         }
 
         if ($order->offers_close_at !== null && CarbonImmutable::now()->gt($order->offers_close_at)) {
-            throw BusinessRuleViolationException::rule('BR-031', 'انتهت نافذة تقديم العروض.');
+            throw BusinessRuleViolationException::rule('BR-031', Localization::text('copy.the_offer_submission_window_has_closed'));
         }
 
         $max = $this->settings->int(Cfg::MaxOffersPerOrder);
 
         if ($order->offers()->where('status', OfferStatus::Submitted->value)->count() >= $max) {
-            throw BusinessRuleViolationException::rule('BR-031', "اكتمل عدد العروض ({$max}).");
+            throw BusinessRuleViolationException::rule('BR-031', Localization::text('dynamic.offer_limit', ['count' => $max]));
         }
     }
 
@@ -141,12 +145,12 @@ final readonly class SubmitOfferAction
             ->exists();
 
         if ($backedOut) {
-            throw BusinessRuleViolationException::rule('BR-036', 'لا يمكن التقديم على طلب اعتذرت عنه.');
+            throw BusinessRuleViolationException::rule('BR-036', Localization::text('copy.you_cannot_submit_an_offer_for_a_request_you'));
         }
 
         // BR-022 — الأهلية كاملة، ومنها المنع بسبب المستحقات (BR-063) في وضع السوق
         if (! $this->eligibility->isEligible($order, $provider)) {
-            throw BusinessRuleViolationException::rule('BR-022', 'غير مؤهل لهذا الطلب.');
+            throw BusinessRuleViolationException::rule('BR-022', Localization::text('copy.you_are_not_eligible_for_this_request'));
         }
     }
 
@@ -162,13 +166,13 @@ final readonly class SubmitOfferAction
         $active = $offers->firstWhere('status', OfferStatus::Submitted);
 
         if ($active !== null) {
-            throw BusinessRuleViolationException::rule('BR-030', 'لديك عرض نشط على هذا الطلب.');
+            throw BusinessRuleViolationException::rule('BR-030', Localization::text('copy.you_already_have_an_active_offer_for_this_request'));
         }
 
         $withdrawn = $offers->where('status', OfferStatus::Withdrawn);
 
         if ($withdrawn->count() >= 2) {
-            throw BusinessRuleViolationException::rule('BR-030', 'إعادة تقديم العرض متاحة مرة واحدة فقط.');
+            throw BusinessRuleViolationException::rule('BR-030', Localization::text('copy.an_offer_can_only_be_resubmitted_once'));
         }
 
         return $withdrawn->last();
@@ -180,7 +184,7 @@ final readonly class SubmitOfferAction
         $min = (string) $this->settings->decimal(Cfg::MinOfferAmount);
 
         if (bccomp($price, $min, 2) < 0) {
-            throw BusinessRuleViolationException::rule('BR-032', "أقل مبلغ عرض {$min} جنيه.");
+            throw BusinessRuleViolationException::rule('BR-032', Localization::text('dynamic.offer_min', ['amount' => $min]));
         }
     }
 
@@ -192,7 +196,7 @@ final readonly class SubmitOfferAction
         }
 
         if ($etaMinutes === null || $etaMinutes < 5 || $etaMinutes > 180) {
-            throw BusinessRuleViolationException::rule('BR-032', 'وقت الوصول بين 5 و180 دقيقة.');
+            throw BusinessRuleViolationException::rule('BR-032', Localization::text('copy.arrival_time_must_be_between_5_and_180_minutes'));
         }
 
         return $etaMinutes;
@@ -206,7 +210,7 @@ final readonly class SubmitOfferAction
         }
 
         if ($deductible === null) {
-            throw BusinessRuleViolationException::rule('BR-032', 'تحديد خصم رسوم المعاينة إلزامي.');
+            throw BusinessRuleViolationException::rule('BR-032', Localization::text('copy.specify_whether_the_inspection_fee_is_deductible'));
         }
 
         return $deductible;

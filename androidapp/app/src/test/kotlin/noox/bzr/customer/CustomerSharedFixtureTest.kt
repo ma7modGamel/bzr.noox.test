@@ -28,6 +28,7 @@ class CustomerSharedFixtureTest {
             "design/fixtures/SCR-C32/cases.json", "design/fixtures/SCR-C33/cases.json",
             "design/fixtures/SCR-C34/cases.json", "design/fixtures/SCR-C35/cases.json",
             "design/fixtures/SCR-C36/cases.json",
+            "design/fixtures/SCR-C37/cases.json", "design/fixtures/SCR-C38/cases.json",
         )
         fixturePaths.forEach { path ->
             val fixture = JSONObject(repositoryFile(path).readText())
@@ -71,7 +72,7 @@ class CustomerSharedFixtureTest {
                 count++
             }
         }
-        assertEquals(227, count)
+        assertEquals(240, count)
     }
 
     private fun assertOptional(label: String, expected: JSONObject, key: String, actual: Any?) {

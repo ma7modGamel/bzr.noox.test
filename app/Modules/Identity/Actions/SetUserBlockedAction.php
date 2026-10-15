@@ -7,6 +7,7 @@ namespace App\Modules\Identity\Actions;
 use App\Modules\Identity\Enums\UserStatus;
 use App\Modules\Identity\Models\Admin;
 use App\Modules\Identity\Models\User;
+use App\Modules\Notifications\Data\LocalizedMessage;
 use App\Modules\Notifications\Services\AccountNotifications;
 use App\Modules\Orders\Actions\CancelOrderAction;
 use App\Modules\Orders\Enums\ActorType;
@@ -51,7 +52,7 @@ final class SetUserBlockedAction
             });
 
         $this->notifications->accountStatusChanged(
-            $user, 'تم إيقاف حسابك', 'السبب: '.trim($reason).' للاستفسار راسل الدعم على '.config('mail.support_address').'.',
+            $user, new LocalizedMessage('notifications.account_blocked_title'), new LocalizedMessage('notifications.account_blocked_body', ['reason' => trim($reason), 'support' => config('mail.support_address')]),
         );
 
         return $cancelled;
@@ -60,6 +61,6 @@ final class SetUserBlockedAction
     public function unblock(User $user, Admin $admin): void
     {
         $user->forceFill(['status' => UserStatus::Active, 'blocked_reason' => null])->save();
-        $this->notifications->accountStatusChanged($user, 'أُعيد تفعيل حسابك', 'يمكنك تسجيل الدخول واستخدام التطبيق من جديد.');
+        $this->notifications->accountStatusChanged($user, new LocalizedMessage('notifications.account_active_title'), new LocalizedMessage('notifications.account_active_body'));
     }
 }

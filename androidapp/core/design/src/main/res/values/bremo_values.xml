@@ -23,7 +23,9 @@
     <integer name="bremo_motion_splash_loop_ms">4800</integer>
     <integer name="bremo_size_category_tile_columns">3</integer>
     <integer name="bremo_size_home_service_tile_columns">3</integer>
-    <dimen name="bremo_elevation_card">9dp</dimen>
-    <dimen name="bremo_elevation_brand">10dp</dimen>
-    <item name="bremo_opacity_scrim" format="float" type="dimen">0.7</item>
+    <integer name="bremo_size_service_tile_columns">2</integer>
+    <integer name="bremo_size_home_tile_columns">4</integer>
+    <dimen name="bremo_elevation_card">2dp</dimen>
+    <dimen name="bremo_elevation_brand">3dp</dimen>
+    <item name="bremo_opacity_scrim" format="float" type="dimen">0.6</item>
 </resources>

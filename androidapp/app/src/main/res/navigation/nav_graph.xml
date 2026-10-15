@@ -31,7 +31,15 @@
 
     <fragment
         android:id="@+id/scr_c03"
-        android:name="noox.bzr.customer.C03ProblemFragment" />
+        android:name="noox.bzr.customer.C03ServiceFragment" />
+
+    <fragment
+        android:id="@+id/scr_c37"
+        android:name="noox.bzr.customer.C37ProblemFragment" />
+
+    <fragment
+        android:id="@+id/scr_c38"
+        android:name="noox.bzr.customer.C38BudgetFragment" />
 
     <fragment
         android:id="@+id/scr_c04"

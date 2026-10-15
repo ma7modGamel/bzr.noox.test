@@ -8,9 +8,15 @@ import noox.bzr.gallery.databinding.ScreenC26OrderHistoryBinding
 /** SCR-C26 (DEC-047): past order details and receipt. */
 class C26OrderHistoryView(context: Context) : CustomerScreenView(context) {
     private val binding = ScreenC26OrderHistoryBinding.inflate(inflater, content)
+    var loadImage: (String, (android.graphics.Bitmap?) -> Unit) -> Unit = { _, ready -> ready(null) }
+    private val photos = android.widget.LinearLayout(context).apply { orientation = android.widget.LinearLayout.VERTICAL }
     var onAction: (String) -> Unit = {}
 
+    private val warrantyBanner = noox.bzr.design.views.InfoBannerView(context)
+
     init {
+        content.addView(warrantyBanner, 0)
+        content.addView(photos)
         listOf(binding.service, binding.receipt, binding.proposals).forEach { it.editText = null }
         binding.provider.rating = ""
         binding.provider.services = null
@@ -20,6 +26,11 @@ class C26OrderHistoryView(context: Context) : CustomerScreenView(context) {
     override fun title(state: CustomerUiState) = string(R.string.order_details_title)
 
     override fun renderContent(state: CustomerUiState) {
+        photos.removeAllViews()
+        photos.addView(photoSection(context, string(R.string.repair_photos_before), state.beforePhotoUrls, loadImage))
+        photos.addView(photoSection(context, string(R.string.repair_photos_after), state.afterPhotoUrls, loadImage))
+        warrantyBanner.isVisible = state.warrantyCoverage.isNotBlank()
+        warrantyBanner.text = state.warrantyCoverage
         binding.status.text = displayStatus(state.displayStatus)
         val serviceLabels = listOf(R.string.receipt_number, R.string.receipt_category, R.string.receipt_problem, R.string.receipt_area, R.string.receipt_visit).map(::string)
         val receiptLabels = listOf(R.string.receipt_labor, R.string.receipt_materials, R.string.receipt_total, R.string.receipt_payment_method, R.string.receipt_payment_status).map(::string)

@@ -4,6 +4,12 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:parentTag="android.widget.LinearLayout">
 
+    <noox.bzr.design.views.WarningBoxView
+        android:id="@+id/duesBlocked"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone" />
+
     <noox.bzr.design.views.StatRowView
         android:id="@+id/summary"
         android:layout_width="match_parent"
@@ -16,6 +22,14 @@
         android:visibility="gone"
         app:bremoText="@string/provider_earnings_employee_info" />
 
+    <noox.bzr.design.views.InfoBannerView android:layout_width="match_parent" android:layout_height="wrap_content" app:bremoText="@string/provider_earnings_filter_notice" />
+    <noox.bzr.design.views.TileGridLayout android:id="@+id/filterTypes" android:layout_width="match_parent" android:layout_height="wrap_content" />
+    <noox.bzr.design.views.AppTextFieldView android:id="@+id/dateFrom" android:layout_width="match_parent" android:layout_height="wrap_content" app:bremoLabel="@string/provider_earnings_from" app:bremoPlaceholder="@string/provider_earnings_date_hint" />
+    <noox.bzr.design.views.AppTextFieldView android:id="@+id/dateTo" android:layout_width="match_parent" android:layout_height="wrap_content" app:bremoLabel="@string/provider_earnings_to" app:bremoPlaceholder="@string/provider_earnings_date_hint" />
+    <noox.bzr.design.views.PrimaryButtonView android:id="@+id/applyFilters" android:layout_width="match_parent" android:layout_height="wrap_content" app:bremoText="@string/provider_earnings_apply" />
+    <noox.bzr.design.views.SecondaryButtonView android:id="@+id/resetFilters" android:layout_width="match_parent" android:layout_height="wrap_content" app:bremoText="@string/provider_earnings_reset" />
+    <noox.bzr.design.views.SecondaryButtonView android:id="@+id/exportStatement" android:layout_width="match_parent" android:layout_height="wrap_content" app:bremoText="@string/provider_earnings_export" />
+    <noox.bzr.design.views.WarningBoxView android:id="@+id/filterError" android:layout_width="match_parent" android:layout_height="wrap_content" android:visibility="gone" />
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -36,6 +50,7 @@
         android:layout_height="wrap_content"
         android:visibility="gone" />
 
+    <noox.bzr.design.views.SecondaryButtonView android:id="@+id/loadMore" android:layout_width="match_parent" android:layout_height="wrap_content" app:bremoText="@string/provider_earnings_more" />
     <TextView
         android:id="@+id/loadingMore"
         android:layout_width="wrap_content"

@@ -194,7 +194,7 @@ $html = <<<HTML
 <main>
   <section class="intro">
     <h1>الدفعة 1 — صفحة مقارنة معرض المكونات</h1>
-    <p>{$cases} لقطة · المقاس {$viewport} بكسل في المنصتين (1×) · RTL · Cairo بأربع أوزان ثابتة · فاتح فقط.</p>
+    <p>{$cases} لقطة · المقاس {$viewport} بكسل في المنصتين (1×) · RTL · IBM Plex Sans Arabic بأربع أوزان ثابتة · فاتح فقط.</p>
     <p><strong>اعتماد المالك:</strong> لقطات Android الست عشرة معتمدة ومحفوظة في <code>design/reference/gallery</code>.</p>
     <p>الفرق يُحسب لـ iOS مقابل المرجع المعتمد، وقبل الاعتماد مقابل لقطة Android. البكسل يُحسب مختلفًا إذا زاد فرق أي قناة عن {$tolerance}؛ صورة الفرق تُعلّم البكسلات المختلفة بالأحمر.</p>
     {$summaryHtml}

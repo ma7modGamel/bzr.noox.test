@@ -16,6 +16,9 @@ enum Cfg: string
     case InspectionFeeEnabled = 'operating.inspection_fee_enabled';         // CFG-091
 
     // ── العروض (DEC-003) ───────────────────────────────────────────────
+    case BestOfferRatingWeight = 'offers.best_rating_weight';
+    case BestOfferPriceWeight = 'offers.best_price_weight';
+    case BestOfferEtaWeight = 'offers.best_eta_weight';
     case OffersWindowNowMinutes = 'offers.window_now_minutes';              // CFG-010
     case OffersWindowScheduledLeadMinutes = 'offers.window_scheduled_lead_minutes'; // CFG-010b
     case OffersWindowScheduledMaxHours = 'offers.window_scheduled_max_hours';       // CFG-010b
@@ -40,6 +43,9 @@ enum Cfg: string
     case TripStartReminderMinutes = 'execution.trip_start_reminder_minutes';   // CFG-031
     case TripStartAlertMinutes = 'execution.trip_start_alert_minutes';         // CFG-032
     case ArrivalLateAlertMinutes = 'execution.arrival_late_alert_minutes';     // CFG-032b
+    case ArrivalCodeValidityMinutes = 'execution.arrival_code_validity_minutes';
+    case ArrivalCodeMaxAttempts = 'execution.arrival_code_max_attempts';
+    case ArrivalCodeLockMinutes = 'execution.arrival_code_lock_minutes';
     case CustomerNoShowWaitMinutes = 'execution.customer_no_show_wait_minutes'; // CFG-033
 
     // ── الأسعار والمقترحات ─────────────────────────────────────────────
@@ -79,6 +85,9 @@ enum Cfg: string
     public function id(): string
     {
         return match ($this) {
+            self::BestOfferRatingWeight => 'CFG-014',
+            self::BestOfferPriceWeight => 'CFG-015',
+            self::BestOfferEtaWeight => 'CFG-016',
             self::OffersWindowNowMinutes => 'CFG-010',
             self::OffersWindowScheduledLeadMinutes, self::OffersWindowScheduledMaxHours => 'CFG-010b',
             self::MaxOffersPerOrder => 'CFG-011',
@@ -93,6 +102,9 @@ enum Cfg: string
             self::TripStartAlertMinutes => 'CFG-032',
             self::ArrivalLateAlertMinutes => 'CFG-032b',
             self::CustomerNoShowWaitMinutes => 'CFG-033',
+            self::ArrivalCodeValidityMinutes => 'CFG-034',
+            self::ArrivalCodeMaxAttempts => 'CFG-035',
+            self::ArrivalCodeLockMinutes => 'CFG-036',
             self::ProposalTimeoutMinutes => 'CFG-040',
             self::PaymentDelayAlertHours => 'CFG-050',
             self::AutoCloseHours => 'CFG-051',
@@ -127,6 +139,9 @@ enum Cfg: string
         return match ($this) {
             self::OffersEnabled => 'تفعيل عروض السعر',
             self::InspectionFeeEnabled => 'تفعيل رسوم المعاينة',
+            self::BestOfferRatingWeight => 'وزن التقييم في الأنسب (%)',
+            self::BestOfferPriceWeight => 'وزن السعر في الأنسب (%)',
+            self::BestOfferEtaWeight => 'وزن وقت الوصول في الأنسب (%)',
             self::OffersWindowNowMinutes => 'نافذة العروض لطلب الآن (دقيقة)',
             self::OffersWindowScheduledLeadMinutes => 'إغلاق عروض المجدول قبل بداية الفترة بـ (دقيقة)',
             self::OffersWindowScheduledMaxHours => 'أقصى مدة لنافذة عروض المجدول (ساعة)',
@@ -145,6 +160,9 @@ enum Cfg: string
             self::TripStartReminderMinutes => 'تذكير الفني ببدء التحرك بعد (دقيقة)',
             self::TripStartAlertMinutes => 'تنبيه الإدارة لعدم بدء التحرك بعد (دقيقة)',
             self::ArrivalLateAlertMinutes => 'تنبيه التأخر في الوصول بعد الوقت المتوقع بـ (دقيقة)',
+            self::ArrivalCodeValidityMinutes => 'صلاحية كود الوصول (دقيقة)',
+            self::ArrivalCodeMaxAttempts => 'أقصى محاولات كود الوصول',
+            self::ArrivalCodeLockMinutes => 'انتظار بعد المحاولات الخاطئة (دقيقة)',
             self::CustomerNoShowWaitMinutes => 'انتظار العميل غير الموجود (دقيقة)',
             self::ProposalTimeoutMinutes => 'مهلة مقترح السعر (دقيقة)',
             self::PaymentDelayAlertHours => 'تنبيه تأخر الدفع (ساعة)',
@@ -191,6 +209,7 @@ enum Cfg: string
     {
         return match ($this) {
             self::OffersEnabled, self::InspectionFeeEnabled => CfgGroup::OperatingMode,
+            self::BestOfferRatingWeight, self::BestOfferPriceWeight, self::BestOfferEtaWeight,
             self::OffersWindowNowMinutes, self::OffersWindowScheduledLeadMinutes,
             self::OffersWindowScheduledMaxHours, self::MaxOffersPerOrder,
             self::MinOfferAmount, self::SelectionGraceNowMinutes,
@@ -200,7 +219,7 @@ enum Cfg: string
             self::AssignmentAlertNowMinutes, self::AssignmentAlertScheduledLeadMinutes,
             self::AssignmentDeadlineNowMinutes => CfgGroup::Assignment,
             self::TripStartReminderMinutes, self::TripStartAlertMinutes,
-            self::ArrivalLateAlertMinutes, self::CustomerNoShowWaitMinutes => CfgGroup::Execution,
+            self::ArrivalLateAlertMinutes, self::ArrivalCodeValidityMinutes, self::ArrivalCodeMaxAttempts, self::ArrivalCodeLockMinutes, self::CustomerNoShowWaitMinutes => CfgGroup::Execution,
             self::ProposalTimeoutMinutes => CfgGroup::Pricing,
             self::PaymentDelayAlertHours, self::AutoCloseHours,
             self::FawryCodeValidityHours, self::ChannelCashEnabled, self::ChannelInstapayEnabled,
@@ -219,6 +238,7 @@ enum Cfg: string
     {
         return match ($this) {
             self::OffersEnabled, self::InspectionFeeEnabled => false,
+            self::BestOfferRatingWeight => 50, self::BestOfferPriceWeight => 30, self::BestOfferEtaWeight => 20,
             self::OffersWindowNowMinutes => 30,
             self::OffersWindowScheduledLeadMinutes => 60,
             self::OffersWindowScheduledMaxHours => 24,
@@ -244,6 +264,9 @@ enum Cfg: string
             self::TripStartReminderMinutes => 10,
             self::TripStartAlertMinutes => 20,
             self::ArrivalLateAlertMinutes => 30,
+            self::ArrivalCodeValidityMinutes => 10,
+            self::ArrivalCodeMaxAttempts => 5,
+            self::ArrivalCodeLockMinutes => 5,
             self::CustomerNoShowWaitMinutes => 20,
             self::ProposalTimeoutMinutes => 60,
             self::PaymentDelayAlertHours => 24,
@@ -253,7 +276,7 @@ enum Cfg: string
             self::ChannelFawryEnabled => false,     // OD-10 — حتى يجهز حساب فوري
             self::InstapayAddress, self::InstapayDisplayName, self::InstapayLink => null, // يُدخلها المدير العام
             self::DisputeWindowHours => 72,
-            self::ProviderDebtLimit => null,       // OD-02 — قبل تفعيل CFG-090
+            self::ProviderDebtLimit => '5000.00',  // OD-02 — DEC-069
             self::DefaultCommissionRate => null,   // OD-01 — قبل تفعيل CFG-090
             self::PayoutCycle => 'weekly',
             self::EmployeeRemittanceCycle => 'daily',

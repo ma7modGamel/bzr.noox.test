@@ -1,0 +1,19 @@
+{
+    "data": [
+        {
+            "id": 1000,
+            "reason_code": "WORK_QUALITY",
+            "reason_label": "جودة التنفيذ غير مرضية",
+            "description": "التنفيذ لم يكتمل كما اتفقنا.",
+            "status": "OPEN",
+            "status_label": "مفتوح",
+            "resolution": null,
+            "resolution_label": null,
+            "resolution_note": null,
+            "is_post_close": false,
+            "attachments": [],
+            "created_at": "2026-10-05T19:51:55+00:00",
+            "resolved_at": null
+        }
+    ]
+}

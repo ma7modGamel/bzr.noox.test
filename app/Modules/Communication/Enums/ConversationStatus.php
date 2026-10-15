@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Communication\Enums;
 
+use App\Support\Localization;
 use Filament\Support\Contracts\HasLabel;
 
 /** 21 §8 — BR-100..BR-102. */
@@ -15,8 +16,8 @@ enum ConversationStatus: string implements HasLabel
     public function getLabel(): string
     {
         return match ($this) {
-            self::Open => 'مفتوحة',
-            self::ReadOnly => 'للقراءة فقط',
+            self::Open => Localization::text('copy.open'),
+            self::ReadOnly => Localization::text('copy.read_only'),
         };
     }
 }

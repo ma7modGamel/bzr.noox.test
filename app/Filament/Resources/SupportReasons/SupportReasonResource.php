@@ -61,6 +61,7 @@ final class SupportReasonResource extends Resource
                 ->label('النص الظاهر للعميل')
                 ->required()
                 ->maxLength(120),
+            TextInput::make('label_en')->label('النص بالإنجليزية')->maxLength(120)->extraInputAttributes(['dir' => 'ltr']),
             TextInput::make('sort')
                 ->label('الترتيب')
                 ->numeric()

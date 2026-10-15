@@ -24,8 +24,10 @@ import androidx.navigation.navOptions
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.launch
 import noox.bzr.auth.AndroidAuthSessionStore
+import noox.bzr.auth.AuthPhase
 import noox.bzr.auth.AuthViewModel
 import noox.bzr.auth.RetrofitAuthApi
 import noox.bzr.auth.authScreen
@@ -39,7 +41,10 @@ import noox.bzr.links.AndroidPushDevice
 import noox.bzr.links.BremoMessagingService
 import noox.bzr.links.DeepLinkRouter
 import noox.bzr.links.DeepLinkTarget
+import noox.bzr.links.ModeMemory
+import noox.bzr.links.ModeMemoryStore
 import noox.bzr.links.NotificationChannels
+import noox.bzr.network.SessionExpiry
 import noox.bzr.provider.ProviderRoutes
 import noox.bzr.provider.ProviderViewModel
 import noox.bzr.provider.UrlConnectionProviderApi
@@ -56,6 +61,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var authenticated: MutableStateFlow<Boolean>
     private var customerFlowActive = false
     private val push by lazy { AndroidPushDevice(applicationContext) }
+    private val modeMemory by lazy { ModeMemoryStore(getSharedPreferences("mode", MODE_PRIVATE)) }
     /** A notification or link that arrived before sign-in, or before the first screen (17 §الروابط العميقة). */
     private var pendingLink: String? = null
     private val bottomNav by lazy { findViewById<BottomNavView>(R.id.bottom_nav) }
@@ -108,10 +114,17 @@ class MainActivity : AppCompatActivity() {
         }
         setUpBottomNav()
         authenticated = MutableStateFlow(session.token != null)
+        customerFlowActive = savedInstanceState != null && session.token != null &&
+            (customerViewModel.hasStarted || providerViewModel.flowActive.value)
+        customerViewModel.refreshLanguage(getString(DesignR.string.common_currency_egp))
+        providerViewModel.refreshLanguage(getString(DesignR.string.common_currency_egp))
+        if (savedInstanceState != null && session.token != null) onSignedIn()
         NotificationChannels.create(this)
         customerViewModel.onDeepLink = ::openLink
         providerViewModel.onDeepLink = ::openLink
         BremoMessagingService.onTokenRefreshed = { customerViewModel.registerPushDevice(it) }
+        SessionExpiry.onExpired = ::onSessionExpired
+        authViewModel.onSessionStarted = customerViewModel::signedIn
         if (savedInstanceState == null) pendingLink = linkFrom(intent)
         // System back follows the same history as the top bar; on customer home it leaves the app (6ب).
         onBackPressedDispatcher.addCallback(this, object : androidx.activity.OnBackPressedCallback(true) {
@@ -146,13 +159,25 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
         }
+        // DEC-067: remember the mode the user moves to; logout and expiry clear the token first, so they never count.
+        lifecycleScope.launch {
+            providerViewModel.flowActive.drop(1).distinctUntilChanged().collect { provider ->
+                if (session.token != null) modeMemory.remember(session.email, if (provider) ModeMemory.PROVIDER else ModeMemory.CUSTOMER)
+            }
+        }
+        // After logout the login screen starts fresh, not on the previous sign-in's success state.
+        lifecycleScope.launch {
+            customerViewModel.requiresAuthenticationFlow.collect { required ->
+                if (required && authViewModel.state.phase == AuthPhase.Success) authViewModel.reset()
+            }
+        }
         // CustomerJourneyFlow's LaunchedEffect(Unit): load home whenever the customer screens start showing.
         lifecycleScope.launch {
             showsCustomer().distinctUntilChanged().collect { customer ->
                 if (customer && !customerFlowActive) {
                     val link = pendingLink
                     pendingLink = null
-                    if (link == null) customerViewModel.loadHome() else openLink(link)
+                    if (link == null) restoreLastMode() else openLink(link)
                     onSignedIn()
                 }
                 customerFlowActive = customer
@@ -258,8 +283,36 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    /** DEC-067: start where this account left off; the customer home loads meanwhile only when it is the answer. */
+    private fun restoreLastMode() {
+        val lastMode = modeMemory.lastMode(session.email)
+        if (lastMode != ModeMemory.PROVIDER) {
+            customerViewModel.loadHome()
+            return
+        }
+        providerViewModel.resolveProviderStatus(unknownOnFailure = true) { status ->
+            val restore = ModeMemory.restoreTarget(lastMode, status, hasPendingLink = false)
+            if (restore.forget) modeMemory.remember(session.email, ModeMemory.CUSTOMER)
+            if (restore.target == ModeMemory.CUSTOMER) {
+                customerViewModel.loadHome()
+            } else {
+                providerViewModel.openDeepLink(DeepLinkTarget(DeepLinkTarget.PROVIDER, restore.target), notificationsDenied = !push.notificationsAllowed())
+            }
+        }
+    }
+
+    /** DEC-065: a refused token signs out locally (as logout does) and shows login with the reason. */
+    private fun onSessionExpired() {
+        if (session.token == null) return
+        val email = session.email.orEmpty()
+        authViewModel.showSessionExpired(email)
+        providerViewModel.closeFlow()
+        customerViewModel.sessionExpired()
+    }
+
     /** DEC-058: register this device, and ask for the notification permission once. */
     private fun onSignedIn() {
+        customerViewModel.persistLanguage()
         runCatching {
             com.google.firebase.messaging.FirebaseMessaging.getInstance().token.addOnSuccessListener { token ->
                 push.store(token)

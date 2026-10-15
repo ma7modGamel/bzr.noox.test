@@ -1,0 +1,42 @@
+{
+  "captured_at": "2026-10-13T19:38:49.305925+00:00",
+  "screenshots": [
+    {
+      "test_snapshot": "technician-real-images-identity-only",
+      "file": "reports/prd-review/assets/after-trust-technician.png",
+      "source_run": "androidapp/app/build/reports/paparazzi/debug/runs/20261013223512_06b73d.js",
+      "sha256": "ebd006091caa106164f646ac4cb921c612dd775782480e4aba402701ab6c68f5"
+    },
+    {
+      "test_snapshot": "technician-identity-verification",
+      "file": "reports/prd-review/assets/after-trust-verification.png",
+      "source_run": "androidapp/app/build/reports/paparazzi/debug/runs/20261013223512_06b73d.js",
+      "sha256": "d57fb7359a6af8dfdcbef1f4726a2f1d3967b74abc95c8c0d35c402eb4cec265"
+    },
+    {
+      "test_snapshot": "customer-real-account-statistics",
+      "file": "reports/prd-review/assets/after-trust-account.png",
+      "source_run": "androidapp/app/build/reports/paparazzi/debug/runs/20261013223511_1d1033.js",
+      "sha256": "d1bfaef82aa02933103700a4d80215d080f2293a854d6b02072f4c58b520b4c6"
+    },
+    {
+      "test_snapshot": "messages-real-unread-availability",
+      "file": "reports/prd-review/assets/after-trust-messages.png",
+      "source_run": "androidapp/app/build/reports/paparazzi/debug/runs/20261013223509_d70370.js",
+      "sha256": "072dcdfb17f524298c51da9fe0032d3391a2ad931d014d1a84680f56bf75c63a"
+    }
+  ],
+  "source": "Android native views rendered by Paparazzi with test data; photos from existing design/images/home-hero.jpg",
+  "validation": {
+    "backend_tests": 32,
+    "android_tests": 15,
+    "swift_core_tests": 59,
+    "backend_assertions": 367
+  },
+  "limits": [
+    "No Xcode build",
+    "No device test",
+    "No production deployment",
+    "Original PDF and HTML remain historical review artifacts"
+  ]
+}

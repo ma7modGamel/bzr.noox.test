@@ -7,17 +7,22 @@ namespace App\Modules\Reviews\Actions;
 use App\Modules\Identity\Models\User;
 use App\Modules\Orders\Enums\OrderStatus;
 use App\Modules\Orders\Models\Order;
+use App\Modules\Orders\Models\OrderMedia;
 use App\Modules\Providers\Models\ProviderProfile;
 use App\Modules\Reviews\Models\Review;
+use App\Modules\Reviews\Models\ReviewTag;
 use App\Modules\Settings\Enums\Cfg;
 use App\Modules\Settings\Services\SettingsRepository;
 use App\Support\Exceptions\BusinessRuleViolationException;
+use App\Support\Localization;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 final readonly class CreateProviderReviewAction
 {
     public function __construct(private SettingsRepository $settings) {}
 
+    /** @param list<int> $mediaIds */
     public function execute(
         Order $order,
         User $customer,
@@ -25,10 +30,24 @@ final readonly class CreateProviderReviewAction
         int $punctuality,
         int $conduct,
         ?string $comment,
+        array $mediaIds = [],
+        array $tags = [],
     ): Review {
-        return DB::transaction(function () use ($order, $customer, $quality, $punctuality, $conduct, $comment): Review {
+        return DB::transaction(function () use ($order, $customer, $quality, $punctuality, $conduct, $comment, $mediaIds, $tags): Review {
             $fresh = Order::query()->lockForUpdate()->findOrFail($order->getKey());
             $this->assertCanRate($fresh, $customer);
+            $allowedTags = ReviewTag::query()->whereIn('code', $tags)->where('is_active', true)->lockForUpdate()->get(['code'])->count();
+            if (count($tags) > 10 || count(array_unique($tags)) !== count($tags) || $allowedTags !== count($tags)) {
+                throw ValidationException::withMessages(['tags' => Localization::text('copy.invalid_service_review_tags')]);
+            }
+
+            $photos = OrderMedia::query()->whereIn('id', $mediaIds)->orderBy('id')->lockForUpdate()->get();
+            if (count($mediaIds) > 5 || $photos->count() !== count($mediaIds) || $photos->contains(
+                fn (OrderMedia $media): bool => $media->uploaded_by !== $customer->getKey()
+                    || $media->order_id !== null || $media->type !== 'IMAGE' || (bool) $media->expires_at?->isPast(),
+            )) {
+                throw BusinessRuleViolationException::rule('BR-014', Localization::text('copy.the_photo_is_invalid_or_does_not_belong_to'));
+            }
 
             $review = Review::query()->create([
                 'order_id' => $fresh->getKey(),
@@ -38,9 +57,14 @@ final readonly class CreateProviderReviewAction
                 'punctuality' => $punctuality,
                 'conduct' => $conduct,
                 'comment' => $comment,
+                'tags' => array_values($tags),
             ]);
 
             $this->refreshProviderRating($fresh->providerProfile);
+
+            foreach ($photos as $photo) {
+                $photo->update(['order_id' => $fresh->getKey(), 'purpose' => 'CUSTOMER_REVIEW', 'expires_at' => null]);
+            }
 
             return $review;
         });
@@ -56,7 +80,7 @@ final readonly class CreateProviderReviewAction
             || $deadline === null
             || now()->isAfter($deadline)
             || $order->review()->exists()) {
-            throw BusinessRuleViolationException::rule('BR-090', 'التقييم غير متاح لهذا الطلب.');
+            throw BusinessRuleViolationException::rule('BR-090', Localization::text('copy.rating_is_unavailable_for_this_request'));
         }
     }
 

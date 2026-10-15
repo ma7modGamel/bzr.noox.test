@@ -30,6 +30,16 @@ object CustomerCatalogSelection {
 data class CustomerUiState(
     val screen: String,
     val phase: CustomerPhase,
+    val reviewTagSummary: List<String> = emptyList(),
+    val imageGroups: List<List<String>> = emptyList(),
+    val beforePhotoUrls: List<String> = emptyList(),
+    val afterPhotoUrls: List<String> = emptyList(),
+    val proposalPhotoUrl: String = "",
+    val arrivalCode: String = "",
+    val arrivalCodeUntil: String = "",
+    val arrivalCodeRequired: Boolean = false,
+    val arrivalExceptionPending: Boolean = false,
+    val arrivalCodeFailed: Boolean = false,
     val canContinue: Boolean = false,
     val messageKey: String? = null,
     val descriptionError: String? = null,
@@ -58,6 +68,9 @@ data class CustomerUiState(
     val showConfirmation: Boolean = false,
     val pendingIndex: Int = -1,
     val countdownSeconds: Int = 0,
+    val proposalDeadline: String = "",
+    val proposalExpiryMessage: String = "",
+    val proposalLoadedUptime: Int = 0,
     val hasPhoto: Boolean = false,
     val stepStates: List<String> = emptyList(),
     val ratings: List<Int> = emptyList(),
@@ -73,6 +86,31 @@ data class CustomerUiState(
     val selectedPricingIndex: Int = -1,
     val noBudget: Boolean = false,
     val providerVerified: Boolean = false,
+    /** DEC-071: server codes beside `options` / `materialOptions` / `pricingOptions`, so views pick each card's copy and icon. */
+    val optionCodes: List<String> = emptyList(),
+    val materialCodes: List<String> = emptyList(),
+    val pricingCodes: List<String> = emptyList(),
+    /** C01 current-request card (DEC-073): per order, beside `items`. Offer figures are blank when not loaded. */
+    val orderIcons: List<String> = emptyList(),
+    val orderAgeMinutes: List<Int> = emptyList(),
+    val orderOfferCounts: List<Int> = emptyList(),
+    val orderLowestOffers: List<String> = emptyList(),
+    val unreadNotifications: Int = 0,
+    val requestSteps: Int = 5,
+    val nowAvailable: Boolean = false,
+    val showMaterials: Boolean = false,
+    val isInstapay: Boolean = false,
+    val isWarranty: Boolean = false,
+    val warrantyCoverage: String = "",
+    val waitingInfo: String = "",
+    val providerAvatarUrl: String = "",
+    val portfolioUrls: List<String> = emptyList(),
+    val unreadCounts: List<Int> = emptyList(),
+    val providersAvailable: List<Boolean> = emptyList(),
+    val providerAvailable: Boolean = false,
+    val warrantyVisitId: Int? = null,
+    val warrantyVisitFinal: Boolean = false,
+    val photoCount: Int = 0,
 )
 
 object CustomerLogic {
@@ -88,16 +126,25 @@ object CustomerLogic {
         }
     }
 
-    fun reduce(screen: String, input: Map<String, Any?>): CustomerUiState {
+    fun reduce(screen: String, input: Map<String, Any?>): CustomerUiState =
+        reduceScreen(screen, input + ("available_actions" to input.strings("available_actions").filter { it != "call" }))
+            .copy(reviewTagSummary = input.strings("review_tag_summary"), imageGroups = input.strings("image_groups").map { it.split("\n").filter(String::isNotBlank) }, beforePhotoUrls = input.strings("work_before_urls"), afterPhotoUrls = input.strings("work_after_urls"), proposalPhotoUrl = input.text("proposal_photo_url"), arrivalCode = input.text("arrival_code"), arrivalCodeUntil = input.text("arrival_code_until"), arrivalCodeRequired = input.boolean("arrival_code_required"), arrivalExceptionPending = input.boolean("arrival_exception_pending"), arrivalCodeFailed = input.boolean("arrival_code_failed"))
+            .copy(warrantyCoverage = input.text("warranty_coverage"), warrantyVisitId = input.integer("warranty_visit_id").takeIf { it > 0 }, warrantyVisitFinal = input.boolean("warranty_visit_final"))
+            .copy(requestSteps = if (input.text("operating_mode") == "staff") 4 else 5, waitingInfo = input.text("waiting_info"))
+            .copy(providerAvatarUrl = input.text("provider_avatar_url"), portfolioUrls = input.strings("portfolio_urls"), unreadCounts = input.strings("unread_counts").map { it.toIntOrNull() ?: 0 }, providersAvailable = input.strings("providers_available").map { it == "true" }, providerAvailable = input.boolean("provider_available"))
+
+    private fun reduceScreen(screen: String, input: Map<String, Any?>): CustomerUiState {
         val event = input.text("event")
         if (event == "loading") return CustomerUiState(screen, CustomerPhase.Loading)
-        if (event == "error") return CustomerUiState(screen, CustomerPhase.Error, messageKey = "error.body")
+        if (event == "error" && (screen != "SCR-C24" || input.strings("ratings").isEmpty())) return CustomerUiState(screen, CustomerPhase.Error, messageKey = "error.body")
 
         return when (screen) {
             "SCR-C01" -> home(input)
             "SCR-C02" -> account(input)
-            "SCR-C03" -> problem(input)
+            "SCR-C03" -> service(input)
+            "SCR-C37" -> problem(input)
             "SCR-C04" -> timing(input)
+            "SCR-C38" -> budget(input)
             "SCR-C05" -> review(input)
             "SCR-C06" -> offers(input)
             "SCR-C07" -> provider(input)
@@ -146,6 +193,12 @@ object CustomerLogic {
             itemStates = input.strings("order_statuses"),
             // The default address labels the home header's location row (DEC-063).
             fieldValues = listOf(input.text("customer_name"), input.text("address_label")),
+            optionCodes = input.strings("order_status_codes"),
+            orderIcons = input.strings("order_icons"),
+            orderAgeMinutes = input.strings("order_age_minutes").map { it.toIntOrNull() ?: -1 },
+            orderOfferCounts = input.strings("order_offer_counts").map { it.toIntOrNull() ?: 0 },
+            orderLowestOffers = input.strings("order_lowest_offers"),
+            unreadNotifications = input.integer("unread_notifications"),
         )
     }
 
@@ -154,10 +207,30 @@ object CustomerLogic {
         phase = CustomerPhase.Content,
         canContinue = true,
         messageKey = if (input.boolean("is_verified")) "account.verified" else "account.unverified",
-        fieldValues = listOf(input.text("name"), input.text("phone")),
+        // DEC-076 (Figma 3002:4654): name, phone, completed orders, saved addresses ("" when not loaded).
+        fieldValues = listOf(input.text("name"), input.text("phone"), input.text("completed_orders"), input.text("address_count"), input.text("active_orders")),
     )
 
     /** C03 (DEC-059): catalog categories and the chosen category's problem types; `is_other` needs 10 characters (BR-013). */
+    /** C03 (DEC-071, step 1 of 5): the service only. The view model filters by `search_query` before reducing. */
+    private fun service(input: Map<String, Any?>): CustomerUiState {
+        val labels = input.strings("category_labels")
+        val selected = input.integer("selected_category_index", -1)
+        val noResults = labels.isEmpty() && input.text("search_query").isNotBlank()
+        return CustomerUiState(
+            "SCR-C03",
+            if (selected < 0) CustomerPhase.Empty else CustomerPhase.Content,
+            canContinue = selected >= 0,
+            messageKey = if (noResults) "request.search.no_results" else null,
+            options = labels,
+            optionIcons = input.strings("category_icons"),
+            itemDetails = input.strings("category_details"),
+            selectedIndex = selected,
+            fieldValues = listOf(input.text("search_query")),
+        )
+    }
+
+    /** C37 (DEC-071, step 2 of 5): problem type, description, media — the former C03 rules. */
     private fun problem(input: Map<String, Any?>): CustomerUiState {
         val selected = input.integer("selected_problem_index", -1)
         val isOther = input.strings("problem_other").getOrNull(selected) == "true"
@@ -169,51 +242,74 @@ object CustomerLogic {
             else -> null
         }
         return CustomerUiState(
-            "SCR-C03",
+            "SCR-C37",
             if (selected < 0) CustomerPhase.Empty else CustomerPhase.Content,
             canContinue = error == null,
             descriptionError = error,
-            options = input.strings("category_labels"),
-            optionIcons = input.strings("category_icons"),
-            selectedIndex = input.integer("selected_category_index", -1),
+            items = listOf(input.text("service_label")),
             itemDetails = input.strings("problem_labels"),
+            itemStates = input.strings("media_kinds"),
+            optionIcons = listOf(input.text("service_icon")),
             selectedOptionIndex = selected,
             fieldValues = listOf(description, input.integer("media_count").toString()),
         )
     }
 
-    /** C04: address, timing, materials; marketplace adds pricing mode and an optional budget (07, BR-015). */
+    /** C04 (DEC-071, step 3 of 5): address and timing. */
     private fun timing(input: Map<String, Any?>): CustomerUiState {
         val timingType = input.text("timing_type")
         val hasAddress = input.text("address_id").isNotBlank()
-        val marketplace = input.text("operating_mode") != "staff"
-        val budget = input.text("budget").trim()
-        val budgetValid = budget.isEmpty() || (budget.toBigDecimalOrNull()?.signum() == 1)
-        val materialSelected = input.integer("selected_material_index", -1) >= 0
-        val pricingSelected = !marketplace || input.integer("selected_pricing_index", -1) >= 0
         val message = when {
             !hasAddress -> "request.address.required"
             input.containsKey("category_available") && !input.boolean("category_available") -> "request.category.unavailable"
-            timingType == "now" && !input.boolean("now_available") -> "request.timing.now_unavailable"
+            input.boolean("availability_loading") && timingType != "scheduled" -> "request.timing.checking"
+            input.boolean("availability_failed") && timingType != "scheduled" -> "request.timing.check_failed"
+            !input.boolean("now_available") && timingType != "scheduled" -> "request.timing.now_unavailable"
             timingType == "scheduled" && input.text("slot_id").isBlank() -> "request.slot.required"
             else -> null
         }
         return CustomerUiState(
             "SCR-C04",
             CustomerPhase.Content,
-            canContinue = hasAddress && timingType.isNotBlank() && message == null && materialSelected
-                && pricingSelected && (!marketplace || budgetValid),
+            canContinue = hasAddress && timingType.isNotBlank() && message == null &&
+                (input.text("operating_mode") != "staff" || input.integer("selected_material_index", -1) >= 0),
+            nowAvailable = input.boolean("now_available"),
+            showMaterials = input.text("operating_mode") == "staff",
+            materialOptions = input.strings("material_labels"),
+            materialCodes = input.strings("material_codes"),
+            selectedMaterialIndex = input.integer("selected_material_index", -1),
             messageKey = message,
-            showPricing = marketplace,
             options = input.strings("timing_labels"),
+            optionCodes = input.strings("timing_codes"),
             selectedOptionIndex = input.integer("selected_timing_index", -1),
-            fieldValues = listOf(input.text("address_label"), budget, input.text("slot_label")),
+            fieldValues = listOf(input.text("address_label"), "", input.text("slot_label")),
+            items = input.strings("address_labels"),
+            selectedIndex = input.integer("selected_address_index", -1),
+        )
+    }
+
+    /** C38 (DEC-071, step 4 of 5): materials; marketplace adds pricing mode and an optional budget (07, BR-015). */
+    private fun budget(input: Map<String, Any?>): CustomerUiState {
+        val marketplace = input.text("operating_mode") != "staff"
+        val budget = input.text("budget").trim()
+        val budgetValid = budget.isEmpty() || (budget.toBigDecimalOrNull()?.signum() == 1)
+        val materialSelected = input.integer("selected_material_index", -1) >= 0
+        val pricingSelected = !marketplace || input.integer("selected_pricing_index", -1) >= 0
+        return CustomerUiState(
+            "SCR-C38",
+            CustomerPhase.Content,
+            canContinue = materialSelected && pricingSelected && (!marketplace || budgetValid),
+            showPricing = marketplace,
+            fieldValues = listOf("", budget),
             fieldErrors = if (marketplace && !budgetValid) listOf("request.budget.invalid") else emptyList(),
             materialOptions = input.strings("material_labels"),
+            materialCodes = input.strings("material_codes"),
             selectedMaterialIndex = input.integer("selected_material_index", -1),
             pricingOptions = if (marketplace) input.strings("pricing_labels") else emptyList(),
+            pricingCodes = if (marketplace) input.strings("pricing_codes") else emptyList(),
             selectedPricingIndex = input.integer("selected_pricing_index", -1),
             noBudget = input.boolean("no_budget"),
+            itemDetails = if (marketplace) input.strings("budget_amounts") else emptyList(),
         )
     }
 
@@ -253,9 +349,13 @@ object CustomerLogic {
             displayStatus = input.text("display_status"),
             items = rows,
             selectedIndex = input.integer("sort_index", 0),
+            options = input.strings("sort_labels"), optionCodes = input.strings("sort_codes"),
             countdownSeconds = input.integer("countdown_seconds"),
             fieldValues = listOf(input.text("order_title")),
             pricingOptions = listOf(input.text("pricing_mode")),
+            // DEC-073: the request summary C35 shows while no offer has arrived (problem, address, time, budget).
+            itemDetails = input.strings("summary_rows"),
+            optionIcons = listOf(input.text("order_icon")),
         )
     }
 
@@ -267,10 +367,13 @@ object CustomerLogic {
             if (available) CustomerPhase.Content else CustomerPhase.Empty,
             canContinue = available && "accept_offer" in input.strings("available_actions"),
             visibleActions = input.strings("available_actions"),
+            // DEC-073 (Figma 3002:873): [6] review total, [7] the order's category for «فني … موثّق».
             fieldValues = listOf(
                 input.text("provider_name"), input.text("provider_rating"), input.text("provider_services"),
                 input.text("provider_experience"), input.text("provider_about"), input.text("offer_price"),
+                input.text("ratings_count"), input.text("provider_category"),
             ),
+            itemStates = input.strings("portfolio_captions"),
             options = input.strings("specialties"),
             itemDetails = input.strings("rating_values"),
             items = input.strings("review_rows"),
@@ -290,8 +393,10 @@ object CustomerLogic {
             showEta = input.text("timing_type") == "now",
             visibleActions = actions,
             isBusy = input.text("event") == "submitting",
+            // DEC-073 (Figma 3002:1757): [4] the order's category, [5] who supplies materials.
             fieldValues = listOf(
                 input.text("provider_name"), input.text("provider_rating"), input.text("provider_services"), input.text("eta_minutes"),
+                input.text("provider_category"), input.text("materials_label"),
             ),
             items = input.strings("offer_rows"),
             itemDetails = input.strings("order_rows"),
@@ -336,6 +441,17 @@ object CustomerLogic {
             displayStatus = input.text("display_status"),
             items = input.strings("summary"),
             stepStates = input.strings("step_states"),
+            itemDetails = input.strings("execution_labels"), options = input.strings("execution_times"), itemStates = input.strings("execution_states"),
+            // DEC-076 (Figma 3002:1631/1903/2055/2540): number, address, problem, agreed price, materials, provider name,
+            // rating, completed jobs, category, approved total, slot.
+            fieldValues = listOf(
+                input.text("order_number"), input.text("address"), input.text("order_title"), input.text("agreed_price"),
+                input.text("materials_label"), input.text("provider_name"), input.text("provider_rating"),
+                input.text("provider_completed"), input.text("provider_category"), input.text("final_amount"), input.text("slot_label"),
+                input.text("completion_estimate_at"), if (input.boolean("completion_estimate_overdue")) "overdue" else "",
+            ),
+            providerVerified = input.boolean("provider_verified"),
+            optionCodes = listOf(input.text("status"), input.text("timing_type")),
         )
     }
 
@@ -424,6 +540,7 @@ object CustomerLogic {
             if (input.integer("audio_count") > 1) add("media.validation.audio_limit")
             if ("failed" in states) add("media.validation.rejected")
         }
+        val selectionError = input.text("media_error").takeIf { it == "media.validation.video_duration" || it == "media.validation.video_unreadable" }
         val busy = input.boolean("recording") || "uploading" in states
         return CustomerUiState(
             screen = "SCR-C17",
@@ -436,7 +553,7 @@ object CustomerLogic {
             },
             items = kinds,
             itemStates = states,
-            fieldErrors = errors,
+            fieldErrors = listOfNotNull(selectionError) + errors,
             isBusy = busy,
         )
     }
@@ -455,6 +572,7 @@ object CustomerLogic {
 
     private fun dispute(input: Map<String, Any?>): CustomerUiState {
         val event = input.text("event")
+        val warranty = input.boolean("warranty")
         val selected = input.integer("selected_reason_index", -1)
         val description = input.text("description")
         val existing = input.boolean("existing")
@@ -462,9 +580,11 @@ object CustomerLogic {
         return CustomerUiState(
             screen = "SCR-C27",
             phase = CustomerPhase.Content,
-            canContinue = !existing && selected >= 0 && description.isNotBlank() && description.length <= 1000 &&
-                "open_dispute" in input.strings("available_actions") && !busy,
-            messageKey = if (event == "success") "dispute.success" else null,
+            canContinue = !existing && description.length <= 1000 && !busy &&
+                if (warranty) description.trim().length >= 10 && "request_warranty" in input.strings("available_actions")
+                else selected >= 0 && description.isNotBlank() && "open_dispute" in input.strings("available_actions"),
+            isWarranty = warranty,
+            messageKey = if (event == "success") (if (warranty) "warranty.success" else "dispute.success") else null,
             descriptionError = if (!existing && description.length > 1000) "request.description.max" else null,
             visibleActions = input.strings("available_actions"),
             items = input.strings("details"),
@@ -500,7 +620,7 @@ object CustomerLogic {
     private fun help(input: Map<String, Any?>): CustomerUiState {
         val subject = input.text("subject")
         val message = input.text("message")
-        val busy = input.text("event") == "submitting"
+        val busy = input.text("event") in listOf("submitting", "uploading")
         val errors = buildList {
             if (subject.isNotEmpty() && subject.length !in 5..120) add("help.validation.subject")
             if (message.isNotEmpty() && message.length !in 10..2000) add("help.validation.message")
@@ -532,6 +652,9 @@ object CustomerLogic {
             fieldValues = input.strings("notification_times"),
             isBusy = input.text("event") == "marking_read",
             notificationsDenied = input.boolean("notifications_denied"),
+            // DEC-076 (Figma 3002:3608): NTF code per row, "today" / "earlier", and the age in minutes.
+            optionCodes = input.strings("notification_codes"), stepStates = input.strings("notification_days"),
+            orderAgeMinutes = input.strings("notification_ages").map { it.toIntOrNull() ?: -1 },
         )
     }
 
@@ -581,6 +704,9 @@ object CustomerLogic {
             canContinue = actions.isNotEmpty() && input.text("event") != "submitting",
             visibleActions = actions,
             isBusy = input.text("event") == "submitting",
+            showEta = input.text("timing_type") == "now",
+            itemDetails = input.strings("summary_rows"),
+            optionIcons = listOf(input.text("order_icon")),
         )
     }
 
@@ -596,6 +722,8 @@ object CustomerLogic {
             options = input.strings("last_messages"),
             fieldValues = input.strings("last_message_times"),
             fieldErrors = input.strings("provider_verified"),
+            // DEC-076 (Figma 3002:2924): "mine" when the last message is the customer's own (sent tick).
+            optionCodes = input.strings("last_message_mine"),
         )
     }
 
@@ -624,6 +752,7 @@ object CustomerLogic {
                 input.text("viewer_role"),
             ),
             fieldValues = listOf(draft),
+            providerVerified = input.boolean("provider_verified"),
             isBusy = busy,
         )
     }
@@ -640,8 +769,14 @@ object CustomerLogic {
             items = titles,
             itemDetails = input.strings("order_subtitles"),
             itemStates = input.strings("order_statuses"),
-            selectedOptionIndex = if (tab == "past") 1 else 0,
+            selectedOptionIndex = when (tab) { "past" -> 1; "cancelled" -> 2; else -> 0 },
             isBusy = busy,
+            // DEC-076 (Figma 3002:3889): per order, status code, category icon, the card row
+            // "number|place|provider|verified|rating|amount|chat|phone" and, while open, the offer figures.
+            optionCodes = input.strings("order_status_codes"), orderIcons = input.strings("order_icons"),
+            options = input.strings("order_rows"),
+            orderOfferCounts = input.strings("order_offer_counts").map { it.toIntOrNull() ?: 0 },
+            orderLowestOffers = input.strings("order_lowest_offers"),
         )
     }
 
@@ -671,10 +806,14 @@ object CustomerLogic {
         val busy = input.text("event") == "switching"
         return CustomerUiState(
             screen = "SCR-C21", phase = CustomerPhase.Content,
-            canContinue = method == "ELECTRONIC" && "pay_electronic" in actions && !busy,
+            canContinue = method == "ELECTRONIC" && ("pay_electronic" in actions || "submit_instapay_transfer" in actions) && !busy,
             items = input.strings("amounts"), options = input.strings("method_labels"),
             selectedOptionIndex = input.integer("selected_method_index", -1),
             visibleActions = actions, isBusy = busy,
+            // DEC-076 (Figma 3002:4134): provider name, problem, address.
+            fieldValues = listOf(input.text("provider_name"), input.text("order_title"), input.text("address")),
+            providerVerified = input.boolean("provider_verified"),
+            optionCodes = input.strings("method_codes"),
         )
     }
 
@@ -682,9 +821,12 @@ object CustomerLogic {
         val event = input.text("event")
         val status = input.text("payment_status")
         val selected = input.integer("selected_channel_index", -1)
-        val busy = event == "creating"
+        val busy = event in listOf("creating", "uploading")
+        val instapay = input.boolean("is_instapay")
         val actions = input.strings("available_actions")
         val message = when {
+            event == "upload_failed" -> "media.upload_error"
+            status == "PENDING_VERIFICATION" -> "payment.instapay.pending"
             busy -> "payment.creating"
             status == "SUCCEEDED" -> "payment.success"
             status == "FAILED" -> "payment.failed"
@@ -695,7 +837,11 @@ object CustomerLogic {
         }
         return CustomerUiState(
             screen = "SCR-C22", phase = CustomerPhase.Content,
-            canContinue = !busy && status != "PENDING" && status != "SUCCEEDED" && selected >= 0 && "pay_electronic" in actions,
+            canContinue = !busy && status !in listOf("PENDING", "PENDING_VERIFICATION", "SUCCEEDED") && selected >= 0 &&
+                if (instapay) "submit_instapay_transfer" in actions && input.boolean("receipt_uploaded") && input.text("transfer_reference").trim().matches(Regex("[A-Za-z0-9_ -]{4,64}"))
+                else "pay_electronic" in actions,
+            isInstapay = instapay, hasPhoto = input.boolean("receipt_uploaded"),
+            fieldValues = listOf(input.text("transfer_reference"), input.text("instapay_address"), input.text("instapay_name"), input.text("order_reference"), input.text("failure_reason_label")),
             messageKey = message, visibleActions = actions,
             items = listOf(input.text("total"), input.text("reference_number"), input.text("checkout_url")),
             itemStates = listOf(status), options = input.strings("channel_labels"),
@@ -711,6 +857,9 @@ object CustomerLogic {
             screen = "SCR-C23", phase = CustomerPhase.Content,
             canContinue = "confirm_completion" in actions && !busy,
             items = input.strings("summary"), visibleActions = actions, isBusy = busy,
+            // DEC-076 (Figma 3002:4134): provider name, problem, address, payment method label.
+            fieldValues = listOf(input.text("provider_name"), input.text("order_title"), input.text("address"), input.text("method_label")),
+            providerVerified = input.boolean("provider_verified"),
         )
     }
 
@@ -718,12 +867,14 @@ object CustomerLogic {
         val ratings = input.strings("ratings").mapNotNull(String::toIntOrNull)
         val complete = ratings.size == 3 && ratings.all { it in 1..5 }
         val commentLength = input.integer("comment_length", input.text("comment").length)
-        val busy = input.text("event") == "submitting"
+        val busy = input.text("event") in listOf("submitting", "uploading")
         val errors = buildList {
             if (!complete) add("rating.validation.required")
             if (commentLength > 500) add("rating.validation.comment_max")
         }
         val message = when (input.text("event")) {
+            "upload_failed" -> "media.upload_error"
+            "error" -> "error.body"
             "window_closed" -> "rating.window_closed"
             "already_exists" -> "rating.already_exists"
             "success" -> "rating.success"
@@ -734,8 +885,11 @@ object CustomerLogic {
             phase = if (input.text("event") == "loaded" && ratings.all { it == 0 }) CustomerPhase.Empty else CustomerPhase.Content,
             canContinue = complete && errors.isEmpty() && !busy && "rate" in input.strings("available_actions"),
             messageKey = message, visibleActions = input.strings("available_actions"),
-            fieldValues = listOf(input.text("comment")), fieldErrors = errors,
-            isBusy = busy, ratings = ratings,
+            // DEC-076 (Figma 3002:4475): comment, provider name, job title; `items` are the chosen quick tags (B-04).
+            fieldValues = listOf(input.text("comment"), input.text("provider_name"), input.text("order_title")), fieldErrors = errors,
+            isBusy = busy, ratings = ratings, items = input.strings("tags"), providerVerified = input.boolean("provider_verified"),
+            photoCount = input.integer("photo_count"),
+            options = input.strings("tag_labels"), optionCodes = input.strings("tag_codes"),
         )
     }
 
@@ -750,8 +904,17 @@ object CustomerLogic {
             visibleActions = actions,
             items = listOf(input.text("type_label"), input.text("amount"), input.text("reason"), input.text("total")),
             isBusy = busy, countdownSeconds = input.integer("countdown_seconds"), hasPhoto = input.boolean("has_photo"),
+            // DEC-076 (Figma 3002:2264 / 3002:4029): provider name, rating, category, the agreed price before this proposal.
+            fieldValues = listOf(input.text("provider_name"), input.text("provider_rating"), input.text("provider_category"), input.text("original_amount")),
+            providerVerified = input.boolean("provider_verified"),
+            proposalDeadline = input.text("proposal_deadline"),
+            proposalExpiryMessage = input.text("proposal_expiry_message"),
+            proposalLoadedUptime = input.integer("proposal_loaded_uptime"),
         )
     }
+
+    fun proposalRemaining(state: CustomerUiState, uptimeSeconds: Int): Int =
+        (state.countdownSeconds - if (state.proposalLoadedUptime > 0) (uptimeSeconds - state.proposalLoadedUptime).coerceAtLeast(0) else 0).coerceAtLeast(0)
 
     private fun Map<String, Any?>.text(key: String): String = this[key] as? String ?: ""
     private fun Map<String, Any?>.boolean(key: String): Boolean = this[key] as? Boolean ?: false

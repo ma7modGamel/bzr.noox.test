@@ -8,6 +8,7 @@ use App\Mail\SupportMessageMail;
 use App\Modules\Content\Enums\LegalPageSlug;
 use App\Modules\Content\Models\LegalPage;
 use App\Modules\Identity\Models\User;
+use App\Support\Localization;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
@@ -20,7 +21,9 @@ final class HelpController
         // DEC-051 — الأسئلة الشائعة تُدار من اللوحة: كل عنوان h3 سؤال وما بعده الإجابة.
         $page = LegalPage::query()->where('slug', LegalPageSlug::Faq->value)->first()?->currentVersion();
 
-        return new JsonResponse(['data' => $page === null ? config('mobile.support_faqs', []) : self::faqItems($page->safeBody())]);
+        return new JsonResponse(['data' => $page === null
+            ? (Localization::locale() === 'ar' ? config('mobile.support_faqs', []) : [])
+            : self::faqItems($page->safeBody())]);
     }
 
     /** @return list<array{code: string, title: string, body: string}> */

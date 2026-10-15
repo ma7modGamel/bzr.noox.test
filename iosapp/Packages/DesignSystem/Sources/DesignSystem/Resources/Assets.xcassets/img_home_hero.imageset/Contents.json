@@ -1,0 +1,12 @@
+{
+    "images": [
+        {
+            "filename": "home-hero.jpg",
+            "idiom": "universal"
+        }
+    ],
+    "info": {
+        "author": "tools/gen-design",
+        "version": 1
+    }
+}

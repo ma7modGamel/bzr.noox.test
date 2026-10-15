@@ -10,14 +10,14 @@ use App\Modules\Providers\Models\ProviderProfile;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-/** BR-091 — الفني يقيّم العميل بالنجوم فقط، مرة واحدة. */
+/** BR-091 — تقييم العميل مرة واحدة: نجوم، ووسوم وتعليق اختياريان. */
 final class CustomerRating extends Model
 {
     protected $guarded = ['id'];
 
     protected function casts(): array
     {
-        return ['hidden_at' => 'immutable_datetime'];
+        return ['hidden_at' => 'immutable_datetime', 'tags' => 'array'];
     }
 
     public function order(): BelongsTo

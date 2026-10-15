@@ -13,6 +13,7 @@ use App\Modules\Orders\Models\OrderEvent;
 use App\Modules\Orders\Services\OrderDeadlines;
 use App\Modules\Settings\Enums\OperatingMode;
 use App\Support\Exceptions\BusinessRuleViolationException;
+use App\Support\Localization;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
 
@@ -23,7 +24,7 @@ final readonly class RepublishOrderAction
     public function execute(Order $order, User $customer): Order
     {
         if (! $this->canExecute($order, $customer)) {
-            throw BusinessRuleViolationException::rule('BR-021', 'إعادة نشر الطلب غير متاحة في حالته الحالية.');
+            throw BusinessRuleViolationException::rule('BR-021', Localization::text('copy.this_request_cannot_be_republished_in_its_current_state'));
         }
 
         $publishedAt = CarbonImmutable::now();

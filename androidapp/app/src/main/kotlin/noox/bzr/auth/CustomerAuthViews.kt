@@ -203,6 +203,7 @@ internal fun authTextRes(key: String): Int = when (key) {
     "auth.validation.password_short" -> R.string.auth_validation_password_short
     "auth.error.credentials" -> R.string.auth_error_credentials
     "auth.error.blocked" -> R.string.auth_error_blocked
+    "auth.error.session_expired" -> R.string.auth_error_session_expired
     "auth.error.rate_limited" -> R.string.auth_error_rate_limited
     "auth.verify.resent" -> R.string.auth_verify_resent
     "auth.verify.not_yet" -> R.string.auth_verify_not_yet

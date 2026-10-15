@@ -205,7 +205,33 @@ final class ProviderWorkspaceApiTest extends TestCase
             ->assertJsonPath('data.summary.balance', '720.00')
             ->assertJsonPath('data.summary.available', '720.00')
             ->assertJsonPath('data.summary.pending', '0.00')
+            ->assertJsonPath('data.dues.blocked', false)
+            ->assertJsonPath('data.dues.debt', '0.00')
             ->assertJsonCount(2, 'data.transactions');
+    }
+
+    /** DEC-068 — الفني الممنوع (BR-063) يرى الدين والحد في كشفه. */
+    #[Test]
+    public function blocked_provider_sees_debt_and_limit(): void
+    {
+        $settings = app(SettingsRepository::class);
+        $settings->set(Cfg::OffersEnabled, true);
+        $settings->set(Cfg::ProviderDebtLimit, '500.00');
+        $profile = ProviderProfile::factory()->independent()->create(['dues_blocked_at' => now()]);
+        Order::factory()->status(OrderStatus::Closed)->create([
+            'provider_profile_id' => $profile->getKey(), 'operating_mode' => OperatingMode::Marketplace,
+            'payment_method' => PaymentMethod::Cash, 'labor_total' => '6500.00', 'materials_total' => '0.00',
+            'final_amount' => '6500.00', 'commission_amount' => '650.00',
+            'closed_at' => now()->subDays(2), 'settlement_eligible_at' => now()->subDay(),
+        ]);
+
+        $this->actingAs($profile->user, 'sanctum')
+            ->withHeader('X-App-Mode', 'PROVIDER')
+            ->getJson('/api/v1/provider/earnings')
+            ->assertOk()
+            ->assertJsonPath('data.dues.blocked', true)
+            ->assertJsonPath('data.dues.debt', '650.00')
+            ->assertJsonPath('data.dues.limit', '500.00');
     }
 
     #[Test]

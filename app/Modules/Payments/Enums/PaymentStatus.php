@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Payments\Enums;
 
+use App\Support\Localization;
 use Filament\Support\Contracts\HasColor;
 use Filament\Support\Contracts\HasLabel;
 
@@ -20,12 +21,12 @@ enum PaymentStatus: string implements HasColor, HasLabel
     public function getLabel(): string
     {
         return match ($this) {
-            self::Pending => 'قيد التنفيذ',
-            self::PendingVerification => 'بانتظار تأكيد التحويل',
-            self::Succeeded => 'ناجحة',
-            self::Failed => 'فاشلة',
-            self::Expired => 'منتهية',
-            self::Cancelled => 'ملغاة',
+            self::Pending => Localization::text('copy.in_progress'),
+            self::PendingVerification => Localization::text('copy.awaiting_transfer_verification'),
+            self::Succeeded => Localization::text('copy.successful'),
+            self::Failed => Localization::text('copy.failed'),
+            self::Expired => Localization::text('copy.expired'),
+            self::Cancelled => Localization::text('copy.cancelled'),
         };
     }
 

@@ -128,3 +128,16 @@
 
 ## إذن الإشعارات على الجهاز
 يُطلب إذن النظام مرة واحدة بعد أول وصول إلى C01 أو P08: Android 13+ عبر `POST_NOTIFICATIONS`، وiOS عبر `UNUserNotificationCenter`. تسجيل الرمز `POST /me/devices` يتم بعد الدخول وعند تغيّر الرمز، و`DELETE /me/devices` عند الخروج. الرفض لا يمنع أي وظيفة، وC32 يعرض `InfoBanner` مع `open_settings`.
+
+
+## جاهزية الإرسال الفعلي — تحديث 14 أكتوبر 2026
+
+اعتمد المستخدم تجهيز التكامل الآن وتوفير الإعدادات والأجهزة لاحقًا. يظل الإعداد المحلي `log`؛ لا يثبت الصندوق الداخلي أو الاختبار المعزول وصول Push إلى هاتف.
+
+شغّل `php artisan notifications:push-check --json` بعد ضبط `PUSH_DRIVER=fcm` و`FCM_PROJECT_ID` و`FCM_CREDENTIALS_PATH` بمسار ملف حساب خدمة آمن خارج المستودع. الأمر يفحص هوية المشروع ومفتاح حساب الخدمة وتطابق إعدادَي Android وiOS مع `com.bremo.app`. يمكن تمرير `--android-config` و`--ios-config` لمسارات ملفات البناء. لا يعرض أسرارًا ولا يرسل، ويخرج بالفشل عند نقص الإعداد. اجتيازه لا يثبت ربط APNs أو وصول إشعار.
+
+يوضع `GoogleService-Info.plist` الخاص بتطبيق iOS في حزمة التطبيق، ويربط مفتاح APNs في Firebase طبقًا لـ[دليل Apple عبر Firebase](https://firebase.google.com/docs/cloud-messaging/ios/get-started). Android يستخدم ملف `google-services.json` المطابق للمشروع والحزمة وفق [الدليل الرسمي](https://firebase.google.com/docs/cloud-messaging/android/get-started). لم تُضف هذه الدفعة مفاتيح أو تغيّر إعدادات استقبال حقيقية.
+
+مهام `SendPushNotification` الحالية تُرسل للطابور الافتراضي؛ يجب أن يتابعه عامل بيئة التشغيل. بعد تسجيل جهاز اختبار، يدعم `php artisan notifications:push-test USER --mode=CUSTOMER --order=ID` رابط الطلب المرتبط بالمستلم؛ وللفني استخدم `--mode=PROVIDER` مع طلبه المعيّن. لا يُغيّر أمر الاختبار حالة الطلب. اختبر الوصول وفتح الطلب في المقدمة والخلفية والبداية الباردة على المنصتين، وتجدّد الرمز والخروج وتبديل الوضع. الاختبار الحقيقي مؤجل لحين توفير المستخدم الإعدادات والأجهزة.
+
+خطأ FCM عام برمز HTTP 404 لا يحذف الجهاز؛ يُزال الرمز عند `UNREGISTERED` أو خطأ محدد في رمز التسجيل. الأخطاء المؤقتة تحتفظ بإعادة المحاولة وبالإشعار الداخلي، طبقًا لـ[تصنيف أخطاء Firebase](https://firebase.google.com/docs/cloud-messaging/error-codes).

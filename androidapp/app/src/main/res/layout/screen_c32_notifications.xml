@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- SCR-C32 C32NotificationsScreen content (DEC-047). -->
+<!-- Figma «Primo App» «الإشعارات» 3002:3608 (DEC-076); SCR-C32 C32NotificationsScreen content (DEC-047). -->
 <merge xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -26,10 +26,11 @@
         app:bremoTitle="@string/notifications_empty_title"
         app:bremoBody="@string/notifications_empty_body" />
 
-    <androidx.recyclerview.widget.RecyclerView
+    <LinearLayout
         android:id="@+id/notifications"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:nestedScrollingEnabled="false"
-        android:overScrollMode="never" />
+        android:divider="@drawable/bremo_gap_m"
+        android:orientation="vertical"
+        android:showDividers="middle" />
 </merge>

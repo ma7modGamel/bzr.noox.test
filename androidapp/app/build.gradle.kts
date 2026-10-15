@@ -98,4 +98,6 @@ dependencies {
 // Optional filter while converting screens: -Pbzr.screens=SCR-C01,SCR-C02 (all screens when absent).
 tasks.withType<Test>().configureEach {
     providers.gradleProperty("bzr.screens").orNull?.let { systemProperty("bzr.screens", it) }
+    // Review only, never recorded as approved images: -Pbzr.tall=1.25 (or 2) multiplies the viewport height to compare whole screens.
+    providers.gradleProperty("bzr.tall").orNull?.let { systemProperty("bzr.tall", it) }
 }

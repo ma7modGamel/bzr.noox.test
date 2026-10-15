@@ -50,7 +50,7 @@
     "media_limits": {
         "images": 5,
         "image_mb": 10,
-        "video_seconds": 60,
+        "video_seconds": 30,
         "video_mb": 50,
         "audio_seconds": 120,
         "audio_mb": 5,

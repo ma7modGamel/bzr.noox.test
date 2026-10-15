@@ -7,6 +7,7 @@ namespace App\Http\Api\V1\Controllers;
 use App\Modules\Content\Enums\LegalPageSlug;
 use App\Modules\Content\Models\LegalPage;
 use App\Modules\Content\Models\LegalPageVersion;
+use App\Support\Localization;
 use Illuminate\Http\JsonResponse;
 
 /**
@@ -20,7 +21,7 @@ final class PageController
         $version = $this->current(LegalPageSlug::tryFrom($slug));
 
         if ($version === null) {
-            return new JsonResponse(['error' => ['code' => 'PAGE_NOT_PUBLISHED', 'message' => 'الصفحة غير منشورة بعد.']], 404);
+            return new JsonResponse(['error' => ['code' => 'PAGE_NOT_PUBLISHED', 'message' => Localization::text('messages.page_not_published')]], 404);
         }
 
         return new JsonResponse(['data' => self::payload($version)]);
@@ -32,17 +33,20 @@ final class PageController
         $terms = $this->current(LegalPageSlug::Terms);
 
         if ($terms === null) {
-            return new JsonResponse(['error' => ['code' => 'PAGE_NOT_PUBLISHED', 'message' => 'الشروط غير منشورة بعد.']], 404);
+            return new JsonResponse(['error' => ['code' => 'PAGE_NOT_PUBLISHED', 'message' => Localization::text('messages.page_not_published')]], 404);
         }
 
         $cancellation = $this->current(LegalPageSlug::Cancellation);
+        $privacy = $this->current(LegalPageSlug::Privacy);
 
         return new JsonResponse(['data' => [
             'version' => $terms->terms_version ?? $terms->version,
+            'locale' => $terms->locale,
             'title' => $terms->title,
             'body' => $terms->safeBody(),
             'effective_at' => $terms->effective_at?->toIso8601String(),
             'cancellation_policy' => $cancellation === null ? null : self::payload($cancellation),
+            'privacy_policy' => $privacy === null ? null : self::payload($privacy),
         ]]);
     }
 
@@ -51,11 +55,12 @@ final class PageController
     {
         return [
             'slug' => $version->page->slug->value,
+            'locale' => $version->locale,
             'title' => $version->title,
             'version' => $version->version,
             'body_html' => $version->safeBody(),
             'effective_at' => $version->effective_at?->toIso8601String(),
-            'web_url' => route('legal.show', $version->page->slug->value),
+            'web_url' => route('legal.show', ['slug' => $version->page->slug->value, 'locale' => $version->locale]),
         ];
     }
 

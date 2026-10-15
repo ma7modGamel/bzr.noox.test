@@ -1,0 +1,310 @@
+{
+  "format.minutes": {
+    "ar": {
+      "zero": "%d دقيقة",
+      "one": "دقيقة واحدة",
+      "two": "دقيقتان",
+      "few": "%d دقائق",
+      "many": "%d دقيقة",
+      "other": "%d دقيقة"
+    },
+    "en": {
+      "one": "%d minute",
+      "other": "%d minutes"
+    }
+  },
+  "format.eta": {
+    "ar": {
+      "zero": "الوصول خلال %d دقيقة",
+      "one": "الوصول خلال دقيقة واحدة",
+      "two": "الوصول خلال دقيقتين",
+      "few": "الوصول خلال %d دقائق",
+      "many": "الوصول خلال %d دقيقة",
+      "other": "الوصول خلال %d دقيقة"
+    },
+    "en": {
+      "one": "Arrives in %d minute",
+      "other": "Arrives in %d minutes"
+    }
+  },
+  "format.services": {
+    "ar": {
+      "zero": "لا توجد خدمات",
+      "one": "خدمة واحدة",
+      "two": "خدمتان",
+      "few": "%d خدمات",
+      "many": "%d خدمة",
+      "other": "%d خدمة"
+    },
+    "en": {
+      "one": "%d service",
+      "other": "%d services"
+    }
+  },
+  "format.services_completed": {
+    "ar": {
+      "zero": "لا توجد خدمات مكتملة",
+      "one": "خدمة مكتملة واحدة",
+      "two": "خدمتان مكتملتان",
+      "few": "%d خدمات مكتملة",
+      "many": "%d خدمة مكتملة",
+      "other": "%d خدمة مكتملة"
+    },
+    "en": {
+      "one": "%d completed service",
+      "other": "%d completed services"
+    }
+  },
+  "customer.home.offers.new": {
+    "ar": {
+      "zero": "لا توجد عروض جديدة",
+      "one": "عرض جديد واحد",
+      "two": "عرضان جديدان",
+      "few": "%d عروض جديدة",
+      "many": "%d عرضًا جديدًا",
+      "other": "%d عرض جديد"
+    },
+    "en": {
+      "one": "%d new offer",
+      "other": "%d new offers"
+    }
+  },
+  "offers.available": {
+    "ar": {
+      "zero": "لا توجد عروض متاحة",
+      "one": "عرض واحد متاح",
+      "two": "عرضان متاحان",
+      "few": "%d عروض متاحة",
+      "many": "%d عرضًا متاحًا",
+      "other": "%d عرض متاح"
+    },
+    "en": {
+      "one": "%d offer available",
+      "other": "%d offers available"
+    }
+  },
+  "waiting.nearby": {
+    "ar": {
+      "zero": "لا يوجد فنيون قريبون يمكنهم رؤية طلبك",
+      "one": "فني واحد قريب يمكنه رؤية طلبك",
+      "two": "فنيان قريبان يمكنهما رؤية طلبك",
+      "few": "%d فنيين قريبين يمكنهم رؤية طلبك",
+      "many": "%d فنيًا قريبًا يمكنهم رؤية طلبك",
+      "other": "%d فني قريب يمكنهم رؤية طلبك"
+    },
+    "en": {
+      "one": "%d nearby technician can see your request",
+      "other": "%d nearby technicians can see your request"
+    }
+  },
+  "provider.stat.experience.value": {
+    "ar": {
+      "zero": "%d سنة",
+      "one": "سنة واحدة",
+      "two": "سنتان",
+      "few": "%d سنوات",
+      "many": "%d سنة",
+      "other": "%d سنة"
+    },
+    "en": {
+      "one": "%d year",
+      "other": "%d years"
+    }
+  },
+  "provider.stat.response.value": {
+    "ar": {
+      "zero": "%d دقيقة",
+      "one": "دقيقة واحدة",
+      "two": "دقيقتان",
+      "few": "%d دقائق",
+      "many": "%d دقيقة",
+      "other": "%d دقيقة"
+    },
+    "en": {
+      "one": "%d min",
+      "other": "%d min"
+    }
+  },
+  "provider.reviews.count": {
+    "ar": {
+      "zero": "لا توجد تقييمات",
+      "one": "تقييم واحد",
+      "two": "تقييمان",
+      "few": "%d تقييمات",
+      "many": "%d تقييمًا",
+      "other": "%d تقييم"
+    },
+    "en": {
+      "one": "%d review",
+      "other": "%d reviews"
+    }
+  },
+  "provider.reviews.all": {
+    "ar": {
+      "zero": "عرض التقييمات",
+      "one": "عرض التقييم الوحيد",
+      "two": "عرض التقييمين",
+      "few": "عرض كل الـ %d تقييمات",
+      "many": "عرض كل الـ %d تقييمًا",
+      "other": "عرض كل الـ %d تقييم"
+    },
+    "en": {
+      "one": "See the %d review",
+      "other": "See all %d reviews"
+    }
+  },
+  "confirm.completed": {
+    "ar": {
+      "zero": "لا توجد خدمات مكتملة",
+      "one": "خدمة مكتملة واحدة",
+      "two": "خدمتان مكتملتان",
+      "few": "%d خدمات مكتملة",
+      "many": "%d خدمة مكتملة",
+      "other": "%d خدمة مكتملة"
+    },
+    "en": {
+      "one": "%d completed job",
+      "other": "%d completed jobs"
+    }
+  },
+  "account.addresses_count": {
+    "ar": {
+      "zero": "لا توجد عناوين",
+      "one": "عنوان واحد",
+      "two": "عنوانان",
+      "few": "%d عناوين",
+      "many": "%d عنوانًا",
+      "other": "%d عنوان"
+    },
+    "en": {
+      "one": "%d address",
+      "other": "%d addresses"
+    }
+  },
+  "offer.eta": {
+    "ar": {
+      "zero": "الوصول خلال %d دقيقة",
+      "one": "الوصول خلال دقيقة واحدة",
+      "two": "الوصول خلال دقيقتين",
+      "few": "الوصول خلال %d دقائق",
+      "many": "الوصول خلال %d دقيقة",
+      "other": "الوصول خلال %d دقيقة"
+    },
+    "en": {
+      "one": "Arrives within %d min",
+      "other": "Arrives within %d min"
+    }
+  },
+  "offer.eta.hours": {
+    "ar": {
+      "zero": "الوصول خلال %d ساعة",
+      "one": "الوصول خلال ساعة واحدة",
+      "two": "الوصول خلال ساعتين",
+      "few": "الوصول خلال %d ساعات",
+      "many": "الوصول خلال %d ساعة",
+      "other": "الوصول خلال %d ساعة"
+    },
+    "en": {
+      "one": "Arrives within %d h",
+      "other": "Arrives within %d h"
+    }
+  },
+  "tracking.finish.title": {
+    "ar": {
+      "zero": "الوقت المتوقع للانتهاء: %d دقيقة",
+      "one": "الوقت المتوقع للانتهاء: دقيقة واحدة",
+      "two": "الوقت المتوقع للانتهاء: دقيقتان",
+      "few": "الوقت المتوقع للانتهاء: %d دقائق",
+      "many": "الوقت المتوقع للانتهاء: %d دقيقة",
+      "other": "الوقت المتوقع للانتهاء: %d دقيقة"
+    },
+    "en": {
+      "one": "Expected to finish in %d min",
+      "other": "Expected to finish in %d min"
+    }
+  },
+  "time.ago.minutes": {
+    "ar": {
+      "zero": "الآن",
+      "one": "منذ دقيقة واحدة",
+      "two": "منذ دقيقتين",
+      "few": "منذ %d دقائق",
+      "many": "منذ %d دقيقة",
+      "other": "منذ %d دقيقة"
+    },
+    "en": {
+      "one": "%d min ago",
+      "other": "%d min ago"
+    }
+  },
+  "customer.home.published.minutes": {
+    "ar": {
+      "zero": "تم النشر الآن",
+      "one": "تم النشر منذ دقيقة واحدة",
+      "two": "تم النشر منذ دقيقتين",
+      "few": "تم النشر منذ %d دقائق",
+      "many": "تم النشر منذ %d دقيقة",
+      "other": "تم النشر منذ %d دقيقة"
+    },
+    "en": {
+      "one": "Published %d min ago",
+      "other": "Published %d min ago"
+    }
+  },
+  "time.ago.hours": {
+    "ar": {
+      "zero": "الآن",
+      "one": "منذ ساعة واحدة",
+      "two": "منذ ساعتين",
+      "few": "منذ %d ساعات",
+      "many": "منذ %d ساعة",
+      "other": "منذ %d ساعة"
+    },
+    "en": {
+      "one": "%d h ago",
+      "other": "%d h ago"
+    }
+  },
+  "customer.home.published.hours": {
+    "ar": {
+      "zero": "تم النشر الآن",
+      "one": "تم النشر منذ ساعة واحدة",
+      "two": "تم النشر منذ ساعتين",
+      "few": "تم النشر منذ %d ساعات",
+      "many": "تم النشر منذ %d ساعة",
+      "other": "تم النشر منذ %d ساعة"
+    },
+    "en": {
+      "one": "Published %d h ago",
+      "other": "Published %d h ago"
+    }
+  },
+  "time.ago.days": {
+    "ar": {
+      "zero": "الآن",
+      "one": "منذ يوم واحد",
+      "two": "منذ يومين",
+      "few": "منذ %d أيام",
+      "many": "منذ %d يوم",
+      "other": "منذ %d يوم"
+    },
+    "en": {
+      "one": "%d d ago",
+      "other": "%d d ago"
+    }
+  },
+  "customer.home.published.days": {
+    "ar": {
+      "zero": "تم النشر الآن",
+      "one": "تم النشر منذ يوم واحد",
+      "two": "تم النشر منذ يومين",
+      "few": "تم النشر منذ %d أيام",
+      "many": "تم النشر منذ %d يوم",
+      "other": "تم النشر منذ %d يوم"
+    },
+    "en": {
+      "one": "Published %d d ago",
+      "other": "Published %d d ago"
+    }
+  }
+}

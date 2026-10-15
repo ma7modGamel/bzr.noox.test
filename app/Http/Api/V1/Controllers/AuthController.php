@@ -6,6 +6,7 @@ namespace App\Http\Api\V1\Controllers;
 
 use App\Modules\Identity\Enums\UserStatus;
 use App\Modules\Identity\Models\User;
+use App\Support\Localization;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Events\Verified;
@@ -31,7 +32,7 @@ final class AuthController
             'password' => ['required', 'string', 'min:8'],
         ]);
 
-        $user = User::query()->create($data + ['status' => UserStatus::Active]);
+        $user = User::query()->create($data + ['locale' => Localization::locale(), 'status' => UserStatus::Active]);
         event(new Registered($user));
 
         return new JsonResponse([
@@ -52,7 +53,7 @@ final class AuthController
         $user = User::query()->where('email', $credentials['email'])->first();
 
         if ($user === null || ! Hash::check($credentials['password'], $user->password)) {
-            throw ValidationException::withMessages(['email' => 'بيانات الدخول غير صحيحة.']);
+            throw ValidationException::withMessages(['email' => Localization::text('copy.the_sign_in_details_are_incorrect')]);
         }
 
         // BR-003 — المحظور لا يستطيع الدخول وتُلغى رموزه (AC-ACC-02)
@@ -60,9 +61,11 @@ final class AuthController
             $user->tokens()->delete();
 
             return new JsonResponse([
-                'error' => ['code' => 'ACCOUNT_BLOCKED', 'message' => 'الحساب محظور.'],
+                'error' => ['code' => 'ACCOUNT_BLOCKED', 'message' => Localization::text('copy.this_account_is_blocked')],
             ], 403);
         }
+
+        $user->update(['locale' => Localization::locale()]);
 
         return new JsonResponse([
             'user' => $this->userPayload($user),
@@ -84,7 +87,7 @@ final class AuthController
 
         if ($user->hasVerifiedEmail()) {
             return new JsonResponse([
-                'error' => ['code' => 'EMAIL_ALREADY_VERIFIED', 'message' => 'البريد مفعّل بالفعل.'],
+                'error' => ['code' => 'EMAIL_ALREADY_VERIFIED', 'message' => Localization::text('copy.the_email_address_is_already_verified')],
             ], 409);
         }
 
@@ -100,7 +103,7 @@ final class AuthController
 
         if (! hash_equals($hash, sha1($user->getEmailForVerification()))) {
             return new JsonResponse([
-                'error' => ['code' => 'INVALID_VERIFICATION_LINK', 'message' => 'رابط التفعيل غير صالح.'],
+                'error' => ['code' => 'INVALID_VERIFICATION_LINK', 'message' => Localization::text('copy.the_verification_link_is_invalid')],
             ], 403);
         }
 
@@ -108,7 +111,7 @@ final class AuthController
             event(new Verified($user));
         }
 
-        return new JsonResponse(['message' => 'تم تفعيل البريد.']);
+        return new JsonResponse(['message' => Localization::text('copy.your_email_address_has_been_verified')]);
     }
 
     public function forgotPassword(Request $request): JsonResponse
@@ -141,7 +144,7 @@ final class AuthController
         );
 
         if ($status !== Password::PasswordReset) {
-            throw ValidationException::withMessages(['email' => 'تعذّرت استعادة كلمة المرور.']);
+            throw ValidationException::withMessages(['email' => Localization::text('copy.the_password_could_not_be_reset')]);
         }
 
         return new JsonResponse(status: 204);

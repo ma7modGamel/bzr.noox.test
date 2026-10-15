@@ -1,0 +1,66 @@
+{
+    "conversation": {
+        "id": 1002,
+        "order": {
+            "id": 1002,
+            "number": 1,
+            "status": "CONFIRMED",
+            "status_label": "تم التأكيد",
+            "category": "سباكة",
+            "problem_type": "تسريب مياه",
+            "area": "الحي الأول"
+        },
+        "provider": {
+            "id": 1002,
+            "name": "كريم السباك",
+            "avatar_path": null,
+            "is_verified": true
+        },
+        "customer": {
+            "id": 1002,
+            "name": "منى حسن",
+            "avatar_path": null,
+            "rating_avg": null
+        },
+        "status": "OPEN",
+        "last_message": null
+    },
+    "data": [
+        {
+            "id": 1002,
+            "sender_user_id": 1004,
+            "is_mine": false,
+            "body": "تمام، هوصل خلال نص ساعة.",
+            "was_masked": false,
+            "media": [],
+            "created_at": "2026-10-05T19:36:05+00:00"
+        },
+        {
+            "id": 1000,
+            "sender_user_id": 1001,
+            "is_mine": true,
+            "body": "التسريب تحت الحوض، الباب مفتوح.",
+            "was_masked": false,
+            "media": [],
+            "created_at": "2026-10-05T19:36:05+00:00"
+        },
+        {
+            "id": 1003,
+            "sender_user_id": 1001,
+            "is_mine": true,
+            "body": "",
+            "was_masked": false,
+            "media": [
+                {
+                    "id": 1002,
+                    "type": "IMAGE"
+                }
+            ],
+            "created_at": "2026-10-05T19:36:05+00:00"
+        }
+    ],
+    "meta": {
+        "current_page": 1,
+        "last_page": 1
+    }
+}

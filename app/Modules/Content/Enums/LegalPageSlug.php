@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Content\Enums;
 
+use App\Support\Localization;
 use Filament\Support\Contracts\HasLabel;
 
 /** الصفحات الأربع في DEC-051؛ المسار العام نفسه هو الـ slug. */
@@ -17,10 +18,10 @@ enum LegalPageSlug: string implements HasLabel
     public function getLabel(): string
     {
         return match ($this) {
-            self::Terms => 'الشروط والأحكام',
-            self::Privacy => 'سياسة الخصوصية',
-            self::Cancellation => 'سياسة الإلغاء',
-            self::Faq => 'الأسئلة الشائعة',
+            self::Terms => Localization::text('copy.terms_and_conditions'),
+            self::Privacy => Localization::text('copy.privacy_policy'),
+            self::Cancellation => Localization::text('copy.cancellation_policy'),
+            self::Faq => Localization::text('copy.frequently_asked_questions'),
         };
     }
 }

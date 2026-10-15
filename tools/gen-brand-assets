@@ -5,8 +5,9 @@ declare(strict_types=1);
 
 $root = dirname(__DIR__);
 $brand = json_decode((string) file_get_contents($root.'/design/brand/brand.json'), true, flags: JSON_THROW_ON_ERROR);
-$tokens = json_decode((string) file_get_contents($root.'/design/tokens.json'), true, flags: JSON_THROW_ON_ERROR);
-$symbol = (string) file_get_contents($root.'/'.$brand['symbol']);
+require_once __DIR__.'/design-theme.php';
+$tokens = resolveThemeTokens(json_decode((string) file_get_contents($root.'/design/tokens.json'), true, flags: JSON_THROW_ON_ERROR));
+$symbol = resolveBrandSymbol((string) file_get_contents($root.'/'.$brand['symbol']), $tokens['color']);
 $symbolBody = (string) preg_replace('/^<svg[^>]*>|<\/svg>\s*$/', '', $symbol);
 $temporary = sys_get_temp_dir().'/bremo-brand-'.bin2hex(random_bytes(6));
 mkdir($temporary, 0755, true);
@@ -60,29 +61,8 @@ function brandWrite(string $relative, string $content): string
 
 function brandRaster(string $svg, string $relative, int $width, int $height, bool $opaque = true): void
 {
-    global $temporary, $root, $outputs;
-    $source = $temporary.'/'.hash('sha256', $svg).'.svg';
-    file_put_contents($source, $svg);
-    $path = $root.'/'.$relative;
-    if (! is_dir(dirname($path))) {
-        mkdir(dirname($path), 0755, true);
-    }
-    $arguments = ['python3', $root.'/tools/render-brand-svg', $source, $path, (string) $width, (string) $height];
-    if ($opaque) {
-        $arguments[] = '--opaque';
-    }
-    $process = proc_open($arguments, [1 => ['pipe', 'w'], 2 => ['pipe', 'w']], $pipes);
-    if (! is_resource($process)) {
-        throw new RuntimeException('librsvg and Cairo are required for brand SVG export.');
-    }
-    $error = stream_get_contents($pipes[2]);
-    fclose($pipes[1]);
-    fclose($pipes[2]);
-    if (proc_close($process) !== 0) {
-        throw new RuntimeException($error);
-    }
-    brandConvert([$path, '-strip', ($opaque ? 'PNG24:' : 'PNG32:').$path]);
-    $outputs[$relative] = hash_file('sha256', $path);
+    global $root;
+    brandWrite($relative, renderBrandPng($root, $svg, $width, $height, $opaque));
 }
 
 function brandSvg(int $width, int $height, string $body): string
@@ -97,9 +77,9 @@ function brandEmbed(string $path, float $x, float $y, float $width, float $heigh
 
 function brandText(string $text, string $locale, int $size, int $width, string $color, bool $bold = true): string
 {
-    global $temporary;
+    global $temporary, $tokens;
     $path = $temporary.'/'.hash('sha256', $text.$locale.$size.$width.$color).'.png';
-    $markup = '<span font_family="Cairo" weight="'.($bold ? 'bold' : 'normal').'" foreground="'.$color.'">'.htmlspecialchars($text, ENT_XML1).'</span>';
+    $markup = '<span font_family="'.htmlspecialchars($tokens['font']['family'], ENT_XML1).'" weight="'.($bold ? 'bold' : 'normal').'" foreground="'.$color.'">'.htmlspecialchars($text, ENT_XML1).'</span>';
     brandConvert(['-background', 'none', '-pointsize', (string) $size, '-direction', $locale === 'ar' ? 'right-to-left' : 'left-to-right', '-define', 'pango:align='.($locale === 'ar' ? 'right' : 'left'), '-define', 'pango:language='.$locale, '-define', 'pango:wrap=word', '-size', $width.'x', 'pango:'.$markup, '-strip', 'PNG32:'.$path]);
 
     return $path;
@@ -125,11 +105,8 @@ function brandArchive(string $relative, array $files): void
     $outputs[$relative] = hash_file('sha256', $root.'/'.$relative);
 }
 
-$background = '<defs><linearGradient id="background" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="'.$primary.'"/><stop offset="1" stop-color="'.$backdrop.'"/></linearGradient></defs><rect width="1024" height="1024" fill="url(#background)"/>';
-$scale = 1024 * $brand['icon']['symbolHeightRatio'] / 400;
-$x = (1024 - 320 * $scale) / 2;
-$y = (1024 - 400 * $scale) / 2;
-$icon = brandSvg(1024, 1024, $background.'<g transform="translate('.$x.' '.$y.') scale('.$scale.')">'.$symbolBody.'</g>');
+$icon = themedBrandIcon($symbol, $tokens, $brand['icon']['symbolHeightRatio']);
+brandWrite('design/generated/brand/symbol.svg', $symbol);
 brandWrite('design/generated/brand/app-icon.svg', $icon);
 brandRaster($icon, 'design/brand/app-icon-1024.png', 1024, 1024);
 brandRaster($symbol, 'design/generated/brand/symbol-transparent.png', 1200, 1500, false);
@@ -139,7 +116,7 @@ $iconPath = $root.'/design/brand/app-icon-1024.png';
 
 foreach (['ar', 'en'] as $locale) {
     $strings = json_decode((string) file_get_contents($root.'/design/strings.'.$locale.'.json'), true, flags: JSON_THROW_ON_ERROR);
-    $title = brandText($strings['store.feature.title'], $locale, 48, 630, '#FFFFFF');
+    $title = brandText($strings['store.feature.title'], $locale, 48, 630, $tokens['color']['onPrimary']);
     $detail = brandText($strings['store.feature.body'], $locale, 17, 640, $tint, false);
     $titleSize = getimagesize($title);
     $detailSize = getimagesize($detail);
@@ -172,7 +149,7 @@ foreach (['ar', 'en'] as $locale) {
             throw new RuntimeException('Export captures at device resolution before generating store artwork: '.$captureRelative);
         }
         $outputs[$captureRelative] = hash_file('sha256', $capture);
-        $headline = brandText($strings[$screen['headlineKey']], $locale, 46, 880, '#FFFFFF');
+        $headline = brandText($strings[$screen['headlineKey']], $locale, 46, 880, $tokens['color']['onPrimary']);
         $description = brandText($strings[$screen['detailKey']], $locale, 20, 880, $tint, false);
         $headlineSize = getimagesize($headline);
         $descriptionSize = getimagesize($description);
@@ -202,7 +179,7 @@ foreach (array_keys($outputs) as $file) {
 }
 brandArchive('design/generated/store/bremo-store-assets.zip', $storeFiles);
 brandArchive('design/generated/brand/bremo-brand-kit.zip', [
-    'symbol.svg' => $brand['symbol'],
+    'symbol.svg' => 'design/generated/brand/symbol.svg',
     'symbol-transparent.png' => 'design/generated/brand/symbol-transparent.png',
     'app-icon.svg' => 'design/generated/brand/app-icon.svg',
     'app-icon-1024.png' => 'design/brand/app-icon-1024.png',

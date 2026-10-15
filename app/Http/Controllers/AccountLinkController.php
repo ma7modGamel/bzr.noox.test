@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Modules\Identity\Models\User;
+use App\Support\Localization;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Auth\Events\Verified;
 use Illuminate\Contracts\View\View;
@@ -33,27 +34,27 @@ final class AccountLinkController
         }
 
         return view('public.account-result', [
-            'title' => $valid ? 'تم تفعيل البريد' : 'رابط التفعيل غير صالح',
+            'title' => $valid ? Localization::text('web.verified_title') : Localization::text('web.verify_invalid'),
             'success' => $valid,
             'body' => $valid
-                ? 'يمكنك الآن العودة إلى التطبيق وتسجيل الدخول.'
-                : 'اطلب رابطًا جديدًا من شاشة تفعيل البريد في التطبيق.',
+                ? Localization::text('web.return_login')
+                : Localization::text('web.verify_retry'),
         ]);
     }
 
     public function expired(): View
     {
         return view('public.account-result', [
-            'title' => 'انتهت صلاحية الرابط',
+            'title' => Localization::text('web.link_expired'),
             'success' => false,
-            'body' => 'اطلب رابطًا جديدًا من التطبيق.',
+            'body' => Localization::text('web.link_retry'),
         ]);
     }
 
     public function showReset(Request $request, string $token): View
     {
         return view('public.password-reset', [
-            'title' => 'تعيين كلمة مرور جديدة',
+            'title' => Localization::text('web.new_password'),
             'token' => $token,
             'email' => (string) $request->query('email', ''),
         ]);
@@ -66,9 +67,9 @@ final class AccountLinkController
             'email' => ['required', 'email'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
         ], [
-            'password.min' => 'كلمة المرور 8 أحرف على الأقل.',
-            'password.confirmed' => 'كلمتا المرور غير متطابقتين.',
-            'email.email' => 'البريد غير صالح.',
+            'password.min' => Localization::text('web.password_min'),
+            'password.confirmed' => Localization::text('web.password_mismatch'),
+            'email.email' => Localization::text('web.email_invalid'),
         ]);
 
         $status = Password::reset(
@@ -82,13 +83,13 @@ final class AccountLinkController
 
         if ($status !== Password::PasswordReset) {
             return back()->withInput($request->only('email'))
-                ->withErrors(['password' => 'الرابط غير صالح أو انتهت صلاحيته. اطلب رابطًا جديدًا من التطبيق.']);
+                ->withErrors(['password' => Localization::text('web.reset_invalid')]);
         }
 
         return view('public.account-result', [
-            'title' => 'تم تعيين كلمة المرور',
+            'title' => Localization::text('web.reset_done'),
             'success' => true,
-            'body' => 'سجّل الدخول في التطبيق بكلمة المرور الجديدة. تم تسجيل الخروج من كل الأجهزة.',
+            'body' => Localization::text('web.reset_done_body'),
         ]);
     }
 }

@@ -1,75 +1,159 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- SCR-C07 C07ProviderScreen content (DEC-047). -->
+<!-- SCR-C07 — Figma «Primo App» technician profile 3002:873 (DEC-073). -->
 <merge xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     tools:parentTag="android.widget.LinearLayout">
 
-    <noox.bzr.design.views.EmptyStateView
+    <!-- Profile card. -->
+    <LinearLayout
+        android:id="@+id/profileCard"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/bremo_bg_card"
+        android:divider="@drawable/bremo_gap_s"
+        android:gravity="center_horizontal"
+        android:orientation="vertical"
+        android:padding="@dimen/bremo_space_l"
+        android:showDividers="middle">
+
+        <FrameLayout
+            android:layout_width="@dimen/bremo_size_profile_avatar"
+            android:layout_height="@dimen/bremo_size_profile_avatar">
+
+            <TextView
+                android:id="@+id/avatar"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@drawable/bremo_bg_avatar_large"
+                android:gravity="center"
+                android:importantForAccessibility="no"
+                android:textAppearance="@style/TextAppearance.Bremo.ProfileName"
+                android:textColor="@color/bremo_primary600" />
+
+            <FrameLayout
+                android:id="@+id/verifiedBadge"
+                android:layout_width="@dimen/bremo_size_verified_badge"
+                android:layout_height="@dimen/bremo_size_verified_badge"
+                android:layout_gravity="bottom|start"
+                android:background="@drawable/bremo_bg_verified_badge">
+
+                <ImageView
+                    android:layout_width="@dimen/bremo_size_icon_small"
+                    android:layout_height="@dimen/bremo_size_icon_small"
+                    android:layout_gravity="center"
+                    android:importantForAccessibility="no"
+                    app:srcCompat="@drawable/ic_check"
+                    app:tint="@color/bremo_on_primary" />
+            </FrameLayout>
+        </FrameLayout>
+
+        <TextView
+            android:id="@+id/name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="@style/TextAppearance.Bremo.ProfileName" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:divider="@drawable/bremo_gap_s"
+            android:orientation="horizontal"
+            android:showDividers="middle">
+
+            <TextView
+                android:id="@+id/title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bremo_bg_verified_pill"
+                android:drawablePadding="@dimen/bremo_space_xs"
+                android:paddingHorizontal="@dimen/bremo_space_s"
+                android:textAppearance="@style/TextAppearance.Bremo.StatusPill"
+                android:textColor="@color/bremo_verified_text"
+                app:drawableStartCompat="@drawable/ic_verified"
+                app:drawableTint="@color/bremo_verified_text" />
+
+            <TextView
+                android:id="@+id/availableNow"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bremo_bg_info_pill"
+                android:drawablePadding="@dimen/bremo_space_xs"
+                android:paddingHorizontal="@dimen/bremo_space_s"
+                android:text="@string/provider_available_now"
+                android:textAppearance="@style/TextAppearance.Bremo.StatusPill"
+                android:textColor="@color/bremo_slate500"
+                app:drawableStartCompat="@drawable/bremo_bg_online_dot" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/stats"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bremo_bg_stat_strip"
+            android:orientation="horizontal"
+            android:paddingVertical="@dimen/bremo_space_m" />
+    </LinearLayout>
+
+    <noox.bzr.design.views.InfoBannerView
         android:id="@+id/unavailable"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:visibility="gone"
-        app:bremoTitle="@string/provider_unavailable_title"
-        app:bremoBody="@string/provider_unavailable_body"
-        app:action="@string/common_back_to_offers" />
-
-    <noox.bzr.design.views.ProviderHeaderView
-        android:id="@+id/header"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:name="@string/offer_provider"
-        app:avatarSize="large"
-        app:verifiedLabel="@string/provider_verified" />
-
-    <noox.bzr.design.views.StatRowView
-        android:id="@+id/stats"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
-
-    <TextView
-        android:id="@+id/aboutTitle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="@style/TextAppearance.Bremo.SectionTitle"
-        android:text="@string/provider_about_title" />
-
-    <TextView
-        android:id="@+id/aboutBody"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="@style/TextAppearance.Bremo.Secondary" />
+        app:bremoText="@string/provider_unavailable_title" />
 
     <LinearLayout
-        android:id="@+id/specialties"
+        android:id="@+id/sections"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:divider="@drawable/bremo_gap_xl"
         android:orientation="vertical"
-        android:divider="@drawable/bremo_gap_s"
-        android:showDividers="middle" />
-
-    <noox.bzr.design.views.RatingBarsView
-        android:id="@+id/bars"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
-
-    <TextView
-        android:id="@+id/reviewsTitle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="@style/TextAppearance.Bremo.SectionTitle"
-        android:text="@string/provider_reviews_title" />
-
-    <LinearLayout
-        android:id="@+id/reviewList"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:divider="@drawable/bremo_gap_m"
         android:showDividers="middle" />
 
     <noox.bzr.customer.ActionButtonsView
         android:id="@+id/actions"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
+
+    <!-- Bottom dock (pinned): the offer price, chat, and choose. -->
+    <LinearLayout
+        android:id="@+id/dock"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:divider="@drawable/bremo_gap_m"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:showDividers="middle">
+
+        <LinearLayout
+            android:id="@+id/priceBlock"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/provider_offer_price"
+                android:textAppearance="@style/TextAppearance.Bremo.Hint" />
+
+            <TextView
+                android:id="@+id/price"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="@style/TextAppearance.Bremo.StatValue" />
+        </LinearLayout>
+
+        <noox.bzr.design.views.IconSquareButtonView
+            android:id="@+id/chat"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <noox.bzr.design.views.PrimaryButtonView
+            android:id="@+id/choose"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            app:bremoIcon="@drawable/ic_arrow_forward" />
+    </LinearLayout>
 </merge>

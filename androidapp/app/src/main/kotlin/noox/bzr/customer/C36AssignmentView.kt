@@ -1,6 +1,7 @@
 package noox.bzr.customer
 
 import android.content.Context
+import noox.bzr.design.ButtonVisualState
 import noox.bzr.design.R
 import noox.bzr.gallery.databinding.ScreenC36AssignmentBinding
 
@@ -11,11 +12,14 @@ class C36AssignmentView(context: Context) : CustomerScreenView(context) {
 
     init {
         binding.actions.onAction = { onAction(it) }
+        binding.follow.onClick = { onAction("follow") }
     }
 
     override fun title(state: CustomerUiState) = string(R.string.assignment_waiting_title)
 
     override fun renderContent(state: CustomerUiState) {
+        binding.waiting.text = state.waitingInfo.ifBlank { string(R.string.tracking_status_open) }
+        binding.follow.state = if (state.isBusy) ButtonVisualState.Loading else ButtonVisualState.Normal
         binding.summary.title = state.fieldValues.firstOrNull().orEmpty().ifBlank { string(R.string.assignment_summary_title) }
         binding.summary.rows = state.items.mapIndexed { index, row ->
             (if (index == 0) R.drawable.ic_orders else if (index == 1) R.drawable.ic_location else R.drawable.ic_calendar) to row

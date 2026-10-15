@@ -15,6 +15,7 @@ use App\Modules\Payments\Enums\PaymentStatus;
 use App\Modules\Payments\Models\Payment;
 use App\Modules\Payments\Services\PaymentChannels;
 use App\Support\Exceptions\BusinessRuleViolationException;
+use App\Support\Localization;
 use Illuminate\Support\Facades\DB;
 
 /** BR-050 — تغيير الطريقة متاح حتى تسجيل الدفع فقط. */
@@ -27,7 +28,7 @@ final readonly class ChangePaymentMethodAction
 
             if ($fresh->customer_id !== $customer->getKey()
                 || $fresh->status !== OrderStatus::AwaitingPayment) {
-                throw BusinessRuleViolationException::rule('BR-050', 'لا يمكن تغيير طريقة الدفع الآن.');
+                throw BusinessRuleViolationException::rule('BR-050', Localization::text('copy.the_payment_method_cannot_be_changed_now'));
             }
 
             if ($fresh->payment_method === $method) {
@@ -35,11 +36,11 @@ final readonly class ChangePaymentMethodAction
             }
 
             if (app(PaymentChannels::class)->pendingTransfer($fresh) !== null) {
-                throw BusinessRuleViolationException::rule('BR-057', 'التحويل المرسل بانتظار تأكيد الإدارة؛ لا يمكن تغيير الطريقة الآن.');
+                throw BusinessRuleViolationException::rule('BR-057', Localization::text('copy.the_submitted_transfer_is_awaiting_administration_verification_the_payment'));
             }
 
             if (! app(PaymentChannels::class)->methodEnabled($method)) {
-                throw BusinessRuleViolationException::rule('BR-051', 'طريقة الدفع هذه غير متاحة حاليًا.');
+                throw BusinessRuleViolationException::rule('BR-051', Localization::text('copy.this_payment_method_is_currently_unavailable'));
             }
 
             $from = $fresh->payment_method;

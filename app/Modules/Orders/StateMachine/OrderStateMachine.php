@@ -10,8 +10,10 @@ use App\Modules\Orders\Models\Order;
 use App\Modules\Orders\Models\OrderEvent;
 use App\Modules\Settings\Enums\Cfg;
 use App\Modules\Settings\Services\FeatureGate;
+use App\Support\Exceptions\BusinessRuleViolationException;
 use App\Support\Exceptions\FeatureDisabledException;
 use App\Support\Exceptions\InvalidTransitionException;
+use App\Support\Localization;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -25,9 +27,9 @@ final class OrderStateMachine
     public function __construct(private readonly FeatureGate $features) {}
 
     /**
-     * @param array<string, mixed> $meta بيانات الحدث (24)
-     * @param (callable(Order): void)|null $mutate تعديلات إضافية على الطلب داخل نفس المعاملة
-     * @param (callable(Order, OrderEvent): void)|null $after آثار جانبية بعد الالتزام
+     * @param  array<string, mixed>  $meta  بيانات الحدث (24)
+     * @param  (callable(Order): void)|null  $mutate  تعديلات إضافية على الطلب داخل نفس المعاملة
+     * @param  (callable(Order, OrderEvent): void)|null  $after  آثار جانبية بعد الالتزام
      */
     public function apply(
         Order $order,
@@ -50,6 +52,14 @@ final class OrderStateMachine
             /** @var Order $fresh */
             $fresh = Order::query()->lockForUpdate()->findOrFail($order->getKey());
 
+            if (in_array($action, ['assignWarrantyVisit', 'completeFreeWarrantyVisit'], true) && ! $fresh->isWarrantyVisit()) {
+                throw BusinessRuleViolationException::rule('WARRANTY-14', Localization::text('copy.warranty_unavailable'));
+            }
+
+            if ($actorType === ActorType::Provider && $fresh->hasPendingNoShowReport()) {
+                throw BusinessRuleViolationException::rule('BR-071', Localization::text('copy.absence_report_pending'));
+            }
+
             if (! $transition->allowsFrom($fresh->status)) {
                 throw InvalidTransitionException::for($fresh->status, $action);
             }
@@ -67,6 +77,19 @@ final class OrderStateMachine
             $fresh->status = $transition->to;
             $fresh->version = $fresh->version + 1;
             $fresh->save();
+
+            if ($fresh->isWarrantyVisit()) {
+                $claim = $fresh->warrantyClaim()->lockForUpdate()->firstOrFail();
+                $claim->update([
+                    'status' => match ($fresh->status) {
+                        OrderStatus::Closed => 'COMPLETED',
+                        OrderStatus::Cancelled, OrderStatus::Expired => 'CANCELLED',
+                        OrderStatus::Open => 'REQUESTED',
+                        default => 'ASSIGNED',
+                    },
+                    'provider_profile_id' => $fresh->provider_profile_id,
+                ]);
+            }
 
             $event = OrderEvent::query()->create([
                 'order_id' => $fresh->getKey(),
@@ -94,6 +117,9 @@ final class OrderStateMachine
     /** يخبر الواجهات بما هو متاح الآن بلا محاولة تنفيذ. */
     public function can(Order $order, string $action, ActorType $actorType): bool
     {
+        if (in_array($action, ['assignWarrantyVisit', 'completeFreeWarrantyVisit'], true) && ! $order->isWarrantyVisit()) {
+            return false;
+        }
         $transition = TransitionTable::find($action);
 
         if ($transition === null) {

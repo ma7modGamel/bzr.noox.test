@@ -1,0 +1,32 @@
+{
+    "data": {
+        "id": 1000,
+        "status": "REJECTED",
+        "display_status": "provider.application.status.REJECTED",
+        "rejection_reason": "صورة البطاقة غير واضحة",
+        "suspension_reason": null,
+        "experience_years": 7,
+        "bio": null,
+        "category_ids": [
+            1
+        ],
+        "specialty_ids": [
+            1
+        ],
+        "area_ids": [
+            1
+        ],
+        "payout_method": "INSTAPAY",
+        "payout_details": "hossam@instapay",
+        "profile_photo_uploaded": true,
+        "documents": {
+            "id_front": true,
+            "id_back": true
+        },
+        "submitted_at": "2026-10-05T06:00:00+00:00",
+        "available_actions": [
+            "resubmit_provider_application",
+            "submit_provider_application"
+        ]
+    }
+}

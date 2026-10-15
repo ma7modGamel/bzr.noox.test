@@ -15,6 +15,7 @@ use App\Modules\Orders\Models\Order;
 use App\Modules\Orders\Models\OrderMedia;
 use App\Modules\Providers\Models\ProviderProfile;
 use App\Support\Exceptions\BusinessRuleViolationException;
+use App\Support\Localization;
 use Illuminate\Support\Facades\DB;
 
 final readonly class ConversationService
@@ -27,7 +28,7 @@ final readonly class ConversationService
     public function start(User $customer, Order $order, ProviderProfile $provider): Conversation
     {
         if ($order->customer_id !== $customer->getKey() || $order->status !== OrderStatus::Open) {
-            throw BusinessRuleViolationException::rule('BR-100', 'لا يمكن بدء هذه المحادثة.');
+            throw BusinessRuleViolationException::rule('BR-100', Localization::text('copy.this_conversation_cannot_be_started'));
         }
 
         $hasOffer = $order->offers()
@@ -36,7 +37,7 @@ final readonly class ConversationService
             ->exists();
 
         if (! $hasOffer) {
-            throw BusinessRuleViolationException::rule('BR-100', 'المحادثة متاحة مع مقدم خدمة أرسل عرضًا فقط.');
+            throw BusinessRuleViolationException::rule('BR-100', Localization::text('copy.you_can_only_chat_with_a_technician_who_has'));
         }
 
         return Conversation::query()->firstOrCreate([
@@ -65,20 +66,18 @@ final readonly class ConversationService
         $this->assertParticipant($conversation, $sender);
 
         if ($conversation->status !== ConversationStatus::Open) {
-            throw BusinessRuleViolationException::rule('BR-102', 'المحادثة للقراءة فقط.');
+            throw BusinessRuleViolationException::rule('BR-102', Localization::text('copy.this_conversation_is_read_only'));
         }
 
         $order = $conversation->order;
-        $masked = $order->status === OrderStatus::Open
-            ? $this->masker->mask($body)
-            : ['body' => $body, 'masked' => false];
+        $masked = $this->masker->mask($body);
 
         $message = DB::transaction(function () use ($conversation, $sender, $body, $mediaIds, $masked, $order): Message {
             $media = collect();
 
             if ($mediaIds !== []) {
                 if ($order->status === OrderStatus::Open) {
-                    throw BusinessRuleViolationException::rule('BR-101', 'الصور متاحة بعد تأكيد الطلب فقط.');
+                    throw BusinessRuleViolationException::rule('BR-101', Localization::text('copy.photos_are_only_available_after_the_request_is_confirmed'));
                 }
 
                 $media = OrderMedia::query()
@@ -91,7 +90,7 @@ final readonly class ConversationService
                     ->get();
 
                 if ($media->count() !== count(array_unique($mediaIds))) {
-                    throw BusinessRuleViolationException::rule('BR-101', 'إحدى صور الرسالة غير متاحة.');
+                    throw BusinessRuleViolationException::rule('BR-101', Localization::text('copy.one_of_the_message_photos_is_unavailable'));
                 }
             }
 

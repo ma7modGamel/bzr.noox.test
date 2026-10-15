@@ -7,6 +7,7 @@ namespace App\Http\Api\V1\Controllers;
 use App\Modules\Providers\Actions\UpdateProviderProfileAction;
 use App\Modules\Providers\Models\ProviderProfile;
 use App\Support\Exceptions\BusinessRuleViolationException;
+use App\Support\Localization;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -42,7 +43,7 @@ final class ProviderProfileController
     /** @return array<string, mixed> */
     private function payload(ProviderProfile $profile): array
     {
-        $profile->load(['user', 'categories:id,name', 'categories.problemTypes:id,category_id,name', 'specialties:id,name', 'areas.city:id,name', 'portfolioItems']);
+        $profile->load(['user', 'categories:id,name,name_en', 'categories.problemTypes:id,category_id,name,name_en', 'specialties:id,name,name_en', 'areas.city:id,name,name_en', 'portfolioItems']);
 
         return [
             'id' => $profile->getKey(),
@@ -56,14 +57,14 @@ final class ProviderProfileController
             'avg_response_minutes' => $profile->avg_response_minutes,
             'categories' => $profile->categories->map(fn ($category): array => [
                 'id' => $category->getKey(),
-                'name' => $category->name,
-                'specialties' => $category->problemTypes->map->only(['id', 'name'])->values(),
+                'name' => Localization::field($category),
+                'specialties' => $category->problemTypes->map(fn ($problem): array => ['id' => $problem->id, 'name' => Localization::field($problem)])->values(),
             ])->values(),
             'specialty_ids' => $profile->specialties->modelKeys(),
             'areas' => $profile->areas->map(fn ($area): array => [
                 'id' => $area->getKey(),
-                'name' => $area->name,
-                'city' => $area->city->name,
+                'name' => Localization::field($area),
+                'city' => Localization::field($area->city),
             ])->values(),
             'area_ids' => $profile->areas->modelKeys(),
             'payout_method' => $profile->payout_method,
@@ -75,6 +76,6 @@ final class ProviderProfileController
     private function profile(Request $request): ProviderProfile
     {
         return $request->user()->providerProfile
-            ?? throw BusinessRuleViolationException::rule('BR-022', 'لا يوجد ملف فني لهذا الحساب.');
+            ?? throw BusinessRuleViolationException::rule('BR-022', Localization::text('copy.there_is_no_technician_profile_for_this_account'));
     }
 }

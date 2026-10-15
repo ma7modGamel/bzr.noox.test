@@ -18,6 +18,7 @@ use App\Modules\Orders\StateMachine\OrderStateMachine;
 use App\Modules\Providers\Models\ProviderProfile;
 use App\Modules\Settings\Services\FeatureGate;
 use App\Support\Exceptions\BusinessRuleViolationException;
+use App\Support\Localization;
 
 /**
  * T-27 — تعيين مقدم خدمة لطلب في وضع الموظفين (BR-007).
@@ -85,7 +86,7 @@ final readonly class AssignProviderAction
         if ($order->provider_profile_id === $provider->getKey()) {
             throw BusinessRuleViolationException::rule(
                 'BR-007',
-                'إعادة التعيين تتطلب اختيار مقدم خدمة مختلف عن الحالي.',
+                Localization::text('copy.reassignment_requires_a_different_technician'),
             );
         }
 

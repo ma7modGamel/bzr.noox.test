@@ -13,7 +13,7 @@ if (! is_dir($target) && ! mkdir($target, 0775, true) && ! is_dir($target)) {
 $approved = [];
 foreach ($fixture['snapshot_cases'] as $case) {
     $id = $case['id'];
-    $matches = glob($root.'/androidapp/core/design/src/test/snapshots/images/*_gallery-'.$id.'.png') ?: [];
+    $matches = glob($root.'/androidapp/core/design/src/test/snapshots/images/*_xml-gallery-'.$id.'.png') ?: [];
     if (count($matches) !== 1) {
         throw new RuntimeException("Expected exactly one Android snapshot for {$id}; found ".count($matches).'.');
     }

@@ -8,6 +8,7 @@ use App\Modules\Providers\Actions\AddPortfolioItemAction;
 use App\Modules\Providers\Models\PortfolioItem;
 use App\Modules\Providers\Models\ProviderProfile;
 use App\Support\Exceptions\BusinessRuleViolationException;
+use App\Support\Localization;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -38,6 +39,6 @@ final class ProviderPortfolioController
     private function profile(Request $request): ProviderProfile
     {
         return $request->user()->providerProfile
-            ?? throw BusinessRuleViolationException::rule('BR-022', 'لا يوجد ملف فني لهذا الحساب.');
+            ?? throw BusinessRuleViolationException::rule('BR-022', Localization::text('copy.there_is_no_technician_profile_for_this_account'));
     }
 }

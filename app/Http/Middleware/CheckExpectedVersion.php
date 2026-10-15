@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Middleware;
 
 use App\Modules\Orders\Models\Order;
+use App\Support\Localization;
 use Closure;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -25,7 +26,7 @@ final class CheckExpectedVersion
             return new JsonResponse([
                 'error' => [
                     'code' => 'CONFLICT',
-                    'message' => 'تغيّر الطلب منذ آخر تحديث لديك. أعد تحميله.',
+                    'message' => Localization::text('copy.this_request_has_changed_since_your_last_update_reload'),
                     'current_version' => $order->version,
                 ],
             ], 409);

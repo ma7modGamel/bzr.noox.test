@@ -1,0 +1,27 @@
+{
+    "data": [
+        {
+            "id": "3b764749-671b-449c-baf3-4de17c94b270",
+            "code": "NTF-17",
+            "title": "فُتحت مشكلة على طلب #3",
+            "body": "نراجع المشكلة ونبلغك بالقرار.",
+            "deep_link": "bremo://orders/3/dispute",
+            "read_at": null,
+            "created_at": "2026-10-05T19:51:55+00:00"
+        },
+        {
+            "id": "ff0ef054-0bd1-422f-81e4-5b0209001174",
+            "code": "NTF-09",
+            "title": "وصل الفني",
+            "body": "الفني عند العنوان الآن.",
+            "deep_link": "bremo://orders/3",
+            "read_at": null,
+            "created_at": "2026-10-05T19:51:55+00:00"
+        }
+    ],
+    "meta": {
+        "current_page": 1,
+        "last_page": 1,
+        "unread_count": 2
+    }
+}

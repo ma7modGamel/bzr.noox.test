@@ -1,19 +1,165 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- SCR-C35 C35NoOffersScreen content (DEC-047). -->
+<!-- SCR-C35 — Figma «Primo App» «طلبك اتنشر» 3002:1519: the open request while no offer has arrived (DEC-073). -->
 <merge xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     tools:parentTag="android.widget.LinearLayout">
 
-    <noox.bzr.design.views.EmptyStateView
-        android:id="@+id/empty"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:bremoTitle="@string/no_offers_title"
-        app:bremoBody="@string/no_offers_body" />
+        android:divider="@drawable/bremo_gap_s"
+        android:gravity="center_horizontal"
+        android:orientation="vertical"
+        android:showDividers="middle">
 
-    <noox.bzr.customer.ActionButtonsView
-        android:id="@+id/actions"
+        <FrameLayout
+            android:layout_width="@dimen/bremo_size_success_ring"
+            android:layout_height="@dimen/bremo_size_success_ring"
+            android:background="@drawable/bremo_bg_success_ring">
+
+            <FrameLayout
+                android:layout_width="@dimen/bremo_size_success_core"
+                android:layout_height="@dimen/bremo_size_success_core"
+                android:layout_gravity="center"
+                android:background="@drawable/bremo_bg_success_core">
+
+                <ImageView
+                    android:layout_width="@dimen/bremo_size_icon"
+                    android:layout_height="@dimen/bremo_size_icon"
+                    android:layout_gravity="center"
+                    android:importantForAccessibility="no"
+                    app:srcCompat="@drawable/ic_check"
+                    app:tint="@color/bremo_on_primary" />
+            </FrameLayout>
+        </FrameLayout>
+
+
+
+        <TextView
+            android:id="@+id/heading"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:textAppearance="@style/TextAppearance.Bremo.ScreenTitle" />
+
+        <TextView
+            android:id="@+id/body"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:textAppearance="@style/TextAppearance.Bremo.Subtitle" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/orderCard"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/bremo_bg_card"
+        android:divider="@drawable/bremo_gap_m"
+        android:orientation="vertical"
+        android:padding="@dimen/bremo_space_l"
+        android:showDividers="middle">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:divider="@drawable/bremo_gap_m"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:showDividers="middle">
+
+            <FrameLayout
+                android:layout_width="@dimen/bremo_size_option_well"
+                android:layout_height="@dimen/bremo_size_option_well"
+                android:background="@drawable/bremo_bg_order_well">
+
+                <ImageView
+                    android:id="@+id/orderIcon"
+                    android:layout_width="@dimen/bremo_size_icon"
+                    android:layout_height="@dimen/bremo_size_icon"
+                    android:layout_gravity="center"
+                    android:importantForAccessibility="no" />
+            </FrameLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/kind"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textAlignment="viewStart"
+                    android:textAppearance="@style/TextAppearance.Bremo.Hint" />
+
+                <TextView
+                    android:id="@+id/orderTitle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textAlignment="viewStart"
+                    android:textAppearance="@style/TextAppearance.Bremo.HomeSection" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/waitingStatus"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="top"
+                android:background="@drawable/bremo_bg_info_pill"
+                android:drawablePadding="@dimen/bremo_space_xs"
+                android:paddingHorizontal="@dimen/bremo_space_s"
+                android:text="@string/waiting_status"
+                android:textAppearance="@style/TextAppearance.Bremo.Hint"
+                app:drawableStartCompat="@drawable/bremo_bg_waiting_dot" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/infoRows"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:divider="@drawable/bremo_gap_s"
+            android:orientation="vertical"
+            android:showDividers="middle" />
+    </LinearLayout>
+
+    <!-- STATIC (DEC-074, BACKEND-NOTES B-13): no count of nearby technicians before offers arrive. -->
+    <noox.bzr.design.views.InfoBannerView
+        android:id="@+id/waitingInfo"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
+
+    <noox.bzr.design.views.InfoBannerView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:bremoText="@string/waiting_compare" />
+
+    <LinearLayout
+        android:id="@+id/buttons"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:divider="@drawable/bremo_gap_s"
+        android:orientation="vertical"
+        android:showDividers="middle">
+
+        <noox.bzr.design.views.PrimaryButtonView
+            android:id="@+id/primary"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:bremoIcon="@drawable/ic_arrow_forward" />
+
+        <noox.bzr.design.views.SecondaryButtonView
+            android:id="@+id/edit"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:bremoText="@string/action_edit_request" />
+
+        <noox.bzr.design.views.DangerTextButtonView
+            android:id="@+id/cancel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:bremoText="@string/action_cancel" />
+    </LinearLayout>
 </merge>

@@ -20,6 +20,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Str;
 use Illuminate\Testing\TestResponse;
 use PHPUnit\Framework\Attributes\Test;
+use Tests\Support\AttachesRepairPhotos;
 use Tests\TestCase;
 
 /**
@@ -28,6 +29,7 @@ use Tests\TestCase;
  */
 final class ApiJourneyTest extends TestCase
 {
+    use AttachesRepairPhotos;
     use RefreshDatabase;
 
     protected function setUp(): void
@@ -91,6 +93,7 @@ final class ApiJourneyTest extends TestCase
         $customer = User::factory()->create();
         $address = CustomerAddress::factory()->create(['user_id' => $customer->id]);
         $category = Category::query()->where('name', 'سباكة')->sole();
+        ProviderProfile::factory()->servingFor($category->id, $address->area_id)->create();
         // BR-046: عرض التنفيذ في وضع الموظفين يتطلب دليل سعر فعّالًا لنوع المشكلة.
         $category->problemTypes()->where('is_other', false)->firstOrFail()->update([
             'employee_price_min' => '300.00',
@@ -143,6 +146,7 @@ final class ApiJourneyTest extends TestCase
         ])->assertNoContent();
 
         $this->providerPost($providerUser, "/api/v1/provider/orders/{$orderId}/arrived", [
+            'expected_version' => Order::query()->findOrFail($orderId)->version, 'arrival_code' => $this->arrivalCode(Order::query()->findOrFail($orderId)),
             'lat' => 30.0600, 'lng' => 31.3400,
         ])->assertOk()->assertJsonPath('data.status', 'ARRIVED');
 
@@ -160,6 +164,7 @@ final class ApiJourneyTest extends TestCase
             ->assertJsonPath('data.status', 'IN_PROGRESS');
 
         // 6) الفني ينهي ويستلم نقدًا
+        $this->attachRepairPhotos(Order::query()->findOrFail($orderId), $provider);
         $this->providerPost($providerUser, "/api/v1/provider/orders/{$orderId}/complete")
             ->assertOk()
             ->assertJsonPath('data.amounts.final_amount', '450.00');
@@ -234,6 +239,7 @@ final class ApiJourneyTest extends TestCase
         $customer = User::factory()->create();
         $address = CustomerAddress::factory()->create(['user_id' => $customer->id]);
         $category = Category::query()->where('name', 'سباكة')->sole();
+        ProviderProfile::factory()->servingFor($category->id, $address->area_id)->create();
         $key = (string) Str::uuid();
 
         $payload = [

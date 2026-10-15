@@ -1,0 +1,162 @@
+[
+  {
+    "key": "assignment.alert_now_minutes",
+    "value": "15"
+  },
+  {
+    "key": "assignment.alert_scheduled_lead_minutes",
+    "value": "60"
+  },
+  {
+    "key": "assignment.deadline_now_minutes",
+    "value": "60"
+  },
+  {
+    "key": "offers.max_per_order",
+    "value": "10"
+  },
+  {
+    "key": "offers.min_amount",
+    "value": "\"50.00\""
+  },
+  {
+    "key": "offers.selection_grace_now_minutes",
+    "value": "15"
+  },
+  {
+    "key": "offers.selection_lead_scheduled_minutes",
+    "value": "30"
+  },
+  {
+    "key": "offers.window_now_minutes",
+    "value": "30"
+  },
+  {
+    "key": "offers.window_scheduled_lead_minutes",
+    "value": "60"
+  },
+  {
+    "key": "offers.window_scheduled_max_hours",
+    "value": "24"
+  },
+  {
+    "key": "operating.inspection_fee_enabled",
+    "value": "false"
+  },
+  {
+    "key": "operating.offers_enabled",
+    "value": "false"
+  },
+  {
+    "key": "payments.auto_close_hours",
+    "value": "24"
+  },
+  {
+    "key": "payments.channel_cash_enabled",
+    "value": "true"
+  },
+  {
+    "key": "payments.channel_fawry_enabled",
+    "value": "false"
+  },
+  {
+    "key": "payments.channel_instapay_enabled",
+    "value": "true"
+  },
+  {
+    "key": "payments.delay_alert_hours",
+    "value": "24"
+  },
+  {
+    "key": "payments.fawry_code_validity_hours",
+    "value": "24"
+  },
+  {
+    "key": "payments.instapay_address",
+    "value": "null"
+  },
+  {
+    "key": "payments.instapay_display_name",
+    "value": "null"
+  },
+  {
+    "key": "payments.instapay_link",
+    "value": "null"
+  },
+  {
+    "key": "pricing.proposal_timeout_minutes",
+    "value": "60"
+  },
+  {
+    "key": "ratings.phone_hide_after_close_hours",
+    "value": "24"
+  },
+  {
+    "key": "ratings.reminder_hours",
+    "value": "24"
+  },
+  {
+    "key": "ratings.window_days",
+    "value": "7"
+  },
+  {
+    "key": "scheduling.max_open_orders",
+    "value": "3"
+  },
+  {
+    "key": "scheduling.min_lead_minutes",
+    "value": "90"
+  },
+  {
+    "key": "scheduling.service_hours_from",
+    "value": "\"08:00\""
+  },
+  {
+    "key": "scheduling.service_hours_to",
+    "value": "\"22:00\""
+  },
+  {
+    "key": "scheduling.slots",
+    "value": "[{\"to\": \"11:00\", \"from\": \"09:00\"}, {\"to\": \"13:00\", \"from\": \"11:00\"}, {\"to\": \"15:00\", \"from\": \"13:00\"}, {\"to\": \"17:00\", \"from\": \"15:00\"}, {\"to\": \"19:00\", \"from\": \"17:00\"}, {\"to\": \"21:00\", \"from\": \"19:00\"}]"
+  },
+  {
+    "key": "settlements.default_commission_rate",
+    "value": "null"
+  },
+  {
+    "key": "settlements.dispute_window_hours",
+    "value": "72"
+  },
+  {
+    "key": "settlements.employee_remittance_cycle",
+    "value": "\"daily\""
+  },
+  {
+    "key": "settlements.payout_cycle",
+    "value": "\"weekly\""
+  },
+  {
+    "key": "settlements.provider_debt_limit",
+    "value": "\"5000.00\""
+  },
+  {
+    "key": "tracking.arrival_point_retention_days",
+    "value": "90"
+  },
+  {
+    "key": "tracking.arrival_warning_distance_m",
+    "value": "500"
+  },
+  {
+    "key": "tracking.eta_recalc_distance_m",
+    "value": "300"
+  },
+  {
+    "key": "tracking.eta_recalc_seconds",
+    "value": "120"
+  },
+  {
+    "key": "tracking.location_update_seconds",
+    "value": "30"
+  }
+]

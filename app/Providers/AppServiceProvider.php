@@ -11,6 +11,7 @@ use App\Modules\Orders\Services\GoogleRoutesEtaProvider;
 use App\Modules\Payments\Contracts\PaymentGateway;
 use App\Modules\Payments\Services\FawryWebhookSignature;
 use App\Modules\Payments\Services\StagingPaymentGateway;
+use App\Support\Localization;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -26,6 +27,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
+        $this->app->useLangPath(resource_path('lang'));
+
         $this->app->bind(RouteEtaProvider::class, GoogleRoutesEtaProvider::class);
         $this->app->singleton(FawryWebhookSignature::class, fn (): FawryWebhookSignature => new FawryWebhookSignature(
             (string) config('services.fawry.security_key'),
@@ -69,29 +72,31 @@ class AppServiceProvider extends ServiceProvider
         VerifyEmail::createUrlUsing(fn (object $notifiable): string => URL::temporarySignedRoute(
             'web.verification.verify',
             now()->addMinutes((int) config('auth.verification.expire', 60)),
-            ['id' => $notifiable->getKey(), 'hash' => sha1($notifiable->getEmailForVerification())],
+            ['id' => $notifiable->getKey(), 'hash' => sha1($notifiable->getEmailForVerification()), 'locale' => $notifiable->preferredLocale()],
         ));
         VerifyEmail::toMailUsing(fn (object $notifiable, string $url): MailMessage => (new MailMessage)
-            ->subject('تفعيل بريدك في '.config('app.name'))
-            ->greeting('أهلًا بك في '.config('app.name'))
-            ->line('لإكمال إنشاء الحساب، فعّل بريدك الإلكتروني من الزر التالي.')
-            ->action('تفعيل البريد', $url)
-            ->line('الرابط صالح لمدة '.config('auth.verification.expire', 60).' دقيقة.')
-            ->salutation('فريق '.config('app.name')));
+            ->subject(Localization::text('messages.verify_subject', ['brand' => config('app.name')], $notifiable->preferredLocale()))
+            ->greeting(Localization::text('messages.verify_greeting', ['brand' => config('app.name')], $notifiable->preferredLocale()))
+            ->line(Localization::text('messages.verify_body', ['brand' => config('app.name')], $notifiable->preferredLocale()))
+            ->action(Localization::text('messages.verify_action', locale: $notifiable->preferredLocale()), $url)
+            ->line(Localization::text('messages.verify_expiry', ['minutes' => config('auth.verification.expire', 60)], $notifiable->preferredLocale()))
+            ->salutation(Localization::text('messages.mail_team', ['brand' => config('app.name')], $notifiable->preferredLocale())));
 
         ResetPassword::createUrlUsing(fn (object $notifiable, string $token): string => route('password.reset', [
             'token' => $token,
+            'locale' => $notifiable->preferredLocale(),
             'email' => $notifiable->getEmailForPasswordReset(),
         ]));
         ResetPassword::toMailUsing(fn (object $notifiable, string $token): MailMessage => (new MailMessage)
-            ->subject('استعادة كلمة المرور في '.config('app.name'))
-            ->greeting('طلب استعادة كلمة المرور')
-            ->line('وصلنا طلب لتعيين كلمة مرور جديدة لحسابك. اضغط الزر لإكمال الخطوة.')
-            ->action('تعيين كلمة مرور جديدة', route('password.reset', [
+            ->subject(Localization::text('messages.reset_subject', ['brand' => config('app.name')], $notifiable->preferredLocale()))
+            ->greeting(Localization::text('messages.reset_greeting', ['brand' => config('app.name')], $notifiable->preferredLocale()))
+            ->line(Localization::text('messages.reset_body', ['brand' => config('app.name')], $notifiable->preferredLocale()))
+            ->action(Localization::text('messages.reset_action', locale: $notifiable->preferredLocale()), route('password.reset', [
                 'token' => $token,
+                'locale' => $notifiable->preferredLocale(),
                 'email' => $notifiable->getEmailForPasswordReset(),
             ]))
-            ->line('الرابط صالح لمدة '.config('auth.passwords.users.expire', 60).' دقيقة. إن لم تطلب ذلك فتجاهل هذه الرسالة.')
-            ->salutation('فريق '.config('app.name')));
+            ->line(Localization::text('messages.reset_expiry', ['minutes' => config('auth.passwords.users.expire', 60)], $notifiable->preferredLocale()))
+            ->salutation(Localization::text('messages.mail_team', ['brand' => config('app.name')], $notifiable->preferredLocale())));
     }
 }

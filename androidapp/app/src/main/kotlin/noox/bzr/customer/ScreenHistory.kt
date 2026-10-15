@@ -39,6 +39,14 @@ class ScreenHistory<T>(private val root: String, private val screenOf: (T) -> St
         committed = true
     }
 
+    /** Localized snapshots must not be restored after a language change. */
+    fun clear() {
+        entries.clear()
+        current = null
+        committed = false
+        previousRestorable = true
+    }
+
     /** The entry to show on back, or null when already on the root. */
     fun back(rootEntry: () -> T): T? {
         val screen = current?.let(screenOf)

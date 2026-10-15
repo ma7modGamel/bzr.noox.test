@@ -2,107 +2,96 @@ import BzrCore
 import DesignSystem
 import SwiftUI
 
+/// SCR-C04, step 3 of 5 (DEC-071): the service address and when the technician comes.
 public struct C04TimingView: View {
     let state: CustomerUIState
     let onOpen: (String) -> Void
-    let onTimingSelect: (Int) -> Void
     let onMaterialSelect: (Int) -> Void
-    let onPricingSelect: (Int) -> Void
-    let onBudgetChange: (String) -> Void
+    let onTimingSelect: (Int) -> Void
 
     public init(
         state: CustomerUIState, onOpen: @escaping (String) -> Void = { _ in },
         onTimingSelect: @escaping (Int) -> Void = { _ in },
-        onMaterialSelect: @escaping (Int) -> Void = { _ in },
-        onPricingSelect: @escaping (Int) -> Void = { _ in },
-        onBudgetChange: @escaping (String) -> Void = { _ in }
+        onMaterialSelect: @escaping (Int) -> Void = { _ in }
     ) {
         self.state = state
         self.onOpen = onOpen
         self.onTimingSelect = onTimingSelect
         self.onMaterialSelect = onMaterialSelect
-        self.onPricingSelect = onPricingSelect
-        self.onBudgetChange = onBudgetChange
     }
+
+    private var address: String { state.fieldValues.first ?? "" }
 
     public var body: some View {
         CustomerScreen(title: bzrString("request.timing.title"), state: state, bottomBar: AnyView(primaryAction)) {
-            StepIndicator(
-                current: 2, total: 3,
-                label: BzrFormatter.fill(
-                    bzrString("format.step"), values: [("current", "2"), ("total", "3")]))
-            SummaryCard(
-                title: bzrString("request.address.title"),
-                rows: (state.fieldValues.first ?? "").isEmpty ? [] : [(.location, state.fieldValues[0])],
-                editText: bzrString("common.change"),
-                onEdit: { onOpen("SCR-C14") })
-            Button(
-                action: { onTimingSelect(0) },
-                label: {
-                    RadioCard(
-                        title: state.options.first ?? "", body: bzrString("radio.now.body"),
-                        selected: state.selectedOptionIndex == 0)
+            RequestProgress(current: 3, total: state.requestSteps)
+            HStack {
+                heading(.location, bzrString("request.address.title"))
+                Spacer(minLength: DesignSpace.s)
+                LinkButton(text: bzrString("request.address.change"), onClick: { onOpen("SCR-C14") })
+            }
+            MapCard(
+                title: address.isEmpty ? bzrString("request.address.required") : address,
+                onMyLocation: { onOpen("SCR-C15") })
+            HStack(spacing: DesignSpace.s) {
+                if !address.isEmpty {
+                    Button(action: { onOpen("SCR-C14") }) {
+                        SelectableChip(text: address.components(separatedBy: " · ").first ?? address, state: .selected)
+                    }
+                    .buttonStyle(BzrPressStyle())
                 }
-            )
-            .buttonStyle(BzrPressStyle())
-            Button(
-                action: { onOpen("SCR-C16") },
-                label: {
-                    RadioCard(
-                        title: state.options.indices.contains(1) ? state.options[1] : "",
-                        body: slotBody, selected: state.selectedOptionIndex == 1)
+                Button(action: { onOpen("SCR-C15") }) {
+                    SelectableChip(text: bzrString("request.address.new"), state: .unselected)
                 }
-            )
-            .buttonStyle(BzrPressStyle())
+                .buttonStyle(BzrPressStyle())
+                Spacer(minLength: 0)
+            }
+            LinkButton(text: bzrString("request.address.current_location"), onClick: { onOpen("SCR-C15") })
             if let message = state.messageKey { InfoBanner(text: bzrString(message)) }
-            ScreenHeading(bzrString("request.materials.title"))
-            // DEC-063: options in equal columns, like the category tiles.
-            BzrServiceGrid {
-                ForEach(Array(state.materialOptions.enumerated()), id: \.offset) { index, label in
-                    Button(
-                        action: { onMaterialSelect(index) },
-                        label: {
-                            SelectableChip(
-                                text: label,
-                                state: index == state.selectedMaterialIndex ? .selected : .unselected)
-                        }
-                    )
-                    .buttonStyle(BzrPressStyle())
-                }
+            heading(.clock, bzrString("request.timing.question"))
+            ForEach(Array(state.options.enumerated()), id: \.offset) { index, label in
+                let code = state.optionCodes.indices.contains(index) ? state.optionCodes[index] : (index == 0 ? "NOW" : "SCHEDULED")
+                Button(
+                    action: { code == "NOW" ? onTimingSelect(index) : onOpen("SCR-C16") },
+                    label: {
+                        RadioCard(
+                            title: label, body: body(for: code), selected: index == state.selectedOptionIndex,
+                            icon: code == "NOW" ? .bolt : .calendar,
+                            badge: code == "NOW" ? bzrString(state.nowAvailable ? "request.timing.fastest" : "request.timing.unavailable.badge") : "")
+                    }
+                )
+                .buttonStyle(BzrPressStyle())
+                .disabled(code == "NOW" && !state.nowAvailable)
+                .opacity(code == "NOW" && !state.nowAvailable ? 0.55 : 1)
             }
-            if state.showPricing {
-                ScreenHeading(bzrString("request.pricing.title"))
-                ForEach(Array(state.pricingOptions.enumerated()), id: \.offset) { index, label in
-                    Button(
-                        action: { onPricingSelect(index) },
-                        label: {
-                            RadioCard(title: label, body: "", selected: index == state.selectedPricingIndex)
-                        }
-                    )
-                    .buttonStyle(BzrPressStyle())
-                }
-                AppTextField(
-                    label: bzrString("request.budget.label"),
-                    placeholder: bzrString("field.amount.placeholder"),
-                    value: state.fieldValues.indices.contains(1) ? state.fieldValues[1] : "",
-                    state: state.fieldErrors.isEmpty ? .empty : .error,
-                    error: state.fieldErrors.first.map(bzrString), onValueChange: onBudgetChange)
-            } else {
-                InfoBanner(text: bzrString("request.staff.pricing"))
+            if state.messageKey == "request.timing.check_failed" {
+                LinkButton(text: bzrString("common.retry"), onClick: { onOpen("SCR-C04") })
             }
+            if state.showMaterials { MaterialOptions(state: state, onSelect: onMaterialSelect) }
+            InfoBanner(text: bzrString(state.showMaterials ? "request.timing.staff.note" : "request.timing.note"))
+        }
+    }
 
+    private func heading(_ icon: BzrIconKey, _ title: String) -> some View {
+        HStack(spacing: DesignSpace.xs) {
+            BzrIcon(icon, tint: DesignColors.primary600, size: DesignSize.icon)
+            ScreenHeading(title)
         }
     }
 
     /// The chosen slot, or a prompt — never a sample date (6ب).
-    private var primaryAction: some View {
-        PrimaryButton(
-            text: bzrString("common.next"), state: state.canContinue ? .normal : .disabled,
-            onClick: { onOpen("SCR-C05") })
+    private func body(for code: String) -> String {
+        if code == "NOW" {
+            if state.messageKey == "request.timing.checking" { return bzrString("request.timing.checking") }
+            return bzrString(state.nowAvailable ? "request.timing.now.eta" : "request.timing.now_unavailable")
+        }
+        let label = state.fieldValues.count > 2 ? state.fieldValues[2] : ""
+        return label.isEmpty ? bzrString("request.timing.body.SCHEDULED") : label
     }
 
-    private var slotBody: String {
-        let label = state.fieldValues.count > 2 ? state.fieldValues[2] : ""
-        return label.isEmpty ? bzrString("request.slot.choose") : label
+    private var primaryAction: some View {
+        PrimaryButton(
+            text: bzrString(state.showMaterials ? "request.step4.action" : "request.step3.action"), state: state.canContinue ? .normal : .disabled, icon: .arrowForward,
+            onClick: { onOpen(state.showMaterials ? "SCR-C05" : "SCR-C38") })
     }
 }

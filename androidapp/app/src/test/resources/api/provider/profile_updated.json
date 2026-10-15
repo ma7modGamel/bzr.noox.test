@@ -1,0 +1,78 @@
+{
+    "data": {
+        "id": 1004,
+        "name": "كريم السباك",
+        "avatar_path": null,
+        "bio": "سباك خبرة في التسريبات.",
+        "experience_years": 12,
+        "rating_avg": null,
+        "ratings_count": 0,
+        "completed_orders": 0,
+        "avg_response_minutes": null,
+        "categories": [
+            {
+                "id": 1001,
+                "name": "سباكة",
+                "specialties": [
+                    {
+                        "id": 1002,
+                        "name": "تسريب مياه"
+                    },
+                    {
+                        "id": 1006,
+                        "name": "انسداد صرف"
+                    },
+                    {
+                        "id": 1007,
+                        "name": "تركيب أو تغيير خلاط"
+                    },
+                    {
+                        "id": 1008,
+                        "name": "تركيب أو صيانة سخان"
+                    },
+                    {
+                        "id": 1009,
+                        "name": "تركيب أدوات صحية"
+                    },
+                    {
+                        "id": 1010,
+                        "name": "صيانة سيفون أو صندوق طرد"
+                    },
+                    {
+                        "id": 1011,
+                        "name": "ضعف ضغط المياه"
+                    },
+                    {
+                        "id": 1012,
+                        "name": "تركيب فلتر مياه"
+                    },
+                    {
+                        "id": 1013,
+                        "name": "مشكلة أخرى"
+                    }
+                ]
+            }
+        ],
+        "specialty_ids": [
+            75
+        ],
+        "areas": [
+            {
+                "id": 1014,
+                "name": "الحي الأول",
+                "city": "دمياط الجديدة"
+            }
+        ],
+        "area_ids": [
+            9
+        ],
+        "payout_method": "INSTAPAY",
+        "portfolio": [],
+        "available_actions": [
+            "update_provider_profile",
+            "add_portfolio_item",
+            "delete_portfolio_item",
+            "contact_support"
+        ]
+    }
+}

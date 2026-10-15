@@ -109,7 +109,7 @@ final class ScheduledJobsTest extends TestCase
         $provider = ProviderProfile::factory()->servingFor($order->category_id, $order->area_id)->create();
         $order = app(AssignProviderAction::class)->execute($order, $provider, Admin::factory()->create());
         $order = app(StartTripAction::class)->execute($order, $provider);
-        $order = app(MarkArrivedAction::class)->execute($order, $provider, 30.0600, 31.3400);
+        $order = app(MarkArrivedAction::class)->execute($order, $provider, 30.0600, 31.3400, arrivalCode: $this->arrivalCode($order));
         // BR-046: عرض التنفيذ في وضع الموظفين يتطلب دليل سعر فعّالًا لنوع المشكلة.
         $order->problemType()->firstOrFail()->update([
             'employee_price_min' => '300.00',
@@ -140,6 +140,8 @@ final class ScheduledJobsTest extends TestCase
         $customer = User::factory()->create();
         $address = CustomerAddress::factory()->create(['user_id' => $customer->id]);
         $category = Category::query()->where('name', 'سباكة')->sole();
+
+        ProviderProfile::factory()->servingFor($category->id, $address->area_id)->create();
 
         return app(PublishRequestAction::class)->execute($customer, new PublishRequestData(
             customerAddressId: $address->id,

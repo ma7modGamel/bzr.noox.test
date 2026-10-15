@@ -6,9 +6,11 @@ use App\Http\Controllers\AppLinkController;
 use App\Http\Controllers\FawryWebhookController;
 use App\Http\Controllers\LegalPageController;
 use App\Http\Controllers\ShareVisitController;
+use App\Http\Middleware\ResolveLocale;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/v/{token}', ShareVisitController::class)
+    ->middleware(ResolveLocale::class.':query')
     ->middleware('throttle:60,1')
     ->name('share.visit');
 
@@ -17,7 +19,7 @@ Route::post('/webhooks/fawry', FawryWebhookController::class)
     ->name('webhooks.fawry');
 
 // SCR-W02 — روابط البريد (NTF-27، DEC-049).
-Route::middleware('throttle:20,1')->group(function (): void {
+Route::middleware(['throttle:20,1', ResolveLocale::class.':query'])->group(function (): void {
     Route::get('/email/verify/{id}/{hash}', [AccountLinkController::class, 'verify'])
         ->whereNumber('id')
         ->name('web.verification.verify');
@@ -34,12 +36,14 @@ Route::get('/admin/provider-documents/{document}', ProviderDocumentController::c
 Route::get('/.well-known/assetlinks.json', [AppLinkController::class, 'assetLinks']);
 Route::get('/.well-known/apple-app-site-association', [AppLinkController::class, 'appleAppSiteAssociation']);
 Route::get('/app/{path}', [AppLinkController::class, 'fallback'])
+    ->middleware(ResolveLocale::class.':query')
     ->where('path', '[a-z0-9/_-]+')
     ->middleware('throttle:60,1')
     ->name('app.link');
 
 // DEC-051 — الصفحات القانونية العامة (المتاجر، روابط البريد، C34 على الويب).
 Route::get('/{slug}', LegalPageController::class)
+    ->middleware(ResolveLocale::class.':query')
     ->where('slug', 'terms|privacy|cancellation-policy|faq')
     ->middleware('throttle:60,1')
     ->name('legal.show');

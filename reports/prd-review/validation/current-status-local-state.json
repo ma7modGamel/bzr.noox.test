@@ -1,0 +1,70 @@
+{
+  "settings": [
+    {
+      "key": "operating.inspection_fee_enabled",
+      "current_state": "false"
+    },
+    {
+      "key": "operating.offers_enabled",
+      "current_state": "false"
+    },
+    {
+      "key": "payments.channel_cash_enabled",
+      "current_state": "true"
+    },
+    {
+      "key": "payments.channel_fawry_enabled",
+      "current_state": "false"
+    },
+    {
+      "key": "payments.channel_instapay_enabled",
+      "current_state": "true"
+    },
+    {
+      "key": "payments.instapay_address",
+      "current_state": "missing"
+    },
+    {
+      "key": "payments.instapay_display_name",
+      "current_state": "missing"
+    }
+  ],
+  "receiver_value_check": [
+    {
+      "key": "payments.instapay_address",
+      "value_kind": "NULL",
+      "non_empty_string": 0
+    },
+    {
+      "key": "payments.instapay_display_name",
+      "value_kind": "NULL",
+      "non_empty_string": 0
+    }
+  ],
+  "terms_versions": [
+    {
+      "slug": "terms",
+      "version": 3,
+      "locale": "ar",
+      "status": "DRAFT",
+      "effective_at": null,
+      "published_at": null
+    },
+    {
+      "slug": "terms",
+      "version": 2,
+      "locale": "ar",
+      "status": "DRAFT",
+      "effective_at": null,
+      "published_at": null
+    },
+    {
+      "slug": "terms",
+      "version": 1,
+      "locale": "ar",
+      "status": "DRAFT",
+      "effective_at": null,
+      "published_at": null
+    }
+  ]
+}

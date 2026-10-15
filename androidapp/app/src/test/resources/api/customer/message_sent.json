@@ -1,0 +1,11 @@
+{
+    "data": {
+        "id": 1000,
+        "sender_user_id": 1001,
+        "is_mine": true,
+        "body": "التسريب تحت الحوض، الباب مفتوح.",
+        "was_masked": false,
+        "media": [],
+        "created_at": "2026-10-05T19:36:05+00:00"
+    }
+}

@@ -15,6 +15,7 @@ use App\Modules\Offers\Enums\OfferStatus;
 use App\Modules\Offers\Models\Offer;
 use App\Modules\Orders\Enums\CancelReason;
 use App\Modules\Orders\Enums\MaterialsResponsibility;
+use App\Modules\Orders\Enums\OrderEventCode;
 use App\Modules\Orders\Enums\OrderStatus;
 use App\Modules\Orders\Enums\PricingMode;
 use App\Modules\Orders\Enums\TimingType;
@@ -28,6 +29,8 @@ use App\Modules\Reviews\Models\CustomerRating;
 use App\Modules\Reviews\Models\Review;
 use App\Modules\Settings\Enums\OperatingMode;
 use App\Modules\Support\Models\Dispute;
+use App\Modules\Support\Models\WarrantyClaim;
+use Carbon\CarbonImmutable;
 use Database\Factories\OrderFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -46,6 +49,8 @@ final class Order extends Model
     use HasFactory;
 
     protected $guarded = ['id'];
+
+    protected $hidden = ['arrival_code'];
 
     protected function casts(): array
     {
@@ -69,6 +74,15 @@ final class Order extends Model
             'arrived_at' => 'immutable_datetime',
             'work_started_at' => 'immutable_datetime',
             'completed_at' => 'immutable_datetime',
+            'arrival_code' => 'encrypted',
+            'arrival_code_trip_started_at' => 'immutable_datetime',
+            'arrival_code_expires_at' => 'immutable_datetime',
+            'arrival_code_locked_until' => 'immutable_datetime',
+            'arrival_verified_at' => 'immutable_datetime',
+            'arrival_exception_report' => 'array',
+            'arrival_code_attempts' => 'integer',
+            'estimated_completion_at' => 'immutable_datetime',
+            'completion_estimate_updated_at' => 'immutable_datetime',
             'closed_at' => 'immutable_datetime',
             'cancelled_at' => 'immutable_datetime',
             'expired_at' => 'immutable_datetime',
@@ -98,6 +112,17 @@ final class Order extends Model
     public function customer(): BelongsTo
     {
         return $this->belongsTo(User::class, 'customer_id');
+    }
+
+    public function hasPendingNoShowReport(): bool
+    {
+        if ($this->status !== OrderStatus::Arrived) {
+            return false;
+        }
+
+        $this->loadMissing('latestNoShowEvent');
+
+        return $this->latestNoShowEvent?->event_code === OrderEventCode::CustomerNoShowReported;
     }
 
     public function providerProfile(): BelongsTo
@@ -135,6 +160,33 @@ final class Order extends Model
         return $this->belongsTo(ProblemType::class);
     }
 
+    public function warrantyClaims(): HasMany
+    {
+        return $this->hasMany(WarrantyClaim::class);
+    }
+
+    public function warrantyClaim(): BelongsTo
+    {
+        return $this->belongsTo(WarrantyClaim::class);
+    }
+
+    public function latestWarrantyClaim(): HasOne
+    {
+        return $this->hasOne(WarrantyClaim::class)->latestOfMany();
+    }
+
+    public function isWarrantyVisit(): bool
+    {
+        return $this->warranty_claim_id !== null;
+    }
+
+    public function warrantyExpiresAt(): ?CarbonImmutable
+    {
+        $repair = $this->isWarrantyVisit() ? $this->warrantyClaim->order : $this;
+
+        return $repair->work_started_at === null ? null : $repair->completed_at?->addDays(14);
+    }
+
     public function media(): HasMany
     {
         return $this->hasMany(OrderMedia::class);
@@ -154,6 +206,13 @@ final class Order extends Model
     public function proposals(): HasMany
     {
         return $this->hasMany(PriceProposal::class);
+    }
+
+    public function latestNoShowEvent(): HasOne
+    {
+        return $this->hasOne(OrderEvent::class)->ofMany(['id' => 'max'], function (Builder $query): void {
+            $query->whereIn('event_code', [OrderEventCode::CustomerNoShowReported->value, OrderEventCode::CustomerNoShowResolved->value]);
+        });
     }
 
     public function events(): HasMany
@@ -196,8 +255,9 @@ final class Order extends Model
     public function latestSuccessfulPayment(): HasOne
     {
         return $this->hasOne(Payment::class)
-            ->where('status', 'SUCCEEDED')
-            ->latestOfMany('paid_at');
+            ->ofMany(['paid_at' => 'max', 'id' => 'max'], function (Builder $query): void {
+                $query->where('status', 'SUCCEEDED');
+            });
     }
 
     public function latestPaymentAttempt(): HasOne

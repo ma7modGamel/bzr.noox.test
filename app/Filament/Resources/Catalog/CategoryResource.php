@@ -42,6 +42,7 @@ final class CategoryResource extends Resource
     {
         return $schema->components([
             TextInput::make('name')->label('اسم الفئة')->required()->maxLength(100),
+            TextInput::make('name_en')->label('اسم الفئة بالإنجليزية')->maxLength(150)->extraInputAttributes(['dir' => 'ltr']),
             TextInput::make('sort')->label('الترتيب')->numeric()->integer()->default(0),
             // OD-08 / DEC-053 — الفئة المفعّلة لازم يكون ليها أيقونة مسطحة ثنائية اللون.
             Select::make('icon_path')

@@ -9,6 +9,7 @@ use App\Modules\Offers\Enums\OfferStatus;
 use App\Modules\Offers\Models\Offer;
 use App\Modules\Orders\Enums\OrderStatus;
 use App\Modules\Settings\Services\FeatureGate;
+use App\Support\Localization;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -48,9 +49,9 @@ final class ProviderOfferResource extends JsonResource
                 'id' => $this->order->getKey(),
                 'number' => $this->order->number,
                 'version' => $this->order->version,
-                'category' => $this->order->category?->name,
-                'problem_type' => $this->order->problemType?->name,
-                'area' => $this->order->area?->name,
+                'category' => Localization::field($this->order->category),
+                'problem_type' => Localization::field($this->order->problemType),
+                'area' => Localization::field($this->order->area),
                 'timing_type' => $this->order->timing_type->value,
                 'slot_start' => $this->order->slot_start?->toIso8601String(),
             ],

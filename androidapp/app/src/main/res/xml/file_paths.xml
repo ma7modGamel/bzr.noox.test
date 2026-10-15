@@ -3,4 +3,5 @@
     <cache-path
         name="captured_media"
         path="captured-media/" />
+    <cache-path name="statements" path="statements/" />
 </paths>

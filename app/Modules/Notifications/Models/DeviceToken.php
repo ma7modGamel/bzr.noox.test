@@ -15,7 +15,7 @@ final class DeviceToken extends Model
 {
     public const PLATFORMS = ['ANDROID', 'IOS'];
 
-    protected $fillable = ['user_id', 'token', 'platform', 'app_mode', 'last_used_at'];
+    protected $fillable = ['user_id', 'token', 'platform', 'app_mode', 'locale', 'last_used_at'];
 
     protected $hidden = ['token'];
 

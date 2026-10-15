@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Http\Api\V1\Controllers;
 
 use App\Http\Middleware\ResolveAppMode;
+use App\Modules\Notifications\Data\NotificationContent;
+use App\Support\Localization;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Http\JsonResponse;
@@ -20,15 +22,20 @@ final class NotificationController
 
         return new JsonResponse([
             'data' => $notifications->getCollection()->map(
-                static fn (DatabaseNotification $notification): array => [
-                    'id' => $notification->getKey(),
-                    'code' => $notification->data['code'] ?? class_basename($notification->type),
-                    'title' => $notification->data['title'] ?? '',
-                    'body' => $notification->data['body'] ?? '',
-                    'deep_link' => $notification->data['deep_link'] ?? null,
-                    'read_at' => $notification->read_at?->toIso8601String(),
-                    'created_at' => $notification->created_at?->toIso8601String(),
-                ],
+                static function (DatabaseNotification $notification): array {
+                    $data = NotificationContent::localized($notification->data, Localization::locale());
+
+                    return [
+                        'id' => $notification->getKey(),
+                        'code' => $data['code'] ?? class_basename($notification->type),
+                        'title' => $data['title'] ?? '',
+                        'body' => $data['body'] ?? '',
+                        'deep_link' => $data['deep_link'] ?? null,
+                        'read_at' => $notification->read_at?->toIso8601String(),
+                        'created_at' => $notification->created_at?->toIso8601String(),
+                        'legacy_content_unavailable' => $data['legacy_content_unavailable'] ?? false,
+                    ];
+                },
             )->values(),
             'meta' => [
                 'current_page' => $notifications->currentPage(),

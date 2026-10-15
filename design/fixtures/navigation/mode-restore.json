@@ -1,0 +1,9 @@
+{"model":"ModeMemory.restoreTarget","spec":"docs/34-DECISION-LOG.md DEC-067","cases":[
+  {"id":"no_memory","input":{"last_mode":null,"provider_status":"ACTIVE","has_pending_link":false},"expected":{"target":"CUSTOMER","forget":false}},
+  {"id":"customer_last","input":{"last_mode":"CUSTOMER","provider_status":"ACTIVE","has_pending_link":false},"expected":{"target":"CUSTOMER","forget":false}},
+  {"id":"provider_active","input":{"last_mode":"PROVIDER","provider_status":"ACTIVE","has_pending_link":false},"expected":{"target":"SCR-P08","forget":false}},
+  {"id":"provider_pending","input":{"last_mode":"PROVIDER","provider_status":"PENDING","has_pending_link":false},"expected":{"target":"SCR-P07","forget":false}},
+  {"id":"provider_profile_gone","input":{"last_mode":"PROVIDER","provider_status":"NONE","has_pending_link":false},"expected":{"target":"CUSTOMER","forget":true}},
+  {"id":"status_unknown","input":{"last_mode":"PROVIDER","provider_status":"UNKNOWN","has_pending_link":false},"expected":{"target":"CUSTOMER","forget":false}},
+  {"id":"pending_link_wins","input":{"last_mode":"PROVIDER","provider_status":"ACTIVE","has_pending_link":true},"expected":{"target":"LINK","forget":false}}
+]}

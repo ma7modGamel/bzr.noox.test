@@ -1,0 +1,74 @@
+{
+  "captured_at": "2026-10-13T20:40:58.036285+00:00",
+  "screenshots": [
+    {
+      "test_snapshot": "additional-cost-real-decision-deadline",
+      "file": "reports/prd-review/assets/after-deadlines-additional.png",
+      "source_run": "androidapp/app/build/reports/paparazzi/debug/runs/20261013234020_d0c655.js",
+      "sha256": "9a376d0a7c1621b29a410a40f13c6865907973b2e4043a9298598ec0c95c7419"
+    },
+    {
+      "test_snapshot": "additional-cost-expired-no-cancellation",
+      "file": "reports/prd-review/assets/after-deadlines-expired.png",
+      "source_run": "androidapp/app/build/reports/paparazzi/debug/runs/20261013234020_d0c655.js",
+      "sha256": "0f5ac11c6439a139180d9f2f091c601df609f51202dc54223731f57e3f17734e"
+    },
+    {
+      "test_snapshot": "execution-quote-real-decision-deadline",
+      "file": "reports/prd-review/assets/after-deadlines-quote.png",
+      "source_run": "androidapp/app/build/reports/paparazzi/debug/runs/20261013234020_d0c655.js",
+      "sha256": "476dab676f0505e47b0c479705071f9f3948812307f90590e649db190ab1d1e1"
+    },
+    {
+      "test_snapshot": "provider-customer-rating-tags-comment",
+      "file": "reports/prd-review/assets/after-feedback-technician.png",
+      "source_run": "androidapp/app/build/reports/paparazzi/debug/runs/20261013234022_fafedb.js",
+      "sha256": "4e5b0f8867be390ac136fc967dda2dce2f872b39140c486d429f0625240a55c6"
+    }
+  ],
+  "source": "Android native views rendered by Paparazzi with test data; no device screenshots or real transactions",
+  "validation": {
+    "backend": {
+      "tool": "phpunit",
+      "result": "passed",
+      "tests": 47,
+      "passed": 47,
+      "assertions": 313,
+      "duration_ms": 38844
+    },
+    "android": [
+      {
+        "name": "noox.bzr.customer.DecisionDeadlineAndFeedbackViewsTest",
+        "tests": "3",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0"
+      },
+      {
+        "name": "noox.bzr.provider.CustomerFeedbackApiTest",
+        "tests": "1",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0"
+      },
+      {
+        "name": "noox.bzr.customer.WorkflowDecisionViewsTest",
+        "tests": "3",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0"
+      },
+      {
+        "name": "noox.bzr.customer.CustomerApiTypedCallsTest",
+        "tests": "10",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0"
+      }
+    ],
+    "swift_core_tests": 64,
+    "device_tests": false,
+    "xcode_build": false,
+    "production_deployment": false
+  }
+}

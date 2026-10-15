@@ -4,13 +4,17 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Providers\Schemas;
 
+use App\Filament\Support\SettlementActions;
 use App\Modules\Providers\Models\ProviderDocument;
 use App\Modules\Providers\Models\ProviderProfile;
+use App\Modules\Settlements\Services\ProviderEarningsService;
 use Filament\Infolists\Components\ImageEntry;
+use Filament\Infolists\Components\RepeatableEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Illuminate\Support\Collection;
 
 /** ملف الفني للمراجعة — 15 §قائمة مراجعة الإدارة، 16 §الفنيون. */
 final class ProviderProfileInfolist
@@ -63,6 +67,40 @@ final class ProviderProfileInfolist
                         ->state(route('admin.provider-documents.show', $document))
                         ->imageHeight(220))
                     ->all()),
+
+            // DEC-066 — كشف الفني (BR-062) كما يراه في P18؛ للمدير العام وحده.
+            Section::make('الحساب المالي')
+                ->visible(fn (): bool => SettlementActions::super())
+                ->columns(4)
+                ->schema([
+                    TextEntry::make('settlement_balance')->label('الرصيد')
+                        ->state(fn (ProviderProfile $record): string => SettlementActions::balanceLabel($record, self::summary($record)['balance'])),
+                    TextEntry::make('settlement_available')->label('منه بعد مهلة النزاع (المتاح)')
+                        ->state(fn (ProviderProfile $record): string => SettlementActions::balanceLabel($record, self::summary($record)['available'])),
+                    TextEntry::make('settlement_pending')->label('معلّق داخل مهلة النزاع')
+                        ->state(fn (ProviderProfile $record): string => SettlementActions::balanceLabel($record, self::summary($record)['pending'])),
+                    TextEntry::make('dues_blocked_at')->label('منع العروض (BR-063)')
+                        ->placeholder('غير ممنوع')
+                        ->dateTime('Y-m-d H:i', config('app.display_timezone')),
+                    RepeatableEntry::make('settlement_transactions')
+                        ->label('آخر الحركات')
+                        ->state(fn (ProviderProfile $record): array => self::summary($record)['transactions']->take(30)->values()->all())
+                        ->columns(4)
+                        ->columnSpanFull()
+                        ->placeholder('لا توجد حركات بعد.')
+                        ->schema([
+                            TextEntry::make('title')->label('الحركة'),
+                            TextEntry::make('detail')->label('التفاصيل'),
+                            TextEntry::make('amount')->label('الأثر على الرصيد'),
+                            TextEntry::make('occurred_at')->label('التاريخ')->dateTime('Y-m-d H:i', config('app.display_timezone'))->placeholder('—'),
+                        ]),
+                ]),
         ]);
+    }
+
+    /** @return array{balance: float, available: float, pending: float, transactions: Collection<int, array<string, mixed>>} */
+    private static function summary(ProviderProfile $profile): array
+    {
+        return app(ProviderEarningsService::class)->summary($profile);
     }
 }

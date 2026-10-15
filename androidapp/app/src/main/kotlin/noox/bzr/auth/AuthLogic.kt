@@ -49,6 +49,10 @@ object AuthLogic {
                 },
             )
             "network_error" -> base.copy(phase = AuthPhase.Error, messageKey = "error.body")
+            // DEC-065: a refused token brings the user back here; the reason is a notice, not a form error.
+            "session_expired" -> base.copy(
+                canSubmit = false, emailError = null, passwordError = null, messageKey = "auth.error.session_expired",
+            )
             "login_succeeded" -> base.copy(phase = AuthPhase.Success, canSubmit = false, route = if (input.boolean("is_verified")) "SCR-C01" else "SCR-C12")
             else -> base
         }

@@ -35,7 +35,7 @@ class AuthSharedFixtureTest {
                 count++
             }
         }
-        assertEquals(29, count)
+        assertEquals(30, count)
     }
 
     private fun assertNullable(label: String, expected: JSONObject, key: String, actual: String?) {

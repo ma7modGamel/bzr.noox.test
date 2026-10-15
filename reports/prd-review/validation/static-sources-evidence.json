@@ -1,0 +1,264 @@
+{
+  "reviewed_at": "2026-10-14T16:11:48.546604+03:00",
+  "git_head": "856752d9b5d190535e503583b022c3c7410350b6",
+  "working_tree_changes_included": true,
+  "scope": [
+    "S01",
+    "S02",
+    "S03",
+    "S04",
+    "S05",
+    "S06",
+    "S07"
+  ],
+  "owner_decisions": {
+    "arrival": "Hide until travel; use existing map tracking and Google Routes when configured",
+    "completion_estimate": "Assigned technician enters and updates minutes while work is in progress",
+    "best_offer_weights": {
+      "rating": 50,
+      "price": 30,
+      "eta": 20,
+      "admin_editable": true,
+      "scheduled_ignores_eta": true
+    }
+  },
+  "original_prd": {
+    "path": "/home/tro/Downloads/Bremo_PRD.pdf",
+    "sha256": "7b1532e5170c88e7bae3373166498fe06e689e16bf6c4f4e3cca40d96db9996f",
+    "modified": false
+  },
+  "verification": {
+    "backend": {
+      "tool": "phpunit",
+      "result": "passed",
+      "tests": 69,
+      "passed": 69,
+      "assertions": 339,
+      "duration_ms": 39988
+    },
+    "android": {
+      "tests": 26,
+      "suites": [
+        {
+          "name": "noox.bzr.customer.CustomerApiTypedCallsTest",
+          "tests": "10",
+          "failures": "0",
+          "errors": "0",
+          "skipped": "0"
+        },
+        {
+          "name": "noox.bzr.customer.CustomerSharedFixtureTest",
+          "tests": "1",
+          "failures": "0",
+          "errors": "0",
+          "skipped": "0"
+        },
+        {
+          "name": "noox.bzr.customer.StaticDataSourcesApiTest",
+          "tests": "2",
+          "failures": "0",
+          "errors": "0",
+          "skipped": "0"
+        },
+        {
+          "name": "noox.bzr.customer.StaticDataSourcesViewsTest",
+          "tests": "7",
+          "failures": "0",
+          "errors": "0",
+          "skipped": "0"
+        },
+        {
+          "name": "noox.bzr.provider.ProviderModelsDecodeTest",
+          "tests": "5",
+          "failures": "0",
+          "errors": "0",
+          "skipped": "0"
+        },
+        {
+          "name": "noox.bzr.provider.ProviderSharedFixtureTest",
+          "tests": "1",
+          "failures": "0",
+          "errors": "0",
+          "skipped": "0"
+        }
+      ]
+    },
+    "swift_core": {
+      "tests": 77,
+      "failures": 0,
+      "platform": "Linux"
+    },
+    "screenshot_rerun": {
+      "tests": 7,
+      "failures": 0
+    },
+    "apk_debug_built": true,
+    "parity_verified": true,
+    "design_lint_passed": true,
+    "pint_passed": true,
+    "swift_format_passed": true,
+    "swiftui_syntax_parse_passed": true,
+    "diff_check_passed": true
+  },
+  "local_data_verified_with_boost_read_only_queries": {
+    "problem_types": 90,
+    "configured_customer_guides": 0,
+    "active_service_review_tags": 5,
+    "best_weights": {
+      "rating": 50,
+      "price": 30,
+      "eta": 20
+    }
+  },
+  "local_mutations": {
+    "applied_migrations": [
+      "2026_10_14_115655_add_customer_price_guide_to_problem_types_table.php",
+      "2026_10_14_115656_add_tags_to_reviews_table.php",
+      "2026_10_14_115657_create_review_tags_table.php",
+      "2026_10_14_115658_add_completion_estimate_to_orders_table.php"
+    ],
+    "seeded": "Initial database review tags and missing settings via insert-only seeders; no sample customer prices or payment receiver data"
+  },
+  "limitations": {
+    "xcode_build_performed": false,
+    "ios_device_test_performed": false,
+    "live_gps_device_test_performed": false,
+    "real_google_routes_call_performed": false,
+    "production_deployment_performed": false,
+    "golden_snapshots_replaced": false,
+    "tag_statistics_added": false,
+    "historical_comment_tag_backfill_performed": false,
+    "estimate_clear_in_native_ui": false
+  },
+  "screenshots": {
+    "backend-technician-completion-estimate": {
+      "path": "reports/prd-review/assets/after-static-technician-estimate.png",
+      "sha256": "bc14f0c0f853e5531ac6778c6a9e6ab17cae81d3167044de8c7e54c7a6e01ebe",
+      "source_run": "androidapp/app/build/reports/paparazzi/debug/runs/20261014161029_a28ccd.js",
+      "snapshot": {
+        "name": "backend-technician-completion-estimate",
+        "testName": "noox.bzr.customer.StaticDataSourcesViewsTest#technicianCanEnterAndSubmitAnEstimateWithoutChangingOrderState",
+        "timestamp": "2026-10-14T13:10:29.290Z",
+        "tags": [],
+        "file": "images/ab35082fde9ae22a9597bc478fefc231c692230d.png"
+      }
+    },
+    "backend-service-review-tags": {
+      "path": "reports/prd-review/assets/after-static-review-tags.png",
+      "sha256": "5f34e13f1bf6986038db85b35eebd4db911795deb4742e3aee25d90482487f16",
+      "source_run": "androidapp/app/build/reports/paparazzi/debug/runs/20261014161028_2f2877.js",
+      "snapshot": {
+        "name": "backend-service-review-tags",
+        "testName": "noox.bzr.customer.StaticDataSourcesViewsTest#reviewChoicesUseServerLabelsAndSendStableCodes",
+        "timestamp": "2026-10-14T13:10:29.050Z",
+        "tags": [],
+        "file": "images/a66e03a4bc92ef934b3edec6080f058b5e0387dc.png"
+      }
+    },
+    "backend-budget-guide": {
+      "path": "reports/prd-review/assets/after-static-budget-guide.png",
+      "sha256": "b327d0bd0cb4f3b262683b27dc4edcb3f893bfa49c08855381937c71fc5056c3",
+      "source_run": "androidapp/app/build/reports/paparazzi/debug/runs/20261014161028_34dfc7.js",
+      "snapshot": {
+        "name": "backend-budget-guide",
+        "testName": "noox.bzr.customer.StaticDataSourcesViewsTest#budgetUsesServerAmountsAndHidesTheGuideWhenUnconfigured",
+        "timestamp": "2026-10-14T13:10:28.318Z",
+        "tags": [],
+        "file": "images/62498c0b95f845f3cb997d6db3c1dbe1aa991d44.png"
+      }
+    },
+    "backend-budget-guide-unconfigured": {
+      "path": "reports/prd-review/assets/after-static-budget-unconfigured.png",
+      "sha256": "c650d697f95d63acbd74009c914a379d361e0b8c651ec1c0198fb825c00ea08d",
+      "source_run": "androidapp/app/build/reports/paparazzi/debug/runs/20261014161028_34dfc7.js",
+      "snapshot": {
+        "name": "backend-budget-guide-unconfigured",
+        "testName": "noox.bzr.customer.StaticDataSourcesViewsTest#budgetUsesServerAmountsAndHidesTheGuideWhenUnconfigured",
+        "timestamp": "2026-10-14T13:10:28.385Z",
+        "tags": [],
+        "file": "images/feabc4d572810c8395aaa76553b7a99c9285c422.png"
+      }
+    },
+    "backend-offer-availability-and-sorts": {
+      "path": "reports/prd-review/assets/after-static-offers.png",
+      "sha256": "107d8e1eac31d0e7e61d2c943976614d18913f968e2f7dc79b01f4071eaf2e5f",
+      "source_run": "androidapp/app/build/reports/paparazzi/debug/runs/20261014161028_835e7b.js",
+      "snapshot": {
+        "name": "backend-offer-availability-and-sorts",
+        "testName": "noox.bzr.customer.StaticDataSourcesViewsTest#offerAvailabilityIsNotShownOnEveryCardAndSortsAreServerLabels",
+        "timestamp": "2026-10-14T13:10:28.833Z",
+        "tags": [],
+        "file": "images/401e5ccc07d9e21183b9e004d4fa04a105ec92b6.png"
+      }
+    },
+    "backend-timing-without-arrival-promise": {
+      "path": "reports/prd-review/assets/after-static-timing.png",
+      "sha256": "e9d8886e9e5e3fa5a9f9e455fa8a72740f3b17ec1fda78eb69c8eb247d4b0378",
+      "source_run": "androidapp/app/build/reports/paparazzi/debug/runs/20261014161028_ad4e4e.js",
+      "snapshot": {
+        "name": "backend-timing-without-arrival-promise",
+        "testName": "noox.bzr.customer.StaticDataSourcesViewsTest#timingHasNoFixedArrivalWindowBeforeTravel",
+        "timestamp": "2026-10-14T13:10:28.563Z",
+        "tags": [],
+        "file": "images/4656f55e0ffcaa95362d8e1983f3ea04f3b247a2.png"
+      }
+    },
+    "backend-execution-steps-and-estimate": {
+      "path": "reports/prd-review/assets/after-static-execution.png",
+      "sha256": "f0c974d7daabd42721c512d04f3bcfb9c25a1e919006f32700dde60b23b4f4d2",
+      "source_run": "androidapp/app/build/reports/paparazzi/debug/runs/20261014161027_61f728.js",
+      "snapshot": {
+        "name": "backend-execution-steps-and-estimate",
+        "testName": "noox.bzr.customer.StaticDataSourcesViewsTest#executionShowsOnlyServerStagesTimesAndOptionalTechnicianEstimate",
+        "timestamp": "2026-10-14T13:10:27.987Z",
+        "tags": [],
+        "file": "images/e03ccc7d58028bb0410f2f6a4494d2f9cd0e7742.png"
+      }
+    }
+  },
+  "source_hashes": {
+    "app/Modules/Catalog/Models/ProblemType.php": "b6fc608fc3997f918890147cb70930a4ad1812fe52ec69cb77301c966442b3f9",
+    "app/Filament/Resources/Catalog/RelationManagers/ProblemTypesRelationManager.php": "ecb291ecf49c8a8efdcbbbfc048d69a690d20a8e45032d7694e63704b11f4dfd",
+    "app/Modules/Offers/Services/OfferRanking.php": "efcb3b12a86d1c167ac9da86d75cf74851daf1437ebbae9c6fb825fdc70cb063",
+    "app/Modules/Orders/Services/OrderExecutionPresentation.php": "798ed48509b626ea277f539ddf67ab3521d68bbe5a1fc53362c90847c4581fff",
+    "app/Modules/Orders/Actions/UpdateCompletionEstimateAction.php": "b351eb4d62c1c1658b27d51ab4f3bcb7138ba2588be7ff220f83f937406830ee",
+    "app/Modules/Reviews/Actions/CreateProviderReviewAction.php": "062be270bd6aab08eebeaed6315b5bfea82bf5a3342b87928319d5604cc5085c",
+    "app/Filament/Resources/ReviewTags/ReviewTagResource.php": "8182ffcb86efd0cebe73c58e77a0a339a4ff078272c097ba8e6524da2d5dea0b",
+    "app/Filament/Pages/OperatingSettings.php": "58e567a1c9344ed46b3c622d14d648c1b81c77af442d9d207b66d0399d46d69b",
+    "app/Http/Api/V1/Resources/OfferResource.php": "1ac555e87300668c5cf22be9bf658564745ff890f3edb38f4a9f338156664021",
+    "app/Http/Api/V1/Resources/OrderResource.php": "fbccc8840f41c52ec7e90264124b6d204b0ab263099349614f4cd1f3c7e16786",
+    "androidapp/app/src/main/kotlin/noox/bzr/customer/CustomerLogic.kt": "424638cef5d71ca7dbdfae5b2a336db47ad96ee9c7386876c1bfc0f462543deb",
+    "androidapp/app/src/main/kotlin/noox/bzr/customer/CustomerViewModel.kt": "1a5d528c0e33239fb481d65038a3f55f526b1be54ac60b31942c87b82906be13",
+    "androidapp/app/src/main/kotlin/noox/bzr/provider/ProviderActiveOrderView.kt": "1ec94b6f56450f8772fe55b45f54d63e0ea1cbfca562bfb17f91146ea825db36",
+    "androidapp/app/src/test/kotlin/noox/bzr/customer/StaticDataSourcesViewsTest.kt": "255134445b344bd61434c7ffc566163fc4201d4f76c5d361a8774dba3d2bea9c",
+    "androidapp/app/src/test/kotlin/noox/bzr/customer/StaticDataSourcesApiTest.kt": "a7c05865d73dacc227df0ce6dd33fed57077536b6c26c1580f3dcba07121703f",
+    "iosapp/Core/Sources/BzrCore/CustomerJourney.swift": "c5afe55f118201a6468d5982b00b97b6329e6518222c9eb3102c362c79f9741c",
+    "iosapp/Core/Sources/BzrCore/ProviderJourney.swift": "5c834a340f08b9a81203f386b29b249185fb5ef3925651f6c1e0ab77c4f8f33e",
+    "iosapp/Core/Tests/BzrCoreTests/StaticDataSourcesTests.swift": "a0f2755a2f02649f2a35d75bf934af18b2fb81d4754bbb02ccfeb94878071e84",
+    "iosapp/BzrApp/Provider/ProviderJourneyViews.swift": "a5e69641021af921c4b8bbd2194134ec7ca7b542dc096d05039f2c9a04b43ce0",
+    "docs/31-API-CONTRACT.md": "cccfdd768ff5d53eff3441734678110fe58dd189e44bce18d9e6383e4def430f",
+    "docs/43-UI-BUILD-CONTRACT.md": "8642f7210682d33706bc5ee02b54c6b7f61c61f8348f27a40173cac022b03e89"
+  },
+  "artifacts": {
+    "apk": {
+      "path": "androidapp/app/build/outputs/apk/debug/app-debug.apk",
+      "sha256": "dee478614dc726a5b8b8fd56992b69de5ee1aa1ed1fcde9fcbdcc221f9996e28"
+    },
+    "validation": {
+      "reports/prd-review/validation/static-sources-android-summary.json": "a3852640ac6ad57978df20d38facb6356fdd3ac918c4332767d806f9b0573791",
+      "reports/prd-review/validation/static-sources-android-tests.log": "1f1eb899ea8c04888decf22d4a3c92787a038b64109d311d89eb955920b496a5",
+      "reports/prd-review/validation/static-sources-backend-tests.json": "e5b27c7fdd8ea9235d9198d8caf244e767ed020de299df8901da73fb873f3763",
+      "reports/prd-review/validation/static-sources-design.log": "622e3323b44aaefde7b43bfb08e2bbb0b89cc666b9dd73cf64528f13089aa994",
+      "reports/prd-review/validation/static-sources-diff-check.log": "a21ef31e47bd6ff93a7b873b2bf69023b36f876ed91800eb16623d8a43f7d886",
+      "reports/prd-review/validation/static-sources-migrations.log": "6f4450574d720ae03a32a2f7ac6c8113fbb76ff68e46991ec249a9fa3a1c091c",
+      "reports/prd-review/validation/static-sources-parity.log": "056eb76a9d0fab36a19d2a17b506f1b909f6f62a4708d58c1234c784e663d570",
+      "reports/prd-review/validation/static-sources-pint.log": "cd1a94fc2cf6a965b86e1a4809d6c7fb9148b1ee374e1010ed2ac96ff4876ec2",
+      "reports/prd-review/validation/static-sources-screenshots.json": "0ad2376b99e9cbcdc24602dc07855b19acbd0161c89ebd0e20bc73e7be8c85b1",
+      "reports/prd-review/validation/static-sources-screenshots.log": "ab6e3817d23f82090c6910bcde734242113c0cd01745c735db895759cc8ad2b8",
+      "reports/prd-review/validation/static-sources-seed.log": "8016fbdac952606a8deef4907763308206b7e0e5fa4f14eae85f23e00d652448",
+      "reports/prd-review/validation/static-sources-swift-format.log": "b72566975bad7cc908cc1fca3cdb7157769d77a673cd3e695a195b86934ea8ae",
+      "reports/prd-review/validation/static-sources-swift-tests.log": "f6542cf1963954d77a89bb086ef99b363c612bf53bbb2b5816be3c31e09689db",
+      "reports/prd-review/validation/static-sources-swiftui-parse.log": "d71360d3a16b2e0ed62a4d637897b7e58221270e01968e023f57d22e9b1b7e24"
+    }
+  }
+}

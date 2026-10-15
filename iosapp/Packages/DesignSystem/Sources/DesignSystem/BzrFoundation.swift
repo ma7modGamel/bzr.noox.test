@@ -2,7 +2,7 @@ import CoreText
 import SwiftUI
 import UIKit
 
-/// Registers the four static Cairo files (one per weight, 43 §2) once per process.
+/// Registers the four static UI font files (one per weight, 43 §2) once per process.
 public enum BzrFontRegistrar {
     private static var didRegister = false
 
@@ -21,7 +21,20 @@ public enum BzrFontRegistrar {
 }
 
 public func bzrString(_ key: String) -> String {
-    String(localized: String.LocalizationValue(key), bundle: .module)
+    let value = String(localized: String.LocalizationValue(key), bundle: .module)
+    assert(value != key, "Missing localization: \(key)")
+    return value
+}
+
+public func bzrPlural(_ key: String, count: Int) -> String {
+    let catalogKey = "plural." + key
+    let template = Bundle.module.localizedString(forKey: catalogKey, value: nil, table: nil)
+    assert(template != catalogKey, "Missing plural localization: \(key)")
+    var value = String.localizedStringWithFormat(template, Int32(clamping: count))
+    for (arabic, western) in zip("٠١٢٣٤٥٦٧٨٩", "0123456789") {
+        value = value.replacingOccurrences(of: String(arabic), with: String(western))
+    }
+    return value
 }
 
 extension BzrTextStyle {
@@ -96,7 +109,7 @@ public struct BzrIcon: View {
             .accessibilityHidden(label == nil)
     }
 
-    private var isDirectional: Bool { key == .arrowBack || key == .chevron }
+    private var isDirectional: Bool { key == .arrowBack || key == .arrowForward || key == .chevron }
 }
 
 public struct BzrCard<Content: View>: View {
@@ -112,9 +125,9 @@ public struct BzrCard<Content: View>: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(DesignSpace.cardPadding)
-        .bzrFrame(
-            radius: DesignRadius.card, fill: DesignColors.surface, border: DesignColors.border,
-            width: DesignBorder.width)
+        // DEC-070: Figma cards are white on the tinted screen with a soft shadow and no outline.
+        .background(RoundedRectangle(cornerRadius: DesignRadius.card).fill(DesignColors.surface))
+        .bzrShadow(DesignShadows.card)
     }
 }
 
@@ -163,8 +176,13 @@ public struct BzrTheme<Content: View>: View {
 public struct BzrServiceGrid<Content: View>: View {
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     private let content: Content
+    private let columns: Int?
 
-    public init(@ViewBuilder content: () -> Content) { self.content = content() }
+    /// `columns` fixes the column count (DEC-070: two for the request service tiles); nil adapts to the width.
+    public init(columns: Int? = nil, @ViewBuilder content: () -> Content) {
+        self.columns = columns
+        self.content = content()
+    }
 
     private var minimumWidth: CGFloat {
         let traits = UITraitCollection(
@@ -176,7 +194,8 @@ public struct BzrServiceGrid<Content: View>: View {
 
     public var body: some View {
         LazyVGrid(
-            columns: [GridItem(.adaptive(minimum: minimumWidth), spacing: DesignSpace.m)],
+            columns: columns.map { Array(repeating: GridItem(.flexible(), spacing: DesignSpace.m), count: $0) }
+                ?? [GridItem(.adaptive(minimum: minimumWidth), spacing: DesignSpace.m)],
             alignment: .leading, spacing: DesignSpace.m
         ) { content }
     }

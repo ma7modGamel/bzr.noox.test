@@ -27,6 +27,7 @@ use Filament\Schemas\Components\Text;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Contracts\Support\Htmlable;
+use Illuminate\Validation\ValidationException;
 
 /**
  * الإعدادات — 04 §الإعدادات. للمدير العام وحده (23).
@@ -153,6 +154,14 @@ final class OperatingSettings extends Page
         $hint = $cfg->id();
         $name = self::fieldName($cfg);
 
+        if (in_array($cfg, [Cfg::ArrivalCodeValidityMinutes, Cfg::ArrivalCodeLockMinutes, Cfg::ArrivalCodeMaxAttempts], true)) {
+            return TextInput::make($name)->label($label)->hint($hint)->integer()->required()->minValue(1)->maxValue($cfg === Cfg::ArrivalCodeMaxAttempts ? 10 : 60);
+        }
+
+        if (in_array($cfg, [Cfg::BestOfferRatingWeight, Cfg::BestOfferPriceWeight, Cfg::BestOfferEtaWeight], true)) {
+            return TextInput::make($name)->label($label)->integer()->required()->minValue(0)->maxValue(100)->helperText('مجموع أوزان التقييم والسعر والوصول يجب أن يساوي 100.');
+        }
+
         return match ($cfg->type()) {
             CfgType::Bool => Toggle::make($name)->label($label)->hint($hint)->inline(false),
             CfgType::Time => TimePicker::make($name)->label($label)->hint($hint)->seconds(false),
@@ -186,6 +195,11 @@ final class OperatingSettings extends Page
         $values = collect(Cfg::cases())
             ->mapWithKeys(fn (Cfg $cfg): array => [$cfg->value => self::fromFormValue($cfg, $state[self::fieldName($cfg)] ?? null)])
             ->all();
+
+        $weightTotal = array_sum(array_map(fn (Cfg $cfg): int => (int) $values[$cfg->value], [Cfg::BestOfferRatingWeight, Cfg::BestOfferPriceWeight, Cfg::BestOfferEtaWeight]));
+        if ($weightTotal !== 100) {
+            throw ValidationException::withMessages(['data.'.self::fieldName(Cfg::BestOfferRatingWeight) => 'مجموع الأوزان يجب أن يساوي 100.']);
+        }
 
         try {
             // BR-009 — لا يُفعَّل CFG-091 إلا مع CFG-090

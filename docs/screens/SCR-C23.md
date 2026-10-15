@@ -6,6 +6,7 @@
 - الدخول من: C09 في AWAITING_CONFIRMATION · الخروج إلى: C24 بعد T-21، أو C27 عبر `open_dispute`.
 - القواعد: BR-052، BR-080، 14، T-21/T-22.
 - الـ API: `POST /orders/{order}/confirm-completion`؛ فتح المشكلة ينتقل إلى C27 ولا يرسل طلبًا من C23.
+- تحديث DEC-076 (Figma 3002:4134 من غير اختيار الطريقة): نفس كروت C21 (الإتمام، والفني، والفاتورة)، ثم الطريقة المستخدمة في `InfoBanner` بالمفتاح `completion.method`، ثم في الشريط السفلي `completion.confirm` بالمبلغ مع `confirm_completion`، ورابط `completion.problem` مع `open_dispute`. القواعد تحت زي ما هي.
 - التخطيط (من أعلى لأسفل):
   1. `AppTopBar` بعنوان `completion.confirm.title`.
   2. `ScreenHeading` بالمفتاح `completion.confirm.heading`.

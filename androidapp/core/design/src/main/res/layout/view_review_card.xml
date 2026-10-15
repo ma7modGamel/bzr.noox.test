@@ -44,7 +44,7 @@
                     android:id="@+id/name"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:fontFamily="@font/cairo_bold"
+                    android:fontFamily="@font/ibmplexsansarabic_bold"
                     android:textAppearance="@style/TextAppearance.Bremo.Body"
                     android:textColor="@color/bremo_navy900" />
 

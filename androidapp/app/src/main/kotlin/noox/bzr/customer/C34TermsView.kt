@@ -3,6 +3,7 @@ package noox.bzr.customer
 import android.content.Context
 import androidx.core.view.isVisible
 import noox.bzr.design.R
+import noox.bzr.design.BzrFormat
 import noox.bzr.gallery.databinding.ScreenC34TermsBinding
 
 /** SCR-C34 (DEC-047): current terms version. */
@@ -14,8 +15,8 @@ class C34TermsView(context: Context) : CustomerScreenView(context) {
     override fun renderContent(state: CustomerUiState) {
         binding.empty.isVisible = !state.canContinue
         listOf(binding.version, binding.effective, binding.body).forEach { it.isVisible = state.canContinue }
-        binding.version.text = "${string(R.string.terms_version)}: ${state.itemDetails.getOrElse(0) { "" }}"
-        binding.effective.text = "${string(R.string.terms_effective)}: ${state.itemDetails.getOrElse(1) { "" }}"
-        binding.body.text = state.items.firstOrNull().orEmpty()
+        binding.version.text = BzrFormat.fill(string(R.string.terms_version_format), "version" to BzrFormat.ltrValue(context, state.itemDetails.getOrElse(0) { "" }))
+        binding.effective.text = BzrFormat.fill(string(R.string.terms_effective_format), "date" to BzrFormat.ltrValue(context, BzrFormat.legalDate(state.itemDetails.getOrElse(1) { "" })))
+        binding.body.text = LegalHtml.render(state.items.firstOrNull().orEmpty())
     }
 }

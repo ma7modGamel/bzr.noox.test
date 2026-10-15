@@ -16,6 +16,7 @@ use App\Modules\Settings\Services\SettingsRepository;
 use App\Modules\Support\Enums\DisputeStatus;
 use App\Modules\Support\Models\Dispute;
 use App\Support\Exceptions\BusinessRuleViolationException;
+use App\Support\Localization;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
 
@@ -41,7 +42,7 @@ final readonly class OpenDisputeAction
         $this->assertWindow($order);
 
         if ($order->hasOpenDispute()) {
-            throw BusinessRuleViolationException::rule('BR-120', 'يوجد نزاع مفتوح على هذا الطلب.');
+            throw BusinessRuleViolationException::rule('BR-120', Localization::text('copy.there_is_already_an_open_dispute_for_this_request'));
         }
 
         $isPostClose = $order->status === OrderStatus::Closed;
@@ -117,7 +118,7 @@ final readonly class OpenDisputeAction
         }
 
         if ($order->status !== OrderStatus::Closed || $order->closed_at === null) {
-            throw BusinessRuleViolationException::rule('BR-120', 'فتح المشكلة متاح من وصول الفني وحتى مهلة ما بعد الإغلاق.');
+            throw BusinessRuleViolationException::rule('BR-120', Localization::text('copy.problems_can_be_reported_from_technician_arrival_until_the'));
         }
 
         $deadline = $order->closed_at->addHours($this->settings->int(Cfg::DisputeWindowHours));
@@ -125,7 +126,7 @@ final readonly class OpenDisputeAction
         if (CarbonImmutable::now()->gt($deadline)) {
             throw BusinessRuleViolationException::rule(
                 'BR-120',
-                'انتهت مهلة فتح المشكلة بعد إغلاق الطلب.',
+                Localization::text('copy.the_deadline_for_reporting_a_problem_after_request_closure'),
             );
         }
     }

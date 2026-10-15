@@ -9,6 +9,8 @@ use App\Modules\Identity\Models\User;
 use App\Modules\Orders\Enums\OrderEventCode;
 use App\Modules\Orders\Enums\OrderStatus;
 use App\Modules\Orders\Models\Order;
+use App\Modules\Orders\Models\OrderMedia;
+use App\Modules\Orders\Services\MediaUploadService;
 use App\Modules\Payments\Actions\ConfirmInstapayTransferAction;
 use App\Modules\Payments\Actions\RejectInstapayTransferAction;
 use App\Modules\Payments\Enums\OrderPaymentStatus;
@@ -22,6 +24,8 @@ use App\Modules\Settings\Services\SettingsRepository;
 use Database\Seeders\SettingsSeeder;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
@@ -34,6 +38,7 @@ final class InstapayTransferTest extends TestCase
     {
         parent::setUp();
         $this->seed(SettingsSeeder::class);
+        Storage::fake('local');
         $settings = app(SettingsRepository::class);
         $settings->set(Cfg::InstapayAddress, 'bremo@instapay');
         $settings->set(Cfg::InstapayDisplayName, 'Bremo');
@@ -76,6 +81,7 @@ final class InstapayTransferTest extends TestCase
         $response = $this->actingAs($customer, 'sanctum')
             ->postJson("/api/v1/orders/{$order->id}/instapay-transfers", [
                 'transfer_reference' => 'IPN-778812',
+                'receipt_media_id' => $this->receipt($customer),
                 'expected_version' => $order->version,
             ])
             ->assertCreated()
@@ -107,6 +113,7 @@ final class InstapayTransferTest extends TestCase
         $this->actingAs($customer, 'sanctum')
             ->postJson("/api/v1/orders/{$order->id}/instapay-transfers", [
                 'transfer_reference' => 'IPN-2',
+                'receipt_media_id' => $this->receipt($customer),
                 'expected_version' => $order->refresh()->version,
             ])
             ->assertUnprocessable()
@@ -208,9 +215,38 @@ final class InstapayTransferTest extends TestCase
         $this->actingAs($customer, 'sanctum')
             ->postJson("/api/v1/orders/{$order->id}/instapay-transfers", [
                 'transfer_reference' => 'IPN-8',
+                'receipt_media_id' => $this->receipt($customer),
                 'expected_version' => $order->version,
             ])
             ->assertStatus(409);
+    }
+
+    private function receipt(User $customer): int
+    {
+        return app(MediaUploadService::class)->store($customer, UploadedFile::fake()->image('receipt.jpg'))->getKey();
+    }
+
+    #[Test]
+    public function receipt_is_required_and_must_be_an_unexpired_unattached_customer_image(): void
+    {
+        [$order, $customer, $provider] = $this->awaitingPaymentOrder();
+        $this->actingAs($customer, 'sanctum')->postJson("/api/v1/orders/{$order->id}/instapay-transfers", ['transfer_reference' => 'IPN-PROOF', 'expected_version' => $order->version])->assertUnprocessable()->assertJsonPath('error.code', 'VALIDATION_FAILED');
+        $id = $this->receipt($provider->user);
+        $this->actingAs($customer, 'sanctum')->postJson("/api/v1/orders/{$order->id}/instapay-transfers", ['transfer_reference' => 'IPN-PROOF', 'receipt_media_id' => $id, 'expected_version' => $order->version])->assertUnprocessable();
+        $this->assertDatabaseCount('payments', 0);
+        $id = $this->receipt($customer);
+        OrderMedia::findOrFail($id)->update(['expires_at' => now()->subMinute()]);
+        $this->postJson("/api/v1/orders/{$order->id}/instapay-transfers", ['transfer_reference' => 'IPN-PROOF', 'receipt_media_id' => $id, 'expected_version' => $order->version])->assertUnprocessable();
+    }
+
+    #[Test]
+    public function receipt_remains_private_from_the_assigned_technician(): void
+    {
+        [$order, $customer, $provider] = $this->awaitingPaymentOrder();
+        $this->submit($order, $customer, 'IPN-PRIVATE');
+        $id = Payment::query()->firstOrFail()->receipt_media_id;
+        $this->actingAs($customer, 'sanctum')->getJson("/api/v1/media/{$id}")->assertOk();
+        $this->actingAs($provider->user, 'sanctum')->withHeader('X-App-Mode', 'PROVIDER')->getJson("/api/v1/media/{$id}")->assertNotFound();
     }
 
     private function submit(Order $order, User $customer, string $reference): void
@@ -218,6 +254,7 @@ final class InstapayTransferTest extends TestCase
         $this->actingAs($customer, 'sanctum')
             ->postJson("/api/v1/orders/{$order->id}/instapay-transfers", [
                 'transfer_reference' => $reference,
+                'receipt_media_id' => $this->receipt($customer),
                 'expected_version' => $order->version,
             ])
             ->assertCreated();

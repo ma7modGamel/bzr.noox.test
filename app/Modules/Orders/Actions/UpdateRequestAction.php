@@ -17,12 +17,15 @@ use App\Modules\Orders\Enums\TimingType;
 use App\Modules\Orders\Models\Order;
 use App\Modules\Orders\Models\OrderEvent;
 use App\Modules\Orders\Models\OrderMedia;
+use App\Modules\Orders\Services\MediaUploadService;
 use App\Modules\Orders\Services\OrderDeadlines;
+use App\Modules\Orders\Services\RequestAvailability;
 use App\Modules\Orders\Services\SchedulingCalendar;
 use App\Modules\Settings\Enums\Cfg;
 use App\Modules\Settings\Enums\OperatingMode;
 use App\Modules\Settings\Services\SettingsRepository;
 use App\Support\Exceptions\BusinessRuleViolationException;
+use App\Support\Localization;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
 
@@ -32,6 +35,7 @@ final readonly class UpdateRequestAction
         private SchedulingCalendar $calendar,
         private OrderDeadlines $deadlines,
         private SettingsRepository $settings,
+        private RequestAvailability $availability,
     ) {}
 
     public function execute(Order $order, User $customer, PublishRequestData $data): Order
@@ -46,6 +50,10 @@ final readonly class UpdateRequestAction
         $deadlines = $this->deadlines->for($order->operating_mode, $data->timingType, $slot['start'] ?? null, $now);
 
         return DB::transaction(function () use ($order, $customer, $data, $address, $category, $problemType, $slot, $deadlines, $now): Order {
+            if ($order->isEmployeeMode() && $data->timingType === TimingType::Now) {
+                $this->availability->assertNowAvailable($customer, $address, $category->getKey());
+            }
+
             $order->forceFill([
                 'city_id' => $address->city_id,
                 'area_id' => $address->area_id,
@@ -93,7 +101,7 @@ final readonly class UpdateRequestAction
         if ($order->customer_id !== $customer->getKey()
             || $order->status !== OrderStatus::Open
             || $order->offers()->exists()) {
-            throw BusinessRuleViolationException::rule('BR-021', 'لا يمكن تعديل الطلب بعد وصول أول عرض.');
+            throw BusinessRuleViolationException::rule('BR-021', Localization::text('copy.the_request_cannot_be_edited_after_the_first_offer'));
         }
     }
 
@@ -102,7 +110,7 @@ final readonly class UpdateRequestAction
         $address = CustomerAddress::query()->with(['city', 'area'])
             ->where('user_id', $customer->getKey())->find($id);
         if ($address === null || ! $address->city->is_active || ! $address->area->is_active) {
-            throw BusinessRuleViolationException::rule('BR-010', 'العنوان غير متاح.');
+            throw BusinessRuleViolationException::rule('BR-010', Localization::text('copy.this_address_is_unavailable'));
         }
 
         return $address;
@@ -112,7 +120,7 @@ final readonly class UpdateRequestAction
     {
         $category = Category::query()->where('is_active', true)->find($id);
         if ($category === null || ! $category->cities()->where('cities.id', $address->city_id)->wherePivot('is_active', true)->exists()) {
-            throw BusinessRuleViolationException::rule('BR-011', 'الفئة غير متاحة في هذه المدينة.');
+            throw BusinessRuleViolationException::rule('BR-011', Localization::text('copy.this_category_is_unavailable_in_this_city'));
         }
 
         return $category;
@@ -123,7 +131,7 @@ final readonly class UpdateRequestAction
         $problemType = ProblemType::query()->where('category_id', $category->getKey())
             ->where('is_active', true)->find($id);
         if ($problemType === null) {
-            throw BusinessRuleViolationException::rule('BR-011', 'نوع المشكلة غير متاح.');
+            throw BusinessRuleViolationException::rule('BR-011', Localization::text('copy.this_problem_type_is_unavailable'));
         }
 
         return $problemType;
@@ -133,7 +141,7 @@ final readonly class UpdateRequestAction
     {
         $length = mb_strlen(trim((string) $description));
         if ($length > 1000 || ($problemType->is_other && $length < 10)) {
-            throw BusinessRuleViolationException::rule('BR-013', 'وصف المشكلة غير صالح.');
+            throw BusinessRuleViolationException::rule('BR-013', Localization::text('copy.the_problem_description_is_invalid'));
         }
     }
 
@@ -146,7 +154,7 @@ final readonly class UpdateRequestAction
             return [];
         }
         if ($data->slotStart === null) {
-            throw BusinessRuleViolationException::rule('BR-017', 'اختيار الفترة إلزامي.');
+            throw BusinessRuleViolationException::rule('BR-017', Localization::text('copy.select_an_appointment_slot'));
         }
 
         return $this->calendar->assertValidSlot($address->city, $data->slotStart);
@@ -158,7 +166,7 @@ final readonly class UpdateRequestAction
             return null;
         }
         if ((float) $budget < (float) $this->settings->decimal(Cfg::MinOfferAmount)) {
-            throw BusinessRuleViolationException::rule('BR-015', 'الميزانية أقل من الحد الأدنى.');
+            throw BusinessRuleViolationException::rule('BR-015', Localization::text('copy.the_budget_is_below_the_minimum_amount'));
         }
 
         return $budget;
@@ -173,8 +181,12 @@ final readonly class UpdateRequestAction
         $media = OrderMedia::query()->whereIn('id', $mediaIds)->where('uploaded_by', $customer->getKey())
             ->whereNull('order_id')->lockForUpdate()->get();
         if ($media->count() !== count(array_unique($mediaIds))) {
-            throw BusinessRuleViolationException::rule('BR-014', 'إحدى الوسائط غير متاحة.');
+            throw BusinessRuleViolationException::rule('BR-014', Localization::text('copy.one_of_the_attachments_is_unavailable'));
         }
+        foreach ($media->where('type', 'VIDEO') as $video) {
+            MediaUploadService::assertVideoDurationAllowed($video->duration_sec);
+        }
+
         OrderMedia::query()->whereKey($media->modelKeys())->update(['order_id' => $order->getKey(), 'expires_at' => null]);
     }
 }

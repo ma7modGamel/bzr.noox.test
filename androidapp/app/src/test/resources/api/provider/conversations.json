@@ -1,0 +1,42 @@
+{
+    "data": [
+        {
+            "id": 1000,
+            "order": {
+                "id": 1000,
+                "number": 1,
+                "status": "AWAITING_CONFIRMATION",
+                "status_label": "بانتظار تأكيد الإنهاء",
+                "category": "سباكة",
+                "problem_type": "تسريب مياه",
+                "area": "الحي الأول"
+            },
+            "provider": {
+                "id": 1004,
+                "name": "كريم السباك",
+                "avatar_path": null,
+                "is_verified": true
+            },
+            "customer": {
+                "id": 1004,
+                "name": "منى حسن",
+                "avatar_path": null,
+                "rating_avg": null
+            },
+            "status": "OPEN",
+            "last_message": {
+                "id": 1000,
+                "sender_user_id": 1005,
+                "is_mine": false,
+                "body": "شكرًا على السرعة.",
+                "was_masked": false,
+                "media": [],
+                "created_at": "2026-10-05T06:00:00+00:00"
+            }
+        }
+    ],
+    "meta": {
+        "current_page": 1,
+        "last_page": 1
+    }
+}

@@ -1,28 +1,52 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- SCR-C04 C04TimingScreen content (DEC-047). -->
+<!-- SCR-C04 step 3 of 5 — place and time (DEC-071, Figma 3002:1125). -->
 <merge xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     tools:parentTag="android.widget.LinearLayout">
 
-    <noox.bzr.design.views.SummaryCardView
-        android:id="@+id/address"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:bremoTitle="@string/request_address_title"
-        app:editText="@string/common_change" />
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
 
-    <noox.bzr.design.views.RadioCardView
-        android:id="@+id/now"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:bremoBody="@string/radio_now_body" />
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:drawablePadding="@dimen/bremo_space_xs"
+            android:text="@string/request_address_title"
+            android:textAlignment="viewStart"
+            android:textAppearance="@style/TextAppearance.Bremo.SectionTitle"
+            app:drawableStartCompat="@drawable/ic_location"
+            app:drawableTint="@color/bremo_primary600" />
 
-    <noox.bzr.design.views.RadioCardView
-        android:id="@+id/slot"
+        <noox.bzr.design.views.LinkButtonView
+            android:id="@+id/changeAddress"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:bremoText="@string/request_address_change" />
+    </LinearLayout>
+
+    <noox.bzr.design.views.MapCardView
+        android:id="@+id/map"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <LinearLayout
+        android:id="@+id/addressPills"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:bremoBody="@string/request_slot_choose" />
+        android:divider="@drawable/bremo_gap_s"
+        android:orientation="horizontal"
+        android:showDividers="middle" />
+
+    <noox.bzr.design.views.LinkButtonView
+        android:id="@+id/currentLocation"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:bremoText="@string/request_address_current_location" />
 
     <noox.bzr.design.views.InfoBannerView
         android:id="@+id/message"
@@ -31,51 +55,69 @@
         android:visibility="gone" />
 
     <TextView
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/request_materials_title"
-        android:textAppearance="@style/TextAppearance.Bremo.SectionTitle" />
+        android:drawablePadding="@dimen/bremo_space_xs"
+        android:text="@string/request_timing_question"
+        android:textAppearance="@style/TextAppearance.Bremo.SectionTitle"
+        app:drawableStartCompat="@drawable/ic_clock"
+        app:drawableTint="@color/bremo_primary600" />
 
-    <!-- DEC-063: options in equal columns, like the category tiles. -->
-    <noox.bzr.design.views.TileGridLayout
-        android:id="@+id/materials"
+    <LinearLayout
+        android:id="@+id/timings"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:divider="@drawable/bremo_gap_m"
+        android:orientation="vertical"
+        android:showDividers="middle" />
+
+    <noox.bzr.design.views.InfoBannerView
+        android:id="@+id/note"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 
-    <TextView
-        android:id="@+id/pricingTitle"
+    <noox.bzr.design.views.LinkButtonView
+        android:id="@+id/refreshAvailability"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/request_pricing_title"
-        android:textAppearance="@style/TextAppearance.Bremo.SectionTitle" />
+        android:visibility="gone"
+        app:bremoText="@string/common_retry" />
 
     <LinearLayout
-        android:id="@+id/pricing"
+        android:id="@+id/materialsSection"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:divider="@drawable/bremo_gap_s"
-        android:showDividers="middle" />
-
-    <noox.bzr.design.views.AppTextFieldView
-        android:id="@+id/budget"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:visibility="gone"
-        app:bremoLabel="@string/request_budget_label"
-        app:bremoPlaceholder="@string/field_amount_placeholder"
-        app:fieldState="filled" />
-
-    <noox.bzr.design.views.InfoBannerView
-        android:id="@+id/staffPricing"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:visibility="gone"
-        app:bremoText="@string/request_staff_pricing" />
+        android:divider="@drawable/bremo_gap_m"
+        android:showDividers="middle"
+        android:visibility="gone">
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/request_materials_section"
+            android:textAppearance="@style/TextAppearance.Bremo.SectionTitle" />
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/request_materials_body"
+            android:textAppearance="@style/TextAppearance.Bremo.Secondary" />
+        <LinearLayout
+            android:id="@+id/materials"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:divider="@drawable/bremo_gap_m"
+            android:showDividers="middle" />
+        <noox.bzr.design.views.InfoBannerView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:bremoText="@string/request_materials_assurance" />
+    </LinearLayout>
 
     <noox.bzr.design.views.PrimaryButtonView
         android:id="@+id/next"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:bremoText="@string/common_next" />
+        app:bremoIcon="@drawable/ic_arrow_forward"
+        app:bremoText="@string/request_step3_action" />
 </merge>

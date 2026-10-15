@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Payments\Enums;
 
+use App\Support\Localization;
 use Filament\Support\Contracts\HasLabel;
 
 /** قنوات فوري التي تعرضها C22. */
@@ -15,10 +16,6 @@ enum PaymentChannel: string implements HasLabel
 
     public function getLabel(): string
     {
-        return match ($this) {
-            self::Card => 'بطاقة بنكية',
-            self::Wallet => 'محفظة إلكترونية',
-            self::Kiosk => 'كود دفع من منفذ فوري',
-        };
+        return Localization::enum($this);
     }
 }

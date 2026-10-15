@@ -7,12 +7,20 @@
     <!-- DEC-058: asked once after the first C01/P08 (docs/17, notification permission). -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <application
+        android:name=".BremoApplication"
+        android:localeConfig="@xml/locales_config"
         android:allowBackup="false"
         android:icon="@mipmap/ic_launcher"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:label="@string/app_launcher_name"
         android:supportsRtl="true"
         android:theme="@style/Theme.Bremo">
+        <service
+            android:name="androidx.appcompat.app.AppLocalesMetadataHolderService"
+            android:enabled="false"
+            android:exported="false">
+            <meta-data android:name="autoStoreLocales" android:value="true" />
+        </service>
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="${MAPS_ANDROID_API_KEY}" />

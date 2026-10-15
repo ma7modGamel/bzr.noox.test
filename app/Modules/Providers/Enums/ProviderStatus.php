@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Providers\Enums;
 
+use App\Support\Localization;
 use Filament\Support\Contracts\HasColor;
 use Filament\Support\Contracts\HasLabel;
 
@@ -17,12 +18,7 @@ enum ProviderStatus: string implements HasColor, HasLabel
 
     public function getLabel(): string
     {
-        return match ($this) {
-            self::PendingReview => 'بانتظار المراجعة',
-            self::Active => 'نشط',
-            self::Rejected => 'مرفوض',
-            self::Suspended => 'موقوف',
-        };
+        return Localization::enum($this);
     }
 
     public function getColor(): string

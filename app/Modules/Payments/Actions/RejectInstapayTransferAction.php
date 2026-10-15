@@ -13,6 +13,7 @@ use App\Modules\Payments\Enums\PaymentStatus;
 use App\Modules\Payments\Enums\TransferRejectionReason;
 use App\Modules\Payments\Models\Payment;
 use App\Support\Exceptions\BusinessRuleViolationException;
+use App\Support\Localization;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Facades\DB;
 
@@ -25,7 +26,7 @@ final readonly class RejectInstapayTransferAction
     public function execute(Payment $payment, Admin $admin, TransferRejectionReason $reason, ?string $note = null): Payment
     {
         if (! $admin->isSuper()) {
-            throw new AuthorizationException('رفض التحويلات للمدير العام فقط (23).');
+            throw new AuthorizationException(Localization::text('copy.only_the_general_manager_may_reject_transfers_23'));
         }
 
         $rejected = DB::transaction(function () use ($payment, $admin, $reason, $note): Payment {
@@ -33,7 +34,7 @@ final readonly class RejectInstapayTransferAction
             $fresh = Payment::query()->lockForUpdate()->findOrFail($payment->getKey());
 
             if ($fresh->status !== PaymentStatus::PendingVerification) {
-                throw BusinessRuleViolationException::rule('BR-057', 'هذا التحويل لم يعد بانتظار التأكيد.');
+                throw BusinessRuleViolationException::rule('BR-057', Localization::text('copy.this_transfer_is_no_longer_awaiting_verification'));
             }
 
             $fresh->forceFill([

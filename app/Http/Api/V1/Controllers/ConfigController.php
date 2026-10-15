@@ -9,16 +9,20 @@ use App\Modules\Orders\Enums\CancelReason;
 use App\Modules\Orders\Enums\MaterialsResponsibility;
 use App\Modules\Orders\Enums\PricingMode;
 use App\Modules\Orders\Enums\TimingType;
+use App\Modules\Orders\Services\MediaUploadService;
 use App\Modules\Payments\Enums\PaymentChannel;
 use App\Modules\Payments\Enums\PaymentMethod;
 use App\Modules\Payments\Services\PaymentChannels;
 use App\Modules\Pricing\Enums\ProposalType;
 use App\Modules\Providers\Enums\PayoutMethod;
+use App\Modules\Reviews\Enums\CustomerRatingTag;
+use App\Modules\Reviews\Models\ReviewTag;
 use App\Modules\Settings\Enums\Cfg;
 use App\Modules\Settings\Services\FeatureGate;
 use App\Modules\Settings\Services\SettingsRepository;
 use App\Modules\Support\Enums\SupportReasonType;
 use App\Modules\Support\Models\SupportReason;
+use App\Support\Localization;
 use BackedEnum;
 use Filament\Support\Contracts\HasLabel;
 use Illuminate\Http\JsonResponse;
@@ -68,7 +72,7 @@ final class ConfigController
             'media_limits' => [
                 'images' => 5,
                 'image_mb' => 10,
-                'video_seconds' => 60,
+                'video_seconds' => MediaUploadService::VIDEO_MAX_SECONDS,
                 'video_mb' => 50,
                 'audio_seconds' => 120,
                 'audio_mb' => 5,
@@ -77,9 +81,12 @@ final class ConfigController
                 'audio_bitrate_bps' => 64_000,
             ],
             'option_lists' => [
+                'service_review_tags' => ReviewTag::options(),
+                'offer_sorts' => array_map(fn (string $code): array => ['code' => $code, 'label' => Localization::text('copy.offer_sort_'.$code)], ['best', 'price', 'rating', 'eta']),
                 'customer_cancellation_reasons' => $this->enumOptions(CancelReason::forActor(ActorType::Customer)),
                 'provider_cancellation_reasons' => $this->enumOptions(CancelReason::forActor(ActorType::Provider)),
                 'proposal_types' => $this->enumOptions(ProposalType::cases()),
+                'customer_rating_tags' => $this->enumOptions(CustomerRatingTag::cases()),
                 'dispute_reasons' => $supportReasons
                     ->get(SupportReasonType::Dispute->value, collect())
                     ->map(fn (SupportReason $reason): array => $reason->toOption())
@@ -91,10 +98,16 @@ final class ConfigController
                 'timing_types' => $this->enumOptions(TimingType::cases()),
                 'materials_responsibilities' => $this->enumOptions(MaterialsResponsibility::cases()),
                 'pricing_modes' => $this->enumOptions(PricingMode::cases()),
-                'payment_methods' => $this->enumOptions(PaymentMethod::cases()),
+                'payment_methods' => $this->enumOptions(array_values(array_filter(
+                    PaymentMethod::cases(), fn (PaymentMethod $method): bool => $channels->methodEnabled($method),
+                ))),
                 'payment_channels' => $this->enumOptions(PaymentChannel::cases()),
                 // DEC-050 — القنوات المفعّلة من اللوحة فقط؛ التطبيق لا يعرض غيرها.
                 'payment_gateways' => $this->enumOptions($channels->enabled()),
+                'electronic_payment_gateways' => $this->enumOptions(array_values(array_filter(
+                    $channels->enabled(),
+                    fn ($channel): bool => $channel->method() === PaymentMethod::Electronic,
+                ))),
                 'provider_payout_methods' => array_map(
                     static fn (PayoutMethod $method): array => [
                         'code' => $method->value,

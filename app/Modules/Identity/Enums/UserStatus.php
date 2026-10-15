@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Identity\Enums;
 
+use App\Support\Localization;
 use Filament\Support\Contracts\HasColor;
 use Filament\Support\Contracts\HasLabel;
 
@@ -16,8 +17,8 @@ enum UserStatus: string implements HasColor, HasLabel
     public function getLabel(): string
     {
         return match ($this) {
-            self::Active => 'نشط',
-            self::Blocked => 'محظور',
+            self::Active => Localization::text('copy.active'),
+            self::Blocked => Localization::text('copy.blocked'),
         };
     }
 

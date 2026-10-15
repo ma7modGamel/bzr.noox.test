@@ -6,6 +6,7 @@ namespace App\Modules\Notifications\Notifications;
 
 use App\Modules\Notifications\Channels\AppDatabaseChannel;
 use App\Modules\Notifications\Data\NotificationContent;
+use App\Support\Localization;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -45,15 +46,17 @@ final class AppNotification extends Notification implements ShouldQueue
 
     public function toMail(object $notifiable): MailMessage
     {
+        $locale = $notifiable->locale ?? 'ar';
+        $data = NotificationContent::localized($this->content->toArray(), $locale);
         $mail = (new MailMessage)
-            ->subject($this->content->title.' — '.config('app.name'))
-            ->greeting($this->content->title)
-            ->line($this->content->body);
+            ->subject($data['title'].' — '.config('app.name'))
+            ->greeting($data['title'])
+            ->line($data['body']);
 
         if (($link = $this->content->webLink()) !== null) {
-            $mail->action('فتح في تطبيق '.config('app.name'), $link);
+            $mail->action(Localization::text('messages.mail_open', ['brand' => config('app.name')], $locale), $link);
         }
 
-        return $mail->salutation('فريق '.config('app.name'));
+        return $mail->salutation(Localization::text('messages.mail_team', ['brand' => config('app.name')], $locale));
     }
 }

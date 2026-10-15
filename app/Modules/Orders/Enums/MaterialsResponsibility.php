@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Orders\Enums;
 
+use App\Support\Localization;
 use Filament\Support\Contracts\HasLabel;
 
 /** BR-016 — معلوماتية للفني؛ التكلفة لا تدخل إلا بمقترح MATERIALS (DEC-007). */
@@ -15,10 +16,6 @@ enum MaterialsResponsibility: string implements HasLabel
 
     public function getLabel(): string
     {
-        return match ($this) {
-            self::CustomerHas => 'عندي الخامات',
-            self::ProviderSupplies => 'الفني يوفر الخامات',
-            self::Unsure => 'غير محدد',
-        };
+        return Localization::enum($this);
     }
 }

@@ -10,8 +10,10 @@ import android.widget.TextView
 import noox.bzr.design.R
 
 /**
- * Stable destinations, readable labels and a selection capsule (DEC-063: soft gradient capsule, gradient icon,
- * bold label, a short grow-in that is skipped when the system turns animations off). RTL follows localization.
+ * Stable destinations with readable labels. DEC-070 (Figma «Primo App» nav): a tinted bar lifted by a soft shadow,
+ * each tab an icon over its label; the chosen tab takes the primary colour (Figma's lighter teal is darkened for
+ * contrast). A short fade-in marks the change and is skipped when the system turns animations off. RTL follows
+ * localization.
  */
 class BottomNavView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) : BremoLinearLayout(context, attrs) {
     var items: List<Pair<Int, String>> = emptyList()
@@ -33,7 +35,7 @@ class BottomNavView @JvmOverloads constructor(context: Context, attrs: Attribute
         orientation = HORIZONTAL
         gravity = Gravity.TOP
         minimumHeight = px(R.dimen.bremo_size_bottom_nav_height)
-        setBackgroundResource(R.color.bremo_surface)
+        setBackgroundResource(R.color.bremo_surface_alt)
         cardShadow()
         val padding = px(R.dimen.bremo_space_s)
         setPaddingRelative(padding, padding, padding, padding)
@@ -55,15 +57,10 @@ class BottomNavView @JvmOverloads constructor(context: Context, attrs: Attribute
 }
 
 private class NavItemView(context: Context, icon: Int, label: String) : BremoLinearLayout(context) {
-    private val iconContainer = BremoLinearLayout(context).apply {
-        gravity = Gravity.CENTER
-        val horizontal = px(R.dimen.bremo_space_l)
-        val vertical = px(R.dimen.bremo_space_xs)
-        setPaddingRelative(horizontal, vertical, horizontal, vertical)
-    }
-    private val iconView = GradientIconView(context)
+    private val iconContainer = BremoLinearLayout(context).apply { gravity = Gravity.CENTER }
+    private val iconView = android.widget.ImageView(context).apply { importantForAccessibility = IMPORTANT_FOR_ACCESSIBILITY_NO }
     private val labelView = TextView(context).apply {
-        appearance(R.style.TextAppearance_Bremo_Caption)
+        appearance(R.style.TextAppearance_Bremo_NavLabel)
         gravity = Gravity.CENTER
         text = label
         importantForAccessibility = IMPORTANT_FOR_ACCESSIBILITY_NO
@@ -75,7 +72,7 @@ private class NavItemView(context: Context, icon: Int, label: String) : BremoLin
         minimumHeight = px(R.dimen.bremo_size_touch_target_min)
         contentDescription = label
         isFocusable = true
-        iconView.setIcon(icon)
+        iconView.setImageResource(icon)
         val size = px(R.dimen.bremo_size_icon)
         iconContainer.addView(iconView, LayoutParams(size, size))
         addView(iconContainer, LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT))
@@ -89,27 +86,16 @@ private class NavItemView(context: Context, icon: Int, label: String) : BremoLin
 
     fun select(selected: Boolean, animate: Boolean) {
         isSelected = selected
-        if (selected) {
-            iconView.setGradient(color(R.color.bremo_gradient_icon_brand_from), color(R.color.bremo_gradient_icon_brand_to))
-            iconContainer.setBackgroundResource(R.drawable.bremo_bg_nav_pill)
-        } else {
-            iconView.setGradient(color(R.color.bremo_slate400), color(R.color.bremo_slate400))
-            iconContainer.background = null
-        }
-        labelView.setTextColor(color(if (selected) R.color.bremo_primary700 else R.color.bremo_slate400))
-        labelView.setTypeface(labelView.typeface, if (selected) android.graphics.Typeface.BOLD else android.graphics.Typeface.NORMAL)
+        val tint = color(if (selected) R.color.bremo_primary600 else R.color.bremo_slate500)
+        androidx.core.widget.ImageViewCompat.setImageTintList(iconView, android.content.res.ColorStateList.valueOf(tint))
+        labelView.setTextColor(tint)
         iconContainer.animate().cancel()
         if (animate && selected && ValueAnimator.areAnimatorsEnabled() && !SnapshotMode.enabled) {
             iconContainer.alpha = fraction(R.dimen.bremo_ratio_press_feedback)
-            iconContainer.scaleX = NAV_GROW_FROM
-            iconContainer.scaleY = NAV_GROW_FROM
-            iconContainer.animate().alpha(1f).scaleX(1f).scaleY(1f)
-                .setInterpolator(android.view.animation.OvershootInterpolator())
+            iconContainer.animate().alpha(1f)
                 .setDuration(resources.getInteger(R.integer.bremo_motion_nav_bar_ms).toLong()).start()
         } else {
             iconContainer.alpha = 1f
-            iconContainer.scaleX = 1f
-            iconContainer.scaleY = 1f
         }
     }
 
@@ -117,10 +103,5 @@ private class NavItemView(context: Context, icon: Int, label: String) : BremoLin
         super.onInitializeAccessibilityNodeInfo(info)
         info.className = "android.widget.Tab"
         info.isSelected = isSelected
-    }
-
-    private companion object {
-        /** The capsule grows in from this scale when a tab is chosen. */
-        const val NAV_GROW_FROM = 0.86f
     }
 }

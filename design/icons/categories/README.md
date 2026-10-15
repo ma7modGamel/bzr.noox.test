@@ -1,6 +1,6 @@
 # أيقونات الفئات (OD-08)
 
-أسلوب مسطح ثنائي اللون كما في C01، بمساحة `viewBox="0 0 48 48"` وأشكال مملوءة فقط.
+رموز Material Symbols Outlined بلون واحد زي ملف Figma «Primo App» (DEC-070)، بمساحة `viewBox="0 0 48 48"` ومسار واحد مملوء بـ `TONE_A`.
 اللونان رمزان يستبدلهما `tools/gen-design` من `tokens.json → categoryIcon`:
 
 - `TONE_A`: اللون الأساسي.

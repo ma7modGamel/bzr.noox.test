@@ -20,6 +20,7 @@ use App\Modules\Settings\Enums\Cfg;
 use App\Modules\Settings\Services\FeatureGate;
 use App\Modules\Settings\Services\SettingsRepository;
 use App\Support\Exceptions\BusinessRuleViolationException;
+use App\Support\Localization;
 use Carbon\CarbonImmutable;
 
 /**
@@ -43,7 +44,7 @@ final readonly class AcceptOfferAction
         $this->features->requireOffers('acceptOffer');
 
         if ($order->customer_id !== $customerId) {
-            throw BusinessRuleViolationException::rule('BR-034', 'هذا الطلب ليس طلبك.');
+            throw BusinessRuleViolationException::rule('BR-034', Localization::text('copy.this_request_does_not_belong_to_you'));
         }
 
         $this->assertOfferIsSelectable($order, $offer);
@@ -96,7 +97,7 @@ final readonly class AcceptOfferAction
             // OD-01 — لا يُفعَّل وضع السوق قبل حسم النسبة (35)
             throw BusinessRuleViolationException::rule(
                 'BR-060',
-                'نسبة العمولة (CFG-062) غير محددة؛ يلزم حسم OD-01 قبل تفعيل وضع السوق.',
+                Localization::text('copy.the_commission_rate_cfg_062_is_not_configured_od'),
             );
         }
 
@@ -106,15 +107,15 @@ final readonly class AcceptOfferAction
     private function assertOfferIsSelectable(Order $order, Offer $offer): void
     {
         if ($offer->order_id !== $order->getKey() || $offer->status !== OfferStatus::Submitted) {
-            throw BusinessRuleViolationException::rule('BR-034', 'العرض لم يعد متاحًا للاختيار.');
+            throw BusinessRuleViolationException::rule('BR-034', Localization::text('copy.this_offer_is_no_longer_available_for_selection'));
         }
 
         if ($order->status !== OrderStatus::Open) {
-            throw BusinessRuleViolationException::rule('BR-034', 'الطلب لم يعد مفتوحًا.');
+            throw BusinessRuleViolationException::rule('BR-034', Localization::text('copy.this_request_is_no_longer_open'));
         }
 
         if ($order->selection_deadline_at !== null && CarbonImmutable::now()->gt($order->selection_deadline_at)) {
-            throw BusinessRuleViolationException::rule('BR-034', 'انتهت مهلة اختيار العرض.');
+            throw BusinessRuleViolationException::rule('BR-034', Localization::text('copy.the_deadline_for_selecting_an_offer_has_passed'));
         }
     }
 
@@ -124,13 +125,13 @@ final readonly class AcceptOfferAction
         $provider = $offer->providerProfile;
 
         if ($provider->status !== ProviderStatus::Active) {
-            throw BusinessRuleViolationException::rule('BR-034', 'مقدم الخدمة لم يعد نشطًا.');
+            throw BusinessRuleViolationException::rule('BR-034', Localization::text('copy.the_technician_is_no_longer_active'));
         }
 
         if (! $this->eligibility->isEligible($order, $provider)) {
             throw BusinessRuleViolationException::rule(
                 'BR-034',
-                'مقدم الخدمة مشغول بطلب آخر في نفس التوقيت. اختر عرضًا آخر.',
+                Localization::text('copy.the_technician_has_another_request_at_the_same_time'),
             );
         }
     }

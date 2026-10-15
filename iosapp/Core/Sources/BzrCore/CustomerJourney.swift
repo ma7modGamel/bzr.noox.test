@@ -7,6 +7,16 @@ public enum CustomerPhase: String, Codable, Sendable {
 }
 
 public struct CustomerUIState: Equatable, Sendable {
+    public var imageGroups: [[String]] = []
+    public var reviewTagSummary: [String] = []
+    public var beforePhotoURLs: [String] = []
+    public var afterPhotoURLs: [String] = []
+    public var proposalPhotoURL: String = ""
+    public var arrivalCode: String = ""
+    public var arrivalCodeUntil: String = ""
+    public var arrivalCodeRequired: Bool = false
+    public var arrivalExceptionPending: Bool = false
+    public var arrivalCodeFailed: Bool = false
     public var screen: String
     public var phase: CustomerPhase
     public var canContinue: Bool
@@ -36,6 +46,9 @@ public struct CustomerUIState: Equatable, Sendable {
     public var isDefault: Bool
     public var showConfirmation: Bool
     public var pendingIndex: Int
+    public var proposalDeadline = ""
+    public var proposalExpiryMessage = ""
+    public var proposalLoadedUptime = 0
     public var countdownSeconds: Int
     public var hasPhoto: Bool
     public var stepStates: [String]
@@ -52,6 +65,31 @@ public struct CustomerUIState: Equatable, Sendable {
     public var selectedPricingIndex = -1
     public var noBudget = false
     public var providerVerified = false
+    /// DEC-071: server codes beside `options` / `materialOptions` / `pricingOptions`, so views pick each card's copy and icon.
+    public var optionCodes: [String] = []
+    public var materialCodes: [String] = []
+    public var pricingCodes: [String] = []
+    /// C01 current-request card (DEC-073): per order, beside `items`. Offer figures are blank when not loaded.
+    public var orderIcons: [String] = []
+    public var orderAgeMinutes: [Int] = []
+    public var orderOfferCounts: [Int] = []
+    public var orderLowestOffers: [String] = []
+    public var unreadNotifications = 0
+    public var requestSteps = 5
+    public var nowAvailable = false
+    public var showMaterials = false
+    public var isInstapay = false
+    public var isWarranty = false
+    public var warrantyCoverage = ""
+    public var waitingInfo = ""
+    public var providerAvatarURL = ""
+    public var portfolioURLs: [String] = []
+    public var unreadCounts: [Int] = []
+    public var providersAvailable: [Bool] = []
+    public var providerAvailable = false
+    public var warrantyVisitID: Int?
+    public var warrantyVisitFinal = false
+    public var photoCount = 0
 
     public init(
         screen: String, phase: CustomerPhase, canContinue: Bool = false,
@@ -137,7 +175,37 @@ public enum CustomerLogic {
     }
 
     public static func reduce(screen: String, input: [String: CustomerInputValue]) -> CustomerUIState {
-        if let transientState = transientState(screen: screen, event: input.text("event")) {
+        var resolved = input
+        resolved["available_actions"] = .strings(input.strings("available_actions").filter { $0 != "call" })
+        var state = reduceScreen(screen: screen, input: resolved)
+        state.reviewTagSummary = input.strings("review_tag_summary")
+        state.imageGroups = input.strings("image_groups").map { $0.components(separatedBy: "\n").filter { !$0.isEmpty } }
+        state.beforePhotoURLs = input.strings("work_before_urls")
+        state.afterPhotoURLs = input.strings("work_after_urls")
+        state.proposalPhotoURL = input.text("proposal_photo_url")
+        state.arrivalCode = input.text("arrival_code")
+        state.arrivalCodeUntil = input.text("arrival_code_until")
+        state.arrivalCodeRequired = input.bool("arrival_code_required")
+        state.arrivalExceptionPending = input.bool("arrival_exception_pending")
+        state.arrivalCodeFailed = input.bool("arrival_code_failed")
+        state.requestSteps = input.text("operating_mode") == "staff" ? 4 : 5
+        state.warrantyCoverage = input.text("warranty_coverage")
+        state.waitingInfo = input.text("waiting_info")
+        state.providerAvatarURL = input.text("provider_avatar_url")
+        state.portfolioURLs = input.strings("portfolio_urls")
+        state.unreadCounts = input.strings("unread_counts").map { Int($0) ?? 0 }
+        state.providersAvailable = input.strings("providers_available").map { $0 == "true" }
+        state.providerAvailable = input.bool("provider_available")
+        if screen == "SCR-C19" { state.providerVerified = input.bool("provider_verified") }
+        state.warrantyVisitID = input.integer("warranty_visit_id") > 0 ? input.integer("warranty_visit_id") : nil
+        state.warrantyVisitFinal = input.bool("warranty_visit_final")
+        return state
+    }
+
+    private static func reduceScreen(screen: String, input: [String: CustomerInputValue]) -> CustomerUIState {
+        if !(screen == "SCR-C24" && input.text("event") == "error" && !input.strings("ratings").isEmpty),
+            let transientState = transientState(screen: screen, event: input.text("event"))
+        {
             return transientState
         }
         return screenState(screen: screen, input: input)
@@ -157,8 +225,10 @@ public enum CustomerLogic {
         switch screen {
         case "SCR-C01": return home(input)
         case "SCR-C02": return account(input)
-        case "SCR-C03": return problem(input)
+        case "SCR-C03": return service(input)
+        case "SCR-C37": return problem(input)
         case "SCR-C04": return timing(input)
+        case "SCR-C38": return budget(input)
         case "SCR-C05": return review(input)
         case "SCR-C06": return offers(input)
         case "SCR-C07": return provider(input)
@@ -212,6 +282,12 @@ public enum CustomerLogic {
             // The default address labels the home header's location row (DEC-063).
             fieldValues: [input.text("customer_name"), input.text("address_label")])
         state.optionIcons = input.strings("category_icons")
+        state.optionCodes = input.strings("order_status_codes")
+        state.orderIcons = input.strings("order_icons")
+        state.orderAgeMinutes = input.strings("order_age_minutes").map { Int($0) ?? -1 }
+        state.orderOfferCounts = input.strings("order_offer_counts").map { Int($0) ?? 0 }
+        state.orderLowestOffers = input.strings("order_lowest_offers")
+        state.unreadNotifications = input.integer("unread_notifications", default: 0)
         return state
     }
 
@@ -219,11 +295,26 @@ public enum CustomerLogic {
         CustomerUIState(
             screen: "SCR-C02", phase: .content, canContinue: true,
             messageKey: input.bool("is_verified") ? "account.verified" : "account.unverified",
-            fieldValues: [input.text("name"), input.text("phone")]
+            // DEC-076 (Figma 3002:4654): name, phone, completed orders, saved addresses, active orders ("" when not loaded).
+            fieldValues: [input.text("name"), input.text("phone"), input.text("completed_orders"), input.text("address_count"), input.text("active_orders")]
         )
     }
 
-    /// C03 (DEC-059): catalog categories and the chosen category's problem types; `is_other` needs 10 characters (BR-013).
+    /// C03 (DEC-071, step 1 of 5): the service only. The view model filters by `search_query` before reducing.
+    private static func service(_ input: [String: CustomerInputValue]) -> CustomerUIState {
+        let labels = input.strings("category_labels")
+        let selected = input.integer("selected_category_index", default: -1)
+        let noResults = labels.isEmpty && !input.text("search_query").trimmingCharacters(in: .whitespaces).isEmpty
+        var state = CustomerUIState(
+            screen: "SCR-C03", phase: selected < 0 ? .empty : .content,
+            canContinue: selected >= 0, messageKey: noResults ? "request.search.no_results" : nil,
+            itemDetails: input.strings("category_details"), options: labels,
+            selectedIndex: selected, fieldValues: [input.text("search_query")])
+        state.optionIcons = input.strings("category_icons")
+        return state
+    }
+
+    /// C37 (DEC-071, step 2 of 5): problem type, description, media — the former C03 rules (BR-013).
     private static func problem(_ input: [String: CustomerInputValue]) -> CustomerUIState {
         let selected = input.integer("selected_problem_index", default: -1)
         let other = input.strings("problem_other")
@@ -240,31 +331,30 @@ public enum CustomerLogic {
                 nil
             }
         var state = CustomerUIState(
-            screen: "SCR-C03", phase: selected < 0 ? .empty : .content,
+            screen: "SCR-C37", phase: selected < 0 ? .empty : .content,
             canContinue: error == nil, descriptionError: error,
-            itemDetails: input.strings("problem_labels"), options: input.strings("category_labels"),
-            selectedIndex: input.integer("selected_category_index", default: -1),
+            items: [input.text("service_label")], itemDetails: input.strings("problem_labels"),
+            itemStates: input.strings("media_kinds"),
             selectedOptionIndex: selected,
             fieldValues: [description, String(input.integer("media_count", default: 0))])
-        state.optionIcons = input.strings("category_icons")
+        state.optionIcons = [input.text("service_icon")]
         return state
     }
 
-    /// C04: address, timing, materials; marketplace adds pricing mode and an optional budget (07, BR-015).
+    /// C04 (DEC-071, step 3 of 5): address and timing.
     private static func timing(_ input: [String: CustomerInputValue]) -> CustomerUIState {
         let timingType = input.text("timing_type")
         let hasAddress = !input.text("address_id").isEmpty
-        let marketplace = input.text("operating_mode") != "staff"
-        let budget = input.text("budget").trimmingCharacters(in: .whitespaces)
-        let budgetValid = budget.isEmpty || (Decimal(string: budget).map { $0 > 0 } ?? false)
-        let materialSelected = input.integer("selected_material_index", default: -1) >= 0
-        let pricingSelected = !marketplace || input.integer("selected_pricing_index", default: -1) >= 0
         let message: String? =
             if !hasAddress {
                 "request.address.required"
             } else if input["category_available"] != nil && !input.bool("category_available") {
                 "request.category.unavailable"
-            } else if timingType == "now" && !input.bool("now_available") {
+            } else if input.bool("availability_loading") && timingType != "scheduled" {
+                "request.timing.checking"
+            } else if input.bool("availability_failed") && timingType != "scheduled" {
+                "request.timing.check_failed"
+            } else if !input.bool("now_available") && timingType != "scheduled" {
                 "request.timing.now_unavailable"
             } else if timingType == "scheduled" && input.text("slot_id").isEmpty {
                 "request.slot.required"
@@ -273,18 +363,43 @@ public enum CustomerLogic {
             }
         var state = CustomerUIState(
             screen: "SCR-C04", phase: .content,
-            canContinue: hasAddress && !timingType.isEmpty && message == nil && materialSelected
-                && pricingSelected && (!marketplace || budgetValid),
-            messageKey: message, showPricing: marketplace,
+            canContinue: hasAddress && !timingType.isEmpty && message == nil
+                && (input.text("operating_mode") != "staff" || input.integer("selected_material_index", default: -1) >= 0),
+            messageKey: message, items: input.strings("address_labels"),
             options: input.strings("timing_labels"),
+            selectedIndex: input.integer("selected_address_index", default: -1),
             selectedOptionIndex: input.integer("selected_timing_index", default: -1),
-            fieldValues: [input.text("address_label"), budget, input.text("slot_label")],
+            fieldValues: [input.text("address_label"), "", input.text("slot_label")])
+        state.optionCodes = input.strings("timing_codes")
+        state.nowAvailable = input.bool("now_available")
+        state.showMaterials = input.text("operating_mode") == "staff"
+        state.materialOptions = input.strings("material_labels")
+        state.materialCodes = input.strings("material_codes")
+        state.selectedMaterialIndex = input.integer("selected_material_index", default: -1)
+        return state
+    }
+
+    /// C38 (DEC-071, step 4 of 5): materials; marketplace adds pricing mode and an optional budget (07, BR-015).
+    private static func budget(_ input: [String: CustomerInputValue]) -> CustomerUIState {
+        let marketplace = input.text("operating_mode") != "staff"
+        let budget = input.text("budget").trimmingCharacters(in: .whitespaces)
+        let budgetValid = budget.isEmpty || (Decimal(string: budget).map { $0 > 0 } ?? false)
+        let materialSelected = input.integer("selected_material_index", default: -1) >= 0
+        let pricingSelected = !marketplace || input.integer("selected_pricing_index", default: -1) >= 0
+        var state = CustomerUIState(
+            screen: "SCR-C38", phase: .content,
+            canContinue: materialSelected && pricingSelected && (!marketplace || budgetValid),
+            showPricing: marketplace,
+            fieldValues: ["", budget],
             fieldErrors: marketplace && !budgetValid ? ["request.budget.invalid"] : [])
         state.materialOptions = input.strings("material_labels")
+        state.materialCodes = input.strings("material_codes")
         state.selectedMaterialIndex = input.integer("selected_material_index", default: -1)
         state.pricingOptions = marketplace ? input.strings("pricing_labels") : []
+        state.pricingCodes = marketplace ? input.strings("pricing_codes") : []
         state.selectedPricingIndex = input.integer("selected_pricing_index", default: -1)
         state.noBudget = input.bool("no_budget")
+        state.itemDetails = marketplace ? input.strings("budget_amounts") : []
         return state
     }
 
@@ -317,7 +432,12 @@ public enum CustomerLogic {
             selectedIndex: input.integer("sort_index", default: 0),
             fieldValues: [input.text("order_title")],
             countdownSeconds: input.integer("countdown_seconds", default: 0))
+        state.options = input.strings("sort_labels")
+        state.optionCodes = input.strings("sort_codes")
         state.pricingOptions = [input.text("pricing_mode")]
+        // DEC-073: the request summary C35 shows while no offer has arrived (problem, address, time, budget).
+        state.itemDetails = input.strings("summary_rows")
+        state.optionIcons = [input.text("order_icon")]
         return state
     }
 
@@ -328,10 +448,13 @@ public enum CustomerLogic {
             screen: "SCR-C07", phase: available ? .content : .empty,
             canContinue: available && input.strings("available_actions").contains("accept_offer"),
             visibleActions: input.strings("available_actions"), items: input.strings("review_rows"),
-            itemDetails: input.strings("rating_values"), options: input.strings("specialties"),
+            itemDetails: input.strings("rating_values"), itemStates: input.strings("portfolio_captions"),
+            options: input.strings("specialties"),
+            // DEC-073 (Figma 3002:873): [6] review total, [7] the order's category for «فني … موثّق».
             fieldValues: [
                 input.text("provider_name"), input.text("provider_rating"), input.text("provider_services"),
                 input.text("provider_experience"), input.text("provider_about"), input.text("offer_price"),
+                input.text("ratings_count"), input.text("provider_category"),
             ])
         state.providerVerified = input.bool("provider_verified")
         return state
@@ -348,9 +471,10 @@ public enum CustomerLogic {
             showPricing: true, showEta: input.text("timing_type") == "now", visibleActions: actions,
             items: input.strings("offer_rows"), itemDetails: input.strings("order_rows"),
             options: input.strings("payment_labels"), selectedOptionIndex: payment,
+            // DEC-073 (Figma 3002:1757): [4] the order's category, [5] who supplies materials.
             fieldValues: [
                 input.text("provider_name"), input.text("provider_rating"), input.text("provider_services"),
-                input.text("eta_minutes"),
+                input.text("eta_minutes"), input.text("provider_category"), input.text("materials_label"),
             ],
             isBusy: submitting)
         state.providerVerified = input.bool("provider_verified")
@@ -369,7 +493,7 @@ public enum CustomerLogic {
     private static func tracking(_ input: [String: CustomerInputValue]) -> CustomerUIState {
         let status = input.text("status")
         let terminal = ["OPEN", "CANCELLED", "EXPIRED"].contains(status)
-        return CustomerUIState(
+        var state = CustomerUIState(
             screen: "SCR-C09", phase: input.text("event") == "offline" ? .offline : .content,
             canContinue: true, messageKey: trackingMessage(status),
             showMap: status == "ON_THE_WAY", showEta: status == "ON_THE_WAY",
@@ -378,11 +502,24 @@ public enum CustomerLogic {
             etaApproximate: input.bool("eta_approximate"),
             visibleActions: input.strings("available_actions"),
             displayStatus: input.text("display_status"), items: input.strings("summary"),
+            // DEC-076 (Figma 3002:1631/1903/2055/2540): number, address, problem, agreed price, materials, provider
+            // name, rating, completed jobs, category, approved total, slot.
+            fieldValues: [
+                input.text("order_number"), input.text("address"), input.text("order_title"), input.text("agreed_price"),
+                input.text("materials_label"), input.text("provider_name"), input.text("provider_rating"),
+                input.text("provider_completed"), input.text("provider_category"), input.text("final_amount"),
+                input.text("slot_label"), input.text("completion_estimate_at"), input.bool("completion_estimate_overdue") ? "overdue" : "",
+            ],
             stepStates: input.strings("step_states")
         )
+        state.providerVerified = input.bool("provider_verified")
+        state.optionCodes = [status, input.text("timing_type")]
+        state.itemDetails = input.strings("execution_labels")
+        state.options = input.strings("execution_times")
+        state.itemStates = input.strings("execution_states")
+        return state
     }
 
-    /// The status card names the real terminal state; OPEN and EXPIRED are not cancellations.
     private static func trackingMessage(_ status: String) -> String? {
         switch status {
         case "DISPUTED": "status.reviewing"
@@ -461,12 +598,14 @@ public enum CustomerLogic {
         if input.integer("video_count") > 1 { errors.append("media.validation.video_limit") }
         if input.integer("audio_count") > 1 { errors.append("media.validation.audio_limit") }
         if states.contains("failed") { errors.append("media.validation.rejected") }
+        let selectionError = input.text("media_error")
+        let selectionErrors = ["media.validation.video_duration", "media.validation.video_unreadable"].contains(selectionError) ? [selectionError] : []
         let busy = input.bool("recording") || states.contains("uploading")
         let message = input.bool("recording") ? "media.recording" : errors.first
         return CustomerUIState(
             screen: "SCR-C17", phase: kinds.isEmpty ? .empty : .content,
             canContinue: !errors.contains(where: { $0 != "media.validation.rejected" }) && !busy,
-            messageKey: message, items: kinds, itemStates: states, fieldErrors: errors,
+            messageKey: message, items: kinds, itemStates: states, fieldErrors: selectionErrors + errors,
             isBusy: busy)
     }
 
@@ -483,22 +622,25 @@ public enum CustomerLogic {
 
     private static func dispute(_ input: [String: CustomerInputValue]) -> CustomerUIState {
         let event = input.text("event")
+        let warranty = input.bool("warranty")
         let selected = input.integer("selected_reason_index", default: -1)
         let description = input.text("description")
         let existing = input.bool("existing")
         let busy = event == "submitting"
-        return CustomerUIState(
+        var state = CustomerUIState(
             screen: "SCR-C27", phase: .content,
-            canContinue: !existing && selected >= 0
-                && !description.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-                && description.count <= 1_000 && input.strings("available_actions").contains("open_dispute")
-                && !busy,
-            messageKey: event == "success" ? "dispute.success" : nil,
+            canContinue: !existing && description.count <= 1_000 && !busy
+                && (warranty
+                    ? description.trimmingCharacters(in: .whitespacesAndNewlines).count >= 10 && input.strings("available_actions").contains("request_warranty")
+                    : selected >= 0 && !description.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && input.strings("available_actions").contains("open_dispute")),
+            messageKey: event == "success" ? (warranty ? "warranty.success" : "dispute.success") : nil,
             descriptionError: !existing && description.count > 1_000 ? "request.description.max" : nil,
             visibleActions: input.strings("available_actions"), items: input.strings("details"),
             itemStates: input.strings("status_details"), options: input.strings("reason_labels"),
             selectedOptionIndex: selected, fieldValues: [description], isBusy: busy,
             hasPhoto: input.integer("photo_count") > 0)
+        state.isWarranty = warranty
+        return state
     }
 
     private static func providerReport(_ input: [String: CustomerInputValue]) -> CustomerUIState {
@@ -539,7 +681,7 @@ public enum CustomerLogic {
 
     private static func notifications(_ input: [String: CustomerInputValue]) -> CustomerUIState {
         let titles = input.strings("notification_titles")
-        return CustomerUIState(
+        let state = CustomerUIState(
             screen: "SCR-C32", phase: titles.isEmpty ? .empty : .content,
             canContinue: !titles.isEmpty, items: titles,
             itemDetails: input.strings("notification_bodies"),
@@ -547,6 +689,12 @@ public enum CustomerLogic {
             fieldValues: input.strings("notification_times"),
             isBusy: input.text("event") == "marking_read",
             notificationsDenied: input.bool("notifications_denied"))
+        // DEC-076 (Figma 3002:3608): NTF code per row, "today" / "earlier", and the age in minutes.
+        var result = state
+        result.optionCodes = input.strings("notification_codes")
+        result.stepStates = input.strings("notification_days")
+        result.orderAgeMinutes = input.strings("notification_ages").map { Int($0) ?? -1 }
+        return result
     }
 
     private static func accountSettings(_ input: [String: CustomerInputValue]) -> CustomerUIState {
@@ -591,15 +739,19 @@ public enum CustomerLogic {
 
     private static func noOffers(_ input: [String: CustomerInputValue]) -> CustomerUIState {
         let actions = input.strings("available_actions")
-        return CustomerUIState(
+        var state = CustomerUIState(
             screen: "SCR-C35", phase: .empty,
             canContinue: !actions.isEmpty && input.text("event") != "submitting",
+            showEta: input.text("timing_type") == "now",
             visibleActions: actions, isBusy: input.text("event") == "submitting")
+        state.itemDetails = input.strings("summary_rows")
+        state.optionIcons = [input.text("order_icon")]
+        return state
     }
 
     private static func conversations(_ input: [String: CustomerInputValue]) -> CustomerUIState {
         let providers = input.strings("provider_names")
-        return CustomerUIState(
+        var state = CustomerUIState(
             screen: "SCR-C18", phase: providers.isEmpty ? .empty : .content,
             canContinue: !providers.isEmpty, items: providers,
             itemDetails: input.strings("order_summaries"),
@@ -607,6 +759,9 @@ public enum CustomerLogic {
             options: input.strings("last_messages"),
             fieldValues: input.strings("last_message_times"),
             fieldErrors: input.strings("provider_verified"))
+        // DEC-076 (Figma 3002:2924): "mine" when the last message is the customer's own (sent tick).
+        state.optionCodes = input.strings("last_message_mine")
+        return state
     }
 
     private static func chat(_ input: [String: CustomerInputValue]) -> CustomerUIState {
@@ -639,13 +794,20 @@ public enum CustomerLogic {
         let titles = input.strings("order_titles")
         let tab = input.text("tab")
         let busy = input.text("event") == "loading_more"
-        return CustomerUIState(
+        var state = CustomerUIState(
             screen: "SCR-C25", phase: titles.isEmpty ? .empty : .content,
             canContinue: !titles.isEmpty && !busy,
             messageKey: titles.isEmpty ? "orders.\(tab).empty.title" : nil,
             items: titles, itemDetails: input.strings("order_subtitles"),
-            itemStates: input.strings("order_statuses"),
-            selectedOptionIndex: tab == "past" ? 1 : 0, isBusy: busy)
+            itemStates: input.strings("order_statuses"), options: input.strings("order_rows"),
+            selectedOptionIndex: tab == "past" ? 1 : (tab == "cancelled" ? 2 : 0), isBusy: busy)
+        // DEC-076 (Figma 3002:3889): per order, status code, category icon, the card row
+        // "number|place|provider|verified|rating|amount|chat|phone" and, while open, the offer figures.
+        state.optionCodes = input.strings("order_status_codes")
+        state.orderIcons = input.strings("order_icons")
+        state.orderOfferCounts = input.strings("order_offer_counts").map { Int($0) ?? 0 }
+        state.orderLowestOffers = input.strings("order_lowest_offers")
+        return state
     }
 
     private static func orderHistory(_ input: [String: CustomerInputValue]) -> CustomerUIState {
@@ -666,71 +828,103 @@ public enum CustomerLogic {
         let method = input.text("payment_method")
         let actions = input.strings("available_actions")
         let busy = input.text("event") == "switching"
-        return CustomerUIState(
+        var state = CustomerUIState(
             screen: "SCR-C21", phase: .content,
-            canContinue: method == "ELECTRONIC" && actions.contains("pay_electronic") && !busy,
+            canContinue: method == "ELECTRONIC" && (actions.contains("pay_electronic") || actions.contains("submit_instapay_transfer")) && !busy,
             visibleActions: actions, items: input.strings("amounts"),
             options: input.strings("method_labels"),
             selectedOptionIndex: input.integer("selected_method_index", default: -1),
+            // DEC-076 (Figma 3002:4134): provider name, problem, address.
+            fieldValues: [input.text("provider_name"), input.text("order_title"), input.text("address")],
             isBusy: busy)
+        state.providerVerified = input.bool("provider_verified")
+        state.optionCodes = input.strings("method_codes")
+        return state
     }
 
     private static func electronicPayment(_ input: [String: CustomerInputValue]) -> CustomerUIState {
         let event = input.text("event")
         let status = input.text("payment_status")
         let selected = input.integer("selected_channel_index", default: -1)
-        let busy = event == "creating"
+        let busy = ["creating", "uploading"].contains(event)
+        let instapay = input.bool("is_instapay")
         let actions = input.strings("available_actions")
         let message: String? =
-            if busy { "payment.creating" } else if status == "SUCCEEDED" {
+            if event == "upload_failed" { "media.upload_error" } else if status == "PENDING_VERIFICATION" { "payment.instapay.pending" } else if busy {
+                "payment.creating"
+            } else if status == "SUCCEEDED" {
                 "payment.success"
             } else if status == "FAILED" { "payment.failed" } else if status == "EXPIRED" {
                 "payment.expired"
             } else if status == "PENDING" && !input.text("reference_number").isEmpty {
                 "payment.kiosk.ready"
             } else if status == "PENDING" { "payment.checkout.ready" } else { nil }
-        return CustomerUIState(
+        var state = CustomerUIState(
             screen: "SCR-C22", phase: .content,
-            canContinue: !busy && status != "PENDING" && status != "SUCCEEDED" && selected >= 0
-                && actions.contains("pay_electronic"),
+            canContinue: !busy && !["PENDING", "PENDING_VERIFICATION", "SUCCEEDED"].contains(status) && selected >= 0
+                && (instapay
+                    ? actions.contains("submit_instapay_transfer") && input.bool("receipt_uploaded")
+                        && input.text("transfer_reference").trimmingCharacters(in: .whitespacesAndNewlines).range(of: "^[A-Za-z0-9_ -]{4,64}$", options: .regularExpression) != nil
+                    : actions.contains("pay_electronic")),
             messageKey: message, visibleActions: actions,
             items: [input.text("total"), input.text("reference_number"), input.text("checkout_url")],
             itemStates: [status], options: input.strings("channel_labels"),
             selectedOptionIndex: selected, isBusy: busy,
             countdownSeconds: input.integer("countdown_seconds"))
+        state.isInstapay = instapay
+        state.hasPhoto = input.bool("receipt_uploaded")
+        state.fieldValues = [
+            input.text("transfer_reference"), input.text("instapay_address"), input.text("instapay_name"), input.text("order_reference"), input.text("failure_reason_label"),
+        ]
+        return state
     }
 
     private static func completion(_ input: [String: CustomerInputValue]) -> CustomerUIState {
         let actions = input.strings("available_actions")
         let busy = input.text("event") == "submitting"
-        return CustomerUIState(
+        var state = CustomerUIState(
             screen: "SCR-C23", phase: .content,
             canContinue: actions.contains("confirm_completion") && !busy,
-            visibleActions: actions, items: input.strings("summary"), isBusy: busy)
+            visibleActions: actions, items: input.strings("summary"),
+            // DEC-076 (Figma 3002:4134): provider name, problem, address, payment method label.
+            fieldValues: [input.text("provider_name"), input.text("order_title"), input.text("address"), input.text("method_label")],
+            isBusy: busy)
+        state.providerVerified = input.bool("provider_verified")
+        return state
     }
 
     private static func rating(_ input: [String: CustomerInputValue]) -> CustomerUIState {
         let ratings = input.strings("ratings").compactMap(Int.init)
         let complete = ratings.count == 3 && ratings.allSatisfy { (1...5).contains($0) }
         let commentLength = input.integer("comment_length", default: input.text("comment").count)
-        let busy = input.text("event") == "submitting"
+        let busy = ["submitting", "uploading"].contains(input.text("event"))
         var errors: [String] = []
         if !complete { errors.append("rating.validation.required") }
         if commentLength > 500 { errors.append("rating.validation.comment_max") }
         let message: String? =
             switch input.text("event") {
+            case "upload_failed": "media.upload_error"
+            case "error": "error.body"
             case "window_closed": "rating.window_closed"
             case "already_exists": "rating.already_exists"
             case "success": "rating.success"
             default: nil
             }
-        return CustomerUIState(
+        // DEC-076 (Figma 3002:4475): comment, provider name, job title; `items` are the chosen quick tags (B-04).
+        var state = CustomerUIState(
             screen: "SCR-C24",
             phase: input.text("event") == "loaded" && ratings.allSatisfy { $0 == 0 } ? .empty : .content,
             canContinue: complete && errors.isEmpty && !busy
                 && input.strings("available_actions").contains("rate"),
             messageKey: message, visibleActions: input.strings("available_actions"),
-            fieldValues: [input.text("comment")], fieldErrors: errors, isBusy: busy, ratings: ratings)
+            items: input.strings("tags"),
+            fieldValues: [input.text("comment"), input.text("provider_name"), input.text("order_title")], fieldErrors: errors,
+            isBusy: busy, ratings: ratings)
+        state.options = input.strings("tag_labels")
+        state.optionCodes = input.strings("tag_codes")
+        state.photoCount = input.integer("photo_count")
+        state.providerVerified = input.bool("provider_verified")
+        return state
     }
 
     private static func proposal(
@@ -740,15 +934,29 @@ public enum CustomerLogic {
         let expired = input.bool("expired")
         let busy = input.text("event") == "submitting"
         let actionable = actions.contains("approve_proposal") || actions.contains("reject_proposal")
-        return CustomerUIState(
+        var state = CustomerUIState(
             screen: screen, phase: .content, canContinue: !expired && !busy && actionable,
             messageKey: expired ? "proposal.expired" : (busy ? "proposal.deciding" : nil),
             visibleActions: actions,
             items: [
                 input.text("type_label"), input.text("amount"), input.text("reason"), input.text("total"),
             ],
+            // DEC-076 (Figma 3002:2264 / 3002:4029): provider name, rating, category, the agreed price before this proposal.
+            fieldValues: [
+                input.text("provider_name"), input.text("provider_rating"), input.text("provider_category"),
+                input.text("original_amount"),
+            ],
             isBusy: busy, countdownSeconds: input.integer("countdown_seconds"),
             hasPhoto: input.bool("has_photo"))
+        state.providerVerified = input.bool("provider_verified")
+        state.proposalDeadline = input.text("proposal_deadline")
+        state.proposalExpiryMessage = input.text("proposal_expiry_message")
+        state.proposalLoadedUptime = input.integer("proposal_loaded_uptime")
+        return state
+    }
+
+    public static func proposalRemaining(_ state: CustomerUIState, uptimeSeconds: Int) -> Int {
+        max(0, state.countdownSeconds - (state.proposalLoadedUptime > 0 ? max(0, uptimeSeconds - state.proposalLoadedUptime) : 0))
     }
 }
 
@@ -770,9 +978,41 @@ extension Dictionary where Key == String, Value == CustomerInputValue {
     }
 }
 
+public struct CustomerExecutionStep: Codable, Equatable, Sendable {
+    public let key: String
+    public let label: String
+    public let state: String
+    public let occurredAt: String?
+    enum CodingKeys: String, CodingKey { case key, label, state; case occurredAt = "occurred_at" }
+}
+
+public struct CustomerCompletionEstimate: Codable, Equatable, Sendable {
+    public let estimatedAt: String
+    public let updatedAt: String?
+    public let overdue: Bool
+    enum CodingKeys: String, CodingKey { case overdue; case estimatedAt = "estimated_at"; case updatedAt = "updated_at" }
+}
+
+public struct CustomerPhoto: Codable, Equatable, Sendable {
+    public let id: Int
+    public let purpose: String?
+    public let contentURL: String?
+    enum CodingKeys: String, CodingKey { case id, purpose; case contentURL = "content_url" }
+}
+
+public struct CustomerArrivalCode: Codable, Equatable, Sendable {
+    public let code: String
+    public let expiresAt: String
+    public let serverTime: String
+    enum CodingKeys: String, CodingKey { case code; case expiresAt = "expires_at"; case serverTime = "server_time" }
+}
+
+private struct CustomerArrivalCodeEnvelope: Decodable, Sendable { let data: CustomerArrivalCode }
+private struct CustomerArrivalCodeRequest: Encodable, Sendable { let refresh: Bool }
+
 public struct CustomerOrderSummary: Codable, Equatable, Sendable {
     public let id: Int
-    public let number: String?
+    @FlexibleString public var number: String?
     public let status: String?
     public let version: Int?
     public let displayStatus: String
@@ -782,6 +1022,15 @@ public struct CustomerOrderSummary: Codable, Equatable, Sendable {
     public let amounts: CustomerOrderAmounts?
     public let provider: CustomerProviderSummary?
     public let latestPayment: CustomerPayment?
+    public var paymentReference: String? = nil
+    public var warrantyCoverage: String? = nil
+    public var waiting: CustomerOrderWaiting? = nil
+    public var reviewTagOptions: [CustomerOption]? = nil
+    public var executionSteps: [CustomerExecutionStep]? = nil
+    public var completionEstimate: CustomerCompletionEstimate? = nil
+    public var workPhotos: [CustomerPhoto]? = nil
+    public var arrivalCodeRequired: Bool? = nil
+    public var arrivalExceptionPending: Bool? = nil
     public let category: CustomerOrderReference?
     public let problemType: CustomerOrderReference?
     public let customerAddressId: Int?
@@ -808,6 +1057,38 @@ public struct CustomerOrderSummary: Codable, Equatable, Sendable {
         case statusLabel = "status_label"
         case availableActions = "available_actions"
         case latestPayment = "latest_payment"
+        case paymentReference = "payment_reference"
+        case warrantyCoverage = "warranty_coverage_text"
+        case waiting
+        case reviewTagOptions = "review_tag_options"
+        case executionSteps = "execution_steps"
+        case completionEstimate = "completion_estimate"
+        case workPhotos = "work_photos"
+        case arrivalCodeRequired = "arrival_code_required"
+        case arrivalExceptionPending = "arrival_exception_pending"
+    }
+}
+
+public struct CustomerOrderWaiting: Codable, Equatable, Sendable {
+    public let message: String
+    public let deadlineLabel: String?
+    public let deadlineAt: String?
+
+    enum CodingKeys: String, CodingKey {
+        case message
+        case deadlineLabel = "deadline_label"
+        case deadlineAt = "deadline_at"
+    }
+}
+
+public struct CustomerVisitShareLink: Codable, Equatable, Identifiable, Sendable {
+    public let id: Int
+    public let url: String
+    public let expiresAt: String
+
+    enum CodingKeys: String, CodingKey {
+        case id, url
+        case expiresAt = "expires_at"
     }
 }
 
@@ -936,9 +1217,23 @@ public struct CustomerOrderTermination: Codable, Equatable, Sendable {
 
 public struct CustomerProviderSummary: Codable, Equatable, Sendable {
     public let name: String
+    /// DEC-076: the tracking cards (C09) show the assigned technician's rating, jobs and verification.
+    public let ratingAverage: String?
+    public let completedOrders: Int?
+    public let isVerified: Bool?
+    /// Visible to both sides from CONFIRMED (BR-101).
+    public let phone: String?
+
+    enum CodingKeys: String, CodingKey {
+        case name, phone
+        case ratingAverage = "rating_avg"
+        case completedOrders = "completed_orders"
+        case isVerified = "is_verified"
+    }
 }
 
 public struct CustomerPayment: Codable, Equatable, Sendable {
+    public var failureReasonLabel: String? = nil
     public let id: Int
     public let status: String
     public let amount: String
@@ -949,6 +1244,7 @@ public struct CustomerPayment: Codable, Equatable, Sendable {
 
     enum CodingKeys: String, CodingKey {
         case id, status, amount, channel
+        case failureReasonLabel = "failure_reason_label"
         case referenceNumber = "reference_number"
         case checkoutURL = "checkout_url"
         case expiresAt = "expires_at"
@@ -966,17 +1262,25 @@ public struct CustomerProposal: Codable, Equatable, Sendable {
     public let typeLabel: String
     public let amount: String
     public let projectedTotal: String
+    public var currentTotal: String? = nil
     public let reason: String
+    public var photoURL: String? = nil
     public let photoPath: String?
     public let status: String
     public let expiresAt: String?
+    public var serverTime: String? = nil
+    public var expiryMessage: String? = nil
 
     enum CodingKeys: String, CodingKey {
         case id, type, amount, reason, status
         case typeLabel = "type_label"
         case projectedTotal = "projected_total"
+        case currentTotal = "current_total"
         case photoPath = "photo_path"
+        case photoURL = "photo_url"
         case expiresAt = "expires_at"
+        case serverTime = "server_time"
+        case expiryMessage = "expiry_message"
     }
 }
 
@@ -988,7 +1292,15 @@ public struct CustomerOrderListEnvelope: Codable, Sendable {
     public let data: [CustomerOrderSummary]
 }
 
+public struct InstapayDetails: Codable, Equatable, Sendable {
+    public let address: String
+    public let displayName: String?
+    public let link: String?
+    enum CodingKeys: String, CodingKey { case address, link; case displayName = "display_name" }
+}
+
 public struct CustomerConfig: Codable, Sendable {
+    public let instapay: InstapayDetails?
     public let operatingMode: String
     public let offersEnabled: Bool
     public let optionLists: [String: [CustomerOption]]
@@ -996,6 +1308,7 @@ public struct CustomerConfig: Codable, Sendable {
     public let serviceHours: CustomerServiceHours
 
     enum CodingKeys: String, CodingKey {
+        case instapay
         case operatingMode = "operating_mode"
         case offersEnabled = "offers_enabled"
         case optionLists = "option_lists"
@@ -1028,9 +1341,11 @@ public struct CustomerHome: Equatable, Sendable {
     /// The default address's city: C16 slots and the category check need it without opening C14 (6ب).
     public var addressCityID: Int?
     public var orders: [CustomerOrderSummary] = []
+    public var instapay: InstapayDetails?
 }
 
 public struct CustomerDispute: Codable, Equatable, Sendable {
+    public var visitOrderID: Int? = nil
     public let id: Int
     public let reasonCode: String
     public let reasonLabel: String
@@ -1044,6 +1359,7 @@ public struct CustomerDispute: Codable, Equatable, Sendable {
 
     enum CodingKeys: String, CodingKey {
         case id, description, status, resolution, attachments
+        case visitOrderID = "visit_order_id"
         case reasonCode = "reason_code"
         case reasonLabel = "reason_label"
         case statusLabel = "status_label"
@@ -1058,6 +1374,7 @@ public struct CustomerDisputeAttachment: Codable, Equatable, Sendable {
 }
 
 public struct CustomerConversation: Codable, Equatable, Sendable {
+    public var unreadCount: Int? = nil
     public let id: Int
     public let order: CustomerConversationOrder
     public let provider: CustomerConversationProvider
@@ -1068,6 +1385,7 @@ public struct CustomerConversation: Codable, Equatable, Sendable {
     enum CodingKeys: String, CodingKey {
         case id, order, provider, customer, status
         case lastMessage = "last_message"
+        case unreadCount = "unread_count"
     }
 }
 
@@ -1084,7 +1402,7 @@ public struct CustomerConversationCustomer: Codable, Equatable, Sendable {
 
 public struct CustomerConversationOrder: Codable, Equatable, Sendable {
     public let id: Int
-    public let number: String?
+    @FlexibleString public var number: String?
     public let status: String?
     public let statusLabel: String?
     public let category: String?
@@ -1099,6 +1417,7 @@ public struct CustomerConversationOrder: Codable, Equatable, Sendable {
 }
 
 public struct CustomerConversationProvider: Codable, Equatable, Sendable {
+    public var availableNow: Bool? = nil
     public let id: Int
     public let name: String?
     public let isVerified: Bool
@@ -1106,10 +1425,12 @@ public struct CustomerConversationProvider: Codable, Equatable, Sendable {
     enum CodingKeys: String, CodingKey {
         case id, name
         case isVerified = "is_verified"
+        case availableNow = "available_now"
     }
 }
 
 public struct CustomerMessage: Codable, Equatable, Sendable {
+    public var readAt: String? = nil
     public let id: Int
     public let isMine: Bool
     public let body: String?
@@ -1122,12 +1443,15 @@ public struct CustomerMessage: Codable, Equatable, Sendable {
         case isMine = "is_mine"
         case wasMasked = "was_masked"
         case createdAt = "created_at"
+        case readAt = "read_at"
     }
 }
 
 public struct CustomerMessageMedia: Codable, Equatable, Sendable {
+    public var contentURL: String? = nil
     public let id: Int
     public let type: String
+    enum CodingKeys: String, CodingKey { case id, type; case contentURL = "content_url" }
 }
 
 public struct CustomerConversationMessages: Sendable {
@@ -1297,14 +1621,23 @@ extension CustomerCategoryReference {
     }
 }
 
+public struct CustomerPriceGuide: Codable, Equatable, Sendable {
+    public let minimum: String
+    public let maximum: String
+    public let suggestedAmounts: [String]
+    enum CodingKeys: String, CodingKey { case minimum, maximum; case suggestedAmounts = "suggested_amounts" }
+}
+
 public struct CustomerProblemTypeReference: Codable, Equatable, Sendable {
     public let id: Int
     public let name: String
     public let isOther: Bool
+    public var customerPriceGuide: CustomerPriceGuide? = nil
 
     enum CodingKeys: String, CodingKey {
         case id, name
         case isOther = "is_other"
+        case customerPriceGuide = "customer_price_guide"
     }
 }
 
@@ -1339,6 +1672,8 @@ public enum CustomerCatalogSelection {
 }
 
 public struct ProviderContext: Codable, Equatable, Sendable {
+    public var avatarURL: String? = nil
+    public var tagStatistics: [CustomerReviewTagStatistic]? = nil
     public let id: Int
     public let name: String
     public let bio: String?
@@ -1351,11 +1686,17 @@ public struct ProviderContext: Codable, Equatable, Sendable {
     public let specialties: [CustomerNamedReference]
     public let reviews: [CustomerProviderReview]
     public let availableActions: [String]
+    public let ratingsCount: Int?
+    /// Portfolio URLs are authenticated and scoped to the customer's order.
+    public let portfolio: [ProviderPortfolioItem]?
 
     enum CodingKeys: String, CodingKey {
-        case id, name, bio, specialties, reviews
+        case tagStatistics = "tag_statistics"
+        case id, name, bio, specialties, reviews, portfolio
+        case ratingsCount = "ratings_count"
         case isVerified = "is_verified"
         case availableNow = "available_now"
+        case avatarURL = "avatar_url"
         case experienceYears = "experience_years"
         case ratingAverage = "rating_avg"
         case completedOrders = "completed_orders"
@@ -1370,7 +1711,16 @@ public struct ProviderRatingBreakdown: Codable, Equatable, Sendable {
     public let conduct: String?
 }
 
+public struct CustomerReviewTagStatistic: Codable, Equatable, Sendable {
+    public let code: String
+    public let label: String
+    public let count: Int
+}
+
 public struct CustomerProviderReview: Codable, Equatable, Sendable {
+    public var photos: [CustomerPhoto]? = nil
+    public var area: String? = nil
+    public var tags: [String]? = nil
     public let customerName: String
     public let quality: Int
     public let punctuality: Int
@@ -1379,7 +1729,7 @@ public struct CustomerProviderReview: Codable, Equatable, Sendable {
     public let createdAt: String?
 
     enum CodingKeys: String, CodingKey {
-        case quality, punctuality, conduct, comment
+        case quality, punctuality, conduct, comment, photos, area, tags
         case customerName = "customer_name"
         case createdAt = "created_at"
     }
@@ -1406,14 +1756,18 @@ public struct CustomerOfferProvider: Codable, Equatable, Sendable {
     public let id: Int
     public let name: String
     public let isVerified: Bool
+    public var availableNow: Bool? = nil
     public let ratingAverage: String?
     public let completedOrders: Int?
+    public let ratingsCount: Int?
 
     enum CodingKeys: String, CodingKey {
         case id, name
         case isVerified = "is_verified"
+        case availableNow = "available_now"
         case ratingAverage = "rating_avg"
         case completedOrders = "completed_orders"
+        case ratingsCount = "ratings_count"
     }
 }
 
@@ -1470,7 +1824,16 @@ public struct PublishRequestBody: Encodable, Equatable, Sendable {
     }
 }
 
+public struct RequestAvailabilityPayload: Decodable, Sendable {
+    public let nowAvailable: Bool
+    enum CodingKeys: String, CodingKey { case nowAvailable = "now_available" }
+}
+
 public protocol CustomerAPI: Sendable {
+    func arrivalCode(orderId: Int, refresh: Bool) async throws -> CustomerArrivalCode
+    func profileImage(url: String) async throws -> Data
+    func shareVisit(orderId: Int) async throws -> CustomerVisitShareLink
+    func requestAvailability(addressID: Int, categoryID: Int) async throws -> Bool
     func home() async throws -> CustomerHome
     func catalogCategoryIDs(cityID: Int) async throws -> Set<Int>
     func order(id: Int) async throws -> CustomerOrderSummary
@@ -1494,6 +1857,9 @@ public protocol CustomerAPI: Sendable {
         async throws -> CustomerOrderSummary
     func changePaymentMethod(orderId: Int, method: String, expectedVersion: Int) async throws
         -> CustomerOrderSummary
+    func submitInstapay(orderId: Int, reference: String, receiptMediaID: Int, expectedVersion: Int) async throws -> CustomerPayment
+    func submitStructuredReview(orderId: Int, quality: Int, punctuality: Int, conduct: Int, comment: String?, mediaIDs: [Int], tags: [String]) async throws
+    func submitReviewWithPhotos(orderId: Int, quality: Int, punctuality: Int, conduct: Int, comment: String?, mediaIDs: [Int]) async throws
     func createPayment(orderId: Int, channel: String, expectedVersion: Int) async throws
         -> CustomerPayment
     func confirmCompletion(orderId: Int, expectedVersion: Int) async throws -> CustomerOrderSummary
@@ -1507,6 +1873,8 @@ public protocol CustomerAPI: Sendable {
     func slots(cityId: Int, date: String) async throws -> [CustomerSlot]
     func uploadMedia(_ upload: CustomerMediaUpload) async throws -> CustomerMedia
     func deleteMedia(id: Int) async throws
+    func warrantyClaims(orderId: Int) async throws -> [CustomerDispute]
+    func requestWarranty(orderId: Int, description: String) async throws -> CustomerDispute
     func disputes(orderId: Int) async throws -> [CustomerDispute]
     func openDispute(orderId: Int, reasonCode: String, description: String, mediaIds: [Int])
         async throws -> CustomerDispute
@@ -1522,6 +1890,7 @@ public protocol CustomerAPI: Sendable {
     func updateRatingReminders(enabled: Bool) async throws -> CustomerAccount
     func account() async throws -> CustomerAccount
     func updateAccount(name: String, phone: String) async throws -> CustomerAccount
+    func updateLocale(_ locale: String) async throws
     func changePassword(current: String, password: String, confirmation: String) async throws
     func deleteAccount() async throws
     func terms() async throws -> CustomerTerms
@@ -1529,6 +1898,25 @@ public protocol CustomerAPI: Sendable {
 }
 
 extension CustomerAPI {
+    public func arrivalCode(orderId: Int, refresh: Bool) async throws -> CustomerArrivalCode { throw URLError(.unsupportedURL) }
+    public func submitStructuredReview(orderId: Int, quality: Int, punctuality: Int, conduct: Int, comment: String?, mediaIDs: [Int], tags: [String]) async throws {
+        guard tags.isEmpty else { throw URLError(.unsupportedURL) }
+        try await submitReviewWithPhotos(orderId: orderId, quality: quality, punctuality: punctuality, conduct: conduct, comment: comment, mediaIDs: mediaIDs)
+    }
+    public func profileImage(url: String) async throws -> Data { throw URLError(.unsupportedURL) }
+
+    public func shareVisit(orderId: Int) async throws -> CustomerVisitShareLink { throw URLError(.unsupportedURL) }
+    public func warrantyClaims(orderId: Int) async throws -> [CustomerDispute] { throw URLError(.unsupportedURL) }
+    public func requestWarranty(orderId: Int, description: String) async throws -> CustomerDispute { throw URLError(.unsupportedURL) }
+    public func submitInstapay(orderId: Int, reference: String, receiptMediaID: Int, expectedVersion: Int) async throws -> CustomerPayment { throw URLError(.unsupportedURL) }
+    public func submitReviewWithPhotos(orderId: Int, quality: Int, punctuality: Int, conduct: Int, comment: String?, mediaIDs: [Int]) async throws {
+        guard mediaIDs.isEmpty else { throw URLError(.unsupportedURL) }
+        try await submitReview(orderId: orderId, quality: quality, punctuality: punctuality, conduct: conduct, comment: comment)
+    }
+    public func requestAvailability(addressID _: Int, categoryID _: Int) async throws -> Bool {
+        throw URLError(.unsupportedURL)
+    }
+
     public func tracking(orderId _: Int) async throws -> CustomerTrackingPayload {
         throw URLError(.unsupportedURL)
     }
@@ -1542,6 +1930,15 @@ public struct LiveCustomerAPI: CustomerAPI {
         transport: any HTTPTransport = URLSessionTransport()
     ) {
         client = APIClient(baseURL: baseURL, token: token, appMode: appMode, transport: transport)
+    }
+
+    public func arrivalCode(orderId: Int, refresh: Bool) async throws -> CustomerArrivalCode {
+        let response: CustomerArrivalCodeEnvelope = try await client.post("orders/\(orderId)/arrival-code", body: CustomerArrivalCodeRequest(refresh: refresh))
+        return response.data
+    }
+    public func requestAvailability(addressID: Int, categoryID: Int) async throws -> Bool {
+        let response: RequestAvailabilityPayload = try await client.get("orders/availability?customer_address_id=\(addressID)&category_id=\(categoryID)")
+        return response.nowAvailable
     }
 
     public func catalogCategoryIDs(cityID: Int) async throws -> Set<Int> {
@@ -1568,7 +1965,15 @@ public struct LiveCustomerAPI: CustomerAPI {
         home.addressLabel = address?.displayLabel ?? ""
         home.addressCityID = address?.city?.id
         home.orders = orders.data
+        home.instapay = config.instapay
         return home
+    }
+
+    public func profileImage(url: String) async throws -> Data { try await client.download(url) }
+
+    public func shareVisit(orderId: Int) async throws -> CustomerVisitShareLink {
+        let response: CustomerListItemShareEnvelope = try await client.post("orders/\(orderId)/share-links", body: [String: String]())
+        return response.data
     }
 
     public func order(id: Int) async throws -> CustomerOrderSummary {
@@ -1676,6 +2081,22 @@ public struct LiveCustomerAPI: CustomerAPI {
         return response.data
     }
 
+    public func submitInstapay(orderId: Int, reference: String, receiptMediaID: Int, expectedVersion: Int) async throws -> CustomerPayment {
+        let response: CustomerPaymentEnvelope = try await client.post(
+            "orders/\(orderId)/instapay-transfers", body: InstapayTransferBody(transferReference: reference, receiptMediaID: receiptMediaID, expectedVersion: expectedVersion))
+        return response.data
+    }
+
+    public func submitStructuredReview(orderId: Int, quality: Int, punctuality: Int, conduct: Int, comment: String?, mediaIDs: [Int], tags: [String]) async throws {
+        let _: CustomerReviewEnvelope = try await client.post(
+            "orders/\(orderId)/review", body: ReviewPhotosBody(quality: quality, punctuality: punctuality, conduct: conduct, comment: comment, mediaIDs: mediaIDs, tags: tags))
+    }
+
+    public func submitReviewWithPhotos(orderId: Int, quality: Int, punctuality: Int, conduct: Int, comment: String?, mediaIDs: [Int]) async throws {
+        let _: CustomerReviewEnvelope = try await client.post(
+            "orders/\(orderId)/review", body: ReviewPhotosBody(quality: quality, punctuality: punctuality, conduct: conduct, comment: comment, mediaIDs: mediaIDs))
+    }
+
     public func createPayment(orderId: Int, channel: String, expectedVersion: Int) async throws
         -> CustomerPayment
     {
@@ -1750,6 +2171,15 @@ public struct LiveCustomerAPI: CustomerAPI {
         try await client.delete("media/\(id)")
     }
 
+    public func warrantyClaims(orderId: Int) async throws -> [CustomerDispute] {
+        let response: CustomerListEnvelope<CustomerDispute> = try await client.get("orders/\(orderId)/warranty-claims")
+        return response.data
+    }
+    public func requestWarranty(orderId: Int, description: String) async throws -> CustomerDispute {
+        let response: CustomerDisputeEnvelope = try await client.post("orders/\(orderId)/warranty-claims", body: WarrantyBody(description: description))
+        return response.data
+    }
+
     public func disputes(orderId: Int) async throws -> [CustomerDispute] {
         let response: CustomerListEnvelope<CustomerDispute> = try await client.get(
             "orders/\(orderId)/disputes")
@@ -1815,6 +2245,10 @@ public struct LiveCustomerAPI: CustomerAPI {
         return response.user
     }
 
+    public func updateLocale(_ locale: String) async throws {
+        let _: CustomerAccountEnvelope = try await client.patch("me", body: LocaleUpdateBody(locale: locale))
+    }
+
     public func updateAccount(name: String, phone: String) async throws -> CustomerAccount {
         let response: CustomerAccountEnvelope = try await client.patch(
             "me", body: AccountUpdateBody(name: name, phone: phone))
@@ -1855,16 +2289,25 @@ public struct CustomerNotification: Codable, Sendable {
     public let deepLink: String?
     public let readAt: String?
     public let createdAt: String?
+    /// NTF-xx (NotificationCode); picks the Figma icon on C32 (DEC-076).
+    public let code: String?
 
     enum CodingKeys: String, CodingKey {
-        case id, title, body
+        case id, title, body, code
         case deepLink = "deep_link"
         case readAt = "read_at"
         case createdAt = "created_at"
     }
 }
 
+public struct CustomerOrderStatistics: Codable, Equatable, Sendable {
+    public let completed: Int
+    public let active: Int
+}
+
 public struct CustomerAccount: Codable, Sendable {
+    public var orderStatistics: CustomerOrderStatistics? = nil
+    public var addressesCount: Int? = nil
     public let name: String
     public let email: String
     public let phone: String
@@ -1874,6 +2317,8 @@ public struct CustomerAccount: Codable, Sendable {
 
     enum CodingKeys: String, CodingKey {
         case name, email, phone
+        case orderStatistics = "order_statistics"
+        case addressesCount = "addresses_count"
         case availableActions = "available_actions"
         case ratingRemindersEnabled = "rating_reminders_enabled"
         case isVerified = "is_verified"
@@ -1891,6 +2336,8 @@ private struct RatingRemindersBody: Encodable, Sendable {
 }
 
 public struct CustomerTerms: Codable, Sendable {
+    public var cancellationPolicy: CustomerRelatedLegalPage? = nil
+    public var privacyPolicy: CustomerRelatedLegalPage? = nil
     public let version: Int
     public let body: String
     public let effectiveAt: String
@@ -1898,9 +2345,26 @@ public struct CustomerTerms: Codable, Sendable {
     enum CodingKeys: String, CodingKey {
         case version, body
         case effectiveAt = "effective_at"
+        case cancellationPolicy = "cancellation_policy"
+        case privacyPolicy = "privacy_policy"
     }
+    public var displayBody: String {
+        body
+            + [cancellationPolicy, privacyPolicy].compactMap { $0 }.map { page in
+                let title = page.title.replacingOccurrences(of: "&", with: "&amp;").replacingOccurrences(of: "<", with: "&lt;").replacingOccurrences(of: ">", with: "&gt;")
+                return "<h2>\(title)</h2>\(page.bodyHTML)"
+            }.joined()
+    }
+
 }
 
+public struct CustomerRelatedLegalPage: Codable, Sendable {
+    public let title: String
+    public let bodyHTML: String
+    enum CodingKeys: String, CodingKey { case title; case bodyHTML = "body_html" }
+}
+
+private struct CustomerListItemShareEnvelope: Decodable, Sendable { let data: CustomerVisitShareLink }
 private struct CustomerAccountEnvelope: Decodable, Sendable { let user: CustomerAccount }
 private struct CustomerTermsEnvelope: Decodable, Sendable { let data: CustomerTerms }
 private struct SupportMessageBody: Encodable, Sendable {
@@ -1914,6 +2378,10 @@ private struct NotificationReadBody: Encodable, Sendable {
 private struct AccountUpdateBody: Encodable, Sendable {
     let name: String
     let phone: String
+}
+
+private struct LocaleUpdateBody: Encodable, Sendable {
+    let locale: String
 }
 private struct PasswordChangeBody: Encodable, Sendable {
     let currentPassword: String
@@ -2008,6 +2476,25 @@ private struct ExpectedVersionBody: Encodable, Sendable {
     enum CodingKeys: String, CodingKey { case expectedVersion = "expected_version" }
 }
 
+private struct WarrantyBody: Encodable, Sendable { let description: String }
+
+private struct InstapayTransferBody: Encodable, Sendable {
+    let transferReference: String
+    let receiptMediaID: Int
+    let expectedVersion: Int
+    enum CodingKeys: String, CodingKey { case transferReference = "transfer_reference"; case receiptMediaID = "receipt_media_id"; case expectedVersion = "expected_version" }
+}
+
+private struct ReviewPhotosBody: Encodable, Sendable {
+    let quality: Int
+    let punctuality: Int
+    let conduct: Int
+    let comment: String?
+    let mediaIDs: [Int]
+    var tags: [String] = []
+    enum CodingKeys: String, CodingKey { case quality, punctuality, conduct, comment, tags; case mediaIDs = "media_ids" }
+}
+
 private struct SubmitReviewBody: Encodable, Sendable {
     let quality: Int
     let punctuality: Int
@@ -2029,6 +2516,14 @@ private struct SendCustomerMessageBody: Encodable, Sendable {
 @Observable
 // swiftlint:disable:next type_body_length
 public final class CustomerViewModel {
+    private func reduce(screen: String, input: [String: CustomerInputValue]) -> CustomerUIState {
+        var resolved = input
+        resolved["operating_mode"] = .text(operatingMode)
+        resolved["warranty_coverage"] = .text(currentOrder?.warrantyCoverage ?? "")
+        resolved["waiting_info"] = resolved["waiting_info"] ?? .text(waitingInfo(currentOrder))
+        return CustomerLogic.reduce(screen: screen, input: resolved)
+    }
+
     public private(set) var state = CustomerUIState(screen: "SCR-C01", phase: .loading) {
         // Loading is transient; an error screen is shown but not returned to.
         didSet { if state.phase != .loading { history.show(state, restorable: state.phase != .error) } }
@@ -2043,7 +2538,9 @@ public final class CustomerViewModel {
         guard let target = history.back(rootEntry: { CustomerUIState(screen: "SCR-C01", phase: .loading) })
         else { return false }
         switch target.screen {
+        case "SCR-C04": openTiming()
         case "SCR-C01": await loadHome()
+        case "SCR-C18": await loadConversations()
         case "SCR-C19":
             if let id = currentConversationId {
                 await loadConversation(id: id, showLoading: true)
@@ -2065,8 +2562,14 @@ public final class CustomerViewModel {
     private var currentProposalId: Int?
     private var currentOrder: CustomerOrderSummary?
     private var selectedPaymentChannel = -1
+    private var instapay: InstapayDetails?
+    private var transferReference = ""
+    private var receiptMediaID: Int?
+    private var ratingMediaIDs: [Int] = []
     private var ratingValues = [0, 0, 0]
     private var ratingComment = ""
+    /// DEC-076 (Figma 3002:4475) selected review tags by index → stable server code; stored separately from the comment.
+    private var ratingTags: [Int: String] = [:]
     private var cancellationReasonIndex = -1
     private var cancellationNote = ""
     private var optionLists: [String: [CustomerOption]] = [:]
@@ -2092,12 +2595,15 @@ public final class CustomerViewModel {
     private var addressDraft = CustomerAddressDraft()
     private var mediaDrafts: [CustomerMediaDraft] = []
     private var mediaRecording = false
+    private var mediaSelectionError = ""
     private var chatPollingTask: Task<Void, Never>?
     private var conversationIDs: [Int] = []
     private var currentConversationId: Int?
     private var currentConversation: CustomerConversation?
     private var chatMessages: [CustomerMessage] = []
     private var chatDraft = ""
+    private var arrivalCodeValue: CustomerArrivalCode?
+    private var arrivalCodeFailed = false
     private var orderIDs: [Int] = []
     private var orderStatuses: [String] = []
     private var faqQuestions: [String] = []
@@ -2117,8 +2623,11 @@ public final class CustomerViewModel {
     private var addressLabel = ""
     private var catalog: [CustomerCategoryReference] = []
     private var requestDescription = ""
+    /// C03 search (DEC-071): filters the catalog locally by category and problem-type names.
+    private var serviceQuery = ""
     private var currentOffers: [CustomerOffer] = []
     private var currentOfferId: Int?
+    /// C06 sort chip: 0 rating, 1 price, 2 eta, 3 backend sort options, with best match as the configured default.
     private var offersSortIndex = 0
     private var selectedMaterialIndex = -1
     private var selectedPricingIndex = -1
@@ -2138,22 +2647,22 @@ public final class CustomerViewModel {
 
     public func show(screen: String, input: [String: CustomerInputValue]) {
         if screen != "SCR-C19" { stopChatPolling() }
-        state = CustomerLogic.reduce(screen: screen, input: input)
+        state = reduce(screen: screen, input: input)
     }
 
     public func loadHelp() async {
-        state = CustomerLogic.reduce(screen: "SCR-C29", input: ["event": .text("loading")])
+        state = reduce(screen: "SCR-C29", input: ["event": .text("loading")])
         do {
             let faqs = try await api.faqs()
             faqQuestions = faqs.map(\.title)
             faqAnswers = faqs.map(\.body)
-            state = CustomerLogic.reduce(screen: "SCR-C29", input: helpInput(event: "loaded"))
-        } catch { state = CustomerLogic.reduce(screen: "SCR-C29", input: ["event": .text("error")]) }
+            state = reduce(screen: "SCR-C29", input: helpInput(event: "loaded"))
+        } catch { state = reduce(screen: "SCR-C29", input: ["event": .text("error")]) }
     }
 
     public func toggleFAQ(index: Int) {
         expandedFaqIndex = expandedFaqIndex == index ? -1 : index
-        state = CustomerLogic.reduce(screen: "SCR-C29", input: helpInput(event: "loaded"))
+        state = reduce(screen: "SCR-C29", input: helpInput(event: "loaded"))
     }
 
     public func updateHelpField(index: Int, value: String) {
@@ -2162,29 +2671,29 @@ public final class CustomerViewModel {
         } else {
             helpMessage = String(value.prefix(2_000))
         }
-        state = CustomerLogic.reduce(screen: "SCR-C29", input: helpInput(event: "loaded"))
+        state = reduce(screen: "SCR-C29", input: helpInput(event: "loaded"))
     }
 
     public func submitHelpMessage() async {
         guard state.canContinue else { return }
-        state = CustomerLogic.reduce(screen: "SCR-C29", input: helpInput(event: "submitting"))
+        state = reduce(screen: "SCR-C29", input: helpInput(event: "submitting"))
         do {
             try await api.sendSupportMessage(
                 subject: helpSubject.trimmingCharacters(in: .whitespacesAndNewlines),
                 message: helpMessage.trimmingCharacters(in: .whitespacesAndNewlines))
-            state = CustomerLogic.reduce(screen: "SCR-C29", input: helpInput(event: "success"))
-        } catch { state = CustomerLogic.reduce(screen: "SCR-C29", input: ["event": .text("error")]) }
+            state = reduce(screen: "SCR-C29", input: helpInput(event: "success"))
+        } catch { state = reduce(screen: "SCR-C29", input: ["event": .text("error")]) }
     }
 
     public func loadNotifications() async {
-        state = CustomerLogic.reduce(screen: "SCR-C32", input: ["event": .text("loading")])
+        state = reduce(screen: "SCR-C32", input: ["event": .text("loading")])
         do {
             let values = try await api.notifications()
             notificationIDs = values.map(\.id)
             notificationLinks = values.map { $0.deepLink ?? "" }
-            state = CustomerLogic.reduce(
+            state = reduce(
                 screen: "SCR-C32", input: notificationInput(values, event: "loaded"))
-        } catch { state = CustomerLogic.reduce(screen: "SCR-C32", input: ["event": .text("error")]) }
+        } catch { state = reduce(screen: "SCR-C32", input: ["event": .text("error")]) }
     }
 
     public func openNotification(index: Int) async {
@@ -2222,6 +2731,15 @@ public final class CustomerViewModel {
         }
     }
 
+    /// DEC-076: C09's chat button opens the order's conversation.
+    public func openCurrentOrderChat() async {
+        guard let orderId = currentOrderId else { return }
+        await openChat(orderID: orderId)
+    }
+
+    /// Direct phone contact is handled by administration; the parties use messages.
+    public var currentProviderPhone: String? { nil }
+
     private func openChat(orderID: Int) async {
         guard let conversation = try? await api.conversations(page: 1).first(where: { $0.order.id == orderID })
         else {
@@ -2237,7 +2755,7 @@ public final class CustomerViewModel {
     public func setRatingReminders(_ enabled: Bool) async {
         let previous = ratingRemindersEnabled
         ratingRemindersEnabled = enabled
-        state = CustomerLogic.reduce(screen: "SCR-C33", input: accountInput(event: "loaded"))
+        state = reduce(screen: "SCR-C33", input: accountInput(event: "loaded"))
         do {
             let account = try await api.updateRatingReminders(enabled: enabled)
             ratingRemindersEnabled = account.ratingRemindersEnabled ?? enabled
@@ -2245,20 +2763,20 @@ public final class CustomerViewModel {
             ratingRemindersEnabled = previous
         }
         if state.screen == "SCR-C33" {
-            state = CustomerLogic.reduce(screen: "SCR-C33", input: accountInput(event: "loaded"))
+            state = reduce(screen: "SCR-C33", input: accountInput(event: "loaded"))
         }
     }
 
     public func loadAccount() async {
-        state = CustomerLogic.reduce(screen: "SCR-C33", input: ["event": .text("loading")])
+        state = reduce(screen: "SCR-C33", input: ["event": .text("loading")])
         do {
             let account = try await api.account()
             accountValues = [account.name, account.email, account.phone]
             accountActions = account.availableActions
             ratingRemindersEnabled = account.ratingRemindersEnabled ?? true
             accountMode = "overview"
-            state = CustomerLogic.reduce(screen: "SCR-C33", input: accountInput(event: "loaded"))
-        } catch { state = CustomerLogic.reduce(screen: "SCR-C33", input: ["event": .text("error")]) }
+            state = reduce(screen: "SCR-C33", input: accountInput(event: "loaded"))
+        } catch { state = reduce(screen: "SCR-C33", input: ["event": .text("error")]) }
     }
 
     public func accountAction(_ action: String) async {
@@ -2266,18 +2784,18 @@ public final class CustomerViewModel {
         case "update_account" where accountMode == "edit": await submitAccountUpdate()
         case "update_account":
             accountMode = "edit"
-            state = CustomerLogic.reduce(screen: "SCR-C33", input: accountInput(event: "loaded"))
+            state = reduce(screen: "SCR-C33", input: accountInput(event: "loaded"))
         case "change_password" where accountMode == "password": await submitPasswordChange()
         case "change_password":
             accountMode = "password"
             accountValues = ["", "", ""]
-            state = CustomerLogic.reduce(screen: "SCR-C33", input: accountInput(event: "loaded"))
+            state = reduce(screen: "SCR-C33", input: accountInput(event: "loaded"))
         case "delete_account":
-            state = CustomerLogic.reduce(
+            state = reduce(
                 screen: "SCR-C33", input: accountInput(event: "confirm_delete", mode: "delete"))
         case "dismiss_delete":
             accountMode = "overview"
-            state = CustomerLogic.reduce(screen: "SCR-C33", input: accountInput(event: "loaded"))
+            state = reduce(screen: "SCR-C33", input: accountInput(event: "loaded"))
         case "confirm_delete_account": await submitDeleteAccount()
         case "open_terms": await loadTerms()
         default: break
@@ -2287,21 +2805,21 @@ public final class CustomerViewModel {
     public func updateAccountField(index: Int, value: String) {
         guard accountValues.indices.contains(index) else { return }
         accountValues[index] = value
-        state = CustomerLogic.reduce(screen: "SCR-C33", input: accountInput(event: "loaded"))
+        state = reduce(screen: "SCR-C33", input: accountInput(event: "loaded"))
     }
 
     public func loadTerms() async {
-        state = CustomerLogic.reduce(screen: "SCR-C34", input: ["event": .text("loading")])
+        state = reduce(screen: "SCR-C34", input: ["event": .text("loading")])
         do {
             let terms = try await api.terms()
-            state = CustomerLogic.reduce(
+            state = reduce(
                 screen: "SCR-C34",
                 input: [
-                    "event": .text("loaded"), "body": .text(terms.body),
+                    "event": .text("loaded"), "body": .text(terms.displayBody),
                     "version": .text(String(terms.version)),
-                    "effective_at": .text(displayDateTime(terms.effectiveAt)),
+                    "effective_at": .text(BzrFormatter.legalDate(terms.effectiveAt)),
                 ])
-        } catch { state = CustomerLogic.reduce(screen: "SCR-C34", input: ["event": .text("error")]) }
+        } catch { state = reduce(screen: "SCR-C34", input: ["event": .text("error")]) }
     }
 
     public func noOffersAction(_ action: String) async {
@@ -2323,9 +2841,9 @@ public final class CustomerViewModel {
                     $0.code == order.pricingMode
                 } ?? -1
             requestBudget = order.budgetAmount ?? ""
-            state = CustomerLogic.reduce(screen: "SCR-C03", input: problemInput())
+            state = reduce(screen: "SCR-C03", input: serviceInput())
         } else if action == "republish" {
-            state = CustomerLogic.reduce(
+            state = reduce(
                 screen: "SCR-C35",
                 input: ["event": .text("submitting"), "available_actions": .strings(state.visibleActions)])
             guard let orderId = currentOrderId else { return }
@@ -2334,25 +2852,29 @@ public final class CustomerViewModel {
                 currentOrderId = order.id
                 currentOrder = order
                 await loadOrder(id: order.id)
-            } catch { state = CustomerLogic.reduce(screen: "SCR-C35", input: ["event": .text("error")]) }
+            } catch { state = reduce(screen: "SCR-C35", input: ["event": .text("error")]) }
         }
     }
 
     public func loadConversations(page: Int = 1) async {
         stopChatPolling()
-        state = CustomerLogic.reduce(screen: "SCR-C18", input: ["event": .text("loading")])
+        state = reduce(screen: "SCR-C18", input: ["event": .text("loading")])
         do {
             let conversations = try await api.conversations(page: page)
             conversationIDs = conversations.map(\.id)
-            state = CustomerLogic.reduce(
+            state = reduce(
                 screen: "SCR-C18",
                 input: [
                     "event": .text("loaded"),
                     "provider_names": .strings(conversations.map { $0.provider.name ?? "" }),
+                    "unread_counts": .strings(conversations.map { String($0.unreadCount ?? 0) }),
+                    "providers_available": .strings(conversations.map { String($0.provider.availableNow ?? false) }),
+                    // DEC-076 (Figma 3002:2924): "category • status", without the order number.
                     "order_summaries": .strings(
                         conversations.map {
-                            "\($0.order.category ?? "") #\($0.order.number ?? "") · \($0.order.statusLabel ?? "")"
+                            [$0.order.category ?? "", $0.order.statusLabel ?? ""].filter { !$0.isEmpty }.joined(separator: " • ")
                         }),
+                    "last_message_mine": .strings(conversations.map { $0.lastMessage?.isMine == true ? "mine" : "" }),
                     "conversation_statuses": .strings(conversations.map(\.status)),
                     "last_messages": .strings(conversations.map { $0.lastMessage?.body ?? "" }),
                     "last_message_times": .strings(
@@ -2361,7 +2883,7 @@ public final class CustomerViewModel {
                         conversations.map { $0.provider.isVerified ? "verified" : "" }),
                 ])
         } catch {
-            state = CustomerLogic.reduce(screen: "SCR-C18", input: ["event": .text("error")])
+            state = reduce(screen: "SCR-C18", input: ["event": .text("error")])
         }
     }
 
@@ -2374,60 +2896,100 @@ public final class CustomerViewModel {
 
     public func updateChatDraft(_ value: String) {
         chatDraft = String(value.prefix(1_000))
-        state = CustomerLogic.reduce(screen: "SCR-C19", input: chatInput(event: "loaded"))
+        state = reduce(screen: "SCR-C19", input: chatInput(event: "loaded"))
     }
 
     public func sendChatMessage() async {
         guard let id = currentConversationId else { return }
         let body = chatDraft.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !body.isEmpty, state.canContinue else { return }
-        state = CustomerLogic.reduce(screen: "SCR-C19", input: chatInput(event: "sending"))
+        state = reduce(screen: "SCR-C19", input: chatInput(event: "sending"))
         do {
             _ = try await api.sendMessage(conversationId: id, body: body, mediaIds: [])
             chatDraft = ""
             await loadConversation(id: id, showLoading: false)
         } catch {
-            state = CustomerLogic.reduce(screen: "SCR-C19", input: ["event": .text("error")])
+            state = reduce(screen: "SCR-C19", input: ["event": .text("error")])
         }
     }
 
     public func sendChatImage(_ upload: CustomerMediaUpload) async {
         guard let id = currentConversationId else { return }
-        state = CustomerLogic.reduce(screen: "SCR-C19", input: chatInput(event: "sending"))
+        state = reduce(screen: "SCR-C19", input: chatInput(event: "sending"))
         do {
             let media = try await api.uploadMedia(upload)
             _ = try await api.sendMessage(conversationId: id, body: nil, mediaIds: [media.id])
             await loadConversation(id: id, showLoading: false)
         } catch {
-            state = CustomerLogic.reduce(screen: "SCR-C19", input: ["event": .text("error")])
+            state = reduce(screen: "SCR-C19", input: ["event": .text("error")])
         }
     }
 
     public func loadOrders(tabIndex: Int, page: Int = 1) async {
         stopChatPolling()
-        let tab = tabIndex == 1 ? "past" : "current"
-        state = CustomerLogic.reduce(screen: "SCR-C25", input: ["event": .text("loading")])
+        // DEC-076 (Figma 3002:3889): «الملغاة» is the past scope narrowed to cancelled and expired orders, «السابقة» the rest.
+        let tab = tabIndex == 1 ? "past" : (tabIndex == 2 ? "cancelled" : "current")
+        let ended: Set<String> = ["CANCELLED", "EXPIRED"]
+        state = reduce(screen: "SCR-C25", input: ["event": .text("loading")])
         do {
-            let orders = try await api.orders(scope: tab, page: page)
+            let orders = try await api.orders(scope: tab == "current" ? "current" : "past", page: page).filter {
+                switch tab {
+                case "past": !ended.contains($0.status ?? "")
+                case "cancelled": ended.contains($0.status ?? "")
+                default: true
+                }
+            }
             orderIDs = orders.map(\.id)
             orderStatuses = orders.map { $0.status ?? "" }
-            state = CustomerLogic.reduce(
+            // Offers only exist for open orders; a failed side call leaves the card without figures.
+            var offerCounts: [String] = []
+            var lowestOffers: [String] = []
+            for order in orders {
+                guard order.status == "OPEN", let offers = try? await api.offers(orderId: order.id, sort: "rating") else {
+                    offerCounts.append("0")
+                    lowestOffers.append("")
+                    continue
+                }
+                offerCounts.append(String(offers.count))
+                lowestOffers.append(offers.compactMap { Decimal(string: $0.price) }.min().map { "\($0)" } ?? "")
+            }
+            let catalogIcons = Dictionary(catalog.map { ($0.id, $0.iconKey ?? "") }, uniquingKeysWith: { first, _ in first })
+            let rows: [String] = orders.map { order in
+                let place = [order.location?.area ?? "", order.location?.city ?? ""].filter { !$0.isEmpty }.joined(separator: " — ")
+                let amount = order.provider == nil ? "" : Self.plainAmount(order.amounts?.finalAmount ?? order.amounts?.laborTotal)
+                // The conversation opens when a technician is assigned (B-21: none before acceptance).
+                let fields: [String] = [
+                    order.number ?? "", place, order.provider?.name ?? "",
+                    order.provider?.isVerified == true ? "verified" : "", order.provider?.ratingAverage ?? "", amount,
+                    order.provider == nil ? "" : "chat", "",
+                ]
+                return fields.map { $0.replacingOccurrences(of: "|", with: " ") }.joined(separator: "|")
+            }
+            state = reduce(
                 screen: "SCR-C25",
                 input: [
                     "event": .text("loaded"), "tab": .text(tab),
-                    "order_titles": .strings(
-                        orders.map {
-                            "\($0.category?.name ?? "") — \($0.problemType?.name ?? "")"
-                        }),
+                    "order_titles": .strings(orders.map { ($0.problemType?.name).flatMap { $0.isEmpty ? nil : $0 } ?? $0.category?.name ?? "" }),
                     "order_subtitles": .strings(
                         orders.map {
                             "#\($0.number ?? "") · \($0.location?.area ?? "") · \(displayDateTime($0.createdAt))"
                         }),
                     "order_statuses": .strings(orders.map { $0.statusLabel ?? $0.displayStatus }),
+                    "order_status_codes": .strings(orders.map { $0.status ?? "" }),
+                    "order_icons": .strings(orders.map { catalogIcons[$0.category?.id ?? -1] ?? "" }),
+                    "order_rows": .strings(rows),
+                    "order_offer_counts": .strings(offerCounts),
+                    "order_lowest_offers": .strings(lowestOffers),
                 ])
         } catch {
-            state = CustomerLogic.reduce(screen: "SCR-C25", input: ["event": .text("error")])
+            state = reduce(screen: "SCR-C25", input: ["event": .text("error")])
         }
+    }
+
+    /// C25 card chat button (Figma 3002:3889): the conversation of that order, else the order itself.
+    public func openOrderChat(index: Int) async {
+        guard orderIDs.indices.contains(index) else { return }
+        await openChat(orderID: orderIDs[index])
     }
 
     public func selectOrder(index: Int) async {
@@ -2440,23 +3002,23 @@ public final class CustomerViewModel {
     }
 
     public func loadOrderHistory(id: Int) async {
-        state = CustomerLogic.reduce(screen: "SCR-C26", input: ["event": .text("loading")])
+        state = reduce(screen: "SCR-C26", input: ["event": .text("loading")])
         do {
             let order = try await api.order(id: id)
             let proposals = try await api.proposals(orderId: id).filter { $0.status == "APPROVED" }
             currentOrderId = id
             currentOrder = order
             currentOrderVersion = order.version ?? 0
-            state = CustomerLogic.reduce(
+            state = reduce(
                 screen: "SCR-C26", input: orderHistoryInput(order, proposals: proposals))
         } catch {
-            state = CustomerLogic.reduce(screen: "SCR-C26", input: ["event": .text("error")])
+            state = reduce(screen: "SCR-C26", input: ["event": .text("error")])
         }
     }
 
     public func loadAddresses(selectionMode: Bool = true) async {
         addressSelectionMode = selectionMode
-        state = CustomerLogic.reduce(screen: "SCR-C14", input: ["event": .text("loading")])
+        state = reduce(screen: "SCR-C14", input: ["event": .text("loading")])
         do {
             let addresses = try await api.addresses()
             addressPayloads = addresses
@@ -2466,7 +3028,7 @@ public final class CustomerViewModel {
                 addressId = preferred.id
                 cityId = preferred.city.id
             }
-            state = CustomerLogic.reduce(
+            state = reduce(
                 screen: "SCR-C14",
                 input: [
                     "event": .text("loaded"), "selection_mode": .bool(selectionMode),
@@ -2475,7 +3037,7 @@ public final class CustomerViewModel {
                     "selected_index": .integer(selected),
                 ])
         } catch {
-            state = CustomerLogic.reduce(screen: "SCR-C14", input: ["event": .text("error")])
+            state = reduce(screen: "SCR-C14", input: ["event": .text("error")])
         }
     }
 
@@ -2502,12 +3064,40 @@ public final class CustomerViewModel {
     }
 
     /// C04 from the real draft: mode, address and timing (07).
+    private var serverNowAvailable = false
+    private var availabilityLoading = false
+    private var availabilityFailed = false
+    private var availabilityGeneration = 0
+
     public func openTiming() {
-        state = CustomerLogic.reduce(screen: "SCR-C04", input: timingInput())
+        availabilityGeneration += 1
+        let generation = availabilityGeneration
+        let address = addressId
+        let category = categoryId
+        serverNowAvailable = false
+        availabilityFailed = false
+        availabilityLoading = address != nil && category != nil
+        state = reduce(screen: "SCR-C04", input: timingInput())
+        guard let address, let category else { return }
+        Task {
+            do {
+                let available = try await api.requestAvailability(addressID: address, categoryID: category)
+                guard generation == availabilityGeneration, addressId == address, categoryId == category else { return }
+                serverNowAvailable = available
+                availabilityLoading = false
+                if state.screen == "SCR-C04" { state = reduce(screen: "SCR-C04", input: timingInput()) }
+            } catch {
+                guard generation == availabilityGeneration, addressId == address, categoryId == category else { return }
+                availabilityLoading = false
+                availabilityFailed = true
+                if state.screen == "SCR-C04" { state = reduce(screen: "SCR-C04", input: timingInput()) }
+            }
+        }
     }
 
     public func selectTiming(index: Int) {
         guard options("timing_types").indices.contains(index) else { return }
+        if options("timing_types")[index].code == "NOW" && !serverNowAvailable { return }
         timingType = options("timing_types")[index].code
         if index == 0 {
             slotStart = nil
@@ -2516,60 +3106,73 @@ public final class CustomerViewModel {
         }
     }
 
+    /// C38, step 4 of 5 (DEC-071): materials, and in marketplace the pricing mode and budget.
+    public func openBudget() {
+        if operatingMode == "staff" { openTiming(); return }
+        state = reduce(screen: "SCR-C38", input: budgetInput())
+    }
+
     public func selectMaterial(index: Int) {
         guard options("materials_responsibilities").indices.contains(index) else { return }
         selectedMaterialIndex = index
-        openTiming()
+        state =
+            operatingMode == "staff"
+            ? reduce(screen: "SCR-C04", input: timingInput())
+            : reduce(screen: "SCR-C38", input: budgetInput())
     }
 
     public func selectPricing(index: Int) {
         guard options("pricing_modes").indices.contains(index) else { return }
         selectedPricingIndex = index
-        openTiming()
+        openBudget()
     }
 
     public func updateBudget(_ value: String) {
         requestBudget = String(value.prefix(12))
-        openTiming()
+        openBudget()
+    }
+
+    private func budgetInput() -> [String: CustomerInputValue] {
+        [
+            "event": .text("validate"), "operating_mode": .text(operatingMode),
+            "material_labels": .strings(options("materials_responsibilities").map(\.label)),
+            "material_codes": .strings(options("materials_responsibilities").map(\.code)),
+            "selected_material_index": .integer(selectedMaterialIndex),
+            "pricing_labels": .strings(options("pricing_modes").map(\.label)),
+            "pricing_codes": .strings(options("pricing_modes").map(\.code)),
+            "selected_pricing_index": .integer(selectedPricingIndex), "budget": .text(requestBudget),
+            "budget_amounts": .strings(selectedProblem()?.customerPriceGuide?.suggestedAmounts ?? []),
+        ]
     }
 
     private func timingInput() -> [String: CustomerInputValue] {
         [
             "event": .text("validate"), "operating_mode": .text(operatingMode),
             "category_available": .bool(categoryAvailable),
-            "timing_type": .text(timingType.lowercased()), "now_available": .bool(nowAvailable()),
+            "timing_type": .text(timingType.lowercased()), "now_available": .bool(serverNowAvailable),
+            "availability_loading": .bool(availabilityLoading), "availability_failed": .bool(availabilityFailed),
+            "material_labels": .strings(options("materials_responsibilities").map(\.label)),
+            "material_codes": .strings(options("materials_responsibilities").map(\.code)),
+            "selected_material_index": .integer(selectedMaterialIndex),
             "timing_labels": .strings(options("timing_types").map(\.label)),
+            "timing_codes": .strings(options("timing_types").map(\.code)),
             "selected_timing_index": .integer(
                 options("timing_types").firstIndex { $0.code == timingType } ?? -1),
             "address_id": .text(addressId.map(String.init) ?? ""),
             "address_label": .text(addressLabel),
             "slot_id": .text(slotStart == nil ? "" : "selected"),
             "slot_label": .text(selectedSlotLabel),
-            "material_labels": .strings(options("materials_responsibilities").map(\.label)),
-            "selected_material_index": .integer(selectedMaterialIndex),
-            "pricing_labels": .strings(options("pricing_modes").map(\.label)),
-            "selected_pricing_index": .integer(selectedPricingIndex), "budget": .text(requestBudget),
         ]
-    }
-
-    private func nowAvailable() -> Bool {
-        let formatter = DateFormatter()
-        formatter.locale = Locale(identifier: "en_US_POSIX")
-        formatter.dateFormat = "HH:mm"
-        guard let from = formatter.date(from: serviceHours.from), let to = formatter.date(from: serviceHours.to),
-            let now = formatter.date(from: formatter.string(from: Date()))
-        else { return false }
-        return from <= to ? now >= from && now <= to : now >= from || now <= to
     }
 
     /// C05 before the terms are accepted; the mode decides pricing copy.
     public func openReview() {
-        state = CustomerLogic.reduce(
+        state = reduce(
             screen: "SCR-C05", input: reviewInput(termsAccepted: false))
     }
 
     public func setTermsAccepted(_ accepted: Bool) {
-        state = CustomerLogic.reduce(
+        state = reduce(
             screen: "SCR-C05", input: reviewInput(termsAccepted: accepted))
     }
 
@@ -2600,22 +3203,22 @@ public final class CustomerViewModel {
     }
 
     public func openNewAddress() async {
-        state = CustomerLogic.reduce(screen: "SCR-C15", input: ["event": .text("loading")])
+        state = reduce(screen: "SCR-C15", input: ["event": .text("loading")])
         do {
             guard let city = try await api.cities().first else { throw APIClientError.invalidResponse }
             let areas = try await api.areas(cityId: city.id)
             cityId = city.id
             areaIDs = areas.map(\.id)
             addressDraft = CustomerAddressDraft(cityId: city.id)
-            state = CustomerLogic.reduce(
+            state = reduce(
                 screen: "SCR-C15", input: addressInput(event: "validate", areaLabels: areas.map(\.name)))
         } catch {
-            state = CustomerLogic.reduce(screen: "SCR-C15", input: ["event": .text("error")])
+            state = reduce(screen: "SCR-C15", input: ["event": .text("error")])
         }
     }
 
     public func openEditAddress(index: Int) async {
-        state = CustomerLogic.reduce(screen: "SCR-C15", input: ["event": .text("loading")])
+        state = reduce(screen: "SCR-C15", input: ["event": .text("loading")])
         do {
             guard addressPayloads.indices.contains(index) else { throw APIClientError.invalidResponse }
             let address = addressPayloads[index]
@@ -2630,10 +3233,10 @@ public final class CustomerViewModel {
                 apartment: address.apartment ?? "", landmark: address.landmark ?? "",
                 latitude: Double(address.lat), longitude: Double(address.lng),
                 isDefault: address.isDefault)
-            state = CustomerLogic.reduce(
+            state = reduce(
                 screen: "SCR-C15", input: addressInput(event: "validate", areaLabels: areas.map(\.name)))
         } catch {
-            state = CustomerLogic.reduce(screen: "SCR-C15", input: ["event": .text("error")])
+            state = reduce(screen: "SCR-C15", input: ["event": .text("error")])
         }
     }
 
@@ -2647,27 +3250,27 @@ public final class CustomerViewModel {
         case "landmark": addressDraft.landmark = value
         default: break
         }
-        state = CustomerLogic.reduce(
+        state = reduce(
             screen: "SCR-C15", input: addressInput(event: "validate", areaLabels: state.options))
     }
 
     public func selectArea(index: Int) {
         addressDraft.areaId = areaIDs.indices.contains(index) ? areaIDs[index] : nil
         addressDraft.selectedAreaIndex = index
-        state = CustomerLogic.reduce(
+        state = reduce(
             screen: "SCR-C15", input: addressInput(event: "validate", areaLabels: state.options))
     }
 
     public func updateAddressLocation(latitude: Double, longitude: Double) {
         addressDraft.latitude = latitude
         addressDraft.longitude = longitude
-        state = CustomerLogic.reduce(
+        state = reduce(
             screen: "SCR-C15", input: addressInput(event: "validate", areaLabels: state.options))
     }
 
     public func toggleAddressDefault() {
         addressDraft.isDefault.toggle()
-        state = CustomerLogic.reduce(
+        state = reduce(
             screen: "SCR-C15", input: addressInput(event: "validate", areaLabels: state.options))
     }
 
@@ -2675,7 +3278,7 @@ public final class CustomerViewModel {
         guard state.canContinue, let city = addressDraft.cityId, let area = addressDraft.areaId,
             let latitude = addressDraft.latitude, let longitude = addressDraft.longitude
         else { return }
-        state = CustomerLogic.reduce(
+        state = reduce(
             screen: "SCR-C15", input: addressInput(event: "saving", areaLabels: state.options))
         do {
             _ = try await api.saveAddress(
@@ -2688,30 +3291,30 @@ public final class CustomerViewModel {
                     isDefault: addressDraft.isDefault))
             await loadAddresses(selectionMode: addressSelectionMode)
         } catch {
-            state = CustomerLogic.reduce(screen: "SCR-C15", input: ["event": .text("error")])
+            state = reduce(screen: "SCR-C15", input: ["event": .text("error")])
         }
     }
 
     public func requestDeleteAddress(index: Int) {
         guard addressIDs.indices.contains(index) else { return }
-        state = CustomerLogic.reduce(
+        state = reduce(
             screen: "SCR-C14", input: addressStateInput(event: "confirm_delete", pendingIndex: index))
     }
 
     public func cancelDeleteAddress() {
-        state = CustomerLogic.reduce(screen: "SCR-C14", input: addressStateInput(event: "loaded"))
+        state = reduce(screen: "SCR-C14", input: addressStateInput(event: "loaded"))
     }
 
     public func confirmDeleteAddress() async {
         let index = state.pendingIndex
         guard addressIDs.indices.contains(index) else { return }
-        state = CustomerLogic.reduce(
+        state = reduce(
             screen: "SCR-C14", input: addressStateInput(event: "deleting", pendingIndex: index))
         do {
             try await api.deleteAddress(id: addressIDs[index])
             await loadAddresses(selectionMode: addressSelectionMode)
         } catch {
-            state = CustomerLogic.reduce(screen: "SCR-C14", input: ["event": .text("error")])
+            state = reduce(screen: "SCR-C14", input: ["event": .text("error")])
         }
     }
 
@@ -2729,7 +3332,7 @@ public final class CustomerViewModel {
 
     public func loadSlots(dayLabels: [String], morning: String, evening: String) async {
         guard let cityId else {
-            state = CustomerLogic.reduce(screen: "SCR-C16", input: ["event": .text("error")])
+            state = reduce(screen: "SCR-C16", input: ["event": .text("error")])
             return
         }
         dayDates = customerDayDates()
@@ -2762,7 +3365,7 @@ public final class CustomerViewModel {
     }
 
     public func openMedia() {
-        state = CustomerLogic.reduce(screen: "SCR-C17", input: mediaInput())
+        state = reduce(screen: "SCR-C17", input: mediaInput())
     }
 
     public func canAddMedia(kind: String) -> Bool {
@@ -2775,17 +3378,25 @@ public final class CustomerViewModel {
 
     public func setMediaRecording(_ recording: Bool) {
         mediaRecording = recording
-        state = CustomerLogic.reduce(screen: "SCR-C17", input: mediaInput())
+        state = reduce(screen: "SCR-C17", input: mediaInput())
+    }
+
+    public func rejectMedia(reason: String) {
+        guard state.screen == "SCR-C17" else { return }
+        mediaSelectionError = reason
+        state = reduce(screen: "SCR-C17", input: mediaInput())
     }
 
     public func completeMediaSelection() {
-        state = CustomerLogic.reduce(screen: "SCR-C03", input: problemInput())
+        mediaSelectionError = ""
+        state = reduce(screen: "SCR-C37", input: problemInput())
     }
 
     public func uploadMedia(_ upload: CustomerMediaUpload, kind: String) async {
+        mediaSelectionError = ""
         let draft = CustomerMediaDraft(id: nil, kind: kind, state: "uploading", upload: upload)
         mediaDrafts.append(draft)
-        state = CustomerLogic.reduce(screen: "SCR-C17", input: mediaInput())
+        state = reduce(screen: "SCR-C17", input: mediaInput())
         await uploadMedia(draft)
     }
 
@@ -2797,7 +3408,7 @@ public final class CustomerViewModel {
             token: mediaDrafts[index].token, id: nil, kind: mediaDrafts[index].kind,
             state: "uploading", upload: upload)
         mediaDrafts[index] = draft
-        state = CustomerLogic.reduce(screen: "SCR-C17", input: mediaInput())
+        state = reduce(screen: "SCR-C17", input: mediaInput())
         await uploadMedia(draft)
     }
 
@@ -2815,7 +3426,7 @@ public final class CustomerViewModel {
                     token: draft.token, id: nil, kind: draft.kind, state: "failed", upload: upload)
             }
         }
-        state = CustomerLogic.reduce(screen: "SCR-C17", input: mediaInput())
+        state = reduce(screen: "SCR-C17", input: mediaInput())
     }
 
     public func deleteMedia(index: Int) async {
@@ -2823,7 +3434,7 @@ public final class CustomerViewModel {
         guard mediaDrafts[index].state != "uploading" else { return }
         if let id = mediaDrafts[index].id { try? await api.deleteMedia(id: id) }
         mediaDrafts.remove(at: index)
-        state = CustomerLogic.reduce(screen: "SCR-C17", input: mediaInput())
+        state = reduce(screen: "SCR-C17", input: mediaInput())
     }
 
     public func refreshTracking() async {
@@ -2835,7 +3446,7 @@ public final class CustomerViewModel {
     public var orderDestinationLongitude: Double? { currentOrder?.location?.longitude }
 
     public func loadHome() async {
-        state = CustomerLogic.reduce(screen: "SCR-C01", input: ["event": .text("loading")])
+        state = reduce(screen: "SCR-C01", input: ["event": .text("loading")])
         do {
             let home = try await api.home()
             currentOrderId = home.firstOrderId
@@ -2846,6 +3457,7 @@ public final class CustomerViewModel {
             problemTypeId = nil
             catalog = home.categories
             optionLists = home.optionLists
+            instapay = home.instapay
             optionDefaults = home.optionDefaults
             timingType = optionDefaults["timing_type"] ?? ""
             selectedMaterialIndex =
@@ -2858,7 +3470,18 @@ public final class CustomerViewModel {
             operatingMode = home.operatingMode
             addressLabel = home.addressLabel
             if let city = home.addressCityID { cityId = city }
-            state = CustomerLogic.reduce(
+            // Offers only exist for open orders; a failed side call leaves the card without figures, never blocks home.
+            var offerCount = 0
+            var lowestOffer = ""
+            if let first = home.orders.first, first.status == "OPEN",
+                let offers = try? await api.offers(orderId: first.id, sort: "rating")
+            {
+                offerCount = offers.count
+                lowestOffer = offers.compactMap { Decimal(string: $0.price) }.min().map { "\($0)" } ?? ""
+            }
+            let unread = (try? await api.notifications())?.filter { $0.readAt == nil }.count ?? 0
+            let catalogIcons = Dictionary(catalog.map { ($0.id, $0.iconKey ?? "") }, uniquingKeysWith: { first, _ in first })
+            state = reduce(
                 screen: "SCR-C01",
                 input: [
                     "event": .text("loaded"), "operating_mode": .text(home.operatingMode),
@@ -2868,17 +3491,79 @@ public final class CustomerViewModel {
                     "category_labels": .strings(catalog.map(\.name)),
                     "category_icons": .strings(catalog.map { $0.iconKey ?? "" }),
                     "selected_category_index": .integer(-1),
-                    "order_titles": .strings(home.orders.map { orderSummary($0)[0] }),
+                    // DEC-073 (Figma home): the current-request card titles the problem, says how long ago it was
+                    // published and, while open, how many offers arrived and the lowest — all from the API.
+                    "order_titles": .strings(
+                        home.orders.map { ($0.problemType?.name ?? "").isEmpty ? orderSummary($0)[0] : $0.problemType?.name ?? "" }),
                     "order_subtitles": .strings(home.orders.map { orderSummary($0)[1] }),
                     "order_statuses": .strings(home.orders.map { orderSummary($0)[2] }),
+                    "order_status_codes": .strings(home.orders.map { $0.status ?? "" }),
+                    "order_icons": .strings(home.orders.map { catalogIcons[$0.category?.id ?? -1] ?? "" }),
+                    "order_age_minutes": .strings(home.orders.map { String(Self.minutesSince($0.createdAt)) }),
+                    "order_offer_counts": .strings(home.orders.indices.map { $0 == 0 ? String(offerCount) : "0" }),
+                    "order_lowest_offers": .strings(home.orders.indices.map { $0 == 0 ? lowestOffer : "" }),
+                    "unread_notifications": .integer(unread),
                 ])
         } catch {
-            state = CustomerLogic.reduce(screen: "SCR-C01", input: ["event": .text("error")])
+            state = reduce(screen: "SCR-C01", input: ["event": .text("error")])
         }
     }
 
+    /// Whole minutes since an ISO-8601 timestamp; -1 when it is missing or unreadable.
+    static func isToday(_ timestamp: String?) -> Bool {
+        let minutes = minutesSince(timestamp)
+        guard minutes >= 0 else { return false }
+        return Calendar.current.isDateInToday(Date().addingTimeInterval(-Double(minutes) * 60))
+    }
+
+    static func minutesSince(_ timestamp: String?) -> Int {
+        guard let timestamp else { return -1 }
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        let date = formatter.date(from: timestamp) ?? ISO8601DateFormatter().date(from: timestamp)
+        guard let date else { return -1 }
+        return max(0, Int(Date().timeIntervalSince(date) / 60))
+    }
+
+    /// C03, step 1 of 5 (DEC-071): the service.
     public func openProblem() {
-        state = CustomerLogic.reduce(screen: "SCR-C03", input: problemInput())
+        state = reduce(screen: "SCR-C03", input: serviceInput())
+    }
+
+    /// C37, step 2 of 5: problem type, description and media.
+    public func openProblemDetails() {
+        guard categoryId != nil else { return }
+        state = reduce(screen: "SCR-C37", input: problemInput())
+    }
+
+    public func searchServices(_ query: String) {
+        serviceQuery = String(query.prefix(60))
+        state = reduce(screen: "SCR-C03", input: serviceInput())
+    }
+
+    /// The catalog as C03 shows it: every category whose name or problem types contain the query.
+    private func visibleCategories() -> [CustomerCategoryReference] {
+        let query = serviceQuery.trimmingCharacters(in: .whitespaces)
+        guard !query.isEmpty else { return catalog }
+        return catalog.filter { category in
+            category.name.localizedCaseInsensitiveContains(query)
+                || category.problemTypes.contains { $0.name.localizedCaseInsensitiveContains(query) }
+        }
+    }
+
+    private func serviceInput() -> [String: CustomerInputValue] {
+        let visible = visibleCategories()
+        return [
+            "event": .text("validate"),
+            "category_labels": .strings(visible.map(\.name)),
+            "category_icons": .strings(visible.map { $0.iconKey ?? "" }),
+            // DEC-071: the line under each service is its first three problem types from /catalog, one per line;
+            // the view joins them with the localized list separator.
+            "category_details": .strings(
+                visible.map { $0.problemTypes.filter { !$0.isOther }.prefix(3).map(\.name).joined(separator: "\n") }),
+            "selected_category_index": .integer(visible.firstIndex { $0.id == categoryId } ?? -1),
+            "search_query": .text(serviceQuery),
+        ]
     }
 
     /// C01 urgent card (DEC-063): the same request flow, with "now" chosen for the timing step.
@@ -2890,17 +3575,20 @@ public final class CustomerViewModel {
     /// The timing code the urgent card preselects.
     static let urgentTiming = "NOW"
 
+    /// `index` is a position in the list C03 (or C01, unfiltered) is showing.
     public func selectCategory(index: Int) {
+        if state.screen != "SCR-C03" { serviceQuery = "" }
+        let visible = visibleCategories()
         guard
             let choice = CustomerCatalogSelection.category(
-                categoryIds: catalog.map(\.id),
-                problemIdsByCategory: catalog.map { $0.problemTypes.map(\.id) },
+                categoryIds: visible.map(\.id),
+                problemIdsByCategory: visible.map { $0.problemTypes.map(\.id) },
                 selectedIndex: index,
                 currentProblemId: problemTypeId)
         else { return }
         categoryId = choice.categoryId
         problemTypeId = choice.problemTypeId
-        state = CustomerLogic.reduce(screen: "SCR-C03", input: problemInput())
+        state = reduce(screen: "SCR-C03", input: serviceInput())
     }
 
     public func selectProblem(index: Int) {
@@ -2912,12 +3600,12 @@ public final class CustomerViewModel {
         else { return }
         categoryId = choice.categoryId
         problemTypeId = choice.problemTypeId
-        state = CustomerLogic.reduce(screen: "SCR-C03", input: problemInput())
+        state = reduce(screen: "SCR-C37", input: problemInput())
     }
 
     public func updateProblemDescription(_ value: String) {
         requestDescription = String(value.prefix(1_001))
-        state = CustomerLogic.reduce(screen: "SCR-C03", input: problemInput())
+        state = reduce(screen: "SCR-C37", input: problemInput())
     }
 
     private func selectedCategory() -> CustomerCategoryReference? {
@@ -2932,14 +3620,14 @@ public final class CustomerViewModel {
         let problems = selectedCategory()?.problemTypes ?? []
         return [
             "event": .text("validate"),
-            "category_labels": .strings(catalog.map(\.name)),
-            "category_icons": .strings(catalog.map { $0.iconKey ?? "" }),
-            "selected_category_index": .integer(catalog.firstIndex { $0.id == categoryId } ?? -1),
+            "service_label": .text(selectedCategory()?.name ?? ""),
+            "service_icon": .text(selectedCategory()?.iconKey ?? ""),
             "problem_labels": .strings(problems.map(\.name)),
             "problem_other": .strings(problems.map { String($0.isOther) }),
             "selected_problem_index": .integer(problems.firstIndex { $0.id == problemTypeId } ?? -1),
             "description": .text(requestDescription),
             "media_count": .integer(mediaDrafts.count { $0.id != nil }),
+            "media_kinds": .strings(mediaDrafts.filter { $0.id != nil }.map(\.kind)),
         ]
     }
 
@@ -2954,33 +3642,47 @@ public final class CustomerViewModel {
 
     /// C02 header from `GET /me`, not sample text.
     public func loadAccountSummary() async {
-        state = CustomerLogic.reduce(screen: "SCR-C02", input: ["event": .text("loading")])
+        state = reduce(screen: "SCR-C02", input: ["event": .text("loading")])
         do {
             let account = try await api.account()
-            state = CustomerLogic.reduce(
+            state = reduce(
                 screen: "SCR-C02",
                 input: [
                     "event": .text("loaded"), "is_verified": .bool(account.isVerified ?? false),
                     "name": .text(account.name), "phone": .text(account.phone),
+                    "completed_orders": .text(account.orderStatistics.map { String($0.completed) } ?? ""),
+                    "active_orders": .text(account.orderStatistics.map { String($0.active) } ?? ""),
+                    "address_count": .text(account.addressesCount.map(String.init) ?? ""),
                 ])
         } catch {
-            state = CustomerLogic.reduce(screen: "SCR-C02", input: ["event": .text("error")])
+            state = reduce(screen: "SCR-C02", input: ["event": .text("error")])
         }
     }
 
+    public func refreshArrivalCode() async {
+        guard let order = currentOrder else { return }
+        do { arrivalCodeValue = try await api.arrivalCode(orderId: order.id, refresh: true); arrivalCodeFailed = false } catch { arrivalCodeValue = nil; arrivalCodeFailed = true }
+        state = reduce(screen: "SCR-C09", input: trackingInput(order))
+    }
+
     public func loadOrder(id: Int, screen: String = "SCR-C09") async {
-        state = CustomerLogic.reduce(screen: screen, input: ["event": .text("loading")])
+        state = reduce(screen: screen, input: ["event": .text("loading")])
         do {
             let order = try await api.order(id: id)
             currentOrderId = id
             currentOrderVersion = order.version ?? 0
+            arrivalCodeValue = nil
+            arrivalCodeFailed = false
+            if order.arrivalCodeRequired == true {
+                do { arrivalCodeValue = try await api.arrivalCode(orderId: order.id, refresh: false) } catch { arrivalCodeFailed = true }
+            }
             currentOrder = order
             // An OPEN order in employee mode waits for assignment on C36 (SCR-C36).
-            if screen == "SCR-C09" && operatingMode == "staff" && order.status == "OPEN" {
-                state = CustomerLogic.reduce(screen: "SCR-C36", input: assignmentInput(order))
+            if screen == "SCR-C09" && (operatingMode == "staff" || !(order.warrantyCoverage ?? "").isEmpty) && order.status == "OPEN" {
+                state = reduce(screen: "SCR-C36", input: assignmentInput(order))
                 return
             }
-            state = CustomerLogic.reduce(
+            state = reduce(
                 screen: screen,
                 input: [
                     "event": .text("loaded"), "status": .text(order.status ?? ""),
@@ -2990,21 +3692,21 @@ public final class CustomerViewModel {
                     "step_states": .strings(order.stepper?.map(\.state) ?? []),
                 ])
         } catch {
-            state = CustomerLogic.reduce(screen: screen, input: ["event": .text("error")])
+            state = reduce(screen: screen, input: ["event": .text("error")])
         }
     }
 
     public func loadPaymentSummary() async {
         guard let orderId = currentOrderId else { return }
-        state = CustomerLogic.reduce(screen: "SCR-C21", input: ["event": .text("loading")])
+        state = reduce(screen: "SCR-C21", input: ["event": .text("loading")])
         do {
             let order = try await api.order(id: orderId)
             currentOrder = order
             currentOrderVersion = order.version ?? currentOrderVersion
-            state = CustomerLogic.reduce(
+            state = reduce(
                 screen: "SCR-C21", input: paymentSummaryInput(order, event: "loaded"))
         } catch {
-            state = CustomerLogic.reduce(screen: "SCR-C21", input: ["event": .text("error")])
+            state = reduce(screen: "SCR-C21", input: ["event": .text("error")])
         }
     }
 
@@ -3012,69 +3714,121 @@ public final class CustomerViewModel {
         guard let orderId = currentOrderId, let order = currentOrder else { return }
         guard options("payment_methods").indices.contains(index) else { return }
         let method = options("payment_methods")[index].code
-        state = CustomerLogic.reduce(
+        state = reduce(
             screen: "SCR-C21", input: paymentSummaryInput(order, event: "switching"))
         do {
             let updated = try await api.changePaymentMethod(
                 orderId: orderId, method: method, expectedVersion: currentOrderVersion)
             currentOrder = updated
             currentOrderVersion = updated.version ?? currentOrderVersion
-            state = CustomerLogic.reduce(
+            state = reduce(
                 screen: "SCR-C21", input: paymentSummaryInput(updated, event: "loaded"))
         } catch {
-            state = CustomerLogic.reduce(screen: "SCR-C21", input: ["event": .text("error")])
+            state = reduce(screen: "SCR-C21", input: ["event": .text("error")])
         }
     }
 
     public func openElectronicPayment() {
         guard let order = currentOrder else { return }
-        selectedPaymentChannel = -1
-        state = CustomerLogic.reduce(
-            screen: "SCR-C22", input: paymentInput(order, payment: nil, event: "loaded"))
+        selectedPaymentChannel = options("electronic_payment_gateways").firstIndex { $0.code == "INSTAPAY_MANUAL" } ?? -1
+        transferReference = ""
+        receiptMediaID = nil
+        state = reduce(
+            screen: "SCR-C22", input: paymentInput(order, payment: order.latestPayment, event: "loaded"))
     }
 
     public func selectPaymentChannel(index: Int) {
         guard let order = currentOrder else { return }
         selectedPaymentChannel = index
-        state = CustomerLogic.reduce(
+        state = reduce(
             screen: "SCR-C22", input: paymentInput(order, payment: nil, event: "loaded"))
     }
 
     public func createElectronicPayment() async {
         guard let orderId = currentOrderId, let order = currentOrder,
-            options("payment_channels").indices.contains(selectedPaymentChannel)
+            options("electronic_payment_gateways").indices.contains(selectedPaymentChannel), state.canContinue
         else { return }
-        state = CustomerLogic.reduce(
+        state = reduce(
             screen: "SCR-C22", input: paymentInput(order, payment: nil, event: "creating"))
         do {
             history.commit()
-            let payment = try await api.createPayment(
-                orderId: orderId, channel: options("payment_channels")[selectedPaymentChannel].code,
-                expectedVersion: currentOrderVersion)
-            state = CustomerLogic.reduce(
-                screen: "SCR-C22", input: paymentInput(order, payment: payment, event: "loaded"))
+            let payment: CustomerPayment
+            if options("electronic_payment_gateways")[selectedPaymentChannel].code == "INSTAPAY_MANUAL" {
+                guard let receiptMediaID else { return }
+                payment = try await api.submitInstapay(
+                    orderId: orderId, reference: transferReference.trimmingCharacters(in: .whitespacesAndNewlines), receiptMediaID: receiptMediaID,
+                    expectedVersion: currentOrderVersion)
+            } else {
+                guard let channel = options("payment_channels").first?.code else { return }
+                payment = try await api.createPayment(orderId: orderId, channel: channel, expectedVersion: currentOrderVersion)
+            }
+            let fresh = try await api.order(id: orderId)
+            currentOrder = fresh
+            currentOrderVersion = fresh.version ?? currentOrderVersion
+            state = reduce(
+                screen: "SCR-C22", input: paymentInput(fresh, payment: payment, event: "loaded"))
         } catch {
-            state = CustomerLogic.reduce(screen: "SCR-C22", input: ["event": .text("error")])
+            state = reduce(screen: "SCR-C22", input: ["event": .text("error")])
         }
+    }
+
+    public func updateTransferReference(_ value: String) {
+        transferReference = value
+        guard let order = currentOrder else { return }
+        state = reduce(screen: "SCR-C22", input: paymentInput(order, payment: order.latestPayment, event: "loaded"))
+    }
+
+    public func refreshPayment() async {
+        guard let id = currentOrderId else { return }
+        do {
+            let fresh = try await api.order(id: id)
+            currentOrder = fresh
+            currentOrderVersion = fresh.version ?? currentOrderVersion
+            state = reduce(screen: "SCR-C22", input: paymentInput(fresh, payment: fresh.latestPayment, event: "loaded"))
+        } catch { state = reduce(screen: "SCR-C22", input: ["event": .text("error")]) }
+    }
+
+    public func uploadPaymentReceipt(_ upload: CustomerMediaUpload) async {
+        guard let order = currentOrder, !state.isBusy else { return }
+        state = reduce(screen: "SCR-C22", input: paymentInput(order, payment: order.latestPayment, event: "uploading"))
+        do {
+            receiptMediaID = try await api.uploadMedia(upload).id
+            state = reduce(screen: "SCR-C22", input: paymentInput(order, payment: order.latestPayment, event: "loaded"))
+        } catch { state = reduce(screen: "SCR-C22", input: paymentInput(order, payment: order.latestPayment, event: "upload_failed")) }
+    }
+
+    public func uploadRatingPhoto(_ upload: CustomerMediaUpload) async {
+        guard !state.isBusy, ratingMediaIDs.count < 5 else { return }
+        state = reduce(screen: "SCR-C24", input: ratingInput(event: "uploading"))
+        do {
+            ratingMediaIDs.append(try await api.uploadMedia(upload).id)
+            state = reduce(screen: "SCR-C24", input: ratingInput(event: "loaded"))
+        } catch { state = reduce(screen: "SCR-C24", input: ratingInput(event: "upload_failed")) }
+    }
+
+    public func removeRatingPhoto() {
+        guard !state.isBusy, !ratingMediaIDs.isEmpty else { return }
+        ratingMediaIDs.removeLast()
+        state = reduce(screen: "SCR-C24", input: ratingInput(event: "loaded"))
     }
 
     public func loadCompletionSummary() async {
         guard let orderId = currentOrderId else { return }
-        state = CustomerLogic.reduce(screen: "SCR-C23", input: ["event": .text("loading")])
+        state = reduce(screen: "SCR-C23", input: ["event": .text("loading")])
         do {
             let order = try await api.order(id: orderId)
             currentOrder = order
             currentOrderVersion = order.version ?? currentOrderVersion
-            state = CustomerLogic.reduce(
+            state = reduce(
                 screen: "SCR-C23", input: completionInput(order, event: "loaded"))
         } catch {
-            state = CustomerLogic.reduce(screen: "SCR-C23", input: ["event": .text("error")])
+            state = reduce(screen: "SCR-C23", input: ["event": .text("error")])
         }
     }
 
     public func confirmCompletion() async {
         guard let orderId = currentOrderId, let order = currentOrder else { return }
-        state = CustomerLogic.reduce(
+        state = reduce(
             screen: "SCR-C23", input: completionInput(order, event: "submitting"))
         do {
             history.commit()
@@ -3084,44 +3838,61 @@ public final class CustomerViewModel {
             currentOrderVersion = updated.version ?? currentOrderVersion
             openRating()
         } catch {
-            state = CustomerLogic.reduce(screen: "SCR-C23", input: ["event": .text("error")])
+            state = reduce(screen: "SCR-C23", input: ["event": .text("error")])
         }
     }
 
     public func openRating() {
         ratingValues = [0, 0, 0]
         ratingComment = ""
-        state = CustomerLogic.reduce(screen: "SCR-C24", input: ratingInput(event: "loaded"))
+        ratingTags = [:]
+        ratingMediaIDs.removeAll()
+        state = reduce(screen: "SCR-C24", input: ratingInput(event: "loaded"))
     }
 
     public func updateRating(dimension: Int, value: Int) {
         guard ratingValues.indices.contains(dimension), (1...5).contains(value) else { return }
         ratingValues[dimension] = value
-        state = CustomerLogic.reduce(screen: "SCR-C24", input: ratingInput(event: "loaded"))
+        state = reduce(screen: "SCR-C24", input: ratingInput(event: "loaded"))
     }
+
+    /// Figma's overall row: one tap sets the three API dimensions, which the detail rows can then adjust.
+    public func updateOverallRating(_ value: Int) {
+        guard (1...5).contains(value) else { return }
+        ratingValues = [value, value, value]
+        state = reduce(screen: "SCR-C24", input: ratingInput(event: "loaded"))
+    }
+
+    public func toggleRatingTag(index: Int, label: String) {
+        guard let code = reviewTagOptions()[safe: index]?.code else { return }
+        if ratingTags.removeValue(forKey: index) == nil { ratingTags[index] = code }
+        state = reduce(screen: "SCR-C24", input: ratingInput(event: "loaded"))
+    }
+
+    private var ratingCommentToSend: String { ratingComment.trimmingCharacters(in: .whitespacesAndNewlines) }
 
     public func updateRatingComment(_ value: String) {
         ratingComment = value
-        state = CustomerLogic.reduce(screen: "SCR-C24", input: ratingInput(event: "loaded"))
+        state = reduce(screen: "SCR-C24", input: ratingInput(event: "loaded"))
     }
 
     public func submitRating() async {
         guard let orderId = currentOrderId, state.canContinue else { return }
-        state = CustomerLogic.reduce(screen: "SCR-C24", input: ratingInput(event: "submitting"))
+        state = reduce(screen: "SCR-C24", input: ratingInput(event: "submitting"))
         history.commit()
         do {
-            try await api.submitReview(
+            try await api.submitStructuredReview(
                 orderId: orderId, quality: ratingValues[0], punctuality: ratingValues[1],
                 conduct: ratingValues[2],
-                comment: ratingComment.trimmingCharacters(in: .whitespacesAndNewlines).nilIfEmpty)
-            state = CustomerLogic.reduce(screen: "SCR-C24", input: ratingInput(event: "success"))
+                comment: ratingCommentToSend.nilIfEmpty, mediaIDs: ratingMediaIDs, tags: ratingTags.keys.sorted().compactMap { ratingTags[$0] })
+            state = reduce(screen: "SCR-C24", input: ratingInput(event: "success"))
         } catch {
-            state = CustomerLogic.reduce(screen: "SCR-C24", input: ["event": .text("error")])
+            state = reduce(screen: "SCR-C24", input: ["event": .text("error")])
         }
     }
 
     public func publish(_ body: PublishRequestBody, idempotencyKey: String) async {
-        state = CustomerLogic.reduce(screen: "SCR-C05", input: reviewInput(termsAccepted: true).merging(["event": .text("submitting")]) { $1 })
+        state = reduce(screen: "SCR-C05", input: reviewInput(termsAccepted: true).merging(["event": .text("submitting")]) { $1 })
         history.commit()
         do {
             let order = try await api.publish(body, idempotencyKey: idempotencyKey)
@@ -3129,10 +3900,10 @@ public final class CustomerViewModel {
             currentOrder = order
             currentOrderVersion = order.version ?? 0
             if operatingMode == "staff" {
-                state = CustomerLogic.reduce(screen: "SCR-C36", input: assignmentInput(order))
+                state = reduce(screen: "SCR-C36", input: assignmentInput(order))
             } else {
                 currentOffers = []
-                state = CustomerLogic.reduce(screen: "SCR-C06", input: offersInput(order))
+                state = reduce(screen: "SCR-C06", input: offersInput(order))
             }
         } catch {
             state = publishRefused(error)
@@ -3142,14 +3913,14 @@ public final class CustomerViewModel {
     /// A refused publish stays on C05 with the server's reason (SCR-C05 §الأخطاء), never on the target screen.
     private func publishRefused(_ error: Error) -> CustomerUIState {
         let message = (error as? APIClientError)?.serverMessage ?? ""
-        return CustomerLogic.reduce(
+        return reduce(
             screen: "SCR-C05",
             input: reviewInput(termsAccepted: true).merging(["error_message": .text(message)]) { $1 })
     }
 
     public func publishDraft() async {
         guard let addressId, let categoryId, let problemTypeId else {
-            state = CustomerLogic.reduce(screen: "SCR-C05", input: ["event": .text("error")])
+            state = reduce(screen: "SCR-C05", input: ["event": .text("error")])
             return
         }
         let body = PublishRequestBody(
@@ -3166,7 +3937,7 @@ public final class CustomerViewModel {
                 ? options("pricing_modes")[selectedPricingIndex].code : nil,
             budgetAmount: operatingMode == "marketplace" ? requestBudget.nilIfEmpty : nil)
         if let editingOrderId {
-            state = CustomerLogic.reduce(screen: "SCR-C05", input: reviewInput(termsAccepted: true).merging(["event": .text("submitting")]) { $1 })
+            state = reduce(screen: "SCR-C05", input: reviewInput(termsAccepted: true).merging(["event": .text("submitting")]) { $1 })
             history.commit()
             do {
                 let order = try await api.updateOrder(id: editingOrderId, body: body)
@@ -3175,10 +3946,10 @@ public final class CustomerViewModel {
                 currentOrder = order
                 currentOrderVersion = order.version ?? 0
                 if operatingMode == "staff" {
-                    state = CustomerLogic.reduce(screen: "SCR-C36", input: assignmentInput(order))
+                    state = reduce(screen: "SCR-C36", input: assignmentInput(order))
                 } else {
                     currentOffers = []
-                    state = CustomerLogic.reduce(screen: "SCR-C06", input: offersInput(order))
+                    state = reduce(screen: "SCR-C06", input: offersInput(order))
                 }
             } catch { state = publishRefused(error) }
         } else {
@@ -3192,16 +3963,16 @@ public final class CustomerViewModel {
     }
 
     public func loadOffers(orderId: Int) async {
-        state = CustomerLogic.reduce(screen: "SCR-C06", input: ["event": .text("loading")])
+        state = reduce(screen: "SCR-C06", input: ["event": .text("loading")])
         do {
             let order = try await api.order(id: orderId)
             currentOrder = order
             currentOrderId = orderId
             currentOrderVersion = order.version ?? 0
             currentOffers = try await api.offers(orderId: orderId, sort: offerSortCode())
-            state = CustomerLogic.reduce(screen: "SCR-C06", input: offersInput(order))
+            state = reduce(screen: "SCR-C06", input: offersInput(order))
         } catch {
-            state = CustomerLogic.reduce(screen: "SCR-C06", input: ["event": .text("error")])
+            state = reduce(screen: "SCR-C06", input: ["event": .text("error")])
         }
     }
 
@@ -3219,7 +3990,7 @@ public final class CustomerViewModel {
                     > Decimal(string: $1.provider.ratingAverage ?? "0") ?? 0
             }
         }
-        state = CustomerLogic.reduce(screen: "SCR-C06", input: offersInput(order))
+        state = reduce(screen: "SCR-C06", input: offersInput(order))
     }
 
     public func openOffer(index: Int) {
@@ -3229,7 +4000,7 @@ public final class CustomerViewModel {
             options("payment_methods").firstIndex {
                 $0.code == optionDefaults["payment_method"]
             } ?? 0
-        state = CustomerLogic.reduce(
+        state = reduce(
             screen: "SCR-C08", input: offerDetailsInput(currentOffers[index], event: "loaded"))
     }
 
@@ -3245,7 +4016,7 @@ public final class CustomerViewModel {
             options("payment_methods").firstIndex {
                 $0.code == optionDefaults["payment_method"]
             } ?? 0
-        state = CustomerLogic.reduce(screen: "SCR-C08", input: offerDetailsInput(offer, event: "loaded"))
+        state = reduce(screen: "SCR-C08", input: offerDetailsInput(offer, event: "loaded"))
     }
 
     public func selectOfferPayment(index: Int) {
@@ -3253,7 +4024,7 @@ public final class CustomerViewModel {
             let offer = currentOffers.first(where: { $0.id == currentOfferId })
         else { return }
         selectedPaymentChannel = index
-        state = CustomerLogic.reduce(screen: "SCR-C08", input: offerDetailsInput(offer, event: "loaded"))
+        state = reduce(screen: "SCR-C08", input: offerDetailsInput(offer, event: "loaded"))
     }
 
     public func confirmSelectedOffer() async {
@@ -3261,7 +4032,7 @@ public final class CustomerViewModel {
             options("payment_methods").indices.contains(selectedPaymentChannel),
             let offer = currentOffers.first(where: { $0.id == offerId })
         else { return }
-        state = CustomerLogic.reduce(
+        state = reduce(
             screen: "SCR-C08", input: offerDetailsInput(offer, event: "submitting"))
         do {
             history.commit()
@@ -3272,69 +4043,101 @@ public final class CustomerViewModel {
             currentOrderVersion = updated.version ?? currentOrderVersion
             await loadOrder(id: orderId)
         } catch {
-            state = CustomerLogic.reduce(screen: "SCR-C08", input: ["event": .text("error")])
+            state = reduce(screen: "SCR-C08", input: ["event": .text("error")])
         }
     }
 
     public func loadProvider(id: Int, orderId: Int) async {
-        state = CustomerLogic.reduce(screen: "SCR-C07", input: ["event": .text("loading")])
+        state = reduce(screen: "SCR-C07", input: ["event": .text("loading")])
         do {
             let provider = try await api.provider(id: id, orderId: orderId)
             currentProviderId = id
             currentOrderId = orderId
             currentProviderActions = provider.availableActions
-            state = CustomerLogic.reduce(
-                screen: "SCR-C07",
-                input: [
-                    "event": .text("loaded"), "provider_available": .bool(provider.availableNow),
-                    "provider_name": .text(provider.name),
-                    "provider_rating": .text(provider.ratingAverage ?? ""),
-                    "provider_services": .text(provider.completedOrders.map(String.init) ?? ""),
-                    "provider_experience": .text(provider.experienceYears.map(String.init) ?? ""),
-                    "provider_about": .text(provider.bio ?? ""),
-                    "offer_price": .text(
-                        currentOffers.first { $0.provider.id == id }.map { formatAmount($0.price) } ?? ""),
-                    "provider_verified": .bool(provider.isVerified),
-                    "specialties": .strings(provider.specialties.map(\.name)),
-                    "rating_values": .strings([
-                        provider.ratingBreakdown.quality ?? "",
-                        provider.ratingBreakdown.punctuality ?? "",
-                        provider.ratingBreakdown.conduct ?? "",
-                    ]),
-                    "review_rows": .strings(
-                        provider.reviews.map { review in
-                            let rating = (review.quality + review.punctuality + review.conduct) / 3
-                            return [
-                                review.customerName, String(rating), review.comment ?? "",
-                                displayDateTime(review.createdAt),
-                            ].joined(separator: "|")
-                        }),
-                    "available_actions": .strings(provider.availableActions),
-                ])
+            let offerPrice =
+                currentOffers.first { $0.provider.id == id }.map { offer in
+                    Decimal(string: offer.price).map { "\($0)" } ?? offer.price
+                } ?? ""
+            let ratings: [String] = [
+                provider.ratingBreakdown.quality ?? "", provider.ratingBreakdown.punctuality ?? "",
+                provider.ratingBreakdown.conduct ?? "",
+            ]
+            let reviews: [String] = provider.reviews.map { review in
+                let rating = (review.quality + review.punctuality + review.conduct) / 3
+                return [
+                    review.customerName, String(rating), review.comment ?? "",
+                    [displayDateTime(review.createdAt), review.area ?? ""].filter { !$0.isEmpty }.joined(separator: " · "),
+                ]
+                .joined(separator: "|")
+            }
+            let captions: [String] = (provider.portfolio ?? []).map { $0.caption ?? "" }
+            var input: [String: CustomerInputValue] = [
+                "event": .text("loaded"), "provider_available": .bool(provider.availableNow),
+                "provider_name": .text(provider.name),
+                "provider_rating": .text(provider.ratingAverage ?? ""),
+                "provider_services": .text(provider.completedOrders.map(String.init) ?? ""),
+                "provider_experience": .text(provider.experienceYears.map(String.init) ?? ""),
+                "provider_about": .text(provider.bio ?? ""),
+                "provider_verified": .bool(provider.isVerified),
+            ]
+            input["offer_price"] = .text(offerPrice)
+            input["ratings_count"] = .text(provider.ratingsCount.map(String.init) ?? "")
+            input["provider_category"] = .text(currentOrder?.category?.name ?? "")
+            input["portfolio_captions"] = .strings(captions)
+            input["provider_avatar_url"] = .text(provider.avatarURL ?? "")
+            input["portfolio_urls"] = .strings((provider.portfolio ?? []).map { $0.imageURL ?? "" })
+            input["specialties"] = .strings(provider.specialties.map(\.name))
+            input["rating_values"] = .strings(ratings)
+            input["review_rows"] = .strings(reviews)
+            input["review_tag_summary"] = .strings((provider.tagStatistics ?? []).map { "\($0.label) · \($0.count)" })
+            input["image_groups"] = .strings(provider.reviews.map { ($0.photos ?? []).compactMap(\.contentURL).joined(separator: "\n") })
+            input["available_actions"] = .strings(provider.availableActions)
+            state = reduce(screen: "SCR-C07", input: input)
         } catch {
-            state = CustomerLogic.reduce(screen: "SCR-C07", input: ["event": .text("error")])
+            state = reduce(screen: "SCR-C07", input: ["event": .text("error")])
+        }
+    }
+
+    public func loadProfileImage(url: String) async -> Data? { try? await api.profileImage(url: url) }
+
+    private var warrantyMode = false
+
+    public func openWarrantyVisit() async {
+        guard let id = state.warrantyVisitID else { return }
+        if state.warrantyVisitFinal { await loadOrderHistory(id: id) } else { await loadOrder(id: id) }
+    }
+
+    public func openWarranty() async {
+        guard let id = currentOrderId else { return }
+        warrantyMode = true
+        supportDescription = ""
+        supportReasonIndex = -1
+        state = reduce(screen: "SCR-C27", input: ["event": .text("loading")])
+        do { state = reduce(screen: "SCR-C27", input: disputeInput(event: "loaded", dispute: try await api.warrantyClaims(orderId: id).first)) } catch {
+            state = reduce(screen: "SCR-C27", input: ["event": .text("error")])
         }
     }
 
     public func openDispute() async {
+        warrantyMode = false
         guard let orderId = currentOrderId else { return }
         supportReasonIndex = -1
         supportDescription = ""
         disputeMedia = []
-        state = CustomerLogic.reduce(screen: "SCR-C27", input: ["event": .text("loading")])
+        state = reduce(screen: "SCR-C27", input: ["event": .text("loading")])
         do {
             let disputes = try await api.disputes(orderId: orderId)
             let existing = disputes.first
-            state = CustomerLogic.reduce(
+            state = reduce(
                 screen: "SCR-C27", input: disputeInput(event: "loaded", dispute: existing))
         } catch {
-            state = CustomerLogic.reduce(screen: "SCR-C27", input: ["event": .text("error")])
+            state = reduce(screen: "SCR-C27", input: ["event": .text("error")])
         }
     }
 
     public func selectSupportReason(index: Int) {
         supportReasonIndex = index
-        state = CustomerLogic.reduce(
+        state = reduce(
             screen: state.screen,
             input: state.screen == "SCR-C28"
                 ? providerReportInput(event: "loaded") : disputeInput(event: "loaded"))
@@ -3342,7 +4145,7 @@ public final class CustomerViewModel {
 
     public func updateSupportDescription(_ value: String) {
         supportDescription = String(value.prefix(1_001))
-        state = CustomerLogic.reduce(
+        state = reduce(
             screen: state.screen,
             input: state.screen == "SCR-C28"
                 ? providerReportInput(event: "loaded") : disputeInput(event: "loaded"))
@@ -3350,7 +4153,7 @@ public final class CustomerViewModel {
 
     public func uploadDisputePhoto(_ upload: CustomerMediaUpload) async {
         disputeMedia.append(CustomerMediaDraft(id: nil, kind: "photo", state: "uploading"))
-        state = CustomerLogic.reduce(screen: "SCR-C27", input: disputeInput(event: "loaded"))
+        state = reduce(screen: "SCR-C27", input: disputeInput(event: "loaded"))
         do {
             let item = try await api.uploadMedia(upload)
             disputeMedia[disputeMedia.count - 1] = CustomerMediaDraft(
@@ -3359,38 +4162,43 @@ public final class CustomerViewModel {
             disputeMedia[disputeMedia.count - 1] = CustomerMediaDraft(
                 id: nil, kind: "photo", state: "failed")
         }
-        state = CustomerLogic.reduce(screen: "SCR-C27", input: disputeInput(event: "loaded"))
+        state = reduce(screen: "SCR-C27", input: disputeInput(event: "loaded"))
     }
 
     public func removeDisputePhoto(index: Int) async {
         guard disputeMedia.indices.contains(index) else { return }
         if let id = disputeMedia[index].id { try? await api.deleteMedia(id: id) }
         disputeMedia.remove(at: index)
-        state = CustomerLogic.reduce(screen: "SCR-C27", input: disputeInput(event: "loaded"))
+        state = reduce(screen: "SCR-C27", input: disputeInput(event: "loaded"))
     }
 
     public func submitDispute() async {
         guard let orderId = currentOrderId,
-            options("dispute_reasons").indices.contains(supportReasonIndex), state.canContinue
+            (warrantyMode || options("dispute_reasons").indices.contains(supportReasonIndex)), state.canContinue
         else { return }
-        state = CustomerLogic.reduce(screen: "SCR-C27", input: disputeInput(event: "submitting"))
+        state = reduce(screen: "SCR-C27", input: disputeInput(event: "submitting"))
         history.commit()
         do {
-            let dispute = try await api.openDispute(
-                orderId: orderId, reasonCode: options("dispute_reasons")[supportReasonIndex].code,
-                description: supportDescription.trimmingCharacters(in: .whitespacesAndNewlines),
-                mediaIds: disputeMedia.compactMap(\.id))
-            state = CustomerLogic.reduce(
+            let dispute: CustomerDispute
+            if warrantyMode {
+                dispute = try await api.requestWarranty(orderId: orderId, description: supportDescription.trimmingCharacters(in: .whitespacesAndNewlines))
+            } else {
+                dispute = try await api.openDispute(
+                    orderId: orderId, reasonCode: options("dispute_reasons")[supportReasonIndex].code,
+                    description: supportDescription.trimmingCharacters(in: .whitespacesAndNewlines),
+                    mediaIds: disputeMedia.compactMap(\.id))
+            }
+            state = reduce(
                 screen: "SCR-C27", input: disputeInput(event: "success", dispute: dispute))
         } catch {
-            state = CustomerLogic.reduce(screen: "SCR-C27", input: ["event": .text("error")])
+            state = reduce(screen: "SCR-C27", input: ["event": .text("error")])
         }
     }
 
     public func openProviderReport() {
         supportReasonIndex = -1
         supportDescription = ""
-        state = CustomerLogic.reduce(screen: "SCR-C28", input: providerReportInput(event: "loaded"))
+        state = reduce(screen: "SCR-C28", input: providerReportInput(event: "loaded"))
     }
 
     public func returnToProvider() async {
@@ -3402,35 +4210,35 @@ public final class CustomerViewModel {
         guard let providerId = currentProviderId, let orderId = currentOrderId,
             options("provider_report_reasons").indices.contains(supportReasonIndex), state.canContinue
         else { return }
-        state = CustomerLogic.reduce(screen: "SCR-C28", input: providerReportInput(event: "submitting"))
+        state = reduce(screen: "SCR-C28", input: providerReportInput(event: "submitting"))
         history.commit()
         do {
             try await api.reportProvider(
                 providerId: providerId, orderId: orderId,
                 reasonCode: options("provider_report_reasons")[supportReasonIndex].code,
                 description: supportDescription.trimmingCharacters(in: .whitespacesAndNewlines).nilIfEmpty)
-            state = CustomerLogic.reduce(screen: "SCR-C28", input: providerReportInput(event: "success"))
+            state = reduce(screen: "SCR-C28", input: providerReportInput(event: "success"))
         } catch {
-            state = CustomerLogic.reduce(screen: "SCR-C28", input: ["event": .text("error")])
+            state = reduce(screen: "SCR-C28", input: ["event": .text("error")])
         }
     }
 
     public func openCancellation() {
         cancellationReasonIndex = -1
         cancellationNote = ""
-        state = CustomerLogic.reduce(
+        state = reduce(
             screen: "SCR-C20", input: cancellationInput(event: "loaded"))
     }
 
     public func selectCancellationReason(index: Int) {
         cancellationReasonIndex = index
-        state = CustomerLogic.reduce(
+        state = reduce(
             screen: "SCR-C20", input: cancellationInput(event: "loaded"))
     }
 
     public func updateCancellationNote(_ value: String) {
         cancellationNote = value
-        state = CustomerLogic.reduce(
+        state = reduce(
             screen: "SCR-C20", input: cancellationInput(event: "loaded"))
     }
 
@@ -3438,7 +4246,7 @@ public final class CustomerViewModel {
         guard let orderId = currentOrderId,
             options("customer_cancellation_reasons").indices.contains(cancellationReasonIndex)
         else { return }
-        state = CustomerLogic.reduce(
+        state = reduce(
             screen: "SCR-C20", input: cancellationInput(event: "submitting"))
         do {
             history.commit()
@@ -3448,15 +4256,33 @@ public final class CustomerViewModel {
                 note: cancellationNote.isEmpty ? nil : cancellationNote,
                 expectedVersion: currentOrderVersion)
             currentOrderVersion = order.version ?? currentOrderVersion
-            state = CustomerLogic.reduce(screen: "SCR-C09", input: trackingInput(order))
+            state = reduce(screen: "SCR-C09", input: trackingInput(order))
         } catch {
-            state = CustomerLogic.reduce(screen: "SCR-C20", input: ["event": .text("error")])
+            state = reduce(screen: "SCR-C20", input: ["event": .text("error")])
+        }
+    }
+
+    @ObservationIgnored private var sharingVisit = false
+
+    public func shareVisit() async -> CustomerVisitShareLink? {
+        guard let orderId = currentOrderId, state.visibleActions.contains("share_visit"), !sharingVisit else { return nil }
+        sharingVisit = true
+        state.isBusy = true
+        state.messageKey = nil
+        defer { sharingVisit = false; state.isBusy = false }
+        do {
+            let link = try await api.shareVisit(orderId: orderId)
+            guard currentOrderId == orderId, state.screen == "SCR-C09" else { return nil }
+            return link
+        } catch {
+            if currentOrderId == orderId, state.screen == "SCR-C09" { state.messageKey = "share.error" }
+            return nil
         }
     }
 
     public func loadPendingProposal() async {
         guard let orderId = currentOrderId else { return }
-        state = CustomerLogic.reduce(screen: "SCR-C30", input: ["event": .text("loading")])
+        state = reduce(screen: "SCR-C30", input: ["event": .text("loading")])
         do {
             let order = try await api.order(id: orderId)
             currentOrderVersion = order.version ?? currentOrderVersion
@@ -3469,10 +4295,10 @@ public final class CustomerViewModel {
             }
             currentProposalId = proposal.id
             let screen = proposal.type == "EXECUTION_QUOTE" ? "SCR-C30" : "SCR-C31"
-            state = CustomerLogic.reduce(
+            state = reduce(
                 screen: screen, input: proposalInput(order: order, proposal: proposal, event: "loaded"))
         } catch {
-            state = CustomerLogic.reduce(screen: "SCR-C30", input: ["event": .text("error")])
+            state = reduce(screen: "SCR-C30", input: ["event": .text("error")])
         }
     }
 
@@ -3480,7 +4306,7 @@ public final class CustomerViewModel {
         guard let orderId = currentOrderId, let proposalId = currentProposalId else { return }
         let screen = state.screen
         var input = proposalStateInput(event: "submitting")
-        state = CustomerLogic.reduce(screen: screen, input: input)
+        state = reduce(screen: screen, input: input)
         do {
             history.commit()
             let order = try await api.decideProposal(
@@ -3488,9 +4314,9 @@ public final class CustomerViewModel {
                 expectedVersion: currentOrderVersion)
             currentOrderVersion = order.version ?? currentOrderVersion
             input = trackingInput(order)
-            state = CustomerLogic.reduce(screen: "SCR-C09", input: input)
+            state = reduce(screen: "SCR-C09", input: input)
         } catch {
-            state = CustomerLogic.reduce(screen: screen, input: ["event": .text("error")])
+            state = reduce(screen: screen, input: ["event": .text("error")])
         }
     }
 
@@ -3506,16 +4332,16 @@ public final class CustomerViewModel {
     private func loadConversation(id: Int, showLoading: Bool) async {
         stopChatPolling()
         if showLoading {
-            state = CustomerLogic.reduce(screen: "SCR-C19", input: ["event": .text("loading")])
+            state = reduce(screen: "SCR-C19", input: ["event": .text("loading")])
         }
         do {
             let response = try await api.conversationMessages(id: id, page: 1)
             currentConversation = response.conversation
             chatMessages = response.messages
-            state = CustomerLogic.reduce(screen: "SCR-C19", input: chatInput(event: "loaded"))
+            state = reduce(screen: "SCR-C19", input: chatInput(event: "loaded"))
             scheduleChatPoll(id: id)
         } catch {
-            state = CustomerLogic.reduce(screen: "SCR-C19", input: ["event": .text("error")])
+            state = reduce(screen: "SCR-C19", input: ["event": .text("error")])
         }
     }
 
@@ -3539,9 +4365,12 @@ public final class CustomerViewModel {
         return [
             "event": .text(event), "conversation_status": .text(conversation?.status ?? ""),
             "provider_name": .text(conversation?.provider.name ?? ""),
+            "provider_available": .bool(conversation?.provider.availableNow == true),
+            "provider_verified": .bool(conversation?.provider.isVerified == true),
             "order_summary": .text(
                 "\(conversation?.order.category ?? "") #\(conversation?.order.number ?? "") · \(conversation?.order.statusLabel ?? "")"
             ),
+            "image_groups": .strings(chatMessages.map { $0.media.compactMap(\.contentURL).joined(separator: "\n") }),
             "message_bodies": .strings(
                 chatMessages.map { message in
                     message.body ?? ""
@@ -3583,6 +4412,8 @@ public final class CustomerViewModel {
                     "\($0.typeLabel) · \(formatAmount($0.amount))"
                 }),
             "available_actions": .strings(order.availableActions),
+            "work_before_urls": .strings((order.workPhotos ?? []).filter { $0.purpose == "REPAIR_BEFORE" }.compactMap(\.contentURL)),
+            "work_after_urls": .strings((order.workPhotos ?? []).filter { $0.purpose == "REPAIR_AFTER" }.compactMap(\.contentURL)),
         ]
     }
 
@@ -3606,24 +4437,40 @@ public final class CustomerViewModel {
         return ["#\(order.number ?? "")", order.location?.area ?? "", timing].filter { !$0.isEmpty && $0 != "#" }
     }
 
-    private func offerSortCode() -> String {
-        ["rating", "price", "eta"][safe: offersSortIndex] ?? "rating"
+    private func offerSortOptions() -> [CustomerOption] { options("offer_sorts").filter { $0.code != "eta" || currentOrder?.timing?.type == "NOW" } }
+    private func offerSortCode() -> String { offerSortOptions()[safe: offersSortIndex]?.code ?? "rating" }
+
+    private func waitingInfo(_ order: CustomerOrderSummary?) -> String {
+        guard let waiting = order?.waiting else { return "" }
+        var rows = [waiting.message]
+        if let deadline = waiting.deadlineAt {
+            rows.append("\(waiting.deadlineLabel ?? ""): \(displayDateTime(deadline))")
+        }
+        return rows.joined(separator: "\n")
     }
 
     private func offersInput(_ order: CustomerOrderSummary) -> [String: CustomerInputValue] {
         let pricingMode = (order.pricingMode ?? "").lowercased()
         let timingType = (order.timing?.type ?? "").lowercased()
         return [
+            "waiting_info": .text(waitingInfo(order)),
             "event": .text("loaded"),
             "order_title": .text(
                 "\(order.category?.name ?? "") — \(order.problemType?.name ?? "") · #\(order.number ?? "")"),
             "display_status": .text(order.displayStatus),
             "countdown_seconds": .integer(deadlineSeconds(order.deadlines)),
             "sort_index": .integer(offersSortIndex),
+            "sort_labels": .strings(offerSortOptions().map(\.label)), "sort_codes": .strings(offerSortOptions().map(\.code)),
             "offer_rows": .strings(
                 currentOffers.map { offerRow($0, order: order) }),
             "pricing_mode": .text(pricingMode), "timing_type": .text(timingType),
             "available_actions": .strings(order.availableActions),
+            "summary_rows": .strings([
+                order.problemType?.name ?? "", order.location?.area ?? "",
+                order.timing?.slotStart.map { displayDateTime($0) } ?? "",
+                order.budgetAmount.flatMap { Decimal(string: $0) }.map { "\($0)" } ?? "",
+            ]),
+            "order_icon": .text(catalog.first { $0.id == order.category?.id }?.iconKey ?? ""),
         ]
     }
 
@@ -3632,10 +4479,15 @@ public final class CustomerViewModel {
             order.timing?.type == "NOW"
             ? offer.etaMinutes.map(String.init) ?? ""
             : displayDateTime(order.timing?.slotStart)
+        // C06 card row (DEC-073, Figma 3002:446):
+        // id|name|rating|reviews|amount|includes|eta minutes or slot|materials|note|verified|provider id|subtitle.
+        let materials = options("materials_responsibilities").first { $0.code == order.materialsResponsibility }?.label ?? ""
+        let amount = Decimal(string: offer.price).map { "\($0)" } ?? offer.price
+        let note = (offer.note ?? "").replacingOccurrences(of: "|", with: "/").replacingOccurrences(of: "\n", with: " ")
         return [
             String(offer.id), offer.provider.name, offer.provider.ratingAverage ?? "",
-            offer.provider.completedOrders.map(String.init) ?? "", formatAmount(offer.price), detail,
-            "", String(offer.provider.isVerified), String(offer.provider.id),
+            offer.provider.ratingsCount.map(String.init) ?? "", amount, offer.includesText ?? "", detail,
+            materials, note, String(offer.provider.isVerified), String(offer.provider.id), order.category?.name ?? "", String(offer.provider.availableNow ?? false),
         ].joined(separator: "|")
     }
 
@@ -3653,16 +4505,20 @@ public final class CustomerViewModel {
             "provider_services": .text(offer.provider.completedOrders.map(String.init) ?? ""),
             "provider_verified": .bool(offer.provider.isVerified),
             "order_rows": .strings([
-                "\(order.category?.name ?? "") — \(order.problemType?.name ?? "")",
+                order.problemType?.name ?? "",
                 [order.location?.area ?? "", order.location?.city ?? ""].filter { !$0.isEmpty }
                     .joined(separator: " · "),
+                timingType == "now" ? "" : displayDateTime(order.timing?.slotStart),
             ]),
+            "provider_category": .text(order.category?.name ?? ""),
+            "materials_label": .text(
+                options("materials_responsibilities").first { $0.code == order.materialsResponsibility }?.label ?? ""),
             "payment_labels": .strings(options("payment_methods").map(\.label)),
             "selected_payment_index": .integer(selectedPaymentChannel),
             "available_actions": .strings(order.availableActions.filter { $0 == "accept_offer" }),
             "pricing_mode": .text((order.pricingMode ?? "").lowercased()),
             "timing_type": .text(timingType), "eta_minutes": .text(eta),
-            "offer_rows": .strings([formatAmount(offer.price), detail, included]),
+            "offer_rows": .strings([Decimal(string: offer.price).map { "\($0)" } ?? offer.price, detail, included]),
         ]
     }
 
@@ -3678,19 +4534,46 @@ public final class CustomerViewModel {
             return value ?? ""
         }
         let formatter = DateFormatter()
-        formatter.locale = Locale(identifier: "ar_EG")
+        formatter.locale = Locale(identifier: AppLanguage.current + "_EG")
         formatter.dateFormat = "yyyy-MM-dd · h:mm a"
         return formatter.string(from: date)
     }
 
     private func trackingInput(_ order: CustomerOrderSummary) -> [String: CustomerInputValue] {
         [
+            "execution_labels": .strings(order.executionSteps?.map(\.label) ?? []),
+            "execution_times": .strings(order.executionSteps?.map { $0.occurredAt.map { displayDateTime($0) } ?? "" } ?? []),
+            "execution_states": .strings(order.executionSteps?.map(\.state) ?? []),
+            "completion_estimate_at": .text(order.completionEstimate.map { displayDateTime($0.estimatedAt) } ?? ""),
+            "completion_estimate_overdue": .bool(order.completionEstimate?.overdue == true),
+            "arrival_code_required": .bool(order.arrivalCodeRequired == true), "arrival_exception_pending": .bool(order.arrivalExceptionPending == true),
+            "arrival_code": .text(arrivalCodeValue?.code ?? ""), "arrival_code_until": .text(arrivalCodeValue.map { displayDateTime($0.expiresAt) } ?? ""),
+            "arrival_code_failed": .bool(arrivalCodeFailed),
             "event": .text("loaded"), "status": .text(order.status ?? ""),
             "display_status": .text(order.displayStatus), "stepper": .bool(order.stepper != nil),
             "available_actions": .strings(order.availableActions),
             "step_states": .strings(order.stepper?.map(\.state) ?? []),
             "summary": .strings(["#\(order.number ?? "")", order.location?.area ?? ""]),
+            // DEC-076: the Figma tracking cards — provider, the agreed job and its money, all from the order.
+            "order_number": .text(order.number ?? ""),
+            "address": .text([order.location?.area ?? "", order.location?.city ?? ""].filter { !$0.isEmpty }.joined(separator: " · ")),
+            "order_title": .text(order.problemType?.name ?? ""),
+            "agreed_price": .text(Self.plainAmount(order.amounts?.laborTotal)),
+            "materials_label": .text(
+                options("materials_responsibilities").first { $0.code == order.materialsResponsibility }?.label ?? ""),
+            "provider_name": .text(order.provider?.name ?? ""),
+            "provider_rating": .text(order.provider?.ratingAverage ?? ""),
+            "provider_completed": .text(order.provider?.completedOrders.map(String.init) ?? ""),
+            "provider_verified": .bool(order.provider?.isVerified ?? false),
+            "provider_category": .text(order.category?.name ?? ""),
+            "final_amount": .text(Self.plainAmount(order.amounts?.finalAmount)),
+            "timing_type": .text(order.timing?.type ?? ""),
+            "slot_label": .text(displayDateTime(order.timing?.slotStart)),
         ]
+    }
+
+    static func plainAmount(_ value: String?) -> String {
+        value.flatMap { Decimal(string: $0) }.map { "\($0)" } ?? ""
     }
 
     private func paymentSummaryInput(
@@ -3700,15 +4583,22 @@ public final class CustomerViewModel {
         return [
             "event": .text(event),
             "amounts": .strings([
-                formatAmount(amounts?.laborTotal ?? "0.00"),
-                formatAmount(amounts?.materialsTotal ?? "0.00"),
-                formatAmount(amounts?.finalAmount ?? "0.00"),
+                Self.plainAmount(amounts?.laborTotal ?? "0.00"),
+                Self.plainAmount(amounts?.materialsTotal ?? "0.00"),
+                Self.plainAmount(amounts?.finalAmount ?? "0.00"),
             ]),
             "method_labels": .strings(options("payment_methods").map(\.label)),
+            "method_codes": .strings(options("payment_methods").map(\.code)),
+            "provider_name": .text(order.provider?.name ?? ""),
+            "provider_verified": .bool(order.provider?.isVerified ?? false),
+            "order_title": .text(order.problemType?.name ?? ""),
+            "address": .text([order.location?.area ?? "", order.location?.city ?? ""].filter { !$0.isEmpty }.joined(separator: " · ")),
             "selected_method_index": .integer(
                 options("payment_methods").firstIndex { $0.code == amounts?.paymentMethod } ?? -1),
             "payment_method": .text(amounts?.paymentMethod ?? ""),
             "available_actions": .strings(order.availableActions),
+            "work_before_urls": .strings((order.workPhotos ?? []).filter { $0.purpose == "REPAIR_BEFORE" }.compactMap(\.contentURL)),
+            "work_after_urls": .strings((order.workPhotos ?? []).filter { $0.purpose == "REPAIR_AFTER" }.compactMap(\.contentURL)),
         ]
     }
 
@@ -3716,7 +4606,9 @@ public final class CustomerViewModel {
         event: String, dispute: CustomerDispute? = nil
     ) -> [String: CustomerInputValue] {
         [
-            "event": .text(event), "existing": .bool(dispute != nil),
+            "event": .text(event), "existing": .bool(dispute != nil), "warranty": .bool(warrantyMode),
+            "warranty_visit_id": .integer(dispute?.visitOrderID ?? 0),
+            "warranty_visit_final": .bool(dispute?.status == "COMPLETED" || dispute?.status == "CANCELLED"),
             "reason_labels": .strings(options("dispute_reasons").map(\.label)),
             "selected_reason_index": .integer(supportReasonIndex),
             "description": .text(dispute?.description ?? supportDescription),
@@ -3756,6 +4648,10 @@ public final class CustomerViewModel {
             "deep_links": .strings(notificationLinks),
             "notification_times": .strings(values.map { displayDateTime($0.createdAt) }),
             "notifications_denied": .bool(!notificationsAllowed()),
+            // DEC-076 (Figma 3002:3608): type code for the icon, «اليوم» / «سابق» grouping and the relative time.
+            "notification_codes": .strings(values.map { $0.code ?? "" }),
+            "notification_days": .strings(values.map { Self.isToday($0.createdAt) ? "today" : "earlier" }),
+            "notification_ages": .strings(values.map { String(Self.minutesSince($0.createdAt)) }),
         ]
     }
 
@@ -3770,39 +4666,39 @@ public final class CustomerViewModel {
 
     private func submitAccountUpdate() async {
         guard state.canContinue else { return }
-        state = CustomerLogic.reduce(screen: "SCR-C33", input: accountInput(event: "submitting"))
+        state = reduce(screen: "SCR-C33", input: accountInput(event: "submitting"))
         do {
             let account = try await api.updateAccount(name: accountValues[0], phone: accountValues[2])
             accountValues = [account.name, account.email, account.phone]
             accountMode = "overview"
-            state = CustomerLogic.reduce(screen: "SCR-C33", input: accountInput(event: "success"))
-        } catch { state = CustomerLogic.reduce(screen: "SCR-C33", input: ["event": .text("error")]) }
+            state = reduce(screen: "SCR-C33", input: accountInput(event: "success"))
+        } catch { state = reduce(screen: "SCR-C33", input: ["event": .text("error")]) }
     }
 
     private func submitPasswordChange() async {
         guard state.canContinue else { return }
-        state = CustomerLogic.reduce(screen: "SCR-C33", input: accountInput(event: "submitting"))
+        state = reduce(screen: "SCR-C33", input: accountInput(event: "submitting"))
         do {
             try await api.changePassword(
                 current: accountValues[0], password: accountValues[1], confirmation: accountValues[2])
             accountMode = "overview"
             accountValues = ["", "", ""]
-            state = CustomerLogic.reduce(screen: "SCR-C33", input: accountInput(event: "success"))
-        } catch { state = CustomerLogic.reduce(screen: "SCR-C33", input: ["event": .text("error")]) }
+            state = reduce(screen: "SCR-C33", input: accountInput(event: "success"))
+        } catch { state = reduce(screen: "SCR-C33", input: ["event": .text("error")]) }
     }
 
     private func submitDeleteAccount() async {
-        state = CustomerLogic.reduce(
+        state = reduce(
             screen: "SCR-C33", input: accountInput(event: "submitting", mode: "delete"))
         do {
             try await api.deleteAccount()
             accountDeleted = true
-            state = CustomerLogic.reduce(
+            state = reduce(
                 screen: "SCR-C33", input: accountInput(event: "success", mode: "overview"))
         } catch APIClientError.httpStatus(409) {
             accountMode = "overview"
-            state = CustomerLogic.reduce(screen: "SCR-C33", input: accountInput(event: "active_order"))
-        } catch { state = CustomerLogic.reduce(screen: "SCR-C33", input: ["event": .text("error")]) }
+            state = reduce(screen: "SCR-C33", input: accountInput(event: "active_order"))
+        } catch { state = reduce(screen: "SCR-C33", input: ["event": .text("error")]) }
     }
 
     private func options(_ key: String) -> [CustomerOption] { optionLists[key] ?? [] }
@@ -3816,7 +4712,13 @@ public final class CustomerViewModel {
         return [
             "event": .text(event),
             "total": .text(formatAmount(order.amounts?.finalAmount ?? "0.00")),
-            "channel_labels": .strings(options("payment_channels").map(\.label)),
+            "channel_labels": .strings(options("electronic_payment_gateways").map(\.label)),
+            "is_instapay": .bool(
+                options("electronic_payment_gateways").indices.contains(selectedPaymentChannel)
+                    && options("electronic_payment_gateways")[selectedPaymentChannel].code == "INSTAPAY_MANUAL"),
+            "receipt_uploaded": .bool(receiptMediaID != nil), "transfer_reference": .text(transferReference),
+            "instapay_address": .text(instapay?.address ?? ""), "instapay_name": .text(instapay?.displayName ?? ""), "order_reference": .text(order.paymentReference ?? ""),
+            "failure_reason_label": .text(payment?.failureReasonLabel ?? ""),
             "selected_channel_index": .integer(selectedPaymentChannel),
             "payment_status": .text(payment?.status ?? ""),
             "reference_number": .text(payment?.referenceNumber ?? ""),
@@ -3833,19 +4735,34 @@ public final class CustomerViewModel {
         return [
             "event": .text(event),
             "summary": .strings([
-                order.provider?.name ?? "", formatAmount(amounts?.laborTotal ?? "0.00"),
-                formatAmount(amounts?.materialsTotal ?? "0.00"),
-                formatAmount(amounts?.finalAmount ?? "0.00"), amounts?.paymentMethod ?? "",
+                order.provider?.name ?? "", Self.plainAmount(amounts?.laborTotal ?? "0.00"),
+                Self.plainAmount(amounts?.materialsTotal ?? "0.00"),
+                Self.plainAmount(amounts?.finalAmount ?? "0.00"), amounts?.paymentMethod ?? "",
             ]),
             "available_actions": .strings(order.availableActions),
+            "work_before_urls": .strings((order.workPhotos ?? []).filter { $0.purpose == "REPAIR_BEFORE" }.compactMap(\.contentURL)),
+            "work_after_urls": .strings((order.workPhotos ?? []).filter { $0.purpose == "REPAIR_AFTER" }.compactMap(\.contentURL)),
+            "provider_name": .text(order.provider?.name ?? ""),
+            "provider_verified": .bool(order.provider?.isVerified ?? false),
+            "order_title": .text(order.problemType?.name ?? ""),
+            "address": .text([order.location?.area ?? "", order.location?.city ?? ""].filter { !$0.isEmpty }.joined(separator: " · ")),
+            "method_label": .text(options("payment_methods").first { $0.code == amounts?.paymentMethod }?.label ?? ""),
         ]
     }
+
+    private func reviewTagOptions() -> [CustomerOption] { currentOrder?.reviewTagOptions ?? options("service_review_tags") }
 
     private func ratingInput(event: String) -> [String: CustomerInputValue] {
         [
             "event": .text(event), "ratings": .strings(ratingValues.map(String.init)),
-            "comment": .text(ratingComment), "comment_length": .integer(ratingComment.count),
+            "comment": .text(ratingComment),
+            "photo_count": .integer(ratingMediaIDs.count), "comment_length": .integer(ratingCommentToSend.count),
             "available_actions": .strings(event == "success" ? [] : ["rate"]),
+            "tags": .strings(ratingTags.keys.sorted().compactMap { ratingTags[$0] }),
+            "tag_labels": .strings(reviewTagOptions().map(\.label)), "tag_codes": .strings(reviewTagOptions().map(\.code)),
+            "provider_name": .text(currentOrder?.provider?.name ?? ""),
+            "provider_verified": .bool(currentOrder?.provider?.isVerified ?? false),
+            "order_title": .text(currentOrder?.problemType?.name ?? ""),
         ]
     }
 
@@ -3854,20 +4771,29 @@ public final class CustomerViewModel {
     ) -> [String: CustomerInputValue] {
         let seconds =
             proposal.expiresAt.flatMap { ISO8601DateFormatter().date(from: $0) }
-            .map { max(0, Int($0.timeIntervalSinceNow)) } ?? 0
+            .map { max(0, Int($0.timeIntervalSince(proposal.serverTime.flatMap { ISO8601DateFormatter().date(from: $0) } ?? Date()))) } ?? 0
         return [
             "event": .text(event), "type_label": .text(proposal.typeLabel),
-            "amount": .text(formatAmount(proposal.amount)),
+            "amount": .text(Self.plainAmount(proposal.amount)),
             "reason": .text(proposal.reason),
-            "total": .text(formatAmount(proposal.projectedTotal)),
+            "total": .text(Self.plainAmount(proposal.projectedTotal)),
+            "provider_name": .text(order.provider?.name ?? ""),
+            "provider_rating": .text(order.provider?.ratingAverage ?? ""),
+            "provider_category": .text(order.category?.name ?? ""),
+            "provider_verified": .bool(order.provider?.isVerified ?? false),
+            "original_amount": .text(proposal.currentTotal.map { Self.plainAmount($0) } ?? ""),
+            "proposal_deadline": .text(displayDateTime(proposal.expiresAt)),
+            "proposal_expiry_message": .text(proposal.expiryMessage ?? ""),
+            "proposal_loaded_uptime": .integer(Int(ProcessInfo.processInfo.systemUptime)),
             "countdown_seconds": .integer(seconds), "expired": .bool(seconds == 0),
-            "has_photo": .bool(proposal.photoPath != nil),
+            "has_photo": .bool(proposal.photoURL != nil),
+            "proposal_photo_url": .text(proposal.photoURL ?? ""),
             "available_actions": .strings(order.availableActions),
         ]
     }
 
     private func formatAmount(_ value: String) -> String {
-        "\(value.split(separator: ".").first ?? "0") \(currencyLabel)"
+        BzrFormatter.money(value, currency: currencyLabel)
     }
 
     private func proposalStateInput(event: String) -> [String: CustomerInputValue] {
@@ -3876,19 +4802,24 @@ public final class CustomerViewModel {
             "amount": .text(state.items[safe: 1] ?? ""), "reason": .text(state.items[safe: 2] ?? ""),
             "total": .text(state.items[safe: 3] ?? ""),
             "countdown_seconds": .integer(state.countdownSeconds),
+            "proposal_deadline": .text(state.proposalDeadline), "proposal_expiry_message": .text(state.proposalExpiryMessage),
+            "proposal_loaded_uptime": .integer(state.proposalLoadedUptime),
             "has_photo": .bool(state.hasPhoto), "available_actions": .strings(state.visibleActions),
+            "provider_name": .text(state.fieldValues[safe: 0] ?? ""), "provider_rating": .text(state.fieldValues[safe: 1] ?? ""),
+            "provider_category": .text(state.fieldValues[safe: 2] ?? ""), "original_amount": .text(state.fieldValues[safe: 3] ?? ""),
+            "provider_verified": .bool(state.providerVerified),
         ]
     }
 
     private func loadSlots(
         cityId: Int, dayIndex: Int, dayLabels: [String], morning: String, evening: String
     ) async {
-        state = CustomerLogic.reduce(screen: "SCR-C16", input: ["event": .text("changing_day")])
+        state = reduce(screen: "SCR-C16", input: ["event": .text("changing_day")])
         do {
             let date = dayDates[dayIndex]
             let slots = try await api.slots(cityId: cityId, date: date)
             slotStarts = slots.map(\.start)
-            state = CustomerLogic.reduce(
+            state = reduce(
                 screen: "SCR-C16",
                 input: [
                     "event": .text("loaded"),
@@ -3898,7 +4829,7 @@ public final class CustomerViewModel {
                     "selected_day_index": .integer(dayIndex), "selected_slot_index": .integer(-1),
                 ])
         } catch {
-            state = CustomerLogic.reduce(screen: "SCR-C16", input: ["event": .text("error")])
+            state = reduce(screen: "SCR-C16", input: ["event": .text("error")])
         }
     }
 
@@ -3920,6 +4851,7 @@ public final class CustomerViewModel {
 
     private func mediaInput() -> [String: CustomerInputValue] {
         [
+            "media_error": .text(mediaSelectionError),
             "event": .text("validate"), "media_kinds": .strings(mediaDrafts.map(\.kind)),
             "media_states": .strings(mediaDrafts.map(\.state)),
             "photo_count": .integer(mediaDrafts.count { $0.kind == "photo" }),

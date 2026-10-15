@@ -13,6 +13,7 @@ use App\Modules\Providers\Enums\ProviderStatus;
 use App\Modules\Providers\Models\ProviderProfile;
 use App\Modules\Settings\Services\FeatureGate;
 use App\Support\Exceptions\BusinessRuleViolationException;
+use App\Support\Localization;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -91,7 +92,7 @@ final class ProviderHomeController
         if ($user->status !== UserStatus::Active || $profile?->status !== ProviderStatus::Active) {
             throw BusinessRuleViolationException::rule(
                 'BR-022',
-                'رئيسية الفني متاحة للفني النشط فقط.',
+                Localization::text('copy.the_technician_home_screen_is_only_available_to_active'),
             );
         }
 

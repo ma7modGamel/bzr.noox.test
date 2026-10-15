@@ -29,15 +29,22 @@ struct CustomerScreen<Content: View>: View {
     let onBack: (() -> Void)?
     let content: Content
     let bottomBar: AnyView?
+    /// DEC-073: a screen-owned header that stays above the scrolling body (Figma home header).
+    let header: AnyView?
     /// C01 draws its own header instead of the top bar (DEC-063).
     let showsTopBar: Bool
+    /// DEC-076: an optional top-bar action (Figma's bell on «الرسائل»).
+    let topAction: (icon: BzrIconKey, label: String, action: () -> Void)?
     @Environment(\.customerBack) private var customerBack
     @Environment(\.customerRetry) private var customerRetry
 
     init(
         title: String, state: CustomerUIState, onBack: (() -> Void)? = nil, bottomBar: AnyView? = nil,
-        showsTopBar: Bool = true, @ViewBuilder content: () -> Content
+        showsTopBar: Bool = true, header: AnyView? = nil,
+        topAction: (icon: BzrIconKey, label: String, action: () -> Void)? = nil, @ViewBuilder content: () -> Content
     ) {
+        self.topAction = topAction
+        self.header = header
         self.showsTopBar = showsTopBar
         self.title = title
         self.state = state
@@ -50,9 +57,11 @@ struct CustomerScreen<Content: View>: View {
         VStack(spacing: 0) {
             if showsTopBar {
                 AppTopBar(
-                    title: title, showsBack: !["SCR-C01", "SCR-C25", "SCR-C18", "SCR-C02"].contains(state.screen),
-                    onBack: onBack ?? customerBack)
+                    title: title, actionIcon: topAction?.icon, actionLabel: topAction?.label,
+                    showsBack: !["SCR-C01", "SCR-C25", "SCR-C18", "SCR-C02"].contains(state.screen),
+                    onBack: onBack ?? customerBack, onAction: topAction?.action ?? {})
             }
+            if let header { header }
             ScrollView {
                 VStack(alignment: .leading, spacing: DesignSpace.l) {
                     switch state.phase {
@@ -79,12 +88,28 @@ struct CustomerScreen<Content: View>: View {
         .background(DesignGradients.screen.ignoresSafeArea())
         .safeAreaInset(edge: .bottom, spacing: 0) {
             if state.phase != .loading && state.phase != .error, let bottomBar {
+                // DEC-070: Figma's bottom dock — tinted, lifted by a soft shadow.
                 bottomBar
                     .padding(.horizontal, DesignSpace.screenHorizontal)
-                    .padding(.vertical, DesignSpace.s)
-                    .background(DesignColors.surface)
+                    .padding(.vertical, DesignSpace.m)
+                    .background(DesignColors.surfaceAlt.bzrShadow(DesignShadows.card))
             }
         }
+    }
+}
+
+/// DEC-071: the request flow's five-step header (Figma «Primo App»).
+struct RequestProgress: View {
+    let current: Int
+    var total: Int = 5
+    var hint: String = ""
+
+    var body: some View {
+        StepIndicator(
+            current: current, total: total,
+            label: BzrFormatter.fill(
+                bzrString("format.step"), values: [("current", BzrFormat.number(current)), ("total", BzrFormat.number(total))]),
+            hint: hint)
     }
 }
 
@@ -133,6 +158,7 @@ struct ActionButtons: View {
     private func actionText(_ action: String) -> String {
         bzrString(
             [
+                "request_warranty": "action.request_warranty",
                 "accept_offer": "action.accept_offer", "edit_request": "action.edit_request",
                 "republish": "action.republish", "cancel": "action.cancel", "call": "action.call",
                 "chat": "action.chat", "share_visit": "action.share_visit",

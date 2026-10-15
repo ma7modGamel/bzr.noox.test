@@ -8,6 +8,7 @@ use App\Modules\Orders\Jobs\AutoCloseConfirmedOrders;
 use App\Modules\Orders\Jobs\ExpirePendingProposals;
 use App\Modules\Orders\Jobs\ExpireStaleOrders;
 use App\Modules\Orders\Jobs\PurgeExpiredMedia;
+use App\Modules\Settlements\Jobs\RefreshDuesBlocks;
 use Illuminate\Support\Facades\Schedule;
 
 /*
@@ -51,3 +52,9 @@ Schedule::job(new SendRatingReminders)
     ->everyFifteenMinutes()
     ->withoutOverlapping()
     ->name('notifications:rating-reminders');
+
+// BR-063 — منع العروض بسبب المستحقات ورفعه (وضع السوق فقط، DEC-066)
+Schedule::job(new RefreshDuesBlocks)
+    ->everyTenMinutes()
+    ->withoutOverlapping()
+    ->name('settlements:refresh-dues');

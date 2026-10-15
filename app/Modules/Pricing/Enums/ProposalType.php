@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Pricing\Enums;
 
+use App\Support\Localization;
 use Filament\Support\Contracts\HasLabel;
 
 /** BR-042 — DEC-007. */
@@ -15,11 +16,7 @@ enum ProposalType: string implements HasLabel
 
     public function getLabel(): string
     {
-        return match ($this) {
-            self::ExecutionQuote => 'عرض تنفيذ',
-            self::Materials => 'خامات',
-            self::ExtraWork => 'أعمال إضافية',
-        };
+        return Localization::enum($this);
     }
 
     /** المقترحات القابلة للسحب من الفني (12). */

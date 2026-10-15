@@ -14,6 +14,7 @@ use App\Modules\Orders\StateMachine\OrderStateMachine;
 use App\Modules\Providers\Models\ProviderProfile;
 use App\Modules\Settings\Services\FeatureGate;
 use App\Support\Exceptions\BusinessRuleViolationException;
+use App\Support\Localization;
 
 /**
  * T-06 / T-07 — اعتذار الفني قبل الوصول، أو إعادة فتح إدارية.
@@ -38,7 +39,7 @@ final readonly class BackOutAction
         ?ProviderProfile $provider = null,
     ): Order {
         if ($actor === ActorType::Provider && $order->provider_profile_id !== $provider?->getKey()) {
-            throw BusinessRuleViolationException::rule('BR-036', 'هذا الطلب غير مسنَد إليك.');
+            throw BusinessRuleViolationException::rule('BR-036', Localization::text('copy.this_request_is_not_assigned_to_you'));
         }
 
         $previousProviderId = $order->provider_profile_id;
@@ -79,8 +80,8 @@ final readonly class BackOutAction
                 $fresh->assigned_at = null;
                 $fresh->confirmed_at = null;
                 $fresh->trip_started_at = null;
-                $fresh->offers_close_at = $deadlines['offers_close_at'];
-                $fresh->selection_deadline_at = $deadlines['selection_deadline_at'];
+                $fresh->offers_close_at = $fresh->isWarrantyVisit() ? null : $deadlines['offers_close_at'];
+                $fresh->selection_deadline_at = $fresh->isWarrantyVisit() ? null : $deadlines['selection_deadline_at'];
                 $fresh->reopen_count = $fresh->reopen_count + 1;
             },
         );

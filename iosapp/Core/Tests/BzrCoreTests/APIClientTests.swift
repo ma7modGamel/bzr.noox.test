@@ -8,6 +8,35 @@ import XCTest
 #endif
 
 final class APIClientTests: XCTestCase {
+    func testLegalDateUsesTheEgyptianEffectiveDay() {
+        XCTAssertEqual(BzrFormatter.legalDate("2026-10-11T23:00:00+00:00"), "2026-10-12")
+        XCTAssertEqual(BzrFormatter.legalDate("2026-10-11"), "2026-10-11")
+    }
+    func testMoneyPreservesPiastersAndAvoidsFloatingPointRounding() {
+        XCTAssertEqual(BzrFormatter.money("123.45", currency: "EGP"), "123.45 EGP")
+        XCTAssertEqual(BzrFormatter.money("100.00", currency: "EGP"), "100 EGP")
+        XCTAssertEqual(BzrFormatter.money("0.01", currency: "EGP"), "0.01 EGP")
+    }
+    func testSupportedLanguageNegotiation() {
+        XCTAssertEqual(AppLanguage.resolve(["fr-FR", "en-GB", "ar"]), "en")
+        XCTAssertEqual(AppLanguage.resolve(["ar_EG", "en"]), "ar")
+        XCTAssertEqual(AppLanguage.resolve(["fr"]), "ar")
+        XCTAssertEqual(AppLanguage.resolve([]), "ar")
+    }
+
+    func testEveryRequestUsesTheSelectedLanguage() async throws {
+        for language in ["en-GB", "ar-EG"] {
+            let transport = RecordingTransport(result: HTTPResult(data: Data("{\"ok\":true}".utf8), statusCode: 200))
+            let client = APIClient(
+                baseURL: try XCTUnwrap(URL(string: "https://example.test/api/v1/")),
+                language: language, transport: transport)
+            let _: BooleanResponse = try await client.get("config")
+            XCTAssertEqual(transport.request?.value(forHTTPHeaderField: "Accept-Language"), AppLanguage.resolve([language]))
+            let _: BooleanResponse = try await client.post("orders", body: BooleanResponse(ok: true))
+            XCTAssertEqual(transport.request?.value(forHTTPHeaderField: "Accept-Language"), AppLanguage.resolve([language]))
+        }
+    }
+
     func testTrackingPayloadDecodesLaravelDecimalStrings() throws {
         let payload = try JSONDecoder().decode(
             CustomerTrackingPayload.self,

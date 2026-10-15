@@ -12,8 +12,6 @@ import noox.bzr.customer.CustomerLogic
 import noox.bzr.customer.CustomerMediaUpload
 import noox.bzr.customer.CustomerUiState
 import noox.bzr.links.DeepLinkTarget
-import org.json.JSONArray
-import org.json.JSONObject
 import java.time.OffsetDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -23,12 +21,50 @@ import noox.bzr.network.logFailure
 class ProviderViewModel(
     private val api: ProviderApi,
     private val session: AuthSessionStore,
-    private val currencyLabel: String,
+    private var currencyLabel: String,
 ) : ViewModel() {
     private val mutableState = MutableStateFlow(ProviderUiState("SCR-P01", ProviderPhase.Loading))
     val stateFlow: StateFlow<ProviderUiState> = mutableState.asStateFlow()
     private val mutableFlowActive = MutableStateFlow(false)
     val flowActive: StateFlow<Boolean> = mutableFlowActive.asStateFlow()
+
+    private var language = noox.bzr.network.BremoHttp.language()
+
+    fun refreshLanguage(currency: String) {
+        val nextLanguage = noox.bzr.network.BremoHttp.language()
+        if (language == nextLanguage) return
+        language = nextLanguage
+        currencyLabel = currency
+        if (session.token == null || !mutableFlowActive.value) return
+        activeOrder = null
+        marketRequest = null
+        when (mutableState.value.screen) {
+            "SCR-C32" -> loadNotifications()
+            "SCR-P18" -> loadEarnings()
+            "SCR-P19" -> loadProviderProfile()
+            "SCR-P02" -> mutableState.value = profileState("validate")
+            "SCR-P03" -> mutableState.value = identityState("validate")
+            "SCR-P04" -> launch("SCR-P04") {
+                categories = api.catalog()
+                mutableState.value = catalogState()
+            }
+            "SCR-P05" -> launch("SCR-P05") {
+                val cityId = cities.getOrNull(selectedCityIndex)?.id
+                cities = api.cities()
+                selectedCityIndex = cities.indexOfFirst { it.id == cityId }
+                areas = cityId?.let { api.areas(it) }.orEmpty()
+                mutableState.value = areasState()
+            }
+            "SCR-P06" -> launch("SCR-P06") {
+                val code = payoutOptions.getOrNull(selectedPayoutIndex)?.code
+                payoutOptions = api.payoutOptions()
+                selectedPayoutIndex = payoutOptions.indexOfFirst { it.code == code }
+                mutableState.value = payoutState("validate")
+            }
+            "SCR-P01", "SCR-P07" -> loadApplication()
+            else -> loadHome()
+        }
+    }
 
     private var application: ProviderApplicationPayload? = null
     private var experienceYears = ""
@@ -62,6 +98,8 @@ class ProviderViewModel(
     private var unableNote = ""
     private var requestedUnableAction = ""
     private var ratingStars = 0
+    private var ratingComment = ""
+    private val ratingTags = linkedSetOf<Int>()
     private var workspaceProfile: ProviderProfilePayload? = null
     private var workspaceSpecialtyIds = linkedSetOf<Int>()
     private var workspaceAreaIds = linkedSetOf<Int>()
@@ -152,12 +190,15 @@ class ProviderViewModel(
     }
 
     /** ACTIVE, PENDING (any submitted application), or NONE — the input DeepLinkRouter needs. */
-    fun resolveProviderStatus(onResult: (String) -> Unit) {
+    /** [unknownOnFailure]: a failed check reports UNKNOWN instead of NONE, so DEC-067 keeps the remembered mode. */
+    fun resolveProviderStatus(unknownOnFailure: Boolean = false, onResult: (String) -> Unit) {
         viewModelScope.launch(Dispatchers.IO) {
-            val status = runCatching { api.application(token()).status }.getOrDefault("NOT_STARTED")
+            val status = runCatching { api.application(token()).status }
+                .getOrElse { if (unknownOnFailure) "UNKNOWN" else "NOT_STARTED" }
             val mapped = when (status) {
                 "ACTIVE" -> "ACTIVE"
                 "NOT_STARTED" -> "NONE"
+                "UNKNOWN" -> "UNKNOWN"
                 else -> "PENDING"
             }
             launch(Dispatchers.Main) { onResult(mapped) }
@@ -170,18 +211,18 @@ class ProviderViewModel(
         mutableState.value = ProviderUiState("SCR-C32", ProviderPhase.Loading)
         viewModelScope.launch(Dispatchers.IO) {
             runCatching {
-                val values = api.notifications(token()).getJSONArray("data").let { array -> List(array.length()) { array.getJSONObject(it) } }
-                notificationIds = values.map { it.getString("id") }
-                notificationLinks = values.map { if (it.isNull("deep_link")) "" else it.getString("deep_link") }
+                val values = api.notifications(token())
+                notificationIds = values.map { it.id }
+                notificationLinks = values.map { it.deepLink.orEmpty() }
                 CustomerLogic.reduce(
                     "SCR-C32",
                     mapOf(
                         "event" to "loaded",
-                        "notification_titles" to values.map { it.optString("title") },
-                        "notification_bodies" to values.map { it.optString("body") },
-                        "notification_states" to values.map { if (it.isNull("read_at")) "unread" else "read" },
+                        "notification_titles" to values.map { it.title },
+                        "notification_bodies" to values.map { it.body },
+                        "notification_states" to values.map { if (it.readAt == null) "unread" else "read" },
                         "deep_links" to notificationLinks,
-                        "notification_times" to values.map { it.optString("created_at").displayDateTime() },
+                        "notification_times" to values.map { it.createdAt.orEmpty().displayDateTime() },
                         "notifications_denied" to showDenied,
                     ),
                 )
@@ -212,6 +253,7 @@ class ProviderViewModel(
             "SCR-P11" -> loadMarketOffers()
             "SCR-P18" -> loadEarnings()
             "SCR-P07" -> loadApplication()
+            "SCR-P08" -> loadHome() // DEC-067: restoring the last mode of an active provider
             "PROVIDER_ORDER", "SCR-C19", "SCR-P17" -> openOrderLink(target)
             else -> loadNotifications(notificationsDenied)
         }
@@ -229,6 +271,8 @@ class ProviderViewModel(
             target.target == "SCR-C19" -> viewModelScope.launch(Dispatchers.Main) { openChat() }
             target.target == "SCR-P17" && "rate_customer" in order.availableActions -> {
                 ratingStars = 0
+                ratingComment = ""
+                ratingTags.clear()
                 mutableState.value = ratingState("loaded")
             }
             order.status in listOf("CANCELLED", "EXPIRED", "OPEN") -> viewModelScope.launch(Dispatchers.Main) { loadHome() }
@@ -299,16 +343,17 @@ class ProviderViewModel(
         }
         mutableState.value = offerState("submitting", request)
         viewModelScope.launch(Dispatchers.IO) {
-            val body = JSONObject()
-                .put("price", offerPrice)
-                .put("includes_text", offerIncludes)
-                .put("note", offerNote.ifBlank { JSONObject.NULL })
-            if (request.order.timingType == "NOW") {
-                body.put("eta_minutes", request.context.etaCodes[selectedOfferEta].toInt())
-            }
-            if (request.order.pricingMode == "INSPECTION") {
-                body.put("inspection_fee_deductible", request.context.deductibleCodes[selectedOfferDeductible] == "YES")
-            }
+            val body = OfferBody(
+                price = offerPrice,
+                includesText = offerIncludes,
+                note = offerNote.ifBlank { null },
+                etaMinutes = if (request.order.timingType == "NOW") request.context.etaCodes[selectedOfferEta].toInt() else null,
+                inspectionFeeDeductible = if (request.order.pricingMode == "INSPECTION") {
+                    request.context.deductibleCodes[selectedOfferDeductible] == "YES"
+                } else {
+                    null
+                },
+            )
             runCatching { api.submitOffer(token(), request.order.id, body) }
                 .onSuccess { mutableState.value = offerState("success", request, emptyList()) }
                 .onFailure { mutableState.value = offerState("unavailable", request, emptyList()) }
@@ -381,6 +426,7 @@ class ProviderViewModel(
         if (loaded == null) {
             loadHome()
         } else {
+            if (activeOrder?.id != loaded.id) { arrivalCode = ""; arrivalExceptionNote = "" }
             activeOrder = loaded
             mutableState.value = activeOrderState(loaded)
         }
@@ -395,17 +441,26 @@ class ProviderViewModel(
             "start_work" -> performSimpleAction(action, "start-work")
             "complete_inspection_only" -> performSimpleAction(action, "complete-inspection-only")
             "complete_work" -> performSimpleAction(action, "complete")
-            "confirm_cash" -> performSimpleAction(
-                action,
-                "cash-received",
-                JSONObject().put("amount", order.finalAmount),
-            )
+            "confirm_cash" -> performSimpleAction(action, "cash-received", OrderActionInput(amount = order.finalAmount))
             "chat" -> openChat()
         }
     }
 
     fun selectCustomerRating(index: Int) {
+        if (mutableState.value.isBusy || "rate_customer" !in mutableState.value.visibleActions || index !in 0..4) return
         ratingStars = index + 1
+        mutableState.value = ratingState("loaded")
+    }
+
+    fun toggleCustomerRatingTag(index: Int) {
+        if (mutableState.value.isBusy || "rate_customer" !in mutableState.value.visibleActions || index !in activeOrder?.customerRatingTagOptions.orEmpty().indices) return
+        if (!ratingTags.remove(index)) ratingTags.add(index)
+        mutableState.value = ratingState("loaded")
+    }
+
+    fun updateCustomerRatingComment(value: String) {
+        if (mutableState.value.isBusy) return
+        ratingComment = value.take(501)
         mutableState.value = ratingState("loaded")
     }
 
@@ -418,24 +473,90 @@ class ProviderViewModel(
         }
         mutableState.value = ratingState("submitting")
         viewModelScope.launch(Dispatchers.IO) {
-            runCatching { api.rateCustomer(token(), order.id, ratingStars) }
+            runCatching { api.rateCustomerWithFeedback(token(), order.id, ratingStars, ratingTags.mapNotNull { order.customerRatingTagOptions.getOrNull(it)?.code }, ratingComment.trim().ifEmpty { null }) }
                 .onSuccess { mutableState.value = ratingState("success", emptyList()) }
-                .onFailure { mutableState.value = ProviderLogic.reduce("SCR-P17", mapOf("event" to "error")) }
+                .onFailure { mutableState.value = ratingState("loaded").copy(messageKey = "error.body") }
         }
     }
 
+    private var earningsPayload: ProviderEarningsPayload? = null
+    private var earningsType: String? = null
+    private var earningsDateFrom = ""
+    private var earningsDateTo = ""
+    private var appliedEarningsFilters = Triple<String?, String, String>(null, "", "")
+    private var earningsBusy = false
+
     fun loadEarnings() = launch("SCR-P18") {
-        val loaded = api.earnings(token())
-        mutableState.value = ProviderLogic.reduce(
-            "SCR-P18",
-            mapOf(
-                "event" to "loaded", "operating_mode" to loaded.operatingMode,
-                "summary" to loaded.summary.map(::formatAmount),
-                "transaction_titles" to loaded.transactionTitles,
-                "transaction_details" to loaded.transactionDetails,
-                "transaction_states" to loaded.transactionStates,
-            ),
-        )
+        val filters = appliedEarningsFilters
+        val value = api.filteredEarnings(token(), 1, filters.first, filters.second.ifBlank { null }, filters.third.ifBlank { null })
+        if (mutableState.value.screen != "SCR-P18") return@launch
+        earningsPayload = value
+        earningsType = filters.first; earningsDateFrom = filters.second; earningsDateTo = filters.third
+        mutableState.value = earningsState()
+    }
+
+    fun updateEarningsFilters(typeIndex: Int? = null, dateFrom: String? = null, dateTo: String? = null) {
+        if (earningsBusy) return
+        if (typeIndex != null) earningsType = earningsPayload?.filterOptions?.getOrNull(typeIndex)?.code ?: return
+        if (dateFrom != null) earningsDateFrom = dateFrom.take(10)
+        if (dateTo != null) earningsDateTo = dateTo.take(10)
+        mutableState.value = earningsState()
+    }
+
+    fun applyEarningsFilters(reset: Boolean = false, more: Boolean = false) {
+        if (earningsBusy) return
+        val previous = earningsPayload ?: return
+        if (reset) { earningsType = null; earningsDateFrom = ""; earningsDateTo = "" }
+        val filters = if (more) appliedEarningsFilters else Triple(earningsType, earningsDateFrom, earningsDateTo)
+        val page = if (more) previous.currentPage + 1 else 1
+        if (more && page > previous.lastPage) return
+        earningsBusy = true
+        mutableState.value = earningsState()
+        viewModelScope.launch(Dispatchers.IO) {
+            runCatching { api.filteredEarnings(token(), page, filters.first, filters.second.ifBlank { null }, filters.third.ifBlank { null }) }
+                .onSuccess { loaded ->
+                    if (mutableState.value.screen != "SCR-P18") return@onSuccess
+                    earningsPayload = if (more) loaded.copy(transactionTitles = previous.transactionTitles + loaded.transactionTitles,
+                        transactionDetails = previous.transactionDetails + loaded.transactionDetails, transactionStates = previous.transactionStates + loaded.transactionStates) else loaded
+                    appliedEarningsFilters = filters
+                }
+                .onFailure { if (mutableState.value.screen == "SCR-P18") mutableState.value = earningsState("provider.earnings.filter_error") }
+                .also {
+                    val error = mutableState.value.messageKey.takeIf { it == "provider.earnings.filter_error" }
+                    earningsBusy = false
+                    if (mutableState.value.screen == "SCR-P18") mutableState.value = earningsState(error)
+                }
+        }
+    }
+
+    fun exportEarnings(onReady: (ByteArray) -> Unit) {
+        if (earningsBusy || Triple(earningsType, earningsDateFrom, earningsDateTo) != appliedEarningsFilters) return
+        earningsBusy = true
+        mutableState.value = earningsState()
+        val filters = appliedEarningsFilters
+        viewModelScope.launch(Dispatchers.IO) {
+            val result = runCatching { api.exportEarnings(token(), filters.first, filters.second.ifBlank { null }, filters.third.ifBlank { null }) }
+            earningsBusy = false
+            if (mutableState.value.screen != "SCR-P18") return@launch
+            mutableState.value = earningsState(if (result.isFailure) "provider.earnings.export_error" else null)
+            result.getOrNull()?.let { data -> kotlinx.coroutines.withContext(Dispatchers.Main) { onReady(data) } }
+        }
+    }
+
+    private fun earningsState(error: String? = null): ProviderUiState {
+        val loaded = earningsPayload ?: return ProviderLogic.reduce("SCR-P18", mapOf("event" to "loading"))
+        return ProviderLogic.reduce("SCR-P18", mapOf(
+            "event" to if (earningsBusy) "loading_more" else "loaded", "operating_mode" to loaded.operatingMode,
+            "summary" to loaded.summary.map(::formatAmount), "transaction_titles" to loaded.transactionTitles,
+            "transaction_details" to loaded.transactionDetails, "transaction_states" to loaded.transactionStates,
+            "dues_blocked" to loaded.duesBlocked, "dues_debt" to formatAmount(loaded.duesDebt),
+            "dues_limit" to loaded.duesLimit?.let(::formatAmount).orEmpty(),
+        )).copy(messageKey = error ?: when { loaded.duesBlocked && loaded.operatingMode == "MARKETPLACE" -> "provider.earnings.dues_blocked"; loaded.operatingMode == "EMPLOYEE" -> "provider.earnings.employee.info"; else -> null },
+            earningsDuesBlocked = loaded.duesBlocked && loaded.operatingMode == "MARKETPLACE", earningsEmployee = loaded.operatingMode == "EMPLOYEE",
+            earningsFilterLabels = loaded.filterOptions.map(ProviderReason::label), earningsFilterCodes = loaded.filterOptions.map(ProviderReason::code),
+            earningsTypeIndex = loaded.filterOptions.indexOfFirst { it.code == earningsType }.coerceAtLeast(0),
+            earningsDateFrom = earningsDateFrom, earningsDateTo = earningsDateTo, earningsHasMore = loaded.currentPage < loaded.lastPage,
+            earningsFiltersDirty = Triple(earningsType, earningsDateFrom, earningsDateTo) != appliedEarningsFilters)
     }
 
     fun loadProviderProfile() = launch("SCR-P19") {
@@ -479,11 +600,12 @@ class ProviderViewModel(
         }
         mutableState.value = workspaceProfileState("saving")
         viewModelScope.launch(Dispatchers.IO) {
-            val body = JSONObject()
-                .put("experience_years", experienceYears.toInt())
-                .put("bio", bio.ifBlank { JSONObject.NULL })
-                .put("specialty_ids", JSONArray(workspaceSpecialtyIds.toList()))
-                .put("area_ids", JSONArray(workspaceAreaIds.toList()))
+            val body = ProfileUpdateBody(
+                experienceYears = experienceYears.toInt(),
+                bio = bio.ifBlank { null },
+                specialtyIds = workspaceSpecialtyIds.toList(),
+                areaIds = workspaceAreaIds.toList(),
+            )
             runCatching { api.updateProfile(token(), body) }
                 .onSuccess {
                     workspaceProfile = it
@@ -581,14 +703,20 @@ class ProviderViewModel(
             }.onFailure { mutableState.value = ProviderLogic.reduce("SCR-C19", mapOf("event" to "error")) }
         }
     }
+    private var arrivalCode = ""
+    private var arrivalExceptionNote = ""
+    fun updateArrivalCode(value: String) { arrivalCode = value.mapNotNull { it.digitToIntOrNull() }.joinToString("").take(6) }
+    fun updateArrivalExceptionNote(value: String) { arrivalExceptionNote = value }
 
     fun performLocationAction(action: String, latitude: Double, longitude: Double) {
+        if (action == "start_trip") { arrivalCode = ""; arrivalExceptionNote = "" }
         val path = when (action) {
             "start_trip" -> "start-trip"
             "mark_arrived" -> "arrived"
+            "report_arrival_exception" -> "arrival-exception"
             else -> return
         }
-        performSimpleAction(action, path, JSONObject().put("lat", latitude).put("lng", longitude))
+        performSimpleAction(action, path, OrderActionInput(lat = latitude, lng = longitude, arrivalCode = arrivalCode.takeIf { it.isNotEmpty() }, note = arrivalExceptionNote.takeIf { action == "report_arrival_exception" }))
     }
 
     fun activeDestination(): Pair<Double, Double>? {
@@ -596,7 +724,7 @@ class ProviderViewModel(
         return order.latitude?.let { latitude -> order.longitude?.let { longitude -> latitude to longitude } }
     }
 
-    fun activeCustomerPhone(): String? = activeOrder?.customerPhone
+    fun activeCustomerPhone(): String? = null
 
     fun selectProposalType(index: Int) {
         if (proposalTypes.getOrNull(index) == null) return
@@ -646,12 +774,14 @@ class ProviderViewModel(
         val type = proposalTypes.getOrNull(selectedProposalType) ?: return
         mutableState.value = proposalState("submitting")
         viewModelScope.launch(Dispatchers.IO) {
-            val body = JSONObject()
-                .put("type", type.code)
-                .put("amount", proposalAmount)
-                .put("reason", proposalReason)
-                .putNullable("photo_media_id", proposalPhotoMediaId)
-            if (outsidePriceGuideReason.isNotBlank()) body.put("outside_price_guide_reason", outsidePriceGuideReason)
+            val body = ProposalBody(
+                type = type.code,
+                amount = proposalAmount,
+                reason = proposalReason,
+                expectedVersion = order.version,
+                photoMediaId = proposalPhotoMediaId,
+                outsidePriceGuideReason = outsidePriceGuideReason.ifBlank { null },
+            )
             runCatching { api.submitProposal(token(), order, body) }
                 .onSuccess {
                     mutableState.value = proposalState("success")
@@ -686,15 +816,16 @@ class ProviderViewModel(
                 "report_no_show" -> "customer-no-show"
                 else -> return@launch
             }
-            val body = JSONObject()
-            if (requestedUnableAction != "report_no_show") {
-                body.put("reason_code", providerReasons[selectedUnableReason].code)
-            }
-            if (requestedUnableAction == "report_unable") body.put("note", unableNote)
-            runCatching { api.performOrderAction(token(), order, path, body) }
+            val input = OrderActionInput(
+                reasonCode = if (requestedUnableAction != "report_no_show") providerReasons[selectedUnableReason].code else null,
+                note = if (requestedUnableAction == "report_unable") unableNote else null,
+            )
+            runCatching { api.performOrderAction(token(), order, path, input) }
                 .onSuccess {
                     activeOrder = it
-                    if (it.status == "OPEN" || it.status == "CANCELLED") loadHome() else mutableState.value = activeOrderState(it)
+                    if (it.status == "OPEN" || it.status == "CANCELLED") loadHome() else mutableState.value = activeOrderState(it).let { next ->
+                        if (requestedUnableAction == "report_no_show") next.copy(messageKey = "provider.no_show.pending") else next
+                    }
                 }
                 .onFailure { mutableState.value = ProviderLogic.reduce("SCR-P21", mapOf("event" to "error")) }
         }
@@ -808,17 +939,18 @@ class ProviderViewModel(
         }
         launch("SCR-P06", "submitting") {
             val method = payoutOptions[selectedPayoutIndex]
-            val body = JSONObject()
-                .put("experience_years", experienceYears.toInt())
-                .put("bio", bio.ifBlank { JSONObject.NULL })
-                .put("category_ids", JSONArray(categoryIds.toList()))
-                .put("specialty_ids", JSONArray(specialtyIds.toList()))
-                .put("area_ids", JSONArray(areaIds.toList()))
-                .put("payout_method", method.code)
-                .put("payout_details", payoutDetails)
-                .putNullable("profile_photo_media_id", profilePhotoMediaId)
-                .putNullable("id_front_media_id", idFrontMediaId)
-                .putNullable("id_back_media_id", idBackMediaId)
+            val body = ApplicationBody(
+                experienceYears = experienceYears.toInt(),
+                bio = bio.ifBlank { null },
+                categoryIds = categoryIds.toList(),
+                specialtyIds = specialtyIds.toList(),
+                areaIds = areaIds.toList(),
+                payoutMethod = method.code,
+                payoutDetails = payoutDetails,
+                profilePhotoMediaId = profilePhotoMediaId,
+                idFrontMediaId = idFrontMediaId,
+                idBackMediaId = idBackMediaId,
+            )
             val submitted = api.submit(token(), body)
             application = submitted
             mutableState.value = statusState(submitted)
@@ -981,7 +1113,7 @@ class ProviderViewModel(
     private fun openProposal(action: String) {
         val order = activeOrder ?: return
         launch("SCR-P20") {
-            proposalTypes = api.proposalTypes().filter {
+            proposalTypes = order.proposalTypeOptions.ifEmpty { api.proposalTypes() }.filter {
                 if (action == "submit_execution_quote") it.code == "EXECUTION_QUOTE" else it.code != "EXECUTION_QUOTE"
             }
             selectedProposalType = if (proposalTypes.isEmpty()) -1 else 0
@@ -1004,16 +1136,38 @@ class ProviderViewModel(
         }
     }
 
-    private fun performSimpleAction(action: String, path: String, body: JSONObject = JSONObject()) {
+    fun uploadWorkPhoto(before: Boolean, upload: CustomerMediaUpload) {
+        val order = activeOrder ?: return
+        val action = if (before) "upload_repair_before" else "upload_repair_after"
+        if (mutableState.value.isBusy || action !in order.availableActions) return
+        mutableState.value = activeOrderState(order, "submitting", action)
+        viewModelScope.launch(Dispatchers.IO) {
+            runCatching {
+                val mediaId = api.uploadImage(token(), upload)
+                api.attachWorkPhoto(token(), order, mediaId, if (before) "REPAIR_BEFORE" else "REPAIR_AFTER")
+            }.onSuccess { activeOrder = it; mutableState.value = activeOrderState(it) }
+                .onFailure { mutableState.value = activeOrderState(order).copy(messageKey = "media.upload_error") }
+        }
+    }
+
+    fun updateCompletionEstimate(value: String) {
+        val minutes = value.trim().toIntOrNull()
+        if (minutes == null || minutes !in 1..1440) return
+        performSimpleAction("update_completion_estimate", "completion-estimate", OrderActionInput(minutes = minutes))
+    }
+
+    private fun performSimpleAction(action: String, path: String, input: OrderActionInput = OrderActionInput()) {
         val order = activeOrder ?: return
         if (action !in order.availableActions || mutableState.value.isBusy) return
         mutableState.value = activeOrderState(order, "submitting", action)
         viewModelScope.launch(Dispatchers.IO) {
-            runCatching { api.performOrderAction(token(), order, path, body) }
+            runCatching { api.performOrderAction(token(), order, path, input) }
                 .onSuccess {
                     activeOrder = it
                     if (it.status == "CLOSED" && "rate_customer" in it.availableActions) {
                         ratingStars = 0
+                        ratingComment = ""
+                        ratingTags.clear()
                         mutableState.value = ratingState("loaded")
                     } else if (it.status in listOf("CLOSED", "CANCELLED", "EXPIRED", "OPEN")) {
                         loadHome()
@@ -1021,7 +1175,11 @@ class ProviderViewModel(
                         mutableState.value = activeOrderState(it)
                     }
                 }
-                .onFailure { mutableState.value = ProviderLogic.reduce(screenFor(order), mapOf("event" to "error")) }
+                .onFailure { error ->
+                    if (action in listOf("mark_arrived", "report_arrival_exception")) {
+                        mutableState.value = activeOrderState(order).copy(arrivalError = (error as? ProviderApiException)?.serverMessage.orEmpty(), messageKey = "arrival.code.failed")
+                    } else mutableState.value = ProviderLogic.reduce(screenFor(order), mapOf("event" to "error"))
+                }
         }
     }
 
@@ -1045,7 +1203,9 @@ class ProviderViewModel(
                 "current_action" to currentAction,
                 "display_status" to order.displayStatus,
                 "customer_name" to order.customerName,
+                "warranty_coverage" to order.warrantyCoverage,
                 "customer_rating" to order.customerRating,
+                "before_photo_count" to order.beforePhotoCount, "after_photo_count" to order.afterPhotoCount,
                 "order_summary" to listOf(
                     "#${order.number}",
                     listOf(order.category, order.problemType).filter(String::isNotBlank).joinToString(" — "),
@@ -1059,11 +1219,13 @@ class ProviderViewModel(
                     order.paymentMethodLabel,
                 ) else emptyList<String>(),
                 "step_states" to order.stepStates,
+                "completion_estimate_at" to order.completionEstimateAt,
+                "arrival_code_required" to order.arrivalCodeRequired, "arrival_exception_pending" to order.arrivalExceptionPending,
                 "available_actions" to order.availableActions,
                 "price_guide_min" to order.priceGuideMinimum.orEmpty().substringBefore('.'),
                 "price_guide_max" to order.priceGuideMaximum.orEmpty().substringBefore('.'),
                 "price_review_required" to order.priceGuideReviewRequired,
-                "message_key" to message,
+                "message_key" to if (order.absenceReportPending) "provider.no_show.pending" else message,
             ),
         )
     }
@@ -1112,6 +1274,10 @@ class ProviderViewModel(
             mapOf(
                 "event" to event,
                 "stars" to ratingStars,
+                "tag_labels" to order?.customerRatingTagOptions.orEmpty().map(ProviderReason::label),
+                "tag_codes" to order?.customerRatingTagOptions.orEmpty().map(ProviderReason::code),
+                "selected_tags" to ratingTags.map(Int::toString),
+                "comment" to ratingComment,
                 "order_summary" to listOf(
                     "#${order?.number.orEmpty()}", order?.customerName.orEmpty(),
                     listOf(order?.category.orEmpty(), order?.problemType.orEmpty()).filter(String::isNotBlank).joinToString(" — "),
@@ -1151,6 +1317,20 @@ class ProviderViewModel(
         )
     }
 
+    fun loadChatImage(url: String, ready: (android.graphics.Bitmap?) -> Unit) {
+        val sessionToken = token()
+        Thread {
+            val bitmap = runCatching {
+                val bytes = api.image(sessionToken, url)
+                val bounds = android.graphics.BitmapFactory.Options().apply { inJustDecodeBounds = true }
+                android.graphics.BitmapFactory.decodeByteArray(bytes, 0, bytes.size, bounds)
+                val options = android.graphics.BitmapFactory.Options().apply { while (bounds.outWidth / inSampleSize > 1024 || bounds.outHeight / inSampleSize > 1024) inSampleSize *= 2 }
+                android.graphics.BitmapFactory.decodeByteArray(bytes, 0, bytes.size, options)
+            }.getOrNull()
+            android.os.Handler(android.os.Looper.getMainLooper()).post { ready(bitmap) }
+        }.start()
+    }
+
     private fun chatState(event: String): ProviderUiState {
         val chat = chatPayload ?: return ProviderLogic.reduce("SCR-C19", mapOf("event" to "error"))
         return ProviderLogic.reduce(
@@ -1158,6 +1338,7 @@ class ProviderViewModel(
             mapOf(
                 "event" to event, "viewer_role" to "PROVIDER", "counterpart_name" to chat.customerName,
                 "conversation_status" to chat.status, "order_summary" to chat.orderSummary,
+                "image_groups" to chat.imageGroups,
                 "message_bodies" to chat.bodies, "message_kinds" to chat.kinds,
                 "message_times" to chat.times, "draft" to chatDraft,
             ),
@@ -1184,22 +1365,22 @@ class ProviderViewModel(
         if (order.timingType == "NOW") return "provider.home.timing.now"
         val value = order.slotStart ?: return ""
         return runCatching {
-            OffsetDateTime.parse(value).atZoneSameInstant(ZoneId.systemDefault()).format(DateTimeFormatter.ofPattern("d MMM, h:mm a", Locale.getDefault()))
+            OffsetDateTime.parse(value).atZoneSameInstant(ZoneId.systemDefault()).format(DateTimeFormatter.ofPattern("d MMM, h:mm a", Locale.forLanguageTag(noox.bzr.network.BremoHttp.language())))
         }.getOrDefault(value)
     }
 
-    private fun formatAmount(value: String): String = "${value.substringBefore('.')} $currencyLabel"
+    private fun formatAmount(value: String): String = noox.bzr.design.BzrFormat.money(value, currencyLabel)
 
     private fun timingLabel(order: ProviderHomeOrder): String {
         if (order.timingType == "NOW") return "provider.home.timing.now"
         val value = order.slotStart ?: return ""
         return runCatching {
-            OffsetDateTime.parse(value).atZoneSameInstant(ZoneId.systemDefault()).format(DateTimeFormatter.ofPattern("d MMM, h:mm a", Locale.getDefault()))
+            OffsetDateTime.parse(value).atZoneSameInstant(ZoneId.systemDefault()).format(DateTimeFormatter.ofPattern("d MMM, h:mm a", Locale.forLanguageTag(noox.bzr.network.BremoHttp.language())))
         }.getOrDefault(value)
     }
 
     private fun String.displayDateTime(): String = ifBlank { "" }.let { value ->
-        runCatching { OffsetDateTime.parse(value).atZoneSameInstant(ZoneId.systemDefault()).format(DateTimeFormatter.ofPattern("yyyy-MM-dd · h:mm a")) }.getOrDefault(value)
+        runCatching { OffsetDateTime.parse(value).atZoneSameInstant(ZoneId.systemDefault()).format(DateTimeFormatter.ofPattern("yyyy-MM-dd · h:mm a", Locale.forLanguageTag(noox.bzr.network.BremoHttp.language()))) }.getOrDefault(value)
     }
 
     private fun selectedSpecialties(): List<ProviderChoice> = categories.filter { it.id in categoryIds }.flatMap(ProviderCategory::specialties)
@@ -1248,5 +1429,3 @@ class ProviderViewModel(
         else -> "provider.application.pending"
     }
 }
-
-private fun JSONObject.putNullable(key: String, value: Int?): JSONObject = if (value == null) this else put(key, value)

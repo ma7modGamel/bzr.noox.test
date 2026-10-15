@@ -7,10 +7,12 @@ namespace App\Modules\Reviews\Models;
 use App\Modules\Identity\Models\Admin;
 use App\Modules\Identity\Models\User;
 use App\Modules\Orders\Models\Order;
+use App\Modules\Orders\Models\OrderMedia;
 use App\Modules\Providers\Models\ProviderProfile;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /** BR-090 — ثلاثة أبعاد + نص اختياري، غير قابل للتعديل. */
 final class Review extends Model
@@ -19,12 +21,17 @@ final class Review extends Model
 
     protected function casts(): array
     {
-        return ['hidden_at' => 'immutable_datetime'];
+        return ['hidden_at' => 'immutable_datetime', 'tags' => 'array'];
     }
 
     public function order(): BelongsTo
     {
         return $this->belongsTo(Order::class);
+    }
+
+    public function photos(): HasMany
+    {
+        return $this->hasMany(OrderMedia::class, 'order_id', 'order_id')->where('purpose', 'CUSTOMER_REVIEW');
     }
 
     public function providerProfile(): BelongsTo

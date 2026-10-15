@@ -8,6 +8,7 @@ use App\Modules\Settings\Enums\Cfg;
 use App\Modules\Settings\Enums\OperatingMode;
 use App\Support\Exceptions\BusinessRuleViolationException;
 use App\Support\Exceptions\FeatureDisabledException;
+use App\Support\Localization;
 
 /**
  * بوابة مفاتيح المرحلة — 39-OPERATING-MODES، BR-006..BR-009.
@@ -65,7 +66,7 @@ final class FeatureGate
         if ($inspectionFeeEnabled && ! $offersEnabled) {
             throw BusinessRuleViolationException::rule(
                 'BR-009',
-                'لا يمكن تفعيل رسوم المعاينة (CFG-091) قبل تفعيل عروض السعر (CFG-090).',
+                Localization::text('copy.inspection_fees_cfg_091_cannot_be_enabled_before_price'),
             );
         }
     }

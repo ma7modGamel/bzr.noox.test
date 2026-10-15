@@ -78,10 +78,11 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:paddingHorizontal="@dimen/bremo_space_screen_horizontal"
-            android:paddingVertical="@dimen/bremo_space_s"
-            android:divider="@drawable/bremo_gap_s"
+            android:paddingVertical="@dimen/bremo_space_m"
+            android:divider="@drawable/bremo_gap_m"
             android:showDividers="middle"
-            android:background="@color/bremo_surface"
+            android:background="@color/bremo_surface_alt"
+            android:elevation="@dimen/bremo_elevation_card"
             android:visibility="gone" />
     </LinearLayout>
 

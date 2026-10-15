@@ -1,0 +1,2761 @@
+{
+  "generated_at": "2026-10-12T23:57:24.401704+03:00",
+  "source_pdf": {
+    "path": "/home/tro/Downloads/Bremo_PRD.pdf",
+    "sha256": "7b1532e5170c88e7bae3373166498fe06e689e16bf6c4f4e3cca40d96db9996f",
+    "pages": 29
+  },
+  "git_head": "856752d9b5d190535e503583b022c3c7410350b6",
+  "working_tree_included": true,
+  "snapshot_count": 404,
+  "snapshot_codes": [
+    "SCR-C01",
+    "SCR-C02",
+    "SCR-C03",
+    "SCR-C04",
+    "SCR-C05",
+    "SCR-C06",
+    "SCR-C07",
+    "SCR-C08",
+    "SCR-C09",
+    "SCR-C10",
+    "SCR-C11",
+    "SCR-C12",
+    "SCR-C13",
+    "SCR-C14",
+    "SCR-C15",
+    "SCR-C16",
+    "SCR-C17",
+    "SCR-C18",
+    "SCR-C19",
+    "SCR-C20",
+    "SCR-C21",
+    "SCR-C22",
+    "SCR-C23",
+    "SCR-C24",
+    "SCR-C25",
+    "SCR-C26",
+    "SCR-C27",
+    "SCR-C28",
+    "SCR-C29",
+    "SCR-C30",
+    "SCR-C31",
+    "SCR-C32",
+    "SCR-C33",
+    "SCR-C34",
+    "SCR-C35",
+    "SCR-C36",
+    "SCR-C37",
+    "SCR-C38",
+    "SCR-P01",
+    "SCR-P02",
+    "SCR-P03",
+    "SCR-P04",
+    "SCR-P05",
+    "SCR-P06",
+    "SCR-P07",
+    "SCR-P08",
+    "SCR-P09",
+    "SCR-P10",
+    "SCR-P11",
+    "SCR-P12",
+    "SCR-P13",
+    "SCR-P14",
+    "SCR-P15",
+    "SCR-P16",
+    "SCR-P17",
+    "SCR-P18",
+    "SCR-P19",
+    "SCR-P20",
+    "SCR-P21"
+  ],
+  "snapshot_method": "Paparazzi 1.3.5, fresh rendering in isolated report directory, fixture data",
+  "native_ios_screenshots": false,
+  "e2e_device_test": false,
+  "page_count": 43,
+  "findings": [
+    {
+      "id": "D01",
+      "title": "وضع التشغيل: العروض مقابل تعيين الإدارة",
+      "priority": "P1",
+      "kind": "فرق إعدادات وشرح رحلة",
+      "expected": "الرحلة الأساسية في ص 2–3 و11 و24–25 تبدأ بعروض الفنيين واختيار العميل. تظهر C36 في ص 12 كمسار بديل.",
+      "actual": "الإعداد الفعلي offers_enabled=false؛ الطلبات الجديدة تنتظر تعيين الإدارة، والمعاينة مجانية. مسار العروض موجود لكنه غير مفعّل.",
+      "impact": "تختلف نقطة التأكيد، مصدر السعر، إشعارات الفنيين، والشاشات المتاحة للطرفين.",
+      "remedy": "توثيق وضع الموظفين كمسار الإطلاق الحالي، وفصل مسار السوق المشروط بتفعيل العروض.",
+      "sources": [
+        {
+          "path": "app/Modules/Settings/Services/FeatureGate.php",
+          "line": 21,
+          "sha256": "ed9935ec1926b2cf1574fde03b740a59d4740ae4bae5b5b6896dee12ee5c0590",
+          "snippet": "    public function mode(): OperatingMode\n    {\n        return $this->offersEnabled()\n            ? OperatingMode::Marketplace\n            : OperatingMode::Employee;\n    }"
+        },
+        {
+          "path": "app/Modules/Orders/Actions/AssignProviderAction.php",
+          "line": 38,
+          "sha256": "9331ba255449edd28f904a1aa44d419e074646d357eb9a7053149d39d21f434d",
+          "snippet": "    public function execute(Order $order, ProviderProfile $provider, Admin $admin): Order\n    {\n        $this->features->requireEmployeeMode('assignProvider');\n        $this->eligibility->assertAssignable($order, $provider);\n\n        return $this->stateMachine->apply("
+        }
+      ],
+      "pairs": [
+        {
+          "prd": 46,
+          "page": 11,
+          "label": "C06: العروض",
+          "current": "SCR-C36-waiting_now",
+          "note": "",
+          "crop": null
+        },
+        {
+          "prd": 120,
+          "page": 24,
+          "label": "P08: رئيسية الفني",
+          "current": "SCR-P08-assigned",
+          "note": "",
+          "crop": null
+        }
+      ],
+      "note": "لقطة C36 هي حالة انتظار التعيين. مثال P08 في الملف نفسه يتضمن طلبًا معيّنًا؛ المشكلة أن الرحلة العامة تخلط الوضعين.",
+      "code": false
+    },
+    {
+      "id": "D02",
+      "title": "إنشاء الطلب: ثلاث خطوات مقابل خمس",
+      "priority": "P1",
+      "kind": "اختلاف workflow",
+      "expected": "ص 8–10: C03 المشكلة والوسائط، ثم C04 العنوان والموعد والخامات، ثم C05 المراجعة؛ وعد «3 خطوات».",
+      "actual": "Android وiOS: C03 اختيار الخدمة، C37 وصف المشكلة، C04 المكان والموعد، C38 الخامات والميزانية، ثم C05.",
+      "impact": "الرمز C03 يشير إلى محتوى مختلف، والملف لا يعرض C37 وC38 كخطوتين مستقلتين.",
+      "remedy": "تحديث مخطط الرحلة وترقيم الخطوات والمراجع الخاصة بالشاشات.",
+      "sources": [
+        {
+          "path": "androidapp/app/src/main/kotlin/noox/bzr/customer/CustomerScreens.kt",
+          "line": 9,
+          "sha256": "3c880f5044b4dd1645b0df9f93971814201ad0c9c32bb1d4304fda860e3363ff",
+          "snippet": "    \"SCR-C03\" -> C03ServiceView(context)\n    \"SCR-C37\" -> C37ProblemView(context)\n    \"SCR-C04\" -> C04TimingView(context)\n    \"SCR-C38\" -> C38BudgetView(context)\n    \"SCR-C05\" -> C05ReviewView(context)\n    \"SCR-C06\" -> C06OffersView(context)"
+        },
+        {
+          "path": "iosapp/Core/Sources/BzrCore/CustomerJourney.swift",
+          "line": 245,
+          "sha256": "361dcf3ef98a8aafcea2358bbb1ee01e211289f11da5aa1c7c8873d2843dbd37",
+          "snippet": "    /// C03 (DEC-071, step 1 of 5): the service only. The view model filters by `search_query` before reducing.\n    private static func service(_ input: [String: CustomerInputValue]) -> CustomerUIState {\n        let labels = input.strings(\"category_labels\")\n        let selected = input.integer(\"selected_category_index\", default: -1)\n        let noResults = labels.isEmpty && !input.text(\"search_query\").trimmingCharacters(in: .whitespaces).isEmpty\n        var state = CustomerUIState("
+        }
+      ],
+      "pairs": [
+        {
+          "prd": 32,
+          "page": 8,
+          "label": "C03 في الملف",
+          "current": "SCR-C03-selected",
+          "note": "",
+          "crop": null
+        },
+        {
+          "prd": 32,
+          "page": 8,
+          "label": "المحتوى انتقل إلى C37",
+          "current": "SCR-C37-with_media",
+          "note": "",
+          "crop": null
+        }
+      ],
+      "note": "المقارنة هنا لهيكل الرحلة؛ اختلاف أسماء الأشخاص والمبالغ في اللقطات سببه بيانات الاختبار.",
+      "code": false
+    },
+    {
+      "id": "D03",
+      "title": "الخامات والتسعير انتقلا إلى C38",
+      "priority": "P2",
+      "kind": "اختلاف workflow وخيارات",
+      "expected": "C04 في ص 9 تجمع الموعد والخامات والتسعير، وتعرض خيارين للخامات.",
+      "actual": "C04 للمكان والموعد. C38 للخامات، بثلاثة خيارات بينها «الفني يحدد المطلوب بعد المعاينة». التسعير والميزانية يظهران في وضع السوق فقط.",
+      "impact": "تختلف شاشة إدخال البيانات، وهناك اختيار أعمال إضافي غير موضح في الملف.",
+      "remedy": "إضافة C38 والخيار الثالث، وشرح أن EXECUTION وINSPECTION كلاهما يستقبل عروضًا في وضع السوق.",
+      "sources": [
+        {
+          "path": "app/Modules/Orders/Enums/MaterialsResponsibility.php",
+          "line": 13,
+          "sha256": "5d2796ad7c4a742e86ab15a9cdb8592aa9849a32dabff4ff058135204a8b26ff",
+          "snippet": "    case CustomerHas = 'CUSTOMER_HAS';\n    case ProviderSupplies = 'PROVIDER_SUPPLIES';\n    case Unsure = 'UNSURE';\n\n    public function getLabel(): string\n    {"
+        },
+        {
+          "path": "androidapp/app/src/main/kotlin/noox/bzr/customer/CustomerViewModel.kt",
+          "line": 772,
+          "sha256": "6b111583d8ae334882f83480185e5bafb4d871107cfe29a33ae022e7bedc5ee5",
+          "snippet": "    fun openBudget() {\n        state = CustomerLogic.reduce(\"SCR-C38\", budgetInput())\n    }\n\n    fun selectMaterial(index: Int) {\n        if (options(\"materials_responsibilities\").getOrNull(index) == null) return"
+        }
+      ],
+      "pairs": [
+        {
+          "prd": 36,
+          "page": 9,
+          "label": "C04: الخامات والتسعير",
+          "current": "SCR-C38-staff",
+          "note": "",
+          "crop": null
+        },
+        {
+          "prd": 36,
+          "page": 9,
+          "label": "C04 الحالية: الموعد فقط",
+          "current": "SCR-C04-staff_scheduled",
+          "note": "",
+          "crop": null
+        }
+      ],
+      "note": "",
+      "code": false
+    },
+    {
+      "id": "D04",
+      "title": "المعاينة المجانية ونتيجة رفض السعر",
+      "priority": "P1",
+      "kind": "قاعدة مالية وتعارض داخل الملف",
+      "expected": "ص 4 تقول إن الرفض لا يكلّف شيئًا. C04 تصف المعاينة بأنها مجانية، بينما C06/C08 تعرض رسومًا مثل 75 جنيه.",
+      "actual": "الإعداد الحالي: معاينة مجانية؛ رفض عرض التنفيذ يغلق الطلب بمبلغ صفر. عند وجود رسوم معاينة مدفوعة، يبقى استحقاق الرسوم وحدها.",
+      "impact": "وعد الرفض المجاني لا يصلح كقاعدة عامة لكل أوضاع التشغيل.",
+      "remedy": "كتابة نتيجة الرفض بحسب مجانية المعاينة، وتوضيح النتيجة نفسها عند انتهاء مهلة القرار.",
+      "sources": [
+        {
+          "path": "app/Modules/Pricing/Actions/DecideProposalAction.php",
+          "line": 80,
+          "sha256": "4038f54d68d47b6fea383a90e2ef95373a6093da60b627de7556173083b93c09",
+          "snippet": "        // رفض عرض التنفيذ: المبلغ المستحق هو رسوم المعاينة وحدها (BR-044)\n        $this->settle($proposal, $status, $actor);\n        $amounts = OrderAmounts::for($order->refresh());\n\n        if ($amounts->isZero()) {\n            // BR-056 — معاينة مجانية: إغلاق مباشر بلا دفع\n            return $this->stateMachine->apply(\n                order: $order,\n                action: 'closeFreeInspection',\n                actorType: $actor,\n                actorId: $actorId,\n                meta: ['final_amount' => '0.00', 'rule' => 'BR-056', 'proposal_status' => $status->value],\n                mutate: function (Order $fresh): void {\n                    $fresh->labor_total = '0.00';"
+        },
+        {
+          "path": "app/Modules/Orders/Actions/CompleteInspectionOnlyAction.php",
+          "line": 23,
+          "sha256": "9fcb73d9989e5713ec901dd0fcdf2f06401c8bdae713b6a6ce08dfabb173b7c5",
+          "snippet": "final readonly class CompleteInspectionOnlyAction\n{\n    public function __construct(private OrderStateMachine $stateMachine) {}\n\n    public function execute(Order $order, ActorType $actorType, ?int $actorId = null): Order\n    {"
+        }
+      ],
+      "pairs": [
+        {
+          "prd": 50,
+          "page": 11,
+          "label": "C08: رسوم المعاينة",
+          "current": "SCR-C38-staff",
+          "note": "",
+          "crop": null
+        }
+      ],
+      "note": "في وضع السوق يمكن أن تكون المعاينة مجانية أيضًا؛ الاستحقاق يعتمد على وجود رسوم فعلية، وليس اسم الوضع وحده.",
+      "code": false
+    },
+    {
+      "id": "D05",
+      "title": "مثال خصم المعاينة لا يطابق تعريف السعر في الخادم",
+      "priority": "P1",
+      "kind": "اختلاف تعريف مالي",
+      "expected": "ص 4 و15 تعرض 380 مصنعية +120 خامات −75 معاينة =425، مع عرض الخصم كسطر مستقل.",
+      "actual": "إذا كان عرض التنفيذ 380 والرسوم قابلة للخصم، OrderAmounts يعتبر عرض التنفيذ شاملًا لها؛ الناتج مع خامات 120 هو 500. إذا لم تُخصم، تُضاف الرسوم.",
+      "impact": "تطبيق المثال حرفيًا قد يؤدي إلى خصم الرسوم مرتين، أو تعريف مختلف لمبلغ عرض التنفيذ.",
+      "remedy": "تحديد هل قيمة عرض التنفيذ قبل الخصم أم شاملة له، ثم توحيد مثال العميل والفني والحساب.",
+      "sources": [
+        {
+          "path": "app/Modules/Pricing/Services/OrderAmounts.php",
+          "line": 72,
+          "sha256": "ee17727b3dbe5d4fc2f060ab82076706c4fb6bdbf11add8d08ccf32d1501e903",
+          "snippet": "    private static function laborBase(Order $order, mixed $quote): string\n    {\n        $offer = $order->acceptedOffer;\n\n        if ($order->pricing_mode === PricingMode::Execution) {\n            return self::money($offer?->price);\n        }\n\n        $fee = self::money($offer?->price);\n\n        if ($quote === null) {\n            return $fee;\n        }\n\n        // في وضع الموظفين الرسوم صفر، فالنتيجة هي عرض التنفيذ وحده مهما كانت قيمة الخصم.\n        return $offer?->inspection_fee_deductible\n            ? self::money($quote)\n            : bcadd(self::money($quote), $fee, 2);\n    }\n\n    /** BR-056 — طلب بمبلغ صفر يُغلق مباشرة بلا مرور بـ AWAITING_PAYMENT. */\n    public function isZero(): bool"
+        }
+      ],
+      "pairs": [
+        {
+          "prd": 68,
+          "page": 15,
+          "label": "C21: المثال المالي",
+          "current": "SCR-C21-cash",
+          "note": "",
+          "crop": null
+        }
+      ],
+      "note": "أرقام لقطة التطبيق بيانات اختبار مختلفة؛ إثبات الفرق الحسابي من الكود، وليس مقارنة مبالغ طلبين مختلفين.",
+      "code": true
+    },
+    {
+      "id": "D06",
+      "title": "قرار التكلفة الإضافية لا يُتاح عبر available_actions",
+      "priority": "P1",
+      "kind": "فجوة تنفيذ مستنتجة من الكود",
+      "expected": "C31 في ص 14 تتيح قبول أو رفض أي تكلفة إضافية قبل تنفيذها.",
+      "actual": "مقترحات MATERIALS وEXTRA_WORK تُقدَّم أثناء IN_PROGRESS، لكن إجراءات قرار العميل تُضاف عبر انتقالات عرض التنفيذ الأول، المسموحة فقط في AWAITING_QUOTE_APPROVAL.",
+      "impact": "الواجهتان تعتمدان على الإجراءات لإتاحة القرار؛ قد لا يستطيع العميل حسم المقترح، ولا يستطيع الفني إنهاء العمل ما دام معلّقًا.",
+      "remedy": "إتاحة قرار المقترحات الإضافية دون تغيير حالة الطلب، وإضافة اختبار API لتلك الإجراءات ثم اختبار الرحلة على الجهاز.",
+      "sources": [
+        {
+          "path": "app/Modules/Orders/Services/OrderPresentation.php",
+          "line": 189,
+          "sha256": "34048c214fecc060f1887e5541dc3f51580c4e595397516acd861ff59352c430",
+          "snippet": "        if ($order->pendingProposalRecord !== null) {\n            if ($this->stateMachine->can($order, 'approveExecutionQuote', ActorType::Customer)) {\n                $actions[] = 'approve_proposal';\n            }\n            if ($this->stateMachine->can($order, 'rejectExecutionQuote', ActorType::Customer)) {\n                $actions[] = 'reject_proposal';\n            }\n        }"
+        },
+        {
+          "path": "app/Modules/Orders/StateMachine/TransitionTable.php",
+          "line": 41,
+          "sha256": "e5d35a6481ae9343c4ce5dd7fa004462a4a07cbbdb259e03ae8af4d43e6385c7",
+          "snippet": "            new Transition('T-14', 'approveExecutionQuote', [S::AwaitingQuoteApproval], S::InProgress, [$C], E::ProposalApproved),\n            new Transition('T-15', 'rejectExecutionQuote', [S::AwaitingQuoteApproval], S::AwaitingPayment, [$C, $Y], E::ProposalRejected, note: 'رسوم المعاينة > 0'),"
+        },
+        {
+          "path": "androidapp/app/src/main/kotlin/noox/bzr/customer/CustomerLogic.kt",
+          "line": 833,
+          "sha256": "4bce0a478b45e790e97865fd94a6febf0241d40be0d427441bc66aede86826e4",
+          "snippet": "    private fun proposal(input: Map<String, Any?>, screen: String): CustomerUiState {\n        val actions = input.strings(\"available_actions\")\n        val expired = input.boolean(\"expired\")\n        val busy = input.text(\"event\") == \"submitting\"\n        return CustomerUiState(\n            screen = screen, phase = CustomerPhase.Content,\n            canContinue = !expired && !busy && actions.any { it == \"approve_proposal\" || it == \"reject_proposal\" },\n            messageKey = when { expired -> \"proposal.expired\"; busy -> \"proposal.deciding\"; else -> null },\n            visibleActions = actions,\n            items = listOf(input.text(\"type_label\"), input.text(\"amount\"), input.text(\"reason\"), input.text(\"total\")),\n            isBusy = busy, countdownSeconds = input.integer(\"countdown_seconds\"), hasPhoto = input.boolean(\"has_photo\"),"
+        }
+      ],
+      "pairs": [
+        {
+          "prd": 62,
+          "page": 14,
+          "label": "C31: قرار العميل",
+          "current": "SCR-C31-materials",
+          "note": "",
+          "crop": null
+        }
+      ],
+      "note": "لقطة الاختبار تعطي الواجهة إجراءات الموافقة عمدًا، ولذلك تظهر الأزرار. لا تثبت أن API الحقيقي يُرجعها. النتيجة هنا تحليل كود، وليست إعادة إنتاج على جهاز.",
+      "code": true
+    },
+    {
+      "id": "D07",
+      "title": "فوري معطّل والربط الحالي محاكي",
+      "priority": "P1",
+      "kind": "فرق إتاحة وتكامل",
+      "expected": "ص 15 تعرض دفعًا فعليًا ببطاقة أو محفظة أو كود فوري، وكودًا صالحًا 48 ساعة.",
+      "actual": "channel_fawry_enabled=false وdriver=staging. الربط الحقيقي محجوب صراحة في AppServiceProvider. المحاكي يصدر صلاحية 24 ساعة.",
+      "impact": "وجود C22 لا يعني أن الأموال يمكن تحصيلها فعليًا عبر فوري، ولا يكفي تفعيل المفتاح وحده.",
+      "remedy": "تحديد متطلبات الربط الحقيقي واختباره، وتصحيح مدة الكود إلى السياسة المعتمدة.",
+      "sources": [
+        {
+          "path": "app/Providers/AppServiceProvider.php",
+          "line": 37,
+          "sha256": "d7c32a188073b2df176e05cb02dee3799048f50219cb1257a3b72b5a73ccd24c",
+          "snippet": "            if (config('services.fawry.driver') !== 'staging') {\n                throw new RuntimeException('The real Fawry gateway is not enabled until OD-10 is resolved.');\n            }\n\n            return app(StagingPaymentGateway::class);\n        });"
+        },
+        {
+          "path": "app/Modules/Payments/Services/StagingPaymentGateway.php",
+          "line": 31,
+          "sha256": "241e47f76604e10877ba03adb07b239c455391e498c30650d35f0e7a9a865286",
+          "snippet": "        $expiresAt = CarbonImmutable::now()->addDay();\n        $checkoutUrl = $channel === PaymentChannel::Kiosk\n            ? null\n            : rtrim((string) config('services.fawry.checkout_url'), '/').'/'.$gatewayReference;\n"
+        }
+      ],
+      "pairs": [
+        {
+          "prd": 70,
+          "page": 15,
+          "label": "C22: طرق فوري",
+          "current": "SCR-C22-select_channel",
+          "note": "",
+          "crop": null
+        },
+        {
+          "prd": 72,
+          "page": 15,
+          "label": "C22: كود الدفع",
+          "current": "SCR-C22-kiosk_pending",
+          "note": "",
+          "crop": null
+        }
+      ],
+      "note": "لقطة التطبيق تُظهر قدرة الواجهة مع fixtures، لا قناة مفعّلة أو عملية تحصيل حقيقية.",
+      "code": false
+    },
+    {
+      "id": "D08",
+      "title": "إنستاباي: الخادم موجود والرحلة على العميل غير مكتملة",
+      "priority": "P1",
+      "kind": "فجوة تنفيذ وإعداد",
+      "expected": "الرحلة الأساسية تذكر كاش وفوري. ص 29 تشير إلى شاشة انتظار تأكيد التحويل دون رسم دورة التحويل كاملة.",
+      "actual": "الخادم يدعم إرسال المرجع وإيصال اختياري ثم اعتماد المدير العام. المفتاح true، لكن عنوان الاستقبال null فيمنع إتاحة القناة. لا توجد رحلة إرسال متكاملة في العميلين.",
+      "impact": "المتاح فعليًا بالإعدادات المحلية هو الكاش. إضافة نص حالة انتظار وحده لا تكمل الدفع بإنستاباي.",
+      "remedy": "ضبط عنوان الاستقبال، وتنفيذ اختيار القناة والمرجع والإيصال والإرسال والانتظار والرفض وإعادة المحاولة.",
+      "sources": [
+        {
+          "path": "app/Modules/Payments/Services/PaymentChannels.php",
+          "line": 20,
+          "sha256": "3d5d5c6a32be38154b0253116edd82dde4c70e6d1048cfad8d3c470dddaa0d0e",
+          "snippet": "    public function isEnabled(PaymentGatewayChannel $channel): bool\n    {\n        if ($channel === PaymentGatewayChannel::InstapayManual && $this->instapayAddress() === null) {\n            return false; // لا تُعرض القناة قبل أن يُدخل المدير العام عنوان المنصة\n        }\n\n        return $this->settings->bool($channel->setting());\n    }\n\n    /** @return list<PaymentGatewayChannel> */"
+        },
+        {
+          "path": "app/Modules/Payments/Actions/SubmitInstapayTransferAction.php",
+          "line": 34,
+          "sha256": "ee5016934510c92b8a7f9163f71f820229e3bd685de272907b96679ba091fe22",
+          "snippet": "    public function execute(Order $order, User $customer, string $transferReference, ?int $receiptMediaId = null): Payment\n    {\n        if (! $this->channels->isEnabled(PaymentGatewayChannel::InstapayManual)) {\n            throw FeatureDisabledException::for(Cfg::ChannelInstapayEnabled, 'submitInstapayTransfer');\n        }\n\n        return DB::transaction(function () use ($order, $customer, $transferReference, $receiptMediaId): Payment {\n            $fresh = Order::query()->lockForUpdate()->findOrFail($order->getKey());"
+        },
+        {
+          "path": "androidapp/app/src/main/kotlin/noox/bzr/customer/CustomerFragments.kt",
+          "line": 260,
+          "sha256": "7be7926920a3953f053454ed9a8e9f261edb7a857d718484ccde3cb51728e82b",
+          "snippet": "class C09TrackingFragment : CustomerFragment<C09TrackingView>(R.id.scr_c09) {\n    private var mapController: NativeGoogleMapController? = null\n\n    override fun create() = C09TrackingView(requireContext())\n    override fun C09TrackingView.bind() {\n        onAction = { action ->\n            when (action) {\n                \"cancel\" -> viewModel.openCancellation()\n                \"approve_proposal\", \"reject_proposal\" -> viewModel.loadPendingProposal()\n                \"change_payment_method\", \"pay_electronic\" -> viewModel.loadPaymentSummary()\n                \"confirm_completion\" -> viewModel.loadCompletionSummary()\n                \"rate\" -> viewModel.openRating()\n                \"open_dispute\" -> viewModel.openDispute()\n                \"report_provider\" -> viewModel.openProviderReport()\n                \"chat\" -> viewModel.openCurrentOrderChat()\n                \"call\" -> viewModel.currentProviderPhone()?.let { phone ->\n                    val intent = android.content.Intent(android.content.Intent.ACTION_DIAL, android.net.Uri.parse(\"tel:$phone\"))\n                    if (intent.resolveActivity(requireContext().packageManager) != null) startActivity(intent)\n                }\n                \"refresh\" -> viewModel.openOrder()\n                \"help\" -> viewModel.loadHelp()\n            }\n        }\n    }\n"
+        }
+      ],
+      "pairs": [
+        {
+          "prd": 70,
+          "page": 15,
+          "label": "C22 في الملف",
+          "current": "SCR-C22-select_channel",
+          "note": "",
+          "crop": null
+        }
+      ],
+      "note": "القول إن إنستاباي مفعّل فعليًا غير دقيق قبل ضبط العنوان. توفر إنستاباي لاستلام مستحقات الفني في P06 مسار مختلف.",
+      "code": false
+    },
+    {
+      "id": "D09",
+      "title": "إغلاق الكاش يختلف عن إغلاق الدفع الإلكتروني",
+      "priority": "P2",
+      "kind": "تفصيل ناقص في مخطط الرحلة",
+      "expected": "الرسم العام في ص 3 يسرد الدفع ثم تأكيد الإنهاء. نص C21 نفسه يذكر أن النجاح الإلكتروني يُنهي الطلب تلقائيًا.",
+      "actual": "الكاش: تأكيد استلام الفني ثم AWAITING_CONFIRMATION ثم تأكيد العميل. الإلكتروني: التسوية تنقل الطلب مباشرة إلى CLOSED.",
+      "impact": "المخطط المختصر قد يجعل C23 خطوة إجبارية رغم أن نص الملف والخادم يفرّقان بين المسارين.",
+      "remedy": "رسم فرعين للدفع، مع مسار إغلاق المعاينة المجانية دون دفع.",
+      "sources": [
+        {
+          "path": "app/Modules/Orders/StateMachine/TransitionTable.php",
+          "line": 46,
+          "sha256": "e5d35a6481ae9343c4ce5dd7fa004462a4a07cbbdb259e03ae8af4d43e6385c7",
+          "snippet": "            new Transition('T-19', 'confirmCashReceived', [S::AwaitingPayment], S::AwaitingConfirmation, [$P, $A], E::CashReceived, note: 'المبلغ = final_amount'),\n            new Transition('T-20', 'settleElectronicPayment', [S::AwaitingPayment], S::Closed, [$Y, $A], E::ElectronicPaymentSucceeded, note: 'فوري: توقيع صحيح ومبلغ مطابق؛ إنستاباي: تأكيد المدير العام (BR-057)'),\n            new Transition('T-21', 'confirmCompletion', [S::AwaitingConfirmation], S::Closed, [$C, $Y], E::CompletionConfirmed, note: 'أو مهلة CFG-051'),\n            new Transition('T-22', 'openDispute', [S::Arrived, S::AwaitingQuoteApproval, S::InProgress, S::AwaitingPayment, S::AwaitingConfirmation], S::Disputed, [$C, $P], E::DisputeOpened, note: 'BR-120'),"
+        }
+      ],
+      "pairs": [
+        {
+          "prd": 74,
+          "page": 16,
+          "label": "C23: تأكيد الإنهاء",
+          "current": "SCR-C23-ready",
+          "note": "",
+          "crop": null
+        }
+      ],
+      "note": "هذا نقص في رسم الفروع، وليس تعارضًا كاملًا: الملف يذكر السلوك الصحيح في نص شاشة الدفع.",
+      "code": false
+    },
+    {
+      "id": "D10",
+      "title": "الإلغاء والاعتذار والتعذر ثلاثة مسارات مختلفة",
+      "priority": "P2",
+      "kind": "قيود workflow غير موضحة",
+      "expected": "C20 في ص 14 تعرض الإلغاء، وP21 في ص 27 توحي بإلغاء أو تعليق المهمة عند تعذّر التنفيذ.",
+      "actual": "العميل يلغي حتى ON_THE_WAY فقط؛ بعد الوصول يفتح مشكلة. اعتذار الفني قبل الوصول يعيد الطلب إلى OPEN. التعذر عند الوصول أو التنفيذ يلغي بلا مبلغ؛ لا حالة تعليق مستقلة.",
+      "impact": "اختيار الإجراء الخاطئ يغيّر مصير الطلب: إعادة توزيع، أو نزاع، أو إلغاء نهائي.",
+      "remedy": "توثيق الصلاحيات والنتيجة والمرحلة المسموحة لكل إجراء، وفصلها في مخطط الحالات.",
+      "sources": [
+        {
+          "path": "app/Modules/Orders/Actions/CancelOrderAction.php",
+          "line": 57,
+          "sha256": "bb21631afbd73e245fc6f01e187192d15798132268e9165c2cbfc39ff609e2d2",
+          "snippet": "    private function assertActorMayCancel(Order $order, ActorType $actor, ?int $actorId): void\n    {\n        if ($actor !== ActorType::Customer) {\n            return;\n        }\n\n        if ($order->customer_id !== $actorId) {\n            throw BusinessRuleViolationException::rule('BR-070', Localization::text('copy.this_request_does_not_belong_to_you'));\n        }\n\n        $allowed = [OrderStatus::Open, OrderStatus::Confirmed, OrderStatus::OnTheWay];\n\n        if (! in_array($order->status, $allowed, true)) {\n            throw BusinessRuleViolationException::rule(\n                'BR-070',\n                Localization::text('copy.cancellation_is_unavailable_after_the_technician_arrives_use_report'),\n            );\n        }\n    }\n\n    private function actionFor(Order $order, ActorType $actor): string\n    {\n        if ($actor === ActorType::Admin) {"
+        },
+        {
+          "path": "app/Modules/Orders/Actions/BackOutAction.php",
+          "line": 22,
+          "sha256": "7e6d84b21abac48450784730adc5440b69d2835810beba4e1088d560efe654ed",
+          "snippet": " * BR-036: العرض ← `BACKED_OUT`، والطلب ← `OPEN` بنافذة جديدة، والعروض `NOT_SELECTED` تعود\n * `SUBMITTED` (وضع السوق)، ويُمنع المعتذر من التقديم على نفس الطلب — يحرسه صف `BACKED_OUT` نفسه.\n * في وضع الموظفين يعود الطلب إلى \"بانتظار التعيين\" بمهلة تعيين جديدة (39).\n */\nfinal readonly class BackOutAction\n{"
+        },
+        {
+          "path": "app/Modules/Orders/Actions/ReportUnableAction.php",
+          "line": 21,
+          "sha256": "caa000a8f8330018536077e75f94374a7a2c042d2e547ea1a4c885a7ff26cc80",
+          "snippet": " * T-16 / T-18 — \"تعذّر التنفيذ\" أو \"العميل غير موجود\" (BR-071).\n * الإلغاء هنا بلا أي مبلغ مهما كانت المرحلة (13).\n */\nfinal readonly class ReportUnableAction"
+        }
+      ],
+      "pairs": [
+        {
+          "prd": 66,
+          "page": 14,
+          "label": "C20: الإلغاء",
+          "current": "SCR-C09-arrived",
+          "note": "",
+          "crop": null
+        },
+        {
+          "prd": 140,
+          "page": 27,
+          "label": "P21: تعذر التنفيذ",
+          "current": "SCR-P21-unable_valid",
+          "note": "",
+          "crop": null
+        }
+      ],
+      "note": "",
+      "code": false
+    },
+    {
+      "id": "D11",
+      "title": "استلام مستحقات الفني ليس تحويلًا تلقائيًا",
+      "priority": "P1",
+      "kind": "فرق مالي وتشغيلي",
+      "expected": "P06 في ص 23 تعد بتحويل تلقائي فوري إلى المحفظة بعد إتمام العملية.",
+      "actual": "PayoutMethod يخزن طريقة الاستلام. التحويلات تسجل يدويًا بواسطة المدير العام، بما لا يتجاوز الرصيد المتاح؛ إعداد دورة التحويل أسبوعي والتوريد النقدي للموظف يومي.",
+      "impact": "اختيار محفظة لا يشغّل تحويلًا ماليًا آليًا ولا يضمن زمن التحويل المذكور.",
+      "remedy": "تعديل الوعد إلى سياسة التسوية الحالية، أو تنفيذ تكامل تحويل مستقل إذا كان الفوري مطلبًا جديدًا.",
+      "sources": [
+        {
+          "path": "app/Modules/Settlements/Actions/RecordProviderPayoutAction.php",
+          "line": 19,
+          "sha256": "40ff6a9b82f2dead84e790ced5ac8c4b06d32857ed9e498dcf380ccebe38f4e9",
+          "snippet": " * BR-064 — تحويل يدوي للفني برقم مرجعي، لا يتجاوز الرصيد المتاح.\n * في وضع الموظفين هو رد قيمة الخامات (BR-065). NTF-23 بعد الحفظ (DEC-066).\n */\nfinal readonly class RecordProviderPayoutAction\n{\n    public function __construct(\n        private ProviderEarningsService $earnings,"
+        },
+        {
+          "path": "app/Modules/Settlements/Actions/RecordGuard.php",
+          "line": 15,
+          "sha256": "2d3c92e2210f678577e17ec5fd76e785199df0561629f9e32645821757528d9d",
+          "snippet": "    public static function superAdmin(Admin $admin): void\n    {\n        if (! $admin->isSuper() || ! $admin->is_active) {\n            throw BusinessRuleViolationException::rule('DEC-066', Localization::text('copy.only_the_general_manager_may_record_financial_transactions'));\n        }\n    }\n\n    public static function positiveAmount(string $amount): string"
+        }
+      ],
+      "pairs": [
+        {
+          "prd": 116,
+          "page": 23,
+          "label": "P06: طريقة الاستلام",
+          "current": "SCR-P06-valid",
+          "note": "",
+          "crop": null
+        }
+      ],
+      "note": "",
+      "code": false
+    },
+    {
+      "id": "D12",
+      "title": "P18: الحساب الأساسي موجود؛ التصدير والفلترة ناقصان",
+      "priority": "P2",
+      "kind": "اختلاف وظائف الواجهة",
+      "expected": "P18 في ص 28 تعرض الرصيد والمعلّق والمتاح وسجل الحركات، وزر كشف حساب وفلترة.",
+      "actual": "الحساب والسجل موجودان؛ في وضع الموظفين السالب توريد والموجب خامات، وهو معنى مذكور في صورة الملف أيضًا. لا يوجد تنفيذ ظاهر للتصدير أو أدوات الفلترة المعروضة.",
+      "impact": "لا يصح تصنيف P18 كلها كاختلاف بين السوق والموظفين. النقص المحدد هو أدوات إضافية وشرح الحساب لكل وضع.",
+      "remedy": "توثيق حساب الموظفين والسوق منفصلين، واعتماد أو حذف وظائف كشف الحساب والفلترة.",
+      "sources": [
+        {
+          "path": "app/Modules/Settlements/Services/ProviderEarningsService.php",
+          "line": 78,
+          "sha256": "ee88c72e2351d28490a630ae25f5c963cf715e20a99df024d9fb78d31452dc42",
+          "snippet": "    private function orderContribution(Order $order): float\n    {\n        $cash = $order->payment_method === PaymentMethod::Cash;\n        if ($order->operating_mode === OperatingMode::Employee) {\n            // DEC-066 — ما استُرد من الخامات للعميل لا يُرد للموظف.\n            $materialsRefunded = (float) $order->refunded_total - (float) $order->labor_refunded;\n\n            return $cash ? -((float) $order->labor_total) : (float) $order->materials_total - $materialsRefunded;\n        }\n\n        if ($cash) {\n            return -((float) $order->commission_amount);\n        }\n\n        return (float) $order->final_amount - (float) $order->refunded_total - (float) $order->commission_amount;\n    }\n\n    private function orderDetail(Order $order, float $amount): string"
+        },
+        {
+          "path": "androidapp/app/src/main/kotlin/noox/bzr/provider/P18EarningsView.kt",
+          "line": 15,
+          "sha256": "338ca56bd5e17d90c50d1367ac893506ea86dd875fee05008ea2065457cbfccf",
+          "snippet": "    override fun renderContent(state: ProviderUiState) {\n        binding.summary.items = listOf(\n            StatItem(R.drawable.ic_orders, state.secondaryOptions.getOrElse(0) { \"\" }, string(R.string.provider_earnings_balance)),\n            StatItem(R.drawable.ic_check, state.secondaryOptions.getOrElse(1) { \"\" }, string(R.string.provider_earnings_available)),\n            StatItem(R.drawable.ic_clock, state.secondaryOptions.getOrElse(2) { \"\" }, string(R.string.provider_earnings_pending)),\n        )\n        // DEC-068: new offers paused by dues (BR-063); debt and limit follow the three summary values.\n        binding.duesBlocked.isVisible = state.messageKey == \"provider.earnings.dues_blocked\""
+        }
+      ],
+      "pairs": [
+        {
+          "prd": 146,
+          "page": 28,
+          "label": "P18: المستحقات",
+          "current": "SCR-P18-employee",
+          "note": "",
+          "crop": null
+        }
+      ],
+      "note": "اختلاف الرصيد الموجب والسالب في الصورتين يعكس معاملات fixtures مختلفة؛ ليس خطأً حسابيًا مثبتًا.",
+      "code": false
+    },
+    {
+      "id": "D13",
+      "title": "P17: تقييم العميل بالنجوم فقط",
+      "priority": "P2",
+      "kind": "وظيفة غير منفذة",
+      "expected": "ص 28: نجوم، وسوم مثل تعاون ممتاز، وتعليق اختياري حتى 300 حرف.",
+      "actual": "API وAndroid وiOS يدعمون stars فقط لتقييم العميل. شرط الإغلاق والنافذة ومرة واحدة موجود.",
+      "impact": "الوسوم والتعليق الظاهران في التصميم لن يُحفظا أو يُرسلا حاليًا.",
+      "remedy": "إضافة الحقول إلى العقد والتخزين والواجهتين، أو إزالة العناصر من التصميم.",
+      "sources": [
+        {
+          "path": "app/Http/Api/V1/Controllers/RatingController.php",
+          "line": 43,
+          "sha256": "3921c38d31b03a4a3080dc90ddb14c4e2ab90f1e44693f09ed0c8e50fc96c730",
+          "snippet": "    public function customerRating(Request $request, Order $order, CreateCustomerRatingAction $action): JsonResponse\n    {\n        $provider = $request->user()->providerProfile;\n\n        if ($provider === null) {\n            throw BusinessRuleViolationException::rule('BR-091', Localization::text('copy.there_is_no_technician_profile_for_this_account'));\n        }\n\n        $data = $request->validate(['stars' => ['required', 'integer', 'between:1,5']]);\n        $rating = $action->execute($order, $provider, (int) $data['stars']);\n\n        return new JsonResponse(['data' => [\n            'id' => $rating->getKey(),\n            'stars' => $rating->stars,\n        ]], 201);\n    }"
+        },
+        {
+          "path": "app/Modules/Reviews/Actions/CreateCustomerRatingAction.php",
+          "line": 22,
+          "sha256": "884dc1408a879bffde6a6824af5cbaa28235958bcb375a3c2514e73d5d697e9e",
+          "snippet": "    public function execute(Order $order, ProviderProfile $provider, int $stars): CustomerRating\n    {\n        return DB::transaction(function () use ($order, $provider, $stars): CustomerRating {\n            $fresh = Order::query()->lockForUpdate()->findOrFail($order->getKey());\n            $deadline = $fresh->closed_at?->addDays($this->settings->int(Cfg::RatingWindowDays));\n\n            if ($fresh->provider_profile_id !== $provider->getKey()\n                || $fresh->status !== OrderStatus::Closed"
+        }
+      ],
+      "pairs": [
+        {
+          "prd": 144,
+          "page": 28,
+          "label": "P17: تقييم العميل",
+          "current": "SCR-P17-selected",
+          "note": "",
+          "crop": null
+        }
+      ],
+      "note": "",
+      "code": false
+    },
+    {
+      "id": "D14",
+      "title": "صور إنهاء العمل في P15 ليست رحلة مكتملة",
+      "priority": "P2",
+      "kind": "وظيفة غير منفذة",
+      "expected": "ص 27 تعرض قسم صور الفحص والإصلاح وإضافة صورة أثناء تنفيذ الطلب.",
+      "actual": "تقديم مقترح سعر يدعم صورة؛ إنهاء العمل لا يتضمن رحلة رفع وتثبيت صور قبل/بعد أو صور إثبات الإنجاز.",
+      "impact": "إرفاق صورة للمقترح لا يحقق توثيق الإنجاز الذي توحي به الشاشة.",
+      "remedy": "تحديد وقت الرفع وملكية الملفات وظهورها للعميل، ثم إضافة المسار أو استبعاده من النسخة الحالية.",
+      "sources": [
+        {
+          "path": "app/Http/Api/V1/Controllers/ProviderOrderController.php",
+          "line": 279,
+          "sha256": "c7a218c5bc15a67d5c2fdfb4edb0a526850834c49ed262ef151443e893e0f230",
+          "snippet": "    public function complete(Request $request, Order $order, CompleteWorkAction $action): OrderResource\n    {\n        Gate::authorize('perform', $order);\n\n        return new OrderResource($action->execute($order, $this->profile($request)));\n    }\n\n    /** T-19 — BR-053. */\n    public function cashReceived(Request $request, Order $order, ConfirmCashReceivedAction $action): OrderResource"
+        },
+        {
+          "path": "androidapp/app/src/main/kotlin/noox/bzr/provider/ProviderViewModel.kt",
+          "line": 438,
+          "sha256": "51b3314c8ac96aee5c5726df1342cb61cc8fd417570b2345f777df9dffbd9be2",
+          "snippet": "            \"complete_work\" -> performSimpleAction(action, \"complete\")\n            \"confirm_cash\" -> performSimpleAction(action, \"cash-received\", OrderActionInput(amount = order.finalAmount))\n            \"chat\" -> openChat()\n        }"
+        }
+      ],
+      "pairs": [
+        {
+          "prd": 138,
+          "page": 27,
+          "label": "P15: الصور أثناء التنفيذ",
+          "current": "SCR-P15-in_progress",
+          "note": "",
+          "crop": null
+        }
+      ],
+      "note": "",
+      "code": false
+    },
+    {
+      "id": "D15",
+      "title": "C18: شارات غير المقروء وحالة الاتصال",
+      "priority": "P2",
+      "kind": "بيانات واجهة ناقصة أو ثابتة",
+      "expected": "ص 19 تعرض عدد رسائل غير مقروءة على المحادثة ونقطة حالة اتصال.",
+      "actual": "قائمة المحادثات لا تعيد unread_count، والشارات العددية غير منفذة. بعض نقاط الحالة في الواجهة ثابتة وليست حضورًا لحظيًا.",
+      "impact": "لا يمكن تفسير النقطة كفني متصل الآن أو الشارة كعدد حقيقي دون مصدر بيانات.",
+      "remedy": "توفير عداد قراءة حقيقي، وتسميـة حالة التوفر بوضوح إذا استُخدم available_now بدل الحضور.",
+      "sources": [
+        {
+          "path": "app/Http/Api/V1/Controllers/ConversationController.php",
+          "line": 18,
+          "sha256": "79310af04a0f2b883a64c2fd886b864b214099828ef9c30bd452844f96a40feb",
+          "snippet": "    public function index(Request $request): JsonResponse\n    {\n        $user = $request->user();\n        $profileId = $user->providerProfile?->getKey();\n\n        $conversations = Conversation::query()\n            ->with([\n                'order.category', 'order.problemType', 'order.area', 'providerProfile.user', 'customer',\n                'messages' => fn ($query) => $query->reorder()->latest('id')->limit(1),\n            ])\n            ->where(fn ($query) => $query\n                ->where('customer_id', $user->getKey())\n                ->when($profileId !== null, fn ($query) => $query->orWhere('provider_profile_id', $profileId)))\n            ->orderByDesc('updated_at')\n            ->orderByDesc('id')\n            ->paginate(20);\n"
+        },
+        {
+          "path": "androidapp/app/src/main/kotlin/noox/bzr/customer/C18MessagesView.kt",
+          "line": 78,
+          "sha256": "410a6c96fbf843b63ccd240942a76c9f30af049cf613636adaa60ecec56b0ffb",
+          "snippet": "            // STATIC (DEC-074, BACKEND-NOTES B-03): no presence in the API; the online dot shows on every card (as B-17).\n            avatar(name.trim().take(1), online = true),\n            name, state.fieldErrors.getOrNull(index) == \"verified\", null,\n            state.itemDetails.getOrElse(index) { \"\" }, message.ifBlank { string(R.string.messages_no_messages) },\n            state.fieldValues.getOrElse(index) { \"\" }, if (mine && message.isNotBlank()) R.drawable.ic_check else 0,"
+        }
+      ],
+      "pairs": [
+        {
+          "prd": 88,
+          "page": 19,
+          "label": "C18: الرسائل",
+          "current": "SCR-C18-multiple",
+          "note": "",
+          "crop": null
+        }
+      ],
+      "note": "",
+      "code": false
+    },
+    {
+      "id": "D16",
+      "title": "مشاركة الزيارة: زر ظاهر ومسار الضغط ناقص",
+      "priority": "P2",
+      "kind": "فجوة ربط في التطبيقين",
+      "expected": "الملف لا يرسم دورة إنشاء رابط الزيارة ومشاركته وصلاحيته، رغم تضمين المتابعة والتواصل.",
+      "actual": "الخادم يتيح share_visit، والزر ظاهر في التتبع. معالجات الضغط الحالية في Android وiOS لا تحتوي تنفيذًا له.",
+      "impact": "ضغط المستخدم على الزر لا يكمل وظيفة المشاركة.",
+      "remedy": "ربط إنشاء الرابط بواجهة مشاركة النظام، وتوثيق المعلومات المسموح نشرها وصلاحية الرابط.",
+      "sources": [
+        {
+          "path": "androidapp/app/src/main/kotlin/noox/bzr/customer/CustomerFragments.kt",
+          "line": 260,
+          "sha256": "7be7926920a3953f053454ed9a8e9f261edb7a857d718484ccde3cb51728e82b",
+          "snippet": "class C09TrackingFragment : CustomerFragment<C09TrackingView>(R.id.scr_c09) {\n    private var mapController: NativeGoogleMapController? = null\n\n    override fun create() = C09TrackingView(requireContext())\n    override fun C09TrackingView.bind() {\n        onAction = { action ->\n            when (action) {\n                \"cancel\" -> viewModel.openCancellation()\n                \"approve_proposal\", \"reject_proposal\" -> viewModel.loadPendingProposal()\n                \"change_payment_method\", \"pay_electronic\" -> viewModel.loadPaymentSummary()\n                \"confirm_completion\" -> viewModel.loadCompletionSummary()\n                \"rate\" -> viewModel.openRating()\n                \"open_dispute\" -> viewModel.openDispute()\n                \"report_provider\" -> viewModel.openProviderReport()\n                \"chat\" -> viewModel.openCurrentOrderChat()\n                \"call\" -> viewModel.currentProviderPhone()?.let { phone ->\n                    val intent = android.content.Intent(android.content.Intent.ACTION_DIAL, android.net.Uri.parse(\"tel:$phone\"))\n                    if (intent.resolveActivity(requireContext().packageManager) != null) startActivity(intent)\n                }\n                \"refresh\" -> viewModel.openOrder()\n                \"help\" -> viewModel.loadHelp()\n            }\n        }\n    }\n\n    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {\n        super.onViewCreated(view, savedInstanceState)\n        val controller = NativeGoogleMapController(requireContext(), selectable = false)\n        mapController = controller\n        viewLifecycleOwner.lifecycle.addObserver(controller)"
+        },
+        {
+          "path": "iosapp/BzrApp/Customer/CustomerJourneyRoot.swift",
+          "line": 282,
+          "sha256": "b512612565371b68bdf15b2c690a3547f6bfed0de0a28455e99b6ad8edf45329",
+          "snippet": "    private var tracking: some View {\n        C09TrackingView(\n            state: viewModel.state,\n            tracking: viewModel.trackingPayload,\n            destinationLatitude: viewModel.orderDestinationLatitude,\n            destinationLongitude: viewModel.orderDestinationLongitude,\n            onRefreshTracking: viewModel.refreshTracking\n        ) { action in\n            if action == \"cancel\" {\n                viewModel.openCancellation()\n            } else if [\"approve_proposal\", \"reject_proposal\"].contains(action) {\n                Task { await viewModel.loadPendingProposal() }\n            } else if [\"change_payment_method\", \"pay_electronic\"].contains(action) {\n                Task { await viewModel.loadPaymentSummary() }\n            } else if action == \"confirm_completion\" {\n                Task { await viewModel.loadCompletionSummary() }\n            } else if action == \"rate\" {\n                viewModel.openRating()\n            } else if action == \"open_dispute\" {\n                Task { await viewModel.openDispute() }\n            } else if action == \"report_provider\" {\n                viewModel.openProviderReport()\n            } else if action == \"chat\" {\n                Task { await viewModel.openCurrentOrderChat() }\n            } else if action == \"call\", let phone = viewModel.currentProviderPhone, let url = URL(string: \"tel:\\(phone)\") {\n                openURL(url)\n            } else if action == \"refresh\" {\n                Task { await viewModel.openCurrentOrder() }\n            } else if action == \"help\" {\n                Task { await viewModel.loadHelp() }\n            }\n        }\n    }\n\n    private var electronicPayment: some View {"
+        }
+      ],
+      "pairs": [
+        {
+          "prd": 56,
+          "page": 13,
+          "label": "C09: متابعة الزيارة",
+          "current": "SCR-C09-on_the_way",
+          "note": "",
+          "crop": null
+        }
+      ],
+      "note": "الزر في صورة التطبيق يثبت وجود العنصر فقط؛ عدم اكتمال الضغط مُستنتج من معالج الإجراء.",
+      "code": true
+    },
+    {
+      "id": "D17",
+      "title": "ملف الفني: مؤشرات لا تأتي من بيانات حقيقية",
+      "priority": "P2",
+      "kind": "حدود البيانات",
+      "expected": "C07 في ص 11 تعرض متوسط رد 10 دقائق، بيانات تحقق تفصيلية وصور أعمال وأشخاص.",
+      "actual": "الهوية موثقة على مستوى is_verified، لكن بعض تفاصيل التحقق ومتوسط الرد قيم عرض ثابتة. الصور في عدد من المكونات تظهر كحرف أو رمز رغم وجود روابط.",
+      "impact": "قد تبدو القيم الثابتة إحصاءات فعلية أو مستويات تحقق منفصلة.",
+      "remedy": "إظهار البيانات المتاحة فقط، وحساب زمن الرد، وربط تحميل الصور؛ مراجعة نصوص التحقق غير المدعومة.",
+      "sources": [
+        {
+          "path": "androidapp/app/src/main/kotlin/noox/bzr/customer/C07ProviderView.kt",
+          "line": 65,
+          "sha256": "573ab942247a926c3e3bdb4cb343a8f69298865ecc492c03fcf2d9c282e39274",
+          "snippet": "        // STATIC (DEC-074, BACKEND-NOTES B-12): the API only says whether the technician is verified.\n        if (state.providerVerified) verification()\n        reviews(state.items, value(6))\n        binding.price.text = BzrFormat.fill(string(R.string.customer_home_offers_amount), \"amount\" to value(5))\n        binding.priceBlock.isVisible = value(5).isNotEmpty()\n        binding.chat.isVisible = \"chat\" in state.visibleActions\n        binding.choose.text = BzrFormat.fill(string(R.string.provider_choose), \"name\" to firstName)\n        binding.choose.isVisible = \"accept_offer\" in state.visibleActions"
+        },
+        {
+          "path": "reports/batch-figma-a/BACKEND-NOTES.md",
+          "line": 29,
+          "sha256": "5b59da0fb8b5147ce6628fec26befe886a1972e70fe8001a47387f58821371e6",
+          "snippet": "| B-19 | ملف الفني (3002:873) | «متوسط الرد 10 دقائق» | مفيش زمن رد | **ثابت (DEC-074):** 10 دقائق |\n| B-20 | ملف الفني (3002:873) | منطقة كل مقيّم («التجمع الخامس») | التقييم مفيهوش منطقة المقيّم | **استثناء:** بيظهر تاريخ التقييم الحقيقي مكانها، لأن منطقة ثابتة هتبقى كلام مختلق عن عملاء حقيقيين |"
+        }
+      ],
+      "pairs": [
+        {
+          "prd": 48,
+          "page": 11,
+          "label": "C07: ملف الفني",
+          "current": "SCR-C07-available",
+          "note": "",
+          "crop": null
+        }
+      ],
+      "note": "",
+      "code": false
+    },
+    {
+      "id": "D18",
+      "title": "الانتظار والمهلات: مؤشرات ثابتة وعدادات غير ظاهرة",
+      "priority": "P2",
+      "kind": "اختلاف واجهة وحدود بيانات",
+      "expected": "ص 11 تعرض عداد اختيار العرض، وص 13–14 تعرض عداد قرار السعر، وص 12 تعرض عدد الفنيين الذين وصلهم الطلب ونطاقًا جغرافيًا.",
+      "actual": "المهل في الخادم موجودة، لكن العدادات غير ظاهرة في C06 وC30/C31 الحالية. C35 تستخدم عددًا ثابتًا وشريط تقدم وصور رمزية؛ ليست نتيجة توزيع محسوبة.",
+      "impact": "الشريط وعدد الفنيين لا يثبتان وصول الطلب أو سرعة أول عرض. مهلة القرار تظل مؤثرة رغم غياب العداد.",
+      "remedy": "إظهار المهلة الحقيقية عند الحاجة، وحذف المؤشرات الثابتة أو ربطها ببيانات الخادم.",
+      "sources": [
+        {
+          "path": "androidapp/app/src/main/kotlin/noox/bzr/customer/C35NoOffersView.kt",
+          "line": 33,
+          "sha256": "cc1d8ae4c5e870df86bf71ce12cfeb421de4ece89aadc141461e9fc059255ba7",
+          "snippet": "        binding.nearby.text = BzrFormat.quantity(context, R.plurals.plural_waiting_nearby, STATIC_NEARBY)\n        binding.progress.layoutParams = (binding.progress.layoutParams as LinearLayout.LayoutParams).apply { weight = STATIC_PROGRESS }\n        repeat(STATIC_AVATARS) { index ->\n            val avatar = android.widget.ImageView(context).apply {\n                setImageResource(R.drawable.ic_account)\n                setBackgroundResource(R.drawable.bremo_bg_avatar_large)\n                val inset = resources.getDimensionPixelSize(R.dimen.bremo_space_xs)"
+        },
+        {
+          "path": "androidapp/app/src/main/kotlin/noox/bzr/customer/ProposalDecisionView.kt",
+          "line": 31,
+          "sha256": "f0c41abd30df01c1ad9ef1a8b84c1572407eefe3252352c2786218dd9d3b1231",
+          "snippet": "open class ProposalDecisionView(context: Context, private val screen: String) : CustomerScreenView(context) {\n    private val binding = ScreenC30ProposalBinding.inflate(inflater, content)\n    var onAction: (String) -> Unit = {}\n\n    init {"
+        },
+        {
+          "path": "app/Modules/Orders/Services/OrderDeadlines.php",
+          "line": 48,
+          "sha256": "553413e46cf9ce4178612d332bdc8b4cd83d0673738750db9f9e4effbc440bdd",
+          "snippet": "    private function offerDeadlines(TimingType $timing, ?CarbonImmutable $slotStart, CarbonImmutable $publishedAt): array\n    {\n        if ($timing === TimingType::Now) {\n            $closeAt = $publishedAt->addMinutes($this->settings->int(Cfg::OffersWindowNowMinutes));\n\n            return [\n                'offers_close_at' => $closeAt,\n                'selection_deadline_at' => $closeAt->addMinutes($this->settings->int(Cfg::SelectionGraceNowMinutes)),\n            ];\n        }\n\n        $slotStart ??= $publishedAt;\n\n        // حتى ساعة قبل الفترة، بحد أقصى 24 ساعة من النشر (CFG-010b)\n        $beforeSlot = $slotStart->subMinutes($this->settings->int(Cfg::OffersWindowScheduledLeadMinutes));\n        $maxWindow = $publishedAt->addHours($this->settings->int(Cfg::OffersWindowScheduledMaxHours));\n        $closeAt = $beforeSlot->lt($maxWindow) ? $beforeSlot : $maxWindow;\n"
+        }
+      ],
+      "pairs": [
+        {
+          "prd": 52,
+          "page": 12,
+          "label": "C35: لم تصل عروض",
+          "current": "SCR-C35-edit_only",
+          "note": "",
+          "crop": null
+        },
+        {
+          "prd": 46,
+          "page": 11,
+          "label": "C06: العروض",
+          "current": "SCR-C06-execution_now",
+          "note": "",
+          "crop": null
+        }
+      ],
+      "note": "شاشات السوق هنا تُعرض بحالات اختبار توضيحية، رغم أن وضع السوق معطّل بالإعدادات المحلية.",
+      "code": false
+    },
+    {
+      "id": "D19",
+      "title": "C25: ثلاث تبويبات بدل تبويبين",
+      "priority": "P3",
+      "kind": "اختلاف واجهة وتنقل",
+      "expected": "ص 17 تجمع الطلبات في الحالية والسابقة، وتضع المكتملة والملغية في السابقة.",
+      "actual": "الواجهة الحالية تضيف «الملغاة»؛ السابقة تستبعد CANCELLED وEXPIRED، والملغاة تجمعهما.",
+      "impact": "يتغير مكان العثور على الطلب الملغي أو المنتهي، وتحتاج صور دليل الاستخدام إلى تحديث.",
+      "remedy": "تحديث C25 ومخطط التنقل وتقسيم الطلبات في الملف.",
+      "sources": [
+        {
+          "path": "androidapp/app/src/main/kotlin/noox/bzr/customer/CustomerViewModel.kt",
+          "line": 652,
+          "sha256": "6b111583d8ae334882f83480185e5bafb4d871107cfe29a33ae022e7bedc5ee5",
+          "snippet": "    fun loadOrders(tabIndex: Int = 0, page: Int = 1) = request(\"SCR-C25\") {\n        // DEC-076 (Figma 3002:3889): «الملغاة» is the past scope narrowed to cancelled and expired orders, «السابقة» the rest.\n        ordersTab = when (tabIndex) { 1 -> \"past\"; 2 -> \"cancelled\"; else -> \"current\" }\n        val ended = setOf(\"CANCELLED\", \"EXPIRED\")\n        val orders = api.orders(token(), if (ordersTab == \"current\") \"current\" else \"past\", page).data.filter {\n            when (ordersTab) { \"past\" -> it.status !in ended; \"cancelled\" -> it.status in ended; else -> true }\n        }\n        orderIds = orders.map(CustomerOrder::id)\n        orderStatuses = orders.map(CustomerOrder::status)\n        // Offers only exist for open orders; a failed side call leaves the card without figures.\n        val offerFigures = orders.map { order ->\n            if (order.status != \"OPEN\") return@map 0 to \"\""
+        },
+        {
+          "path": "iosapp/Core/Sources/BzrCore/CustomerJourney.swift",
+          "line": 453,
+          "sha256": "361dcf3ef98a8aafcea2358bbb1ee01e211289f11da5aa1c7c8873d2843dbd37",
+          "snippet": "        case \"CANCELLED\": \"tracking.status.cancelled\"\n        case \"EXPIRED\": \"tracking.status.expired\"\n        case \"OPEN\": \"tracking.status.open\"\n        default: nil\n        }"
+        }
+      ],
+      "pairs": [
+        {
+          "prd": 80,
+          "page": 17,
+          "label": "C25: الطلبات السابقة",
+          "current": "SCR-C25-past",
+          "note": "",
+          "crop": null
+        }
+      ],
+      "note": "",
+      "code": false
+    },
+    {
+      "id": "D20",
+      "title": "روابط البريد: مدد الصلاحية تختلف",
+      "priority": "P2",
+      "kind": "فرق إعدادات ونصوص",
+      "expected": "ص 7: رابط تفعيل البريد صالح 24 ساعة، ورابط استعادة كلمة المرور 15 دقيقة.",
+      "actual": "تفعيل البريد يستخدم افتراضيًا 60 دقيقة، واستعادة كلمة المرور مضبوطة فعليًا على 60 دقيقة.",
+      "impact": "المستخدم قد يتوقع صلاحية أطول للتفعيل أو أقصر للاستعادة من الواقع.",
+      "remedy": "توحيد الإعدادات ورسائل البريد والنصوص الظاهرة في الملف.",
+      "sources": [
+        {
+          "path": "app/Providers/AppServiceProvider.php",
+          "line": 74,
+          "sha256": "d7c32a188073b2df176e05cb02dee3799048f50219cb1257a3b72b5a73ccd24c",
+          "snippet": "            now()->addMinutes((int) config('auth.verification.expire', 60)),\n            ['id' => $notifiable->getKey(), 'hash' => sha1($notifiable->getEmailForVerification()), 'locale' => $notifiable->preferredLocale()],\n        ));\n        VerifyEmail::toMailUsing(fn (object $notifiable, string $url): MailMessage => (new MailMessage)\n            ->subject(Localization::text('messages.verify_subject', ['brand' => config('app.name')], $notifiable->preferredLocale()))"
+        },
+        {
+          "path": "config/auth.php",
+          "line": 111,
+          "sha256": "560278b8d6236010e748ed2b27d23290ebb1206d7c6d2ffbb50b14f445b0aa38",
+          "snippet": "            'expire' => 60,\n            'throttle' => 60,"
+        }
+      ],
+      "pairs": [
+        {
+          "prd": 24,
+          "page": 7,
+          "label": "C12: تفعيل البريد",
+          "current": "SCR-C12-waiting",
+          "note": "",
+          "crop": null
+        },
+        {
+          "prd": 26,
+          "page": 7,
+          "label": "C13: الاستعادة",
+          "current": "SCR-C13-sent",
+          "note": "",
+          "crop": null
+        }
+      ],
+      "note": "",
+      "code": false
+    },
+    {
+      "id": "D21",
+      "title": "وسائط الطلب: 30 ثانية مقابل 60 ثانية للفيديو",
+      "priority": "P3",
+      "kind": "فرق حدود إدخال",
+      "expected": "C17 في ص 8 توضح فيديو بحد 30 ثانية، حتى خمس صور، وفيديو وتسجيل صوتي واحد.",
+      "actual": "الخادم يعلن فيديو حتى 60 ثانية وتسجيلًا صوتيًا حتى 120 ثانية، مع حد خمس صور وفيديو واحد وصوت واحد.",
+      "impact": "التوثيق لا يعكس الحدود التي يتعامل معها العميل والخادم.",
+      "remedy": "تحديث الحدود وتحديد أحجام الملفات ونوع الصوت وسلوك الرفع والفشل وإعادة المحاولة.",
+      "sources": [
+        {
+          "path": "app/Http/Api/V1/Controllers/ConfigController.php",
+          "line": 68,
+          "sha256": "78ee31ba55e98d39ce4335d1d21c6759b9f87bb2b412da34012701a499c96a23",
+          "snippet": "            'media_limits' => [\n                'images' => 5,\n                'image_mb' => 10,\n                'video_seconds' => 60,\n                'video_mb' => 50,\n                'audio_seconds' => 120,\n                'audio_mb' => 5,\n                'audio_mime' => 'audio/mp4',\n                'audio_channels' => 1,\n                'audio_bitrate_bps' => 64_000,\n            ],\n            'option_lists' => ["
+        },
+        {
+          "path": "app/Modules/Orders/Actions/PublishRequestAction.php",
+          "line": 309,
+          "sha256": "cd058ab3195cf277bac31cb8ccf5a32f8e50b31259dfe1f487ca68e70ecdbf4e",
+          "snippet": "        $counts = $media->countBy('type');\n\n        if (($counts['IMAGE'] ?? 0) > 5 || ($counts['VIDEO'] ?? 0) > 1 || ($counts['AUDIO'] ?? 0) > 1) {\n            throw BusinessRuleViolationException::rule('BR-014', Localization::text('copy.the_number_of_attachments_exceeds_the_permitted_limit'));\n        }\n\n        OrderMedia::query()->whereKey($media->modelKeys())->update(["
+        }
+      ],
+      "pairs": [
+        {
+          "prd": 34,
+          "page": 8,
+          "label": "C17: الوسائط",
+          "current": "SCR-C17-recording",
+          "note": "",
+          "crop": null
+        }
+      ],
+      "note": "",
+      "code": false
+    },
+    {
+      "id": "D22",
+      "title": "الإشعارات: صندوق التطبيق موجود وPush المحلي log",
+      "priority": "P1",
+      "kind": "فرق إعداد تكامل",
+      "expected": "C32 في ص 19 توعد بتحديثات الطلب أولًا بأول، مع روابط تتبع ومراجعة عرض.",
+      "actual": "الإشعارات داخل التطبيق لها API وتوجيه للطلب. إعداد Push المحلي log يسجل الإرسال؛ لا يمثل إرسال FCM فعليًا للأجهزة.",
+      "impact": "لا تثبت لقطة صندوق الإشعارات وصول التنبيه خارج التطبيق.",
+      "remedy": "إعداد FCM واختبار استقبال الأجهزة، مع فصل نتائج الاختبار المحلي عن بيئة الإطلاق.",
+      "sources": [
+        {
+          "path": "app/Providers/AppServiceProvider.php",
+          "line": 45,
+          "sha256": "d7c32a188073b2df176e05cb02dee3799048f50219cb1257a3b72b5a73ccd24c",
+          "snippet": "            $driver = (string) config('services.fcm.driver');\n\n            if ($driver === 'fcm') {\n                return app(FcmPushSender::class);\n            }\n\n            if ($this->app->environment('production')) {\n                throw new RuntimeException('PUSH_DRIVER must be fcm in production (DEP-PUSH-01).');\n            }\n\n            return app(LogPushSender::class);\n        });"
+        },
+        {
+          "path": "app/Modules/Notifications/Push/LogPushSender.php",
+          "line": 13,
+          "sha256": "8314c1eb30af267e4490a9aeee1a7ce6fbca6c5a30f8158fa48ecec509a27fb3",
+          "snippet": "final class LogPushSender implements PushSender\n{\n    public function send(string $token, PushMessage $message): PushResult\n    {\n        Log::info('push.log', ['code' => $message->code, 'notification_id' => $message->notificationId]);\n\n        return PushResult::Sent;\n    }\n}"
+        }
+      ],
+      "pairs": [
+        {
+          "prd": 90,
+          "page": 19,
+          "label": "C32: الإشعارات",
+          "current": "SCR-C32-mixed",
+          "note": "",
+          "crop": null
+        }
+      ],
+      "note": "الحكم يخص الإعدادات المحلية التي تمت قراءتها، وليس بيئة تشغيل أخرى أو خادم الهاتف الافتراضي.",
+      "code": false
+    },
+    {
+      "id": "D23",
+      "title": "وعود الضمان والفاتورة والرد تحتاج سياسة وتنفيذًا",
+      "priority": "P1",
+      "kind": "تعارض داخل الملف ومتطلبات غير مثبتة",
+      "expected": "C08 تذكر ضمانًا 14 يومًا، وC02 تذكر 30 يومًا. C22 تعد بفاتورة ضريبية، وتظهر وعود رد أو تحويل فوري.",
+      "actual": "يوجد إيصال وبيانات طلب ونزاعات، لكن لم يُعثر على رحلة ضمان مستقلة أو إصدار فاتورة ضريبية أو SLA آلي لهذه الوعود.",
+      "impact": "الوعود تتجاوز الوظائف التي تثبتها الشاشات والخادم، وبعضها غير متسق داخل الملف نفسه.",
+      "remedy": "توحيد مدة الضمان ونطاقه، واعتماد نصوص الخدمة والفاتورة ومواعيد الدعم والتحويل قبل نشرها.",
+      "sources": [
+        {
+          "path": "app/Modules/Support/Actions/OpenDisputeAction.php",
+          "line": 114,
+          "sha256": "99eb58d5dee37cfdb6a00d6d6e17837d16313804e303f88357214945272b6b84",
+          "snippet": "    private function assertWindow(Order $order): void\n    {\n        if ($order->status->allowsDispute()) {\n            return;\n        }\n\n        if ($order->status !== OrderStatus::Closed || $order->closed_at === null) {\n            throw BusinessRuleViolationException::rule('BR-120', Localization::text('copy.problems_can_be_reported_from_technician_arrival_until_the'));\n        }\n\n        $deadline = $order->closed_at->addHours($this->settings->int(Cfg::DisputeWindowHours));\n\n        if (CarbonImmutable::now()->gt($deadline)) {\n            throw BusinessRuleViolationException::rule(\n                'BR-120',\n                Localization::text('copy.the_deadline_for_reporting_a_problem_after_request_closure'),"
+        },
+        {
+          "path": "app/Http/Api/V1/Resources/OrderResource.php",
+          "line": 101,
+          "sha256": "f460513a961641a4785d75c103c6002b2a0e8e1f254b24edde0eb4bffdf1c6cc",
+          "snippet": "            'amounts' => [\n                'labor_total' => $this->labor_total,\n                'materials_total' => $this->materials_total,\n                'final_amount' => $this->final_amount,\n                'payment_method' => $this->payment_method?->value,\n                'payment_method_label' => $this->payment_method?->getLabel(),\n                'payment_status' => $this->payment_status->value,\n            ],\n\n            'termination' => [\n                'reason_code' => $this->cancel_reason_code?->value,\n                'reason_label' => $this->cancel_reason_code?->getLabel(),\n                'note' => $this->cancel_reason_code === CancelReason::AccountBlocked"
+        }
+      ],
+      "pairs": [
+        {
+          "prd": 92,
+          "page": 19,
+          "label": "C02: ضمان 30 يومًا",
+          "current": "SCR-C02-verified",
+          "note": "",
+          "crop": [
+            0,
+            430,
+            360,
+            917
+          ]
+        }
+      ],
+      "note": "عدم العثور على وظيفة في المستودع لا ينفي وجود إجراء تشغيلي خارجه؛ يلزم تأكيد السياسة مع المسؤولين. لا يتضمن التقرير حكمًا قانونيًا.",
+      "code": false
+    },
+    {
+      "id": "D24",
+      "title": "صفحة 29 لا تصف الهوية والتنقل الحاليين بدقة",
+      "priority": "P3",
+      "kind": "توثيق قديم",
+      "expected": "ص 29 تقول إن التطبيق تيل وخط Cairo، وإن القائمة الجانبية موجودة، وإن كل الخطوات متطابقة.",
+      "actual": "المصدر الحالي أزرق #0054D5 وIBM Plex Sans Arabic. C02 صفحة حساب ضمن التنقل السفلي. الخطوات خمس، وهناك اختلافات إعدادات وتكامل.",
+      "impact": "صفحة المقارنة قد تدفع الفريق لاعتماد تغييرات نُفذت بالفعل، أو تجاهل فروق حقيقية.",
+      "remedy": "إعادة كتابة صفحة التطابق بحسب تاريخ نسخة التطبيق، وتصنيف التنفيذ والإعداد والواجهة كل على حدة.",
+      "sources": [
+        {
+          "path": "design/tokens.json",
+          "line": 9,
+          "sha256": "b1e390301aba2423ba44ac9c84569117cc1ac0ab9d6031c659042dfa8ad9d51e",
+          "snippet": "    \"primary\": \"#0054D5\",\n    \"primaryContainer\": {\n      \"mix\": \"{theme.primary}\",\n      \"with\": \"{theme.surface}\",\n      \"amount\": 0.12"
+        },
+        {
+          "path": "design/tokens.json",
+          "line": 127,
+          "sha256": "b1e390301aba2423ba44ac9c84569117cc1ac0ab9d6031c659042dfa8ad9d51e",
+          "snippet": "    \"family\": \"IBM Plex Sans Arabic\",\n    \"source\": \"Figma Primo App (owner decision 2026-10-09, closes OD-07)\",\n    \"weights\": {\n      \"regular\": 400,\n      \"medium\": 500,\n      \"semibold\": 600,"
+        },
+        {
+          "path": "iosapp/BzrApp/Customer/CustomerJourneyRoot.swift",
+          "line": 12,
+          "sha256": "b512612565371b68bdf15b2c690a3547f6bfed0de0a28455e99b6ad8edf45329",
+          "snippet": "    /// DEC-062: C01, C25, C18, C02 share one bottom navigation under the screen, so its selection animates.\n    private static let tabs = [\"SCR-C01\", \"SCR-C25\", \"SCR-C18\", \"SCR-C02\"]\n\n    var body: some View {"
+        }
+      ],
+      "pairs": [
+        {
+          "prd": 92,
+          "page": 19,
+          "label": "C02 في التصميم",
+          "current": "SCR-C02-verified",
+          "note": "",
+          "crop": null
+        }
+      ],
+      "note": "لا يصح القول إن جميع ملفات Cairo حُذفت: بعضها ما زال ضمن الأصول؛ الخط الأساسي المعتمد هو IBM Plex.",
+      "code": false
+    },
+    {
+      "id": "D25",
+      "title": "حسابي: الإحصاءات الظاهرة ليست كلها محسوبة بالكامل",
+      "priority": "P2",
+      "kind": "حدود بيانات وفجوة إحصاء",
+      "expected": "C02 في ص 19 تعرض إجمالي الطلبات المكتملة ومتوسط تقييم العميل كإحصاءات حساب.",
+      "actual": "عدد المكتمل يُعدّ من أول صفحة للطلبات السابقة فقط. قيمة متوسط التقييم في الواجهة ثابتة. لا تأتي الإحصاءات كلها كحقول محسوبة من /me.",
+      "impact": "قد يقل العدد عن الإجمالي الحقيقي للحساب، وقد يظهر متوسط لا يمثل تقييم صاحبه.",
+      "remedy": "إرجاع إجماليات صحيحة من الخادم، وتنفيذ قرار إتاحة تقييم العميل للطرف المناسب.",
+      "sources": [
+        {
+          "path": "androidapp/app/src/main/kotlin/noox/bzr/customer/CustomerViewModel.kt",
+          "line": 351,
+          "sha256": "6b111583d8ae334882f83480185e5bafb4d871107cfe29a33ae022e7bedc5ee5",
+          "snippet": "        // B-09: `/me` has no stats, so completed orders are counted from the first page of past orders.\n        val addresses = runCatching { api.addresses(token()).size.toString() }.getOrDefault(\"\")\n        val completed = runCatching { api.orders(token(), \"past\").data.count { it.status == \"CLOSED\" }.toString() }.getOrDefault(\"\")\n        mapOf(\n            \"event\" to \"loaded\", \"is_verified\" to user.isVerified,\n            \"name\" to user.name, \"phone\" to user.phone.orEmpty(),\n            \"completed_orders\" to completed, \"address_count\" to addresses,"
+        },
+        {
+          "path": "androidapp/app/src/main/kotlin/noox/bzr/customer/C02AccountView.kt",
+          "line": 51,
+          "sha256": "71b65f3324a3fd4f09eeb9621a57fc0d9d6db785c4293fa2c290fc74774096b2",
+          "snippet": "            // STATIC (DEC-074, BACKEND-NOTES B-09): customers have no rating average in the API.\n            addView(stat(R.drawable.ic_star_filled, R.color.bremo_amber500, R.color.bremo_warning_bg, STATIC_RATING, string(R.string.account_stats_rating)), weight())\n            addView(stat(R.drawable.ic_location, R.color.bremo_slate400, R.color.bremo_surface_container, addresses, string(R.string.account_stats_addresses)), weight())\n        })\n        binding.body.addView(providerCard())"
+        }
+      ],
+      "pairs": [
+        {
+          "prd": 92,
+          "page": 19,
+          "label": "C02: الإحصاءات",
+          "current": "SCR-C02-verified",
+          "note": "",
+          "crop": null
+        }
+      ],
+      "note": "أرقام fixture في الصورة ليست سجلات شخص حقيقي؛ ملاحظة الحساب تتعلق بمصدر الإحصاء في الكود.",
+      "code": false
+    },
+    {
+      "id": "D26",
+      "title": "الإغلاق التلقائي: وقت العرض يختلف عن وقت التنفيذ",
+      "priority": "P1",
+      "kind": "اتساق داخلي مستنتج من الكود",
+      "expected": "الملف لا يحدد بوضوح بداية مهلة الإغلاق التلقائي بعد الدفع النقدي.",
+      "actual": "auto_close_at المرسل للواجهة يُحسب من paid_at +24 ساعة، بينما مهمة الإغلاق تختار completed_at الأقدم من 24 ساعة.",
+      "impact": "عند تأخر الدفع بعد إنهاء العمل، قد يحدث الإغلاق قبل الموعد المعروض للعميل.",
+      "remedy": "توحيد نقطة بداية المهلة في API والمهمة، واختبار حالة تأخر الدفع قبل اعتماد الوعد الزمني.",
+      "sources": [
+        {
+          "path": "app/Modules/Orders/Services/OrderPresentation.php",
+          "line": 81,
+          "sha256": "34048c214fecc060f1887e5541dc3f51580c4e595397516acd861ff59352c430",
+          "snippet": "            'auto_close_at' => $order->status === OrderStatus::AwaitingConfirmation\n                ? $order->latestSuccessfulPayment?->paid_at?->addHours($this->settings->int(Cfg::AutoCloseHours))->toIso8601String()\n                : null,\n        ];"
+        },
+        {
+          "path": "app/Modules/Orders/Jobs/AutoCloseConfirmedOrders.php",
+          "line": 29,
+          "sha256": "3f9148b6895041d92998bb3cdae2b1c4c79853830fabd8a9bd4c3a2eb6e7e4f3",
+          "snippet": "            ->where('completed_at', '<=', $cutoff)\n            ->orderBy('id')\n            ->chunkById(100, function ($orders) use ($confirm, &$closed): void {\n                foreach ($orders as $order) {"
+        }
+      ],
+      "pairs": [
+        {
+          "prd": 74,
+          "page": 16,
+          "label": "C23: انتظار التأكيد",
+          "current": "SCR-C23-ready",
+          "note": "",
+          "crop": null
+        }
+      ],
+      "note": "هذه ملاحظة اتساق داخل التطبيق مرتبطة بالـworkflow؛ لم تُعَد إنتاجها على جهاز أو بطلب حقيقي.",
+      "code": true
+    }
+  ],
+  "inventory": [
+    {
+      "page": 6,
+      "image": 18,
+      "code": "Splash",
+      "label": "البداية",
+      "verdict": "موجود",
+      "note": "لا توجد لقطة جديدة للشاشة الافتتاحية ضمن مجموعة الـ404."
+    },
+    {
+      "page": 6,
+      "image": 20,
+      "code": "C10",
+      "label": "الدخول",
+      "verdict": "مطابق أساسًا",
+      "note": "دخول بالبريد وكلمة المرور."
+    },
+    {
+      "page": 6,
+      "image": 22,
+      "code": "C11",
+      "label": "إنشاء الحساب",
+      "verdict": "مطابق أساسًا",
+      "note": "اسم وبريد وهاتف وكلمة مرور."
+    },
+    {
+      "page": 7,
+      "image": 24,
+      "code": "C12",
+      "label": "تفعيل البريد",
+      "verdict": "فرق صلاحية",
+      "note": "مدة رابط التفعيل مختلفة؛ D20."
+    },
+    {
+      "page": 7,
+      "image": 26,
+      "code": "C13",
+      "label": "استعادة كلمة المرور",
+      "verdict": "فرق صلاحية",
+      "note": "مدة رابط الاستعادة مختلفة؛ D20."
+    },
+    {
+      "page": 8,
+      "image": 28,
+      "code": "C01",
+      "label": "الرئيسية",
+      "verdict": "مطابق جزئيًا",
+      "note": "تتغير دعوة الطلب بحسب وضع التشغيل؛ D01."
+    },
+    {
+      "page": 8,
+      "image": 30,
+      "code": "C01",
+      "label": "الرئيسية الفارغة",
+      "verdict": "مطابق جزئيًا",
+      "note": "تتغير دعوة الطلب بحسب وضع التشغيل؛ D01."
+    },
+    {
+      "page": 8,
+      "image": 32,
+      "code": "C03",
+      "label": "وصف المشكلة",
+      "verdict": "workflow مختلف",
+      "note": "حاليًا اختيار الخدمة؛ محتوى الملف انتقل إلى C37؛ D02."
+    },
+    {
+      "page": 8,
+      "image": 34,
+      "code": "C17",
+      "label": "الوسائط",
+      "verdict": "فرق حدود إدخال",
+      "note": "مدة الفيديو؛ D21."
+    },
+    {
+      "page": 9,
+      "image": 36,
+      "code": "C04",
+      "label": "العنوان والموعد",
+      "verdict": "workflow مختلف",
+      "note": "المكان والموعد فقط؛ الخامات والتسعير إلى C38؛ D03."
+    },
+    {
+      "page": 9,
+      "image": 38,
+      "code": "C16",
+      "label": "اختيار الموعد",
+      "verdict": "مطابق جزئيًا",
+      "note": "الجدولة موجودة؛ القيم من إعدادات المدينة والخادم."
+    },
+    {
+      "page": 9,
+      "image": 40,
+      "code": "C14",
+      "label": "العناوين",
+      "verdict": "مطابق أساسًا",
+      "note": "اختيار وتعديل العنوان المحفوظ."
+    },
+    {
+      "page": 10,
+      "image": 42,
+      "code": "C15",
+      "label": "إضافة عنوان",
+      "verdict": "مطابق أساسًا",
+      "note": "الخريطة والمنطقة وتفاصيل العنوان."
+    },
+    {
+      "page": 10,
+      "image": 44,
+      "code": "C05",
+      "label": "مراجعة الطلب",
+      "verdict": "مطابق جزئيًا",
+      "note": "المراجعة موجودة لكنها الخطوة 5 بدل 3؛ D02."
+    },
+    {
+      "page": 11,
+      "image": 46,
+      "code": "C06",
+      "label": "العروض",
+      "verdict": "موجود وغير مفعّل",
+      "note": "السوق معطّل، والعداد غير ظاهر؛ D01 وD18."
+    },
+    {
+      "page": 11,
+      "image": 48,
+      "code": "C07",
+      "label": "ملف الفني",
+      "verdict": "مطابق جزئيًا",
+      "note": "مؤشرات ثابتة وحدود بيانات الصور والتحقق؛ D17."
+    },
+    {
+      "page": 11,
+      "image": 50,
+      "code": "C08",
+      "label": "تفاصيل العرض",
+      "verdict": "موجود وغير مفعّل",
+      "note": "تفاصيل العرض موجودة؛ رسوم المعاينة حسب المفتاح؛ D04."
+    },
+    {
+      "page": 12,
+      "image": 52,
+      "code": "C35",
+      "label": "لم تصل عروض",
+      "verdict": "مطابق جزئيًا",
+      "note": "مؤشرات انتظار ثابتة؛ شروط إعادة النشر مهمة؛ D18."
+    },
+    {
+      "page": 12,
+      "image": 54,
+      "code": "C36",
+      "label": "انتظار التعيين",
+      "verdict": "مطابق وظيفيًا",
+      "note": "هي مسار التشغيل الحالي، وتوصف في الملف كبديل؛ D01."
+    },
+    {
+      "page": 13,
+      "image": 56,
+      "code": "C09",
+      "label": "التتبع",
+      "verdict": "مطابق جزئيًا",
+      "note": "التتبع موجود؛ المشاركة وقيود الحالات تحتاج استكمالًا؛ D10 وD16."
+    },
+    {
+      "page": 13,
+      "image": 58,
+      "code": "C19",
+      "label": "المحادثة",
+      "verdict": "مطابق جزئيًا",
+      "note": "الحجب قبل التأكيد فقط، والصور بعده؛ قواعد الرحلة."
+    },
+    {
+      "page": 13,
+      "image": 60,
+      "code": "C30",
+      "label": "عرض التنفيذ",
+      "verdict": "مطابق جزئيًا",
+      "note": "عرض واحد بمهلة 60 دقيقة؛ العداد غير ظاهر؛ D04 وD18."
+    },
+    {
+      "page": 14,
+      "image": 62,
+      "code": "C31",
+      "label": "تكلفة إضافية",
+      "verdict": "فجوة إجراء",
+      "note": "قرار إضافات IN_PROGRESS غير متاح عبر الإجراءات؛ D06."
+    },
+    {
+      "page": 14,
+      "image": 64,
+      "code": "C09",
+      "label": "حالات التتبع",
+      "verdict": "مطابق جزئيًا",
+      "note": "التتبع موجود؛ المشاركة وقيود الحالات تحتاج استكمالًا؛ D10 وD16."
+    },
+    {
+      "page": 14,
+      "image": 66,
+      "code": "C20",
+      "label": "الإلغاء",
+      "verdict": "قيود ناقصة في الملف",
+      "note": "الإلغاء قبل الوصول فقط؛ D10."
+    },
+    {
+      "page": 15,
+      "image": 68,
+      "code": "C21",
+      "label": "ملخص الدفع",
+      "verdict": "فرق مالي وإتاحة",
+      "note": "تعريف الخصم والقنوات؛ D05 وD07–D09."
+    },
+    {
+      "page": 15,
+      "image": 70,
+      "code": "C22",
+      "label": "الدفع الإلكتروني",
+      "verdict": "تكامل غير مكتمل",
+      "note": "فوري محاكي وإنستاباي غير مكتمل؛ D07–D08."
+    },
+    {
+      "page": 15,
+      "image": 72,
+      "code": "C22",
+      "label": "كود فوري",
+      "verdict": "تكامل غير مكتمل",
+      "note": "فوري محاكي وإنستاباي غير مكتمل؛ D07–D08."
+    },
+    {
+      "page": 16,
+      "image": 74,
+      "code": "C23",
+      "label": "تأكيد الإنهاء",
+      "verdict": "مطابق جزئيًا",
+      "note": "خاصة بالكاش؛ بداية مهلة الإغلاق تحتاج توحيدًا؛ D09 وD26."
+    },
+    {
+      "page": 16,
+      "image": 76,
+      "code": "C24",
+      "label": "تقييم الفني",
+      "verdict": "مطابق أساسًا",
+      "note": "3 أبعاد وتعليق حتى 500 حرف؛ تقييم بعد الإغلاق خلال 7 أيام."
+    },
+    {
+      "page": 17,
+      "image": 78,
+      "code": "C25",
+      "label": "الطلبات الحالية",
+      "verdict": "فرق تبويبات",
+      "note": "3 تبويبات بدل 2؛ D19."
+    },
+    {
+      "page": 17,
+      "image": 80,
+      "code": "C25",
+      "label": "الطلبات السابقة",
+      "verdict": "فرق تبويبات",
+      "note": "3 تبويبات بدل 2؛ D19."
+    },
+    {
+      "page": 17,
+      "image": 82,
+      "code": "C26",
+      "label": "تفاصيل الطلب",
+      "verdict": "مطابق أساسًا",
+      "note": "بيانات وتاريخ الطلب والإيصال؛ لا يثبت إصدار فاتورة ضريبية."
+    },
+    {
+      "page": 18,
+      "image": 84,
+      "code": "C27",
+      "label": "فتح مشكلة",
+      "verdict": "مطابق جزئيًا",
+      "note": "قبل الإغلاق نزاع يغيّر الحالة، وبعده يوقف التسوية."
+    },
+    {
+      "page": 18,
+      "image": 86,
+      "code": "C28",
+      "label": "الإبلاغ عن فني",
+      "verdict": "مطابق أساسًا",
+      "note": "البلاغ لا يغيّر حالة الطلب؛ موعد الرد وعد تشغيلي يحتاج اعتمادًا."
+    },
+    {
+      "page": 19,
+      "image": 88,
+      "code": "C18",
+      "label": "الرسائل",
+      "verdict": "مطابق جزئيًا",
+      "note": "شارات القراءة والحضور؛ D15."
+    },
+    {
+      "page": 19,
+      "image": 90,
+      "code": "C32",
+      "label": "الإشعارات",
+      "verdict": "مطابق جزئيًا",
+      "note": "داخل التطبيق موجود؛ Push المحلي log؛ D22."
+    },
+    {
+      "page": 19,
+      "image": 92,
+      "code": "C02",
+      "label": "حسابي",
+      "verdict": "اختلاف بيانات/توثيق",
+      "note": "D23–D25؛ ضمان وإحصاءات وهوية وتنقل."
+    },
+    {
+      "page": 20,
+      "image": 94,
+      "code": "C33",
+      "label": "الحساب والأمان",
+      "verdict": "مطابق أساسًا",
+      "note": "تعديل وكلمة مرور وحذف؛ صورة الملف تشمل نافذة حذف مع خلفية مطموسة."
+    },
+    {
+      "page": 20,
+      "image": 96,
+      "code": "C29",
+      "label": "الدعم",
+      "verdict": "مطابق جزئيًا",
+      "note": "FAQ وتواصل موجودان؛ الوعود الزمنية تحتاج سياسة."
+    },
+    {
+      "page": 20,
+      "image": 98,
+      "code": "C34",
+      "label": "الشروط",
+      "verdict": "مطابق جزئيًا",
+      "note": "النص الحالي من نظام المحتوى؛ صورة الإصدار مثال وليست إثبات النص المعتمد."
+    },
+    {
+      "page": 22,
+      "image": 106,
+      "code": "P01",
+      "label": "الانضمام",
+      "verdict": "مطابق أساسًا",
+      "note": "انضمام فني ضمن الحساب نفسه."
+    },
+    {
+      "page": 22,
+      "image": 108,
+      "code": "P02",
+      "label": "البيانات",
+      "verdict": "مطابق أساسًا",
+      "note": "صورة وخبرة ونبذة."
+    },
+    {
+      "page": 22,
+      "image": 110,
+      "code": "P03",
+      "label": "الهوية",
+      "verdict": "مطابق أساسًا",
+      "note": "رفع الهوية وجهًا وظهرًا؛ لا يثبت ذلك تحققًا جنائيًا منفصلًا."
+    },
+    {
+      "page": 22,
+      "image": 112,
+      "code": "P04",
+      "label": "التخصصات",
+      "verdict": "مطابق أساسًا",
+      "note": "فئات وتخصصات من الكتالوج."
+    },
+    {
+      "page": 23,
+      "image": 114,
+      "code": "P05",
+      "label": "مناطق العمل",
+      "verdict": "مطابق أساسًا",
+      "note": "مناطق خدمة وأهلية تعيين."
+    },
+    {
+      "page": 23,
+      "image": 116,
+      "code": "P06",
+      "label": "استلام المستحقات",
+      "verdict": "فرق وعد مالي",
+      "note": "طرق الاستلام موجودة؛ التحويل ليس آليًا؛ D11."
+    },
+    {
+      "page": 23,
+      "image": 118,
+      "code": "P07",
+      "label": "حالة المراجعة",
+      "verdict": "مطابق أساسًا",
+      "note": "مراجعة وتفعيل ورفض وإعادة تقديم."
+    },
+    {
+      "page": 24,
+      "image": 120,
+      "code": "P08",
+      "label": "رئيسية الفني",
+      "verdict": "مطابق جزئيًا",
+      "note": "المتاح الآن والطلب المعيّن موجودان؛ فصل الوضعين مطلوب."
+    },
+    {
+      "page": 24,
+      "image": 122,
+      "code": "P09a",
+      "label": "الطلبات المتاحة",
+      "verdict": "موجود وغير مفعّل",
+      "note": "قائمة طلبات السوق؛ ليست وجهة مستقلة في خريطة أكواد اللقطات."
+    },
+    {
+      "page": 24,
+      "image": 124,
+      "code": "P09",
+      "label": "تفاصيل الطلب",
+      "verdict": "موجود وغير مفعّل",
+      "note": "تفاصيل الطلب المتاح في وضع السوق."
+    },
+    {
+      "page": 25,
+      "image": 126,
+      "code": "P10",
+      "label": "تقديم عرض",
+      "verdict": "موجود وغير مفعّل",
+      "note": "عرض ما قبل التعيين وصافي السوق؛ لا ينطبق على رحلة الموظفين."
+    },
+    {
+      "page": 25,
+      "image": 128,
+      "code": "P11",
+      "label": "عروضي",
+      "verdict": "موجود وغير مفعّل",
+      "note": "تقديم وسحب عروض السوق."
+    },
+    {
+      "page": 26,
+      "image": 130,
+      "code": "P12",
+      "label": "التأكيد",
+      "verdict": "مطابق جزئيًا",
+      "note": "بدء التحرك واعتذار قبل الوصول؛ الاعتذار يعيد الطلب إلى OPEN."
+    },
+    {
+      "page": 26,
+      "image": 132,
+      "code": "P13",
+      "label": "في الطريق",
+      "verdict": "مطابق أساسًا",
+      "note": "ملاحة وموقع وتسجيل وصول، مع قيود الجدولة والموقع."
+    },
+    {
+      "page": 26,
+      "image": 134,
+      "code": "P14",
+      "label": "الوصول",
+      "verdict": "مطابق جزئيًا",
+      "note": "تنفيذ مباشر أو معاينة ثم عرض؛ يوجد إنهاء معاينة فقط."
+    },
+    {
+      "page": 26,
+      "image": 136,
+      "code": "P20",
+      "label": "عرض التنفيذ",
+      "verdict": "مطابق جزئيًا",
+      "note": "الدليل وسبب الخروج موجودان؛ المقترحات الإضافية لها فجوة قرار؛ D06."
+    },
+    {
+      "page": 27,
+      "image": 138,
+      "code": "P15",
+      "label": "التنفيذ",
+      "verdict": "مطابق جزئيًا",
+      "note": "الإنهاء والإضافات موجودان؛ صور الإنجاز ناقصة؛ D06 وD14."
+    },
+    {
+      "page": 27,
+      "image": 140,
+      "code": "P21",
+      "label": "التعذر",
+      "verdict": "قيود ناقصة في الملف",
+      "note": "التعذر إلغاء بلا مبلغ؛ غياب العميل بعد 20 دقيقة؛ D10."
+    },
+    {
+      "page": 27,
+      "image": 142,
+      "code": "P16",
+      "label": "انتظار الدفع",
+      "verdict": "مطابق أساسًا",
+      "note": "تأكيد كاش كامل؛ الانتظار الإلكتروني يختلف."
+    },
+    {
+      "page": 28,
+      "image": 144,
+      "code": "P17",
+      "label": "تقييم العميل",
+      "verdict": "حقول غير منفذة",
+      "note": "نجوم فقط؛ D13."
+    },
+    {
+      "page": 28,
+      "image": 146,
+      "code": "P18",
+      "label": "المستحقات",
+      "verdict": "مطابق جزئيًا",
+      "note": "الحساب موجود، التصدير والفلترة ناقصان؛ D12."
+    },
+    {
+      "page": 28,
+      "image": 148,
+      "code": "P19",
+      "label": "ملف الفني",
+      "verdict": "مطابق أساسًا",
+      "note": "النبذة والخبرة والتخصصات والمناطق ومعرض الأعمال."
+    }
+  ],
+  "assets": {
+    "assets/prd-view-046-0.png": {
+      "sha256": "edf0c71e4c61dd927a19ddf515d25f841af6a4783ba526f608af33fb9ef378a4",
+      "size": [
+        360,
+        720
+      ],
+      "provenance": "الصورة الأصلية المضمّنة في صفحة 11؛ الجزء العلوي أو القص المحدد."
+    },
+    "assets/current-scr-c36-waiting_now.png": {
+      "sha256": "8bbcce1618deaebf033547550c56a4c0d0a1d6771a9a77b7900040fcd6d2b067",
+      "size": [
+        400,
+        800
+      ],
+      "provenance": "SCR-C36-waiting_now · Paparazzi · 400×800"
+    },
+    "assets/prd-view-120-0.png": {
+      "sha256": "990ee4f612ae5de59a57272605a292a15d5af771cba8470aa8ecfda1f7bd48d3",
+      "size": [
+        360,
+        720
+      ],
+      "provenance": "الصورة الأصلية المضمّنة في صفحة 24؛ الجزء العلوي أو القص المحدد."
+    },
+    "assets/current-scr-p08-assigned.png": {
+      "sha256": "6291a3978321e9d29501338d4c2c6012bf750877fec0f972c14569fae24626e0",
+      "size": [
+        400,
+        800
+      ],
+      "provenance": "SCR-P08-assigned · Paparazzi · 400×800"
+    },
+    "assets/prd-view-032-0.png": {
+      "sha256": "86fc234901b668bb43bbaad4419b49b427ed37dfc460ec79da6531e7484bc7d2",
+      "size": [
+        360,
+        720
+      ],
+      "provenance": "الصورة الأصلية المضمّنة في صفحة 8؛ الجزء العلوي أو القص المحدد."
+    },
+    "assets/current-scr-c03-selected.png": {
+      "sha256": "d2c8c6ed41cc4f734ee48a4ea0086770e11fc490044ca0cbf6d1f5454699f248",
+      "size": [
+        400,
+        800
+      ],
+      "provenance": "SCR-C03-selected · Paparazzi · 400×800"
+    },
+    "assets/current-scr-c37-with_media.png": {
+      "sha256": "c9667cf915b23aae046b2bed5b4e2adc18d4979fb982422fd3dc117d0c26270c",
+      "size": [
+        400,
+        800
+      ],
+      "provenance": "SCR-C37-with_media · Paparazzi · 400×800"
+    },
+    "assets/prd-view-036-0.png": {
+      "sha256": "1758690d49c2938b11e306a8962749784364d781b96c53a08d20d00695a05b11",
+      "size": [
+        360,
+        720
+      ],
+      "provenance": "الصورة الأصلية المضمّنة في صفحة 9؛ الجزء العلوي أو القص المحدد."
+    },
+    "assets/current-scr-c38-staff.png": {
+      "sha256": "8b1de580f52963d7868d85fd8c16f086256662f80a7a4fb23a996726384a42e7",
+      "size": [
+        400,
+        800
+      ],
+      "provenance": "SCR-C38-staff · Paparazzi · 400×800"
+    },
+    "assets/current-scr-c04-staff_scheduled.png": {
+      "sha256": "99e2ad4d72ddd1cafb6b500acb8c0ef0a5c84be220a47b2c5c68a64b273abbaa",
+      "size": [
+        400,
+        800
+      ],
+      "provenance": "SCR-C04-staff_scheduled · Paparazzi · 400×800"
+    },
+    "assets/prd-view-050-0.png": {
+      "sha256": "2f587cb6b8f635dd9893463d9ca85f6d25513e40546c614da7edad1b933a1bd7",
+      "size": [
+        360,
+        720
+      ],
+      "provenance": "الصورة الأصلية المضمّنة في صفحة 11؛ الجزء العلوي أو القص المحدد."
+    },
+    "assets/prd-view-068-0.png": {
+      "sha256": "de8aca59ca14d6214b0adcfc133f5020bd237e29cbe7d7bea6258f9a982bb78f",
+      "size": [
+        360,
+        720
+      ],
+      "provenance": "الصورة الأصلية المضمّنة في صفحة 15؛ الجزء العلوي أو القص المحدد."
+    },
+    "assets/current-scr-c21-cash.png": {
+      "sha256": "a50644668f63add34b6b0d4b751708f69a8f9b7d8cd8cc49fae90321c6f1879b",
+      "size": [
+        400,
+        800
+      ],
+      "provenance": "SCR-C21-cash · Paparazzi · 400×800"
+    },
+    "assets/prd-view-062-0.png": {
+      "sha256": "57bee06b6ae4a68c03c5a9b381f2c0b18f28a8668c2ab76b61cfe22793b79b65",
+      "size": [
+        360,
+        720
+      ],
+      "provenance": "الصورة الأصلية المضمّنة في صفحة 14؛ الجزء العلوي أو القص المحدد."
+    },
+    "assets/current-scr-c31-materials.png": {
+      "sha256": "c0a54bc0529f43574d9fc2e2bd2ba6c2bf582cbfcec9ff8b046264da5e8ca88d",
+      "size": [
+        400,
+        800
+      ],
+      "provenance": "SCR-C31-materials · Paparazzi · 400×800"
+    },
+    "assets/prd-view-070-0.png": {
+      "sha256": "a6123cd6d2b28431b41046857d66d1e6cbdcd26250a3777973ff821f6fbefa23",
+      "size": [
+        360,
+        720
+      ],
+      "provenance": "الصورة الأصلية المضمّنة في صفحة 15؛ الجزء العلوي أو القص المحدد."
+    },
+    "assets/current-scr-c22-select_channel.png": {
+      "sha256": "d28c95b3310311d34a40dc4e574f1d45cc47e1bdae70055092cca2e9e8d8a60e",
+      "size": [
+        400,
+        800
+      ],
+      "provenance": "SCR-C22-select_channel · Paparazzi · 400×800"
+    },
+    "assets/prd-view-072-0.png": {
+      "sha256": "f0a366ea1b51736343e4c904da4559b2fb2482f5a0c8140bae57f684c9d35d97",
+      "size": [
+        360,
+        720
+      ],
+      "provenance": "الصورة الأصلية المضمّنة في صفحة 15؛ الجزء العلوي أو القص المحدد."
+    },
+    "assets/current-scr-c22-kiosk_pending.png": {
+      "sha256": "1af07d1e88ef9104979f94f30f00083ce56e7406210b83629e39929437704d05",
+      "size": [
+        400,
+        800
+      ],
+      "provenance": "SCR-C22-kiosk_pending · Paparazzi · 400×800"
+    },
+    "assets/prd-view-074-0.png": {
+      "sha256": "40497628aa4219a829f3cf976e3345bac993e19d232721b26199b422604a4ebd",
+      "size": [
+        360,
+        720
+      ],
+      "provenance": "الصورة الأصلية المضمّنة في صفحة 16؛ الجزء العلوي أو القص المحدد."
+    },
+    "assets/current-scr-c23-ready.png": {
+      "sha256": "454c3ee6ec6f99de87830e3bb794208a59d51c8ac492c8214d48052208b3fdc7",
+      "size": [
+        400,
+        800
+      ],
+      "provenance": "SCR-C23-ready · Paparazzi · 400×800"
+    },
+    "assets/prd-view-066-0.png": {
+      "sha256": "de59b1b7ff733bd148aa1cdb765c47db902b7c62bf7ce759a2b1bb467fe08889",
+      "size": [
+        360,
+        720
+      ],
+      "provenance": "الصورة الأصلية المضمّنة في صفحة 14؛ الجزء العلوي أو القص المحدد."
+    },
+    "assets/current-scr-c09-arrived.png": {
+      "sha256": "0f8b733dbbae3b92cca2bbf6136b75594b115c22bffab0cc1d2d531c83520d03",
+      "size": [
+        400,
+        800
+      ],
+      "provenance": "SCR-C09-arrived · Paparazzi · 400×800"
+    },
+    "assets/prd-view-140-0.png": {
+      "sha256": "11310af265440da006044ec13ac72c4832b9e16f515cbc47cc45e9a2e01f0545",
+      "size": [
+        360,
+        720
+      ],
+      "provenance": "الصورة الأصلية المضمّنة في صفحة 27؛ الجزء العلوي أو القص المحدد."
+    },
+    "assets/current-scr-p21-unable_valid.png": {
+      "sha256": "500dc9911955ed8baaf8f7df66498261a70773f75f3c23ed968d1fc51c0bf268",
+      "size": [
+        400,
+        800
+      ],
+      "provenance": "SCR-P21-unable_valid · Paparazzi · 400×800"
+    },
+    "assets/prd-view-116-0.png": {
+      "sha256": "a51dc9aee87178c860befa076850075763c433673c2fdf6fd310cd8dc56f4db9",
+      "size": [
+        360,
+        720
+      ],
+      "provenance": "الصورة الأصلية المضمّنة في صفحة 23؛ الجزء العلوي أو القص المحدد."
+    },
+    "assets/current-scr-p06-valid.png": {
+      "sha256": "e3d869675f11f8145624fc5fda10778f47809632018d44d2ac41ab95a21a0e4f",
+      "size": [
+        400,
+        800
+      ],
+      "provenance": "SCR-P06-valid · Paparazzi · 400×800"
+    },
+    "assets/prd-view-146-0.png": {
+      "sha256": "5234ce35cbc172b098345c742134066104ccbe06c4afb5d5c835e825663f2bc5",
+      "size": [
+        360,
+        720
+      ],
+      "provenance": "الصورة الأصلية المضمّنة في صفحة 28؛ الجزء العلوي أو القص المحدد."
+    },
+    "assets/current-scr-p18-employee.png": {
+      "sha256": "9165ff2effb100488655ee1f61c5126bf450a411e838ce36d8a819227edbe018",
+      "size": [
+        400,
+        800
+      ],
+      "provenance": "SCR-P18-employee · Paparazzi · 400×800"
+    },
+    "assets/prd-view-144-0.png": {
+      "sha256": "8657fecc13ec94b17e597290f6a1acb64f9c8291564122060d189789a9da3b43",
+      "size": [
+        360,
+        720
+      ],
+      "provenance": "الصورة الأصلية المضمّنة في صفحة 28؛ الجزء العلوي أو القص المحدد."
+    },
+    "assets/current-scr-p17-selected.png": {
+      "sha256": "60cf2e697bf0efcf2991bd9b14a5c6ab294ed5ce244a008babebc15e3e6c7eee",
+      "size": [
+        400,
+        800
+      ],
+      "provenance": "SCR-P17-selected · Paparazzi · 400×800"
+    },
+    "assets/prd-view-138-0.png": {
+      "sha256": "c1e6b78f33b968145c101389a3fac872f1e8c07acd3edf7ccb079bbc8a759a57",
+      "size": [
+        360,
+        720
+      ],
+      "provenance": "الصورة الأصلية المضمّنة في صفحة 27؛ الجزء العلوي أو القص المحدد."
+    },
+    "assets/current-scr-p15-in_progress.png": {
+      "sha256": "c08c902c0d0452520f0c6003cc3da106b9259ebf8353f27cc916c6de8cee1434",
+      "size": [
+        400,
+        800
+      ],
+      "provenance": "SCR-P15-in_progress · Paparazzi · 400×800"
+    },
+    "assets/prd-view-088-0.png": {
+      "sha256": "760502850ede00e9a9ab29258ff1c7b0f28d3995acb1c4ea5ff1ce6c066467e3",
+      "size": [
+        360,
+        720
+      ],
+      "provenance": "الصورة الأصلية المضمّنة في صفحة 19؛ الجزء العلوي أو القص المحدد."
+    },
+    "assets/current-scr-c18-multiple.png": {
+      "sha256": "0f36172ff9ed750153002ae27ac4f5bbe2efc5e0439321327e18cd103f2b6179",
+      "size": [
+        400,
+        800
+      ],
+      "provenance": "SCR-C18-multiple · Paparazzi · 400×800"
+    },
+    "assets/prd-view-056-0.png": {
+      "sha256": "c46c898240cd584a9e3c502ef3eff985c81d79ea3520331ffaab6811e1c873c0",
+      "size": [
+        360,
+        720
+      ],
+      "provenance": "الصورة الأصلية المضمّنة في صفحة 13؛ الجزء العلوي أو القص المحدد."
+    },
+    "assets/current-scr-c09-on_the_way.png": {
+      "sha256": "31992c9dc477caa8c06de60b3b226bdb1495adc26e1e367e41aca2695d5cac05",
+      "size": [
+        400,
+        800
+      ],
+      "provenance": "SCR-C09-on_the_way · Paparazzi · 400×800"
+    },
+    "assets/prd-view-048-0.png": {
+      "sha256": "1f8c87dd7d289786d64ada586b31962b9026c58743ac192b68a296decf9463b2",
+      "size": [
+        360,
+        720
+      ],
+      "provenance": "الصورة الأصلية المضمّنة في صفحة 11؛ الجزء العلوي أو القص المحدد."
+    },
+    "assets/current-scr-c07-available.png": {
+      "sha256": "f4b3c5251d77baf43c5d20df23338325bfef66b57083a42961f1afa03dd154e9",
+      "size": [
+        400,
+        800
+      ],
+      "provenance": "SCR-C07-available · Paparazzi · 400×800"
+    },
+    "assets/prd-view-052-0.png": {
+      "sha256": "5b3bf55c2fe3a80276a799d91817dcb7498e6a2c9b25c2f9c09eaffb2fdf770d",
+      "size": [
+        360,
+        720
+      ],
+      "provenance": "الصورة الأصلية المضمّنة في صفحة 12؛ الجزء العلوي أو القص المحدد."
+    },
+    "assets/current-scr-c35-edit_only.png": {
+      "sha256": "da8a4269a0c0872655271e1434567444acef1fe3dcd622618d76a65003fc12b7",
+      "size": [
+        400,
+        800
+      ],
+      "provenance": "SCR-C35-edit_only · Paparazzi · 400×800"
+    },
+    "assets/current-scr-c06-execution_now.png": {
+      "sha256": "7b648b37bf0bdaf67813fb28abf0cf7a3fa51d03423fddef7fc903b4b858e231",
+      "size": [
+        400,
+        800
+      ],
+      "provenance": "SCR-C06-execution_now · Paparazzi · 400×800"
+    },
+    "assets/prd-view-080-0.png": {
+      "sha256": "61e805a0fde43d3476fd4801fd20f24a7408432a7b06faeeef2304768bcf1b25",
+      "size": [
+        360,
+        720
+      ],
+      "provenance": "الصورة الأصلية المضمّنة في صفحة 17؛ الجزء العلوي أو القص المحدد."
+    },
+    "assets/current-scr-c25-past.png": {
+      "sha256": "3e807a957a50590d58fe0f1fb2f7c5aef57a5425c3a75744aa5ddf9a0411a629",
+      "size": [
+        400,
+        800
+      ],
+      "provenance": "SCR-C25-past · Paparazzi · 400×800"
+    },
+    "assets/prd-view-024-0.png": {
+      "sha256": "6fac535117f628f429c66a4d3b0b7d4b15a3d133e9e4588753fe61828bb29692",
+      "size": [
+        360,
+        720
+      ],
+      "provenance": "الصورة الأصلية المضمّنة في صفحة 7؛ الجزء العلوي أو القص المحدد."
+    },
+    "assets/current-scr-c12-waiting.png": {
+      "sha256": "bc369e6e38836709a5dde0011e80fe575c68052eaa6a983af4485ce7468edf06",
+      "size": [
+        400,
+        800
+      ],
+      "provenance": "SCR-C12-waiting · Paparazzi · 400×800"
+    },
+    "assets/prd-view-026-0.png": {
+      "sha256": "229a9f77d3a078401f3e2fb749014b8175764c3f5d67e03f6983d87ea10a0431",
+      "size": [
+        360,
+        720
+      ],
+      "provenance": "الصورة الأصلية المضمّنة في صفحة 7؛ الجزء العلوي أو القص المحدد."
+    },
+    "assets/current-scr-c13-sent.png": {
+      "sha256": "6cca26e688a7579065d79f3afd5ce7dd9bdb2226bd8254353325d6beef514677",
+      "size": [
+        400,
+        800
+      ],
+      "provenance": "SCR-C13-sent · Paparazzi · 400×800"
+    },
+    "assets/prd-view-034-0.png": {
+      "sha256": "46045fb0391fa4dfd0d00a137eb5b993a57eefbf3628d6a75781243604717717",
+      "size": [
+        360,
+        720
+      ],
+      "provenance": "الصورة الأصلية المضمّنة في صفحة 8؛ الجزء العلوي أو القص المحدد."
+    },
+    "assets/current-scr-c17-recording.png": {
+      "sha256": "58962f1bbfbb5a88376a3743390dc9f4fe68bcba72e7945f27440d52b8a59ee6",
+      "size": [
+        400,
+        800
+      ],
+      "provenance": "SCR-C17-recording · Paparazzi · 400×800"
+    },
+    "assets/prd-view-090-0.png": {
+      "sha256": "ba9b461698fbe39c5cbda2bf2064d96ef1788aa8784c1e2c5c7dbdb691b6f629",
+      "size": [
+        360,
+        720
+      ],
+      "provenance": "الصورة الأصلية المضمّنة في صفحة 19؛ الجزء العلوي أو القص المحدد."
+    },
+    "assets/current-scr-c32-mixed.png": {
+      "sha256": "0fa43a7004bcdcde1bd877d7c6892c754bd263eb88fdd2fbcae0d358efb77faa",
+      "size": [
+        400,
+        800
+      ],
+      "provenance": "SCR-C32-mixed · Paparazzi · 400×800"
+    },
+    "assets/prd-view-092-430.png": {
+      "sha256": "03c9f902d9fbc011b19502763bd9dc8058099dc1aae659c0641e86b5563b932c",
+      "size": [
+        360,
+        487
+      ],
+      "provenance": "الصورة الأصلية المضمّنة في صفحة 19؛ الجزء العلوي أو القص المحدد."
+    },
+    "assets/current-scr-c02-verified.png": {
+      "sha256": "8001ba9e70a22f365a974204450b6ccc27f01c4d57686a2729a1e907b7e0933f",
+      "size": [
+        400,
+        800
+      ],
+      "provenance": "SCR-C02-verified · Paparazzi · 400×800"
+    },
+    "assets/prd-view-092-0.png": {
+      "sha256": "bc9ce6d951127191f06ab5d5e063fdc1a47c92b7b3aa33e5e95f8b44bfe1c383",
+      "size": [
+        360,
+        720
+      ],
+      "provenance": "الصورة الأصلية المضمّنة في صفحة 19؛ الجزء العلوي أو القص المحدد."
+    }
+  },
+  "settings_file": "validation/settings.json",
+  "notes": [
+    "C31 screenshot has fixture-provided actions; API availability is a separate code finding.",
+    "P18 document already describes negative employee remittances and positive materials.",
+    "Instapay enabled flag does not make the channel available without a configured receiver address.",
+    "Local API HTTP500 is not a statement about the default remote mobile backend."
+  ],
+  "final_validation": {
+    "pdf_pages": 43,
+    "missing_finding_codes": [],
+    "backend": {
+      "tool": "phpunit",
+      "result": "passed",
+      "tests": 101,
+      "passed": 101,
+      "assertions": 486,
+      "duration_ms": 47010
+    },
+    "layout": {
+      "title": "تقرير مقارنة Bremo PRD بالتطبيق الحالي",
+      "images": 71,
+      "failedImages": [],
+      "fontReady": "loaded",
+      "pages": [
+        {
+          "id": "cover",
+          "page": 1,
+          "width": 793.6875,
+          "height": 1122.515625,
+          "footerGap": 146.33,
+          "overflow": 0
+        },
+        {
+          "id": "summary",
+          "page": 2,
+          "width": 793.6875,
+          "height": 1122.515625,
+          "footerGap": 173.36,
+          "overflow": 0
+        },
+        {
+          "id": "method",
+          "page": 3,
+          "width": 793.6875,
+          "height": 1122.515625,
+          "footerGap": 302.38,
+          "overflow": 0
+        },
+        {
+          "id": "workflow",
+          "page": 4,
+          "width": 793.6875,
+          "height": 1122.515625,
+          "footerGap": 188.77,
+          "overflow": 0
+        },
+        {
+          "id": "index-1",
+          "page": 5,
+          "width": 793.6875,
+          "height": 1122.515625,
+          "footerGap": 160.03,
+          "overflow": 0
+        },
+        {
+          "id": "index-2",
+          "page": 6,
+          "width": 793.6875,
+          "height": 1122.515625,
+          "footerGap": 123.66,
+          "overflow": 0
+        },
+        {
+          "id": "D01",
+          "page": 7,
+          "width": 793.6875,
+          "height": 1122.515625,
+          "footerGap": 108.08,
+          "overflow": 0
+        },
+        {
+          "id": "D02",
+          "page": 8,
+          "width": 793.6875,
+          "height": 1122.515625,
+          "footerGap": 129.39,
+          "overflow": 0
+        },
+        {
+          "id": "D03",
+          "page": 9,
+          "width": 793.6875,
+          "height": 1122.515625,
+          "footerGap": 138.09,
+          "overflow": 0
+        },
+        {
+          "id": "D04",
+          "page": 10,
+          "width": 793.6875,
+          "height": 1122.515625,
+          "footerGap": 108.08,
+          "overflow": 0
+        },
+        {
+          "id": "D05",
+          "page": 11,
+          "width": 793.6875,
+          "height": 1122.515625,
+          "footerGap": 108.08,
+          "overflow": 0
+        },
+        {
+          "id": "D06",
+          "page": 12,
+          "width": 793.6875,
+          "height": 1122.515625,
+          "footerGap": 8.14,
+          "overflow": 0
+        },
+        {
+          "id": "D07",
+          "page": 13,
+          "width": 793.6875,
+          "height": 1122.515625,
+          "footerGap": 108.08,
+          "overflow": 0
+        },
+        {
+          "id": "D08",
+          "page": 14,
+          "width": 793.6875,
+          "height": 1122.515625,
+          "footerGap": 70.95,
+          "overflow": 0
+        },
+        {
+          "id": "D09",
+          "page": 15,
+          "width": 793.6875,
+          "height": 1122.515625,
+          "footerGap": 108.08,
+          "overflow": 0
+        },
+        {
+          "id": "D10",
+          "page": 16,
+          "width": 793.6875,
+          "height": 1122.515625,
+          "footerGap": 146.44,
+          "overflow": 0
+        },
+        {
+          "id": "D11",
+          "page": 17,
+          "width": 793.6875,
+          "height": 1122.515625,
+          "footerGap": 160.83,
+          "overflow": 0
+        },
+        {
+          "id": "D12",
+          "page": 18,
+          "width": 793.6875,
+          "height": 1122.515625,
+          "footerGap": 85.34,
+          "overflow": 0
+        },
+        {
+          "id": "D13",
+          "page": 19,
+          "width": 793.6875,
+          "height": 1122.515625,
+          "footerGap": 182.14,
+          "overflow": 0
+        },
+        {
+          "id": "D14",
+          "page": 20,
+          "width": 793.6875,
+          "height": 1122.515625,
+          "footerGap": 182.14,
+          "overflow": 0
+        },
+        {
+          "id": "D15",
+          "page": 21,
+          "width": 793.6875,
+          "height": 1122.515625,
+          "footerGap": 182.14,
+          "overflow": 0
+        },
+        {
+          "id": "D16",
+          "page": 22,
+          "width": 793.6875,
+          "height": 1122.515625,
+          "footerGap": 129.39,
+          "overflow": 0
+        },
+        {
+          "id": "D17",
+          "page": 23,
+          "width": 793.6875,
+          "height": 1122.515625,
+          "footerGap": 138.09,
+          "overflow": 0
+        },
+        {
+          "id": "D18",
+          "page": 24,
+          "width": 793.6875,
+          "height": 1122.515625,
+          "footerGap": 93.69,
+          "overflow": 0
+        },
+        {
+          "id": "D19",
+          "page": 25,
+          "width": 793.6875,
+          "height": 1122.515625,
+          "footerGap": 182.14,
+          "overflow": 0
+        },
+        {
+          "id": "D20",
+          "page": 26,
+          "width": 793.6875,
+          "height": 1122.515625,
+          "footerGap": 182.14,
+          "overflow": 0
+        },
+        {
+          "id": "D21",
+          "page": 27,
+          "width": 793.6875,
+          "height": 1122.515625,
+          "footerGap": 182.14,
+          "overflow": 0
+        },
+        {
+          "id": "D22",
+          "page": 28,
+          "width": 793.6875,
+          "height": 1122.515625,
+          "footerGap": 129.39,
+          "overflow": 0
+        },
+        {
+          "id": "D23",
+          "page": 29,
+          "width": 793.6875,
+          "height": 1122.515625,
+          "footerGap": 129.39,
+          "overflow": 0
+        },
+        {
+          "id": "D24",
+          "page": 30,
+          "width": 793.6875,
+          "height": 1122.515625,
+          "footerGap": 85.34,
+          "overflow": 0
+        },
+        {
+          "id": "D25",
+          "page": 31,
+          "width": 793.6875,
+          "height": 1122.515625,
+          "footerGap": 93.69,
+          "overflow": 0
+        },
+        {
+          "id": "D26",
+          "page": 32,
+          "width": 793.6875,
+          "height": 1122.515625,
+          "footerGap": 108.08,
+          "overflow": 0
+        },
+        {
+          "id": "code-proof",
+          "page": 33,
+          "width": 793.6875,
+          "height": 1122.515625,
+          "footerGap": 235.03,
+          "overflow": 0
+        },
+        {
+          "id": "rules-1",
+          "page": 34,
+          "width": 793.6875,
+          "height": 1122.515625,
+          "footerGap": 358,
+          "overflow": 0
+        },
+        {
+          "id": "rules-2",
+          "page": 35,
+          "width": 793.6875,
+          "height": 1122.515625,
+          "footerGap": 358,
+          "overflow": 0
+        },
+        {
+          "id": "admin",
+          "page": 36,
+          "width": 793.6875,
+          "height": 1122.515625,
+          "footerGap": 235.58,
+          "overflow": 0
+        },
+        {
+          "id": "coverage-1",
+          "page": 37,
+          "width": 793.6875,
+          "height": 1122.515625,
+          "footerGap": 25,
+          "overflow": 0
+        },
+        {
+          "id": "coverage-2",
+          "page": 38,
+          "width": 793.6875,
+          "height": 1122.515625,
+          "footerGap": 25,
+          "overflow": 0
+        },
+        {
+          "id": "coverage-3",
+          "page": 39,
+          "width": 793.6875,
+          "height": 1122.515625,
+          "footerGap": 25,
+          "overflow": 0
+        },
+        {
+          "id": "coverage-4",
+          "page": 40,
+          "width": 793.6875,
+          "height": 1122.515625,
+          "footerGap": 70.53,
+          "overflow": 0
+        },
+        {
+          "id": "sources-1",
+          "page": 41,
+          "width": 793.6875,
+          "height": 1122.515625,
+          "footerGap": 96.33,
+          "overflow": 0
+        },
+        {
+          "id": "sources-2",
+          "page": 42,
+          "width": 793.6875,
+          "height": 1122.515625,
+          "footerGap": 96.33,
+          "overflow": 0
+        },
+        {
+          "id": "sources-3",
+          "page": 43,
+          "width": 793.6875,
+          "height": 1122.515625,
+          "footerGap": 636.17,
+          "overflow": 0
+        }
+      ]
+    },
+    "interaction": {
+      "zoomOpened": true,
+      "zoomClosed": true,
+      "anchors": 28
+    }
+  },
+  "artifacts": {
+    "Bremo_PRD_Comparison_AR.pdf": {
+      "bytes": 4876172,
+      "sha256": "cad3c1d3fb4cc8e3690b008b4f8a754b7b9989639496998b755792732111015b"
+    },
+    "Bremo_PRD_Comparison_AR.html": {
+      "bytes": 17688253,
+      "sha256": "df827baabdc14123df091ebc92038f0d537cdaf7a6d74ab845b5f1a28203a185"
+    },
+    "REPORT.md": {
+      "bytes": 67200,
+      "sha256": "0198e6a7fe24be9412fbc0fd74b13f5841e0632d25a1db0387bfe5ae981b38f1"
+    },
+    "source-preview.png": {
+      "bytes": 252487,
+      "sha256": "284d3a769bbeea05f2b9a99429b90215d7a53ddd727b2be0286b57ab39584176"
+    }
+  },
+  "asset_files": {
+    "assets/prd-image-050.png": {
+      "bytes": 212821,
+      "sha256": "2316dcc174568040daf4adcf4702f8894142693c801f8c0f784fb843d839caa4"
+    },
+    "assets/prd-view-070-0.png": {
+      "bytes": 120063,
+      "sha256": "a6123cd6d2b28431b41046857d66d1e6cbdcd26250a3777973ff821f6fbefa23"
+    },
+    "assets/current-scr-c32-mixed.png": {
+      "bytes": 12906,
+      "sha256": "0fa43a7004bcdcde1bd877d7c6892c754bd263eb88fdd2fbcae0d358efb77faa"
+    },
+    "assets/current-scr-c25-past.png": {
+      "bytes": 21718,
+      "sha256": "3e807a957a50590d58fe0f1fb2f7c5aef57a5425c3a75744aa5ddf9a0411a629"
+    },
+    "assets/prd-view-092-0.png": {
+      "bytes": 134783,
+      "sha256": "bc9ce6d951127191f06ab5d5e063fdc1a47c92b7b3aa33e5e95f8b44bfe1c383"
+    },
+    "assets/prd-view-090-0.png": {
+      "bytes": 194219,
+      "sha256": "ba9b461698fbe39c5cbda2bf2064d96ef1788aa8784c1e2c5c7dbdb691b6f629"
+    },
+    "assets/prd-view-062-0.png": {
+      "bytes": 180259,
+      "sha256": "57bee06b6ae4a68c03c5a9b381f2c0b18f28a8668c2ab76b61cfe22793b79b65"
+    },
+    "assets/current-scr-c06-execution_now.png": {
+      "bytes": 41681,
+      "sha256": "7b648b37bf0bdaf67813fb28abf0cf7a3fa51d03423fddef7fc903b4b858e231"
+    },
+    "assets/current-scr-c35-edit_only.png": {
+      "bytes": 32601,
+      "sha256": "da8a4269a0c0872655271e1434567444acef1fe3dcd622618d76a65003fc12b7"
+    },
+    "assets/current-scr-c03-selected.png": {
+      "bytes": 26953,
+      "sha256": "d2c8c6ed41cc4f734ee48a4ea0086770e11fc490044ca0cbf6d1f5454699f248"
+    },
+    "assets/current-scr-c09-arrived.png": {
+      "bytes": 30570,
+      "sha256": "0f8b733dbbae3b92cca2bbf6136b75594b115c22bffab0cc1d2d531c83520d03"
+    },
+    "assets/prd-view-066-0.png": {
+      "bytes": 114090,
+      "sha256": "de59b1b7ff733bd148aa1cdb765c47db902b7c62bf7ce759a2b1bb467fe08889"
+    },
+    "assets/prd-view-116-0.png": {
+      "bytes": 143931,
+      "sha256": "a51dc9aee87178c860befa076850075763c433673c2fdf6fd310cd8dc56f4db9"
+    },
+    "assets/prd-image-088.png": {
+      "bytes": 157693,
+      "sha256": "7469d33aa222a2d8e566bb7aa5bd1b8323af74e9a80b87b7b14d929f1176561f"
+    },
+    "assets/current-scr-c37-with_media.png": {
+      "bytes": 29589,
+      "sha256": "c9667cf915b23aae046b2bed5b4e2adc18d4979fb982422fd3dc117d0c26270c"
+    },
+    "assets/current-scr-c02-verified.png": {
+      "bytes": 29234,
+      "sha256": "8001ba9e70a22f365a974204450b6ccc27f01c4d57686a2729a1e907b7e0933f"
+    },
+    "assets/current-scr-p06-valid.png": {
+      "bytes": 24508,
+      "sha256": "e3d869675f11f8145624fc5fda10778f47809632018d44d2ac41ab95a21a0e4f"
+    },
+    "assets/prd-image-034.png": {
+      "bytes": 101777,
+      "sha256": "4db16d82bb0dc9c1bb833be998b4bf8beb57259fcbfad9dc4aaaa113374338ad"
+    },
+    "assets/current-scr-p15-in_progress.png": {
+      "bytes": 23247,
+      "sha256": "c08c902c0d0452520f0c6003cc3da106b9259ebf8353f27cc916c6de8cee1434"
+    },
+    "assets/prd-image-144.png": {
+      "bytes": 165361,
+      "sha256": "7cb312cf89f2ccde0910478a4f23d9e84ffc300a808d32893488dde50cdfeb36"
+    },
+    "assets/prd-image-032.png": {
+      "bytes": 143043,
+      "sha256": "75d43dfc8baf6dcc0b2514561820e3678b930f7292b657374ce14619a097cb0c"
+    },
+    "assets/current-scr-c38-staff.png": {
+      "bytes": 33876,
+      "sha256": "8b1de580f52963d7868d85fd8c16f086256662f80a7a4fb23a996726384a42e7"
+    },
+    "assets/prd-image-074.png": {
+      "bytes": 251223,
+      "sha256": "000ad6ede7e3a1043942b3f5c0095f36bc8007c1d8a7dc9691efe06ac30e0bcd"
+    },
+    "assets/current-scr-c18-multiple.png": {
+      "bytes": 28239,
+      "sha256": "0f36172ff9ed750153002ae27ac4f5bbe2efc5e0439321327e18cd103f2b6179"
+    },
+    "assets/current-scr-c22-select_channel.png": {
+      "bytes": 22571,
+      "sha256": "d28c95b3310311d34a40dc4e574f1d45cc47e1bdae70055092cca2e9e8d8a60e"
+    },
+    "assets/current-scr-p18-employee.png": {
+      "bytes": 21475,
+      "sha256": "9165ff2effb100488655ee1f61c5126bf450a411e838ce36d8a819227edbe018"
+    },
+    "assets/prd-view-026-0.png": {
+      "bytes": 118672,
+      "sha256": "229a9f77d3a078401f3e2fb749014b8175764c3f5d67e03f6983d87ea10a0431"
+    },
+    "assets/prd-image-146.png": {
+      "bytes": 189032,
+      "sha256": "3df60aad7d6e913835c51312eed29d97ecfbbd0fd20b39bb5e801074d2128a40"
+    },
+    "assets/prd-view-032-0.png": {
+      "bytes": 128843,
+      "sha256": "86fc234901b668bb43bbaad4419b49b427ed37dfc460ec79da6531e7484bc7d2"
+    },
+    "assets/prd-view-048-0.png": {
+      "bytes": 187609,
+      "sha256": "1f8c87dd7d289786d64ada586b31962b9026c58743ac192b68a296decf9463b2"
+    },
+    "assets/prd-view-050-0.png": {
+      "bytes": 164595,
+      "sha256": "2f587cb6b8f635dd9893463d9ca85f6d25513e40546c614da7edad1b933a1bd7"
+    },
+    "assets/prd-image-048.png": {
+      "bytes": 310761,
+      "sha256": "c0714d6f5f9fa5ca8d6cb7e6fa507e6e7ef141e0ee9149684aa793148d06d41b"
+    },
+    "assets/prd-image-138.png": {
+      "bytes": 195927,
+      "sha256": "992afbc6dc947505f928677e77e8725543affc902b0a482bde541597611827be"
+    },
+    "assets/current-scr-p17-selected.png": {
+      "bytes": 17900,
+      "sha256": "60cf2e697bf0efcf2991bd9b14a5c6ab294ed5ce244a008babebc15e3e6c7eee"
+    },
+    "assets/prd-image-092.png": {
+      "bytes": 156849,
+      "sha256": "4c7c5144628ab8096dd0c5cf5036a668c571d9759acede438d7f6841ede84ba1"
+    },
+    "assets/current-scr-c23-ready.png": {
+      "bytes": 31447,
+      "sha256": "454c3ee6ec6f99de87830e3bb794208a59d51c8ac492c8214d48052208b3fdc7"
+    },
+    "assets/prd-view-046-0.png": {
+      "bytes": 175812,
+      "sha256": "edf0c71e4c61dd927a19ddf515d25f841af6a4783ba526f608af33fb9ef378a4"
+    },
+    "assets/current-scr-p08-assigned.png": {
+      "bytes": 27140,
+      "sha256": "6291a3978321e9d29501338d4c2c6012bf750877fec0f972c14569fae24626e0"
+    },
+    "assets/prd-view-036-0.png": {
+      "bytes": 139682,
+      "sha256": "1758690d49c2938b11e306a8962749784364d781b96c53a08d20d00695a05b11"
+    },
+    "assets/prd-view-092-430.png": {
+      "bytes": 71825,
+      "sha256": "03c9f902d9fbc011b19502763bd9dc8058099dc1aae659c0641e86b5563b932c"
+    },
+    "assets/prd-view-146-0.png": {
+      "bytes": 133852,
+      "sha256": "5234ce35cbc172b098345c742134066104ccbe06c4afb5d5c835e825663f2bc5"
+    },
+    "assets/prd-image-056.png": {
+      "bytes": 221560,
+      "sha256": "cb2067e770f7e9a8da690a9bac652f54c01234a08fe5ee500ca37e58675fb360"
+    },
+    "assets/prd-image-140.png": {
+      "bytes": 220400,
+      "sha256": "6d15e4372ef2f8b012c30597d88f7b5ea8842b0de4a8325066a092b198850561"
+    },
+    "assets/prd-view-140-0.png": {
+      "bytes": 168484,
+      "sha256": "11310af265440da006044ec13ac72c4832b9e16f515cbc47cc45e9a2e01f0545"
+    },
+    "assets/prd-image-090.png": {
+      "bytes": 208418,
+      "sha256": "2e6fc675a7eafeff9a99923f0c2de1a47f43b781f0e1a99809647c7e6afa1a53"
+    },
+    "assets/current-scr-c21-cash.png": {
+      "bytes": 30719,
+      "sha256": "a50644668f63add34b6b0d4b751708f69a8f9b7d8cd8cc49fae90321c6f1879b"
+    },
+    "assets/current-scr-c13-sent.png": {
+      "bytes": 17045,
+      "sha256": "6cca26e688a7579065d79f3afd5ce7dd9bdb2226bd8254353325d6beef514677"
+    },
+    "assets/prd-image-072.png": {
+      "bytes": 230517,
+      "sha256": "741b76aa96a1db3e7f66951869a93131a070239d96e946df1a7be96e7395d7ee"
+    },
+    "assets/current-scr-c17-recording.png": {
+      "bytes": 13032,
+      "sha256": "58962f1bbfbb5a88376a3743390dc9f4fe68bcba72e7945f27440d52b8a59ee6"
+    },
+    "assets/current-scr-c09-on_the_way.png": {
+      "bytes": 29728,
+      "sha256": "31992c9dc477caa8c06de60b3b226bdb1495adc26e1e367e41aca2695d5cac05"
+    },
+    "assets/prd-view-088-0.png": {
+      "bytes": 144891,
+      "sha256": "760502850ede00e9a9ab29258ff1c7b0f28d3995acb1c4ea5ff1ce6c066467e3"
+    },
+    "assets/prd-image-036.png": {
+      "bytes": 160064,
+      "sha256": "69bae2729a03267d3adafd15fbd0b54753a154883c499094c34f8c648d13cc9e"
+    },
+    "assets/prd-image-080.png": {
+      "bytes": 206440,
+      "sha256": "d1c72bdee668ff805c56471b6a7d56e5057059d9410f5716e785608d8ae2269b"
+    },
+    "assets/prd-view-080-0.png": {
+      "bytes": 131537,
+      "sha256": "61e805a0fde43d3476fd4801fd20f24a7408432a7b06faeeef2304768bcf1b25"
+    },
+    "assets/prd-image-026.png": {
+      "bytes": 125141,
+      "sha256": "a9e7de25263a79c29faa5c36e1aac667562e92aae554030ca906215fee13fbb8"
+    },
+    "assets/current-scr-c04-staff_scheduled.png": {
+      "bytes": 25006,
+      "sha256": "99e2ad4d72ddd1cafb6b500acb8c0ef0a5c84be220a47b2c5c68a64b273abbaa"
+    },
+    "assets/prd-image-046.png": {
+      "bytes": 193911,
+      "sha256": "96a89c062065dd3c234e419ebec6d56ceb9b9810922948620b6515e64edac1c8"
+    },
+    "assets/prd-view-074-0.png": {
+      "bytes": 142837,
+      "sha256": "40497628aa4219a829f3cf976e3345bac993e19d232721b26199b422604a4ebd"
+    },
+    "assets/prd-image-068.png": {
+      "bytes": 188735,
+      "sha256": "2ad6365311ed14b6cd81df49180f3d01e34be5ef99d794aec0344b4d1f6f195a"
+    },
+    "assets/current-scr-c31-materials.png": {
+      "bytes": 24741,
+      "sha256": "c0a54bc0529f43574d9fc2e2bd2ba6c2bf582cbfcec9ff8b046264da5e8ca88d"
+    },
+    "assets/prd-image-052.png": {
+      "bytes": 137864,
+      "sha256": "5567911622125af7ea767749f909780b2e580186440c5d4f2a12b59ab1242e8e"
+    },
+    "assets/prd-image-116.png": {
+      "bytes": 228454,
+      "sha256": "ffbbde475238671bdacb16616ca1ac81611541dbb158b9c5a08cb12e95947f9c"
+    },
+    "assets/prd-view-120-0.png": {
+      "bytes": 166523,
+      "sha256": "990ee4f612ae5de59a57272605a292a15d5af771cba8470aa8ecfda1f7bd48d3"
+    },
+    "assets/prd-view-068-0.png": {
+      "bytes": 143443,
+      "sha256": "de8aca59ca14d6214b0adcfc133f5020bd237e29cbe7d7bea6258f9a982bb78f"
+    },
+    "assets/prd-image-070.png": {
+      "bytes": 168530,
+      "sha256": "e93227afa768914ecf69b8a9db980e9157a0777f4dba715c4ef535a237ec2581"
+    },
+    "assets/prd-image-062.png": {
+      "bytes": 238824,
+      "sha256": "d8e0d0f0e579e3e4d7affa3292d629f4fd8118dcd5c493fe5672c66bc2722d3a"
+    },
+    "assets/prd-view-056-0.png": {
+      "bytes": 144679,
+      "sha256": "c46c898240cd584a9e3c502ef3eff985c81d79ea3520331ffaab6811e1c873c0"
+    },
+    "assets/prd-view-144-0.png": {
+      "bytes": 136540,
+      "sha256": "8657fecc13ec94b17e597290f6a1acb64f9c8291564122060d189789a9da3b43"
+    },
+    "assets/prd-view-138-0.png": {
+      "bytes": 140498,
+      "sha256": "c1e6b78f33b968145c101389a3fac872f1e8c07acd3edf7ccb079bbc8a759a57"
+    },
+    "assets/prd-view-072-0.png": {
+      "bytes": 150082,
+      "sha256": "f0a366ea1b51736343e4c904da4559b2fb2482f5a0c8140bae57f684c9d35d97"
+    },
+    "assets/current-scr-c22-kiosk_pending.png": {
+      "bytes": 28226,
+      "sha256": "1af07d1e88ef9104979f94f30f00083ce56e7406210b83629e39929437704d05"
+    },
+    "assets/current-scr-p21-unable_valid.png": {
+      "bytes": 20268,
+      "sha256": "500dc9911955ed8baaf8f7df66498261a70773f75f3c23ed968d1fc51c0bf268"
+    },
+    "assets/prd-image-066.png": {
+      "bytes": 162421,
+      "sha256": "772f7d99a90ad35f105bf9b2e41a0dea916bcfebefceb18a21a25fb556cb507e"
+    },
+    "assets/prd-view-052-0.png": {
+      "bytes": 126106,
+      "sha256": "5b3bf55c2fe3a80276a799d91817dcb7498e6a2c9b25c2f9c09eaffb2fdf770d"
+    },
+    "assets/prd-image-024.png": {
+      "bytes": 136852,
+      "sha256": "d391d5329fdae3693a23f0ad961ee48725ab077b879c958e834426759f615fc2"
+    },
+    "assets/current-scr-c12-waiting.png": {
+      "bytes": 14207,
+      "sha256": "bc369e6e38836709a5dde0011e80fe575c68052eaa6a983af4485ce7468edf06"
+    },
+    "assets/current-scr-c07-available.png": {
+      "bytes": 26662,
+      "sha256": "f4b3c5251d77baf43c5d20df23338325bfef66b57083a42961f1afa03dd154e9"
+    },
+    "assets/prd-view-024-0.png": {
+      "bytes": 131691,
+      "sha256": "6fac535117f628f429c66a4d3b0b7d4b15a3d133e9e4588753fe61828bb29692"
+    },
+    "assets/current-scr-c36-waiting_now.png": {
+      "bytes": 14400,
+      "sha256": "8bbcce1618deaebf033547550c56a4c0d0a1d6771a9a77b7900040fcd6d2b067"
+    },
+    "assets/prd-image-120.png": {
+      "bytes": 252801,
+      "sha256": "49536842a10cc5c4a43b9a8e44553cfcbcb234d059b0ce3e51e5eaea6e8735da"
+    },
+    "assets/prd-view-034-0.png": {
+      "bytes": 101468,
+      "sha256": "46045fb0391fa4dfd0d00a137eb5b993a57eefbf3628d6a75781243604717717"
+    }
+  }
+}

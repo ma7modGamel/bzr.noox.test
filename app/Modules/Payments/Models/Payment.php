@@ -10,6 +10,7 @@ use App\Modules\Orders\Models\Order;
 use App\Modules\Orders\Models\OrderMedia;
 use App\Modules\Payments\Enums\PaymentMethod;
 use App\Modules\Payments\Enums\PaymentStatus;
+use App\Modules\Payments\Enums\TransferRejectionReason;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -65,6 +66,7 @@ final class Payment extends Model
             'transfer_reference' => $this->transfer_reference,
             'submitted_at' => $this->submitted_at?->toIso8601String(),
             'failure_reason' => $this->failure_reason,
+            'failure_reason_label' => TransferRejectionReason::tryFrom((string) $this->failure_reason)?->getLabel(),
             'reference_number' => $this->fawry_reference_number,
             'checkout_url' => $this->checkout_url,
             'expires_at' => $this->expires_at?->toIso8601String(),

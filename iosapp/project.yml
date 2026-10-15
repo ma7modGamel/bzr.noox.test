@@ -53,6 +53,7 @@ targets:
     info:
       path: BzrApp/Info.plist
       properties:
+        CFBundleLocalizations: [ar, en]
         CFBundleURLTypes:
           - CFBundleURLName: com.bremo.app.links
             CFBundleURLSchemes: [bremo]

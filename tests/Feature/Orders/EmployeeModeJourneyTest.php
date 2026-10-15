@@ -35,6 +35,7 @@ use Database\Seeders\SettingsSeeder;
 use Database\Seeders\TermsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\Test;
+use Tests\Support\AttachesRepairPhotos;
 use Tests\TestCase;
 
 /**
@@ -43,6 +44,7 @@ use Tests\TestCase;
  */
 final class EmployeeModeJourneyTest extends TestCase
 {
+    use AttachesRepairPhotos;
     use RefreshDatabase;
 
     protected function setUp(): void
@@ -73,7 +75,7 @@ final class EmployeeModeJourneyTest extends TestCase
         $this->assertSame(2, $order->trackingPoints()->count());
 
         // T-10 الوصول: نقطة الوصول تُحفظ والمسار يُحذف (BR-111، BR-112)
-        $order = app(MarkArrivedAction::class)->execute($order, $provider, 30.0600, 31.3400);
+        $order = app(MarkArrivedAction::class)->execute($order, $provider, 30.0600, 31.3400, arrivalCode: $this->arrivalCode($order));
         $this->assertSame(OrderStatus::Arrived, $order->status);
         $this->assertSame(0, $order->trackingPoints()->count());
         $this->assertNotNull($order->arrived_lat);
@@ -98,6 +100,7 @@ final class EmployeeModeJourneyTest extends TestCase
         $this->assertSame(OrderStatus::InProgress, $order->status);
 
         // T-17 الإنهاء: المبالغ تُثبَّت (BR-044)
+        $this->attachRepairPhotos($order, $provider);
         $order = app(CompleteWorkAction::class)->execute($order, $provider);
         $this->assertSame(OrderStatus::AwaitingPayment, $order->status);
         $this->assertSame('450.00', $order->labor_total);
@@ -134,7 +137,7 @@ final class EmployeeModeJourneyTest extends TestCase
         [$customer, $provider, , $order] = $this->publishAndAssign();
 
         $order = app(StartTripAction::class)->execute($order, $provider);
-        $order = app(MarkArrivedAction::class)->execute($order, $provider, 30.0600, 31.3400);
+        $order = app(MarkArrivedAction::class)->execute($order, $provider, 30.0600, 31.3400, arrivalCode: $this->arrivalCode($order));
 
         $quote = app(SubmitProposalAction::class)->execute(
             $order, $provider, ProposalType::ExecutionQuote, '450.00', 'يحتاج تغيير المواسير',
@@ -154,7 +157,7 @@ final class EmployeeModeJourneyTest extends TestCase
     {
         [, $provider, , $order] = $this->publishAndAssign();
         $order = app(StartTripAction::class)->execute($order, $provider);
-        $order = app(MarkArrivedAction::class)->execute($order, $provider, 30.0600, 31.3400);
+        $order = app(MarkArrivedAction::class)->execute($order, $provider, 30.0600, 31.3400, arrivalCode: $this->arrivalCode($order));
 
         app(SubmitProposalAction::class)->execute($order, $provider, ProposalType::ExecutionQuote, '450.00', 'سبب كافٍ');
 
@@ -167,7 +170,7 @@ final class EmployeeModeJourneyTest extends TestCase
     {
         [, $provider, , $order] = $this->publishAndAssign();
         $order = app(StartTripAction::class)->execute($order, $provider);
-        $order = app(MarkArrivedAction::class)->execute($order, $provider, 30.0600, 31.3400);
+        $order = app(MarkArrivedAction::class)->execute($order, $provider, 30.0600, 31.3400, arrivalCode: $this->arrivalCode($order));
 
         $quote = app(SubmitProposalAction::class)->execute(
             $order,
@@ -191,7 +194,7 @@ final class EmployeeModeJourneyTest extends TestCase
     {
         [, $provider, , $order] = $this->publishAndAssign();
         $order = app(StartTripAction::class)->execute($order, $provider);
-        $order = app(MarkArrivedAction::class)->execute($order, $provider, 30.0600, 31.3400);
+        $order = app(MarkArrivedAction::class)->execute($order, $provider, 30.0600, 31.3400, arrivalCode: $this->arrivalCode($order));
 
         $this->expectException(BusinessRuleViolationException::class);
         $this->expectExceptionMessage('سبب السعر خارج دليل الأسعار');
@@ -206,7 +209,7 @@ final class EmployeeModeJourneyTest extends TestCase
     {
         [, $provider, , $order] = $this->publishAndAssign(otherProblem: true, withGuide: false);
         $order = app(StartTripAction::class)->execute($order, $provider);
-        $order = app(MarkArrivedAction::class)->execute($order, $provider, 30.0600, 31.3400);
+        $order = app(MarkArrivedAction::class)->execute($order, $provider, 30.0600, 31.3400, arrivalCode: $this->arrivalCode($order));
 
         $quote = app(SubmitProposalAction::class)->execute(
             $order, $provider, ProposalType::ExecutionQuote, '900.00', 'تفاصيل الحالة بعد المعاينة',
@@ -223,7 +226,7 @@ final class EmployeeModeJourneyTest extends TestCase
     {
         [, $provider, , $order] = $this->publishAndAssign(withGuide: false);
         $order = app(StartTripAction::class)->execute($order, $provider);
-        $order = app(MarkArrivedAction::class)->execute($order, $provider, 30.0600, 31.3400);
+        $order = app(MarkArrivedAction::class)->execute($order, $provider, 30.0600, 31.3400, arrivalCode: $this->arrivalCode($order));
 
         try {
             app(SubmitProposalAction::class)->execute(
@@ -242,7 +245,7 @@ final class EmployeeModeJourneyTest extends TestCase
     {
         [$customer, $provider, , $order] = $this->publishAndAssign();
         $order = app(StartTripAction::class)->execute($order, $provider);
-        $order = app(MarkArrivedAction::class)->execute($order, $provider, 30.0600, 31.3400);
+        $order = app(MarkArrivedAction::class)->execute($order, $provider, 30.0600, 31.3400, arrivalCode: $this->arrivalCode($order));
 
         $quote = app(SubmitProposalAction::class)->execute($order, $provider, ProposalType::ExecutionQuote, '450.00', 'سبب كافٍ');
         $order = app(DecideProposalAction::class)->approve($order->refresh(), $quote, ActorType::Customer, $customer->id);
@@ -261,14 +264,14 @@ final class EmployeeModeJourneyTest extends TestCase
         $order = app(StartTripAction::class)->execute($order, $provider);
 
         try {
-            app(MarkArrivedAction::class)->execute($order, $provider, 30.0700, 31.3500);
+            app(MarkArrivedAction::class)->execute($order, $provider, 30.0700, 31.3500, arrivalCode: $this->arrivalCode($order));
             $this->fail('كان يجب رفض الوصول البعيد بلا تأكيد.');
         } catch (BusinessRuleViolationException $e) {
             $this->assertSame('BR-111', $e->context['rule']);
         }
 
         $order = app(MarkArrivedAction::class)
-            ->execute($order->refresh(), $provider, 30.0700, 31.3500, confirmedFarArrival: true);
+            ->execute($order->refresh(), $provider, 30.0700, 31.3500, confirmedFarArrival: true, arrivalCode: $this->arrivalCode($order));
 
         $this->assertSame(OrderStatus::Arrived, $order->status);
         $this->assertGreaterThan(500, $order->arrival_distance_m);
@@ -283,10 +286,11 @@ final class EmployeeModeJourneyTest extends TestCase
     {
         [$customer, $provider, , $order] = $this->publishAndAssign();
         $order = app(StartTripAction::class)->execute($order, $provider);
-        $order = app(MarkArrivedAction::class)->execute($order, $provider, 30.0600, 31.3400);
+        $order = app(MarkArrivedAction::class)->execute($order, $provider, 30.0600, 31.3400, arrivalCode: $this->arrivalCode($order));
 
         $quote = app(SubmitProposalAction::class)->execute($order, $provider, ProposalType::ExecutionQuote, '450.00', 'سبب كافٍ');
         $order = app(DecideProposalAction::class)->approve($order->refresh(), $quote, ActorType::Customer, $customer->id);
+        $this->attachRepairPhotos($order, $provider);
         $order = app(CompleteWorkAction::class)->execute($order, $provider);
 
         $this->expectException(BusinessRuleViolationException::class);
@@ -309,6 +313,10 @@ final class EmployeeModeJourneyTest extends TestCase
             ]);
         }
 
+        $provider = ProviderProfile::factory()
+            ->servingFor($category->id, $address->area_id)
+            ->create();
+
         $order = app(PublishRequestAction::class)->execute($customer, new PublishRequestData(
             customerAddressId: $address->id,
             categoryId: $category->id,
@@ -318,10 +326,6 @@ final class EmployeeModeJourneyTest extends TestCase
             termsAccepted: true,
             description: 'تسريب أسفل الحوض.',
         ));
-
-        $provider = ProviderProfile::factory()
-            ->servingFor($order->category_id, $order->area_id)
-            ->create();
 
         $admin = Admin::factory()->create();
         $order = app(AssignProviderAction::class)->execute($order, $provider, $admin);

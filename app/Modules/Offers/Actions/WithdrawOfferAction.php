@@ -13,6 +13,7 @@ use App\Modules\Orders\Models\OrderEvent;
 use App\Modules\Providers\Models\ProviderProfile;
 use App\Modules\Settings\Services\FeatureGate;
 use App\Support\Exceptions\BusinessRuleViolationException;
+use App\Support\Localization;
 use Illuminate\Support\Facades\DB;
 
 /** O-02 — سحب العرض قبل الاختيار (BR-030، DEC-014). */
@@ -25,15 +26,15 @@ final readonly class WithdrawOfferAction
         $this->features->requireOffers('withdrawOffer');
 
         if ($offer->provider_profile_id !== $provider->getKey()) {
-            throw BusinessRuleViolationException::rule('BR-030', 'هذا العرض ليس عرضك.');
+            throw BusinessRuleViolationException::rule('BR-030', Localization::text('copy.this_offer_does_not_belong_to_you'));
         }
 
         if ($offer->status !== OfferStatus::Submitted) {
-            throw BusinessRuleViolationException::rule('BR-030', 'العرض لم يعد قابلًا للسحب.');
+            throw BusinessRuleViolationException::rule('BR-030', Localization::text('copy.this_offer_can_no_longer_be_withdrawn'));
         }
 
         if ($offer->order->status !== OrderStatus::Open) {
-            throw BusinessRuleViolationException::rule('BR-030', 'الطلب لم يعد مفتوحًا.');
+            throw BusinessRuleViolationException::rule('BR-030', Localization::text('copy.this_request_is_no_longer_open'));
         }
 
         return DB::transaction(function () use ($offer, $provider): Offer {

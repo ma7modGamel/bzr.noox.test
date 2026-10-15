@@ -1,0 +1,36 @@
+{
+    "data": [
+        {
+            "id": "3a19a9e6-0ba0-417d-859f-dd041907cf81",
+            "code": "NTF-12",
+            "title": "وافق العميل على مقترحك",
+            "body": "طلب #1.",
+            "deep_link": "bremo://provider/orders/1",
+            "read_at": null,
+            "created_at": "2026-10-05T06:00:00+00:00"
+        },
+        {
+            "id": "6d4228ac-6cc6-4efc-be74-436eeaee0629",
+            "code": "NTF-25",
+            "title": "رسالة جديدة",
+            "body": "رسالة جديدة بخصوص طلب #1.",
+            "deep_link": "bremo://provider/orders/1/chat",
+            "read_at": null,
+            "created_at": "2026-10-05T06:00:00+00:00"
+        },
+        {
+            "id": "c080affd-2f9b-4f66-817d-af1597acdee6",
+            "code": "NTF-28",
+            "title": "طلب معيّن لك",
+            "body": "عُيّن لك طلب #1 — سباكة. راجع الموعد والعنوان.",
+            "deep_link": "bremo://provider/orders/1",
+            "read_at": null,
+            "created_at": "2026-10-05T06:00:00+00:00"
+        }
+    ],
+    "meta": {
+        "current_page": 1,
+        "last_page": 1,
+        "unread_count": 3
+    }
+}

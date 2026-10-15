@@ -27,7 +27,7 @@ final class ProviderApplicationResource extends JsonResource
             ];
         }
 
-        $profile->loadMissing(['user', 'categories:id,name', 'specialties:id,name', 'areas:id,name', 'documents']);
+        $profile->loadMissing(['user', 'categories:id,name,name_en', 'specialties:id,name,name_en', 'areas:id,name', 'documents']);
 
         return [
             'id' => $profile->getKey(),
