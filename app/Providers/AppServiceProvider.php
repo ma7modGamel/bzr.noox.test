@@ -12,9 +12,12 @@ use App\Modules\Payments\Contracts\PaymentGateway;
 use App\Modules\Payments\Services\FawryWebhookSignature;
 use App\Modules\Payments\Services\StagingPaymentGateway;
 use App\Support\Localization;
+use App\Support\SlackErrorReporter;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Auth\Notifications\VerifyEmail;
+use Illuminate\Log\Events\MessageLogged;
 use Illuminate\Notifications\Messages\MailMessage;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
@@ -28,6 +31,7 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->useLangPath(resource_path('lang'));
+        $this->app->singleton(SlackErrorReporter::class);
 
         $this->app->bind(RouteEtaProvider::class, GoogleRoutesEtaProvider::class);
         $this->app->singleton(FawryWebhookSignature::class, fn (): FawryWebhookSignature => new FawryWebhookSignature(
@@ -61,6 +65,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        Log::listen(function (MessageLogged $event): void {
+            app(SlackErrorReporter::class)->report($event);
+        });
+
         // DEC-049 — ZeptoMail API transport (MAIL_MAILER=zeptomail).
         Mail::extend('zeptomail', fn (): ZeptoMailTransport => new ZeptoMailTransport(
             (string) config('services.zeptomail.url'),

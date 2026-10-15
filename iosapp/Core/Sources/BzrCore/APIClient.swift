@@ -1,5 +1,9 @@
 import Foundation
 
+#if os(iOS)
+    import Darwin
+#endif
+
 #if canImport(FoundationNetworking)
     import FoundationNetworking
 #endif
@@ -129,7 +133,12 @@ public struct APIClient: Sendable {
         let result = try await request(
             path, method: "POST", body: body,
             contentType: "multipart/form-data; boundary=\(boundary)")
-        return try BzrJSON.decoder().decode(Value.self, from: result.data)
+        do {
+            return try BzrJSON.decoder().decode(Value.self, from: result.data)
+        } catch {
+            AppDiagnostics.report(error)
+            throw error
+        }
     }
 
     public func download(_ path: String) async throws -> Data {
@@ -147,7 +156,12 @@ public struct APIClient: Sendable {
         as type: Value.Type
     ) async throws -> Value {
         let result = try await request(path, method: method, body: body, idempotencyKey: idempotencyKey)
-        return try BzrJSON.decoder().decode(Value.self, from: result.data)
+        do {
+            return try BzrJSON.decoder().decode(Value.self, from: result.data)
+        } catch {
+            AppDiagnostics.report(error)
+            throw error
+        }
     }
 
     private func request(
@@ -163,6 +177,23 @@ public struct APIClient: Sendable {
         request.httpMethod = method
         request.setValue("application/json", forHTTPHeaderField: "Accept")
         request.setValue(language ?? AppLanguage.current, forHTTPHeaderField: "Accept-Language")
+        request.setValue("iOS", forHTTPHeaderField: "X-App-Platform")
+        if let version = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String {
+            request.setValue(version, forHTTPHeaderField: "X-App-Version")
+        }
+        if let build = Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String {
+            request.setValue(build, forHTTPHeaderField: "X-App-Build")
+        }
+        #if os(iOS)
+            request.setValue(ProcessInfo.processInfo.operatingSystemVersionString, forHTTPHeaderField: "X-OS-Version")
+            var device = utsname()
+            uname(&device)
+            let modelLength = MemoryLayout.size(ofValue: device.machine)
+            let model = withUnsafePointer(to: &device.machine) {
+                $0.withMemoryRebound(to: CChar.self, capacity: modelLength) { String(cString: $0) }
+            }
+            request.setValue(model, forHTTPHeaderField: "X-Device-Model")
+        #endif
         if let body {
             request.httpBody = body
             request.setValue(contentType, forHTTPHeaderField: "Content-Type")
@@ -188,7 +219,9 @@ public struct APIClient: Sendable {
             {
                 throw APIClientError.rejected(message: message)
             }
-            throw APIClientError.httpStatus(result.statusCode)
+            let error = APIClientError.httpStatus(result.statusCode)
+            AppDiagnostics.report(error)
+            throw error
         }
         return result
     }

@@ -1,6 +1,7 @@
 package noox.bzr.network
 
 import android.util.Log
+import android.os.Build
 import java.io.IOException
 import java.net.ConnectException
 import java.net.NoRouteToHostException
@@ -45,6 +46,11 @@ object BremoHttp {
             .addInterceptor { chain ->
                 val requestLanguage = language()
                 val response = chain.proceed(chain.request().newBuilder()
+                    .header("X-App-Platform", "Android")
+                    .header("X-App-Version", BuildConfig.VERSION_NAME)
+                    .header("X-App-Build", BuildConfig.VERSION_CODE.toString())
+                    .header("X-Device-Model", "${Build.MANUFACTURER} ${Build.MODEL}".filter { it.code in 32..126 }.take(80))
+                    .header("X-OS-Version", "Android ${Build.VERSION.RELEASE}".filter { it.code in 32..126 }.take(60))
                     .header("Accept", "application/json").header("Accept-Language", requestLanguage).build())
                 if (requestLanguage != language()) {
                     response.close()
@@ -127,6 +133,9 @@ fun <T> bremoExecute(call: Call<T>): T {
         val failure = NetworkException(exception.failureKind(), request.url.toString(), exception)
         log(Log.ERROR, BremoHttp.TAG, "$method $path ✗ ${failure.message}", exception)
         throw failure
+    } catch (exception: Exception) {
+        BremoDiagnostics.record(exception)
+        throw exception
     }
     return bodyOrThrow(method, path, response)
 }
@@ -142,6 +151,9 @@ suspend fun <T> bremoCall(method: String, path: String, call: suspend () -> Resp
         val failure = NetworkException(exception.failureKind(), path, exception)
         log(Log.ERROR, BremoHttp.TAG, "$method $path ✗ ${failure.message}", exception)
         throw failure
+    } catch (exception: Exception) {
+        BremoDiagnostics.record(exception)
+        throw exception
     }
     return bodyOrThrow(method, path, response)
 }
@@ -151,7 +163,7 @@ private fun <T> bodyOrThrow(method: String, path: String, response: Response<T>)
         val text = response.errorBody()?.use { it.string() }.orEmpty()
         val error = runCatching { BremoHttp.json.decodeFromString(ApiErrorEnvelope.serializer(), text).error }.getOrNull()
         log(Log.WARN, BremoHttp.TAG, "$method $path ← HTTP ${response.code()} ${error?.let { "${it.code}: ${it.message}" } ?: text.take(300)}")
-        throw ApiException(response.code(), error)
+        throw ApiException(response.code(), error).also { BremoDiagnostics.record(it) }
     }
     @Suppress("UNCHECKED_CAST")
     return response.body() ?: Unit as T
@@ -185,6 +197,7 @@ internal fun IOException.failureKind(): NetworkFailureKind = when (this) {
 
 /** Logs a failure that a screen turns into its generic error state, so the cause is never lost. */
 fun logFailure(where: String, error: Throwable) {
+    BremoDiagnostics.record(error)
     log(Log.ERROR, BremoHttp.TAG, "$where failed: ${error.javaClass.simpleName}: ${error.message}", error)
 }
 

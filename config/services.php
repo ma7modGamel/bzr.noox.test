@@ -36,6 +36,12 @@ return [
     ],
 
     'slack' => [
+        'errors' => [
+            'enabled' => env('SLACK_ERRORS_ENABLED', false),
+            'webhook_url' => env('LOG_SLACK_WEBHOOK_URL'),
+            'cache_store' => env('SLACK_ERRORS_CACHE_STORE', 'file'),
+            'release' => env('APP_RELEASE', 'unversioned'),
+        ],
         'notifications' => [
             'bot_user_oauth_token' => env('SLACK_BOT_USER_OAUTH_TOKEN'),
             'channel' => env('SLACK_BOT_USER_DEFAULT_CHANNEL'),

@@ -45,6 +45,7 @@ import noox.bzr.links.ModeMemory
 import noox.bzr.links.ModeMemoryStore
 import noox.bzr.links.NotificationChannels
 import noox.bzr.network.SessionExpiry
+import noox.bzr.network.BremoDiagnostics
 import noox.bzr.provider.ProviderRoutes
 import noox.bzr.provider.ProviderViewModel
 import noox.bzr.provider.UrlConnectionProviderApi
@@ -343,6 +344,11 @@ class MainActivity : AppCompatActivity() {
 
     /** One screen at a time, as the Compose flow replaced its content: the back stack never grows. */
     private fun NavController.show(destination: Int) {
+        BremoDiagnostics.screen(resources.getResourceEntryName(destination), when {
+            providerViewModel.flowActive.value -> "PROVIDER"
+            authenticated.value -> "CUSTOMER"
+            else -> "AUTH"
+        })
         if (currentDestination?.id == destination) return
         navigate(destination, null, navOptions {
             popUpTo(graph.id) { inclusive = true }

@@ -4,10 +4,12 @@ import android.app.Application
 import androidx.appcompat.app.AppCompatDelegate
 import noox.bzr.network.AppLanguage
 import noox.bzr.network.BremoHttp
+import noox.bzr.network.BremoDiagnostics
 
 class BremoApplication : Application() {
     override fun onCreate() {
         super.onCreate()
+        BremoDiagnostics.initialize()
         BremoHttp.language = {
             val selected = AppCompatDelegate.getApplicationLocales().toLanguageTags()
             AppLanguage.resolve((selected.ifBlank { resources.configuration.locales.toLanguageTags() }).split(','))

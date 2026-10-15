@@ -73,6 +73,9 @@ struct BzrApp: App {
             }
             // 17 §الروابط العميقة — `bremo://` and Universal Links for email links.
             .onOpenURL { open(link: $0.absoluteString) }
+            .onChange(of: diagnosticScreen, initial: true) { _, screen in
+                BremoDiagnostics.screen(screen, mode: providerViewModel != nil ? "PROVIDER" : (customerViewModel != nil ? "CUSTOMER" : "AUTH"))
+            }
             .onChange(of: push.pendingLink) { _, link in
                 guard let link, customerViewModel != nil else { return }
                 push.pendingLink = nil
@@ -110,6 +113,10 @@ struct BzrApp: App {
 
     /// The splash grows slightly as it fades, as if the app comes forward through it.
     private static let splashExitScale = 1.06
+
+    private var diagnosticScreen: String {
+        providerViewModel?.state.screen ?? customerViewModel?.state.screen ?? authViewModel.state.screen
+    }
 
     private func makeCustomerViewModel(_ token: String) -> CustomerViewModel {
         CustomerViewModel(

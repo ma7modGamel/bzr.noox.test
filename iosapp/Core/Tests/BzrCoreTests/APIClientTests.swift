@@ -24,6 +24,22 @@ final class APIClientTests: XCTestCase {
         XCTAssertEqual(AppLanguage.resolve([]), "ar")
     }
 
+    func testServerFailureEmitsSanitizedDiagnosticsAndSendsPlatformHeader() async throws {
+        let signal = expectation(forNotification: AppDiagnostics.failureNotification, object: nil) { note in
+            note.userInfo?["kind"] as? String == "HTTP_503" && note.userInfo?.count == 1
+        }
+        let transport = RecordingTransport(result: HTTPResult(data: Data("private server details".utf8), statusCode: 503))
+        let client = APIClient(baseURL: try XCTUnwrap(URL(string: "https://example.test/api/v1/")), token: "private-token", transport: transport)
+        do {
+            let _: BooleanResponse = try await client.get("orders/123?private=query")
+            XCTFail("Expected server failure")
+        } catch {
+            XCTAssertEqual(error as? APIClientError, .httpStatus(503))
+        }
+        await fulfillment(of: [signal], timeout: 1)
+        XCTAssertEqual(transport.request?.value(forHTTPHeaderField: "X-App-Platform"), "iOS")
+    }
+
     func testEveryRequestUsesTheSelectedLanguage() async throws {
         for language in ["en-GB", "ar-EG"] {
             let transport = RecordingTransport(result: HTTPResult(data: Data("{\"ok\":true}".utf8), statusCode: 200))

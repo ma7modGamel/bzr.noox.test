@@ -62,6 +62,7 @@ final class BzrAppDelegate: NSObject, UIApplicationDelegate, MessagingDelegate,
         UNUserNotificationCenter.current().delegate = self
         if Bundle.main.path(forResource: "GoogleService-Info", ofType: "plist") != nil {
             FirebaseApp.configure()
+            BremoDiagnostics.start()
             Messaging.messaging().delegate = self
         }
         return true
