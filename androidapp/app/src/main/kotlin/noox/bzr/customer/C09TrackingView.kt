@@ -165,7 +165,7 @@ class C09TrackingView(context: Context) : CustomerScreenView(context) {
         binding.sections.addView(text(BzrFormat.fill(string(R.string.tracking_working_pill), "name" to firstName(state)), R.style.TextAppearance_Bremo_StatusPill).apply {
             setBackgroundResource(R.drawable.bremo_bg_status_pill)
             setPaddingRelative(px(R.dimen.bremo_space_m), px(R.dimen.bremo_space_s), px(R.dimen.bremo_space_m), px(R.dimen.bremo_space_s))
-            setCompoundDrawablesRelativeWithIntrinsicBounds(R.drawable.bremo_bg_online_dot, 0, 0, 0)
+            setCompoundDrawablesRelativeWithIntrinsicBounds(R.drawable.bremo_bg_activity_dot, 0, 0, 0)
             compoundDrawablePadding = px(R.dimen.bremo_space_s)
             sizeCompoundIcons(R.dimen.bremo_size_status_dot)
         })
@@ -255,7 +255,7 @@ class C09TrackingView(context: Context) : CustomerScreenView(context) {
             orientation = LinearLayout.VERTICAL
             val nameRow = row()
             nameRow.addView(text(value(state, NAME), R.style.TextAppearance_Bremo_OfferName))
-            if (state.providerVerified) nameRow.addView(icon(R.drawable.ic_verified, R.color.bremo_primary600, R.dimen.bremo_size_icon_small).apply {
+            if (state.providerVerified) nameRow.addView(icon(R.drawable.ic_verified, R.color.bremo_verified_text, R.dimen.bremo_size_icon_small).apply {
                 layoutParams = LinearLayout.LayoutParams(px(R.dimen.bremo_size_icon_small), px(R.dimen.bremo_size_icon_small)).apply { marginStart = px(R.dimen.bremo_space_xs) }
             })
             addView(nameRow)
@@ -263,7 +263,7 @@ class C09TrackingView(context: Context) : CustomerScreenView(context) {
                 BzrFormat.fill(string(R.string.provider_verified_title), "category" to value(state, CATEGORY)).takeIf { state.providerVerified && value(state, CATEGORY).isNotEmpty() },
                 value(state, COMPLETED).takeIf(String::isNotEmpty)?.let { BzrFormat.quantity(context, R.plurals.plural_confirm_completed, (it).toIntOrNull() ?: 0) }.takeUnless { compact },
             ).joinToString(" • ")
-            if (meta.isNotEmpty()) addView(text(meta, R.style.TextAppearance_Bremo_Hint).apply { setTextColor(context.getColor(R.color.bremo_primary600)) })
+            if (meta.isNotEmpty()) addView(text(meta, R.style.TextAppearance_Bremo_Hint).apply { setTextColor(context.getColor(R.color.bremo_accent_text)) })
         }, LinearLayout.LayoutParams(0, LayoutParams.WRAP_CONTENT, 1f))
         value(state, RATING).takeIf(String::isNotEmpty)?.let { rating ->
             top.addView(text(rating, R.style.TextAppearance_Bremo_DetailStrong).apply {
@@ -349,7 +349,7 @@ class C09TrackingView(context: Context) : CustomerScreenView(context) {
             setPadding(px(R.dimen.bremo_space_m), px(R.dimen.bremo_space_s), px(R.dimen.bremo_space_m), px(R.dimen.bremo_space_s))
         }
         line.addView(text(string(R.string.tracking_agreed), R.style.TextAppearance_Bremo_Caption), LinearLayout.LayoutParams(0, LayoutParams.WRAP_CONTENT, 1f))
-        line.addView(text(amount(value(state, PRICE)), R.style.TextAppearance_Bremo_AmountSmall).apply { setTextColor(context.getColor(R.color.bremo_primary600)) })
+        line.addView(text(amount(value(state, PRICE)), R.style.TextAppearance_Bremo_AmountSmall).apply { setTextColor(context.getColor(R.color.bremo_amount_text)) })
         if (value(state, MATERIALS).isNotEmpty()) line.addView(text(value(state, MATERIALS), R.style.TextAppearance_Bremo_Hint).apply {
             setPaddingRelative(px(R.dimen.bremo_space_s), 0, 0, 0)
         })
@@ -407,7 +407,7 @@ class C09TrackingView(context: Context) : CustomerScreenView(context) {
             addView(text(title, if (body.isEmpty() && icon != null) R.style.TextAppearance_Bremo_DetailStrong else R.style.TextAppearance_Bremo_Hint))
             if (body.isNotEmpty()) addView(text(body, R.style.TextAppearance_Bremo_TileTitle))
         }, LinearLayout.LayoutParams(0, LayoutParams.WRAP_CONTENT, 1f))
-        icon?.let { line.addView(icon(it, R.color.bremo_primary600)) }
+        icon?.let { line.addView(icon(it, R.color.bremo_decorative_icon)) }
         return line
     }
 
@@ -420,7 +420,7 @@ class C09TrackingView(context: Context) : CustomerScreenView(context) {
         }, LinearLayout.LayoutParams(0, LayoutParams.WRAP_CONTENT, 1f))
         line.addView(FrameLayout(context).apply {
             setBackgroundResource(R.drawable.bremo_bg_order_well)
-            addView(icon(icon, R.color.bremo_primary600, R.dimen.bremo_size_icon_small), FrameLayout.LayoutParams(px(R.dimen.bremo_size_icon_small), px(R.dimen.bremo_size_icon_small), Gravity.CENTER))
+            addView(icon(icon, R.color.bremo_decorative_icon, R.dimen.bremo_size_icon_small), FrameLayout.LayoutParams(px(R.dimen.bremo_size_icon_small), px(R.dimen.bremo_size_icon_small), Gravity.CENTER))
         }, LinearLayout.LayoutParams(px(R.dimen.bremo_size_order_well), px(R.dimen.bremo_size_order_well)))
         return line
     }
@@ -430,7 +430,7 @@ class C09TrackingView(context: Context) : CustomerScreenView(context) {
         line.addView(text(title, R.style.TextAppearance_Bremo_HomeSection), LinearLayout.LayoutParams(0, LayoutParams.WRAP_CONTENT, 1f))
         line.addView(FrameLayout(context).apply {
             setBackgroundResource(R.drawable.bremo_bg_order_well)
-            addView(icon(icon, R.color.bremo_primary600, R.dimen.bremo_size_icon_small), FrameLayout.LayoutParams(px(R.dimen.bremo_size_icon_small), px(R.dimen.bremo_size_icon_small), Gravity.CENTER))
+            addView(icon(icon, R.color.bremo_decorative_icon, R.dimen.bremo_size_icon_small), FrameLayout.LayoutParams(px(R.dimen.bremo_size_icon_small), px(R.dimen.bremo_size_icon_small), Gravity.CENTER))
         }, LinearLayout.LayoutParams(px(R.dimen.bremo_size_order_well), px(R.dimen.bremo_size_order_well)))
         return line
     }

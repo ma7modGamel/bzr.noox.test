@@ -114,13 +114,13 @@ struct ProposalDecisionView: View {
                 BzrIcon(.wrench, tint: DesignColors.primary600, size: DesignSize.iconSmall)
                 BzrText(item(0), style: DesignType.caption)
                 Spacer(minLength: DesignSpace.s)
-                BzrText(amount(item(1)), style: DesignType.statValue.colored(DesignColors.primary600))
+                BzrText(amount(item(1)), style: DesignType.statValue.colored(DesignColors.amountText))
             }
             .padding(.horizontal, DesignSpace.m)
             .padding(.vertical, DesignSpace.s)
             .background(RoundedRectangle(cornerRadius: DesignRadius.menuIconBox).fill(DesignColors.surfaceAlt2))
             Rectangle().fill(DesignColors.border).frame(height: DesignBorder.width)
-            line(bzrString("proposal.new_total"), amount(item(3)), style: DesignType.amountDisplay.colored(DesignColors.primary600))
+            line(bzrString("proposal.new_total"), amount(item(3)), style: DesignType.amountDisplay.colored(DesignColors.amountText))
         }
         if !state.proposalPhotoURL.isEmpty {
             card {

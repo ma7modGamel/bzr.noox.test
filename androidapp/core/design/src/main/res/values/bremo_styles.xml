@@ -15,13 +15,13 @@
     </style>
     <style name="TextAppearance.Bremo.DisplayNumber" parent="TextAppearance.Bremo">
         <item name="android:textSize">@dimen/bremo_text_display_number</item>
-        <item name="android:textColor">@color/bremo_primary700</item>
+        <item name="android:textColor">@color/bremo_amount_text</item>
         <item name="android:fontFamily">@font/ibmplexsansarabic_bold</item>
         <item name="fontFamily">@font/ibmplexsansarabic_bold</item>
     </style>
     <style name="TextAppearance.Bremo.Price" parent="TextAppearance.Bremo">
         <item name="android:textSize">@dimen/bremo_text_price</item>
-        <item name="android:textColor">@color/bremo_primary600</item>
+        <item name="android:textColor">@color/bremo_amount_text</item>
         <item name="android:fontFamily">@font/ibmplexsansarabic_bold</item>
         <item name="fontFamily">@font/ibmplexsansarabic_bold</item>
     </style>
@@ -177,7 +177,7 @@
     </style>
     <style name="TextAppearance.Bremo.OfferPrice" parent="TextAppearance.Bremo">
         <item name="android:textSize">@dimen/bremo_text_offer_price</item>
-        <item name="android:textColor">@color/bremo_primary600</item>
+        <item name="android:textColor">@color/bremo_amount_text</item>
         <item name="android:fontFamily">@font/ibmplexsansarabic_bold</item>
         <item name="fontFamily">@font/ibmplexsansarabic_bold</item>
     </style>
@@ -263,13 +263,13 @@
         <item name="cornerRadius">@dimen/bremo_radius_button</item>
         <item name="iconPadding">0dp</item>
         <item name="iconGravity">textStart</item>
-        <item name="backgroundTint">@color/bremo_secondary_button_bg</item>
+        <item name="backgroundTint">@color/bremo_button_secondary_bg</item>
         <item name="strokeColor">@color/bremo_secondary_button_bg</item>
         <item name="strokeWidth">0dp</item>
         <item name="android:textAppearance">@style/TextAppearance.Bremo.SecondaryButton</item>
-        <item name="android:textColor">@color/bremo_secondary_button_text</item>
-        <item name="iconTint">@color/bremo_primary600</item>
-        <item name="rippleColor">@color/bremo_primary50</item>
+        <item name="android:textColor">@color/bremo_button_secondary_fg</item>
+        <item name="iconTint">@color/bremo_button_secondary_fg</item>
+        <item name="rippleColor">@color/bremo_accent_border</item>
     </style>
     <style name="Widget.Bremo.Button.IconSquare" parent="Widget.Bremo.Button.Secondary">
         <item name="android:paddingStart">0dp</item>
@@ -384,7 +384,7 @@
         <item name="colorPrimary">@color/bremo_primary600</item>
         <item name="colorPrimaryVariant">@color/bremo_primary700</item>
         <item name="colorOnPrimary">@color/bremo_on_primary</item>
-        <item name="colorSecondary">@color/bremo_primary600</item>
+        <item name="colorSecondary">@color/bremo_accent_text</item>
         <item name="colorOnSecondary">@color/bremo_on_primary</item>
         <item name="colorSurface">@color/bremo_surface</item>
         <item name="colorOnSurface">@color/bremo_navy800</item>

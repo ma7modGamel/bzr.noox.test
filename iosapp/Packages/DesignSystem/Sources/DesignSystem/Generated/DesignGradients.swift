@@ -35,16 +35,16 @@ public enum DesignGradients {
         Color(red: 0.5725, green: 0.2510, blue: 0.0549, opacity: 1.0000), Color(red: 0.5725, green: 0.2510, blue: 0.0549, opacity: 1.0000),
     ]
     public static let iconWell = LinearGradient(
-        colors: [Color(red: 0.9451, green: 0.9608, blue: 0.9765, opacity: 1.0000), Color(red: 0.9451, green: 0.9608, blue: 0.9765, opacity: 1.0000)],
+        colors: [Color(red: 0.9490, green: 0.9569, blue: 0.9686, opacity: 1.0000), Color(red: 0.9490, green: 0.9569, blue: 0.9686, opacity: 1.0000)],
         startPoint: .topLeading, endPoint: .bottomTrailing)
     public static let iconWellColors = [
-        Color(red: 0.9451, green: 0.9608, blue: 0.9765, opacity: 1.0000), Color(red: 0.9451, green: 0.9608, blue: 0.9765, opacity: 1.0000),
+        Color(red: 0.9490, green: 0.9569, blue: 0.9686, opacity: 1.0000), Color(red: 0.9490, green: 0.9569, blue: 0.9686, opacity: 1.0000),
     ]
     public static let iconBrand = LinearGradient(
-        colors: [Color(red: 0.0000, green: 0.3294, blue: 0.8353, opacity: 1.0000), Color(red: 0.0000, green: 0.3294, blue: 0.8353, opacity: 1.0000)],
+        colors: [Color(red: 0.0784, green: 0.4667, blue: 0.4549, opacity: 1.0000), Color(red: 0.0784, green: 0.4667, blue: 0.4549, opacity: 1.0000)],
         startPoint: .topLeading, endPoint: .bottomTrailing)
     public static let iconBrandColors = [
-        Color(red: 0.0000, green: 0.3294, blue: 0.8353, opacity: 1.0000), Color(red: 0.0000, green: 0.3294, blue: 0.8353, opacity: 1.0000),
+        Color(red: 0.0784, green: 0.4667, blue: 0.4549, opacity: 1.0000), Color(red: 0.0784, green: 0.4667, blue: 0.4549, opacity: 1.0000),
     ]
     public static let screen = LinearGradient(
         colors: [Color(red: 0.9686, green: 0.9725, blue: 0.9804, opacity: 1.0000), Color(red: 0.9686, green: 0.9725, blue: 0.9804, opacity: 1.0000)],
@@ -57,6 +57,18 @@ public enum DesignGradients {
         startPoint: .topLeading, endPoint: .bottomTrailing)
     public static let splashColors = [
         Color(red: 0.0000, green: 0.3294, blue: 0.8353, opacity: 1.0000), Color(red: 0.0118, green: 0.2863, blue: 0.7059, opacity: 1.0000),
+    ]
+    public static let accent = LinearGradient(
+        colors: [Color(red: 0.0784, green: 0.4667, blue: 0.4549, opacity: 1.0000), Color(red: 0.0745, green: 0.4157, blue: 0.4157, opacity: 1.0000)],
+        startPoint: .topLeading, endPoint: .bottomTrailing)
+    public static let accentColors = [
+        Color(red: 0.0784, green: 0.4667, blue: 0.4549, opacity: 1.0000), Color(red: 0.0745, green: 0.4157, blue: 0.4157, opacity: 1.0000),
+    ]
+    public static let disabled = LinearGradient(
+        colors: [Color(red: 0.8941, green: 0.9059, blue: 0.9255, opacity: 1.0000), Color(red: 0.8941, green: 0.9059, blue: 0.9255, opacity: 1.0000)],
+        startPoint: .topLeading, endPoint: .bottomTrailing)
+    public static let disabledColors = [
+        Color(red: 0.8941, green: 0.9059, blue: 0.9255, opacity: 1.0000), Color(red: 0.8941, green: 0.9059, blue: 0.9255, opacity: 1.0000),
     ]
 }
 
@@ -87,51 +99,51 @@ public struct CategoryPalette: Sendable {
 public enum CategoryPalettes {
     static let palettes: [String: CategoryPalette] = [
         "plumbing": CategoryPalette(
-            from: Color(red: 0.0000, green: 0.3294, blue: 0.8353, opacity: 1.0000), to: Color(red: 0.0000, green: 0.3294, blue: 0.8353, opacity: 1.0000),
-            tint: Color(red: 0.9451, green: 0.9608, blue: 0.9765, opacity: 1.0000)),
+            from: Color(red: 0.0784, green: 0.4667, blue: 0.4549, opacity: 1.0000), to: Color(red: 0.0784, green: 0.4667, blue: 0.4549, opacity: 1.0000),
+            tint: Color(red: 0.9176, green: 0.9608, blue: 0.9569, opacity: 1.0000)),
         "electricity": CategoryPalette(
-            from: Color(red: 0.0000, green: 0.3294, blue: 0.8353, opacity: 1.0000), to: Color(red: 0.0000, green: 0.3294, blue: 0.8353, opacity: 1.0000),
-            tint: Color(red: 0.9451, green: 0.9608, blue: 0.9765, opacity: 1.0000)),
+            from: Color(red: 0.0784, green: 0.4667, blue: 0.4549, opacity: 1.0000), to: Color(red: 0.0784, green: 0.4667, blue: 0.4549, opacity: 1.0000),
+            tint: Color(red: 0.9176, green: 0.9608, blue: 0.9569, opacity: 1.0000)),
         "air-conditioning": CategoryPalette(
-            from: Color(red: 0.0000, green: 0.3294, blue: 0.8353, opacity: 1.0000), to: Color(red: 0.0000, green: 0.3294, blue: 0.8353, opacity: 1.0000),
-            tint: Color(red: 0.9451, green: 0.9608, blue: 0.9765, opacity: 1.0000)),
+            from: Color(red: 0.0784, green: 0.4667, blue: 0.4549, opacity: 1.0000), to: Color(red: 0.0784, green: 0.4667, blue: 0.4549, opacity: 1.0000),
+            tint: Color(red: 0.9176, green: 0.9608, blue: 0.9569, opacity: 1.0000)),
         "painting": CategoryPalette(
-            from: Color(red: 0.0000, green: 0.3294, blue: 0.8353, opacity: 1.0000), to: Color(red: 0.0000, green: 0.3294, blue: 0.8353, opacity: 1.0000),
-            tint: Color(red: 0.9451, green: 0.9608, blue: 0.9765, opacity: 1.0000)),
+            from: Color(red: 0.0784, green: 0.4667, blue: 0.4549, opacity: 1.0000), to: Color(red: 0.0784, green: 0.4667, blue: 0.4549, opacity: 1.0000),
+            tint: Color(red: 0.9176, green: 0.9608, blue: 0.9569, opacity: 1.0000)),
         "carpentry": CategoryPalette(
-            from: Color(red: 0.0000, green: 0.3294, blue: 0.8353, opacity: 1.0000), to: Color(red: 0.0000, green: 0.3294, blue: 0.8353, opacity: 1.0000),
-            tint: Color(red: 0.9451, green: 0.9608, blue: 0.9765, opacity: 1.0000)),
+            from: Color(red: 0.0784, green: 0.4667, blue: 0.4549, opacity: 1.0000), to: Color(red: 0.0784, green: 0.4667, blue: 0.4549, opacity: 1.0000),
+            tint: Color(red: 0.9176, green: 0.9608, blue: 0.9569, opacity: 1.0000)),
         "appliances": CategoryPalette(
-            from: Color(red: 0.0000, green: 0.3294, blue: 0.8353, opacity: 1.0000), to: Color(red: 0.0000, green: 0.3294, blue: 0.8353, opacity: 1.0000),
-            tint: Color(red: 0.9451, green: 0.9608, blue: 0.9765, opacity: 1.0000)),
+            from: Color(red: 0.0784, green: 0.4667, blue: 0.4549, opacity: 1.0000), to: Color(red: 0.0784, green: 0.4667, blue: 0.4549, opacity: 1.0000),
+            tint: Color(red: 0.9176, green: 0.9608, blue: 0.9569, opacity: 1.0000)),
         "aluminum-glass": CategoryPalette(
-            from: Color(red: 0.0000, green: 0.3294, blue: 0.8353, opacity: 1.0000), to: Color(red: 0.0000, green: 0.3294, blue: 0.8353, opacity: 1.0000),
-            tint: Color(red: 0.9451, green: 0.9608, blue: 0.9765, opacity: 1.0000)),
+            from: Color(red: 0.0784, green: 0.4667, blue: 0.4549, opacity: 1.0000), to: Color(red: 0.0784, green: 0.4667, blue: 0.4549, opacity: 1.0000),
+            tint: Color(red: 0.9176, green: 0.9608, blue: 0.9569, opacity: 1.0000)),
         "home-installations": CategoryPalette(
-            from: Color(red: 0.0000, green: 0.3294, blue: 0.8353, opacity: 1.0000), to: Color(red: 0.0000, green: 0.3294, blue: 0.8353, opacity: 1.0000),
-            tint: Color(red: 0.9451, green: 0.9608, blue: 0.9765, opacity: 1.0000)),
+            from: Color(red: 0.0784, green: 0.4667, blue: 0.4549, opacity: 1.0000), to: Color(red: 0.0784, green: 0.4667, blue: 0.4549, opacity: 1.0000),
+            tint: Color(red: 0.9176, green: 0.9608, blue: 0.9569, opacity: 1.0000)),
         "ironwork": CategoryPalette(
-            from: Color(red: 0.0000, green: 0.3294, blue: 0.8353, opacity: 1.0000), to: Color(red: 0.0000, green: 0.3294, blue: 0.8353, opacity: 1.0000),
-            tint: Color(red: 0.9451, green: 0.9608, blue: 0.9765, opacity: 1.0000)),
+            from: Color(red: 0.0784, green: 0.4667, blue: 0.4549, opacity: 1.0000), to: Color(red: 0.0784, green: 0.4667, blue: 0.4549, opacity: 1.0000),
+            tint: Color(red: 0.9176, green: 0.9608, blue: 0.9569, opacity: 1.0000)),
         "pest-control": CategoryPalette(
-            from: Color(red: 0.0000, green: 0.3294, blue: 0.8353, opacity: 1.0000), to: Color(red: 0.0000, green: 0.3294, blue: 0.8353, opacity: 1.0000),
-            tint: Color(red: 0.9451, green: 0.9608, blue: 0.9765, opacity: 1.0000)),
+            from: Color(red: 0.0784, green: 0.4667, blue: 0.4549, opacity: 1.0000), to: Color(red: 0.0784, green: 0.4667, blue: 0.4549, opacity: 1.0000),
+            tint: Color(red: 0.9176, green: 0.9608, blue: 0.9569, opacity: 1.0000)),
         "satellite": CategoryPalette(
-            from: Color(red: 0.0000, green: 0.3294, blue: 0.8353, opacity: 1.0000), to: Color(red: 0.0000, green: 0.3294, blue: 0.8353, opacity: 1.0000),
-            tint: Color(red: 0.9451, green: 0.9608, blue: 0.9765, opacity: 1.0000)),
+            from: Color(red: 0.0784, green: 0.4667, blue: 0.4549, opacity: 1.0000), to: Color(red: 0.0784, green: 0.4667, blue: 0.4549, opacity: 1.0000),
+            tint: Color(red: 0.9176, green: 0.9608, blue: 0.9569, opacity: 1.0000)),
         "tiles-flooring": CategoryPalette(
-            from: Color(red: 0.0000, green: 0.3294, blue: 0.8353, opacity: 1.0000), to: Color(red: 0.0000, green: 0.3294, blue: 0.8353, opacity: 1.0000),
-            tint: Color(red: 0.9451, green: 0.9608, blue: 0.9765, opacity: 1.0000)),
+            from: Color(red: 0.0784, green: 0.4667, blue: 0.4549, opacity: 1.0000), to: Color(red: 0.0784, green: 0.4667, blue: 0.4549, opacity: 1.0000),
+            tint: Color(red: 0.9176, green: 0.9608, blue: 0.9569, opacity: 1.0000)),
         "water-tanks": CategoryPalette(
-            from: Color(red: 0.0000, green: 0.3294, blue: 0.8353, opacity: 1.0000), to: Color(red: 0.0000, green: 0.3294, blue: 0.8353, opacity: 1.0000),
-            tint: Color(red: 0.9451, green: 0.9608, blue: 0.9765, opacity: 1.0000)),
+            from: Color(red: 0.0784, green: 0.4667, blue: 0.4549, opacity: 1.0000), to: Color(red: 0.0784, green: 0.4667, blue: 0.4549, opacity: 1.0000),
+            tint: Color(red: 0.9176, green: 0.9608, blue: 0.9569, opacity: 1.0000)),
     ]
 
     /// The palette for an `icon_path` key; unknown keys use the brand gradient.
     public static func palette(_ key: String?) -> CategoryPalette {
         key.flatMap { palettes[$0] }
             ?? CategoryPalette(
-                from: Color(red: 0.0000, green: 0.3294, blue: 0.8353, opacity: 1.0000), to: Color(red: 0.0000, green: 0.3294, blue: 0.8353, opacity: 1.0000),
+                from: Color(red: 0.0784, green: 0.4667, blue: 0.4549, opacity: 1.0000), to: Color(red: 0.0784, green: 0.4667, blue: 0.4549, opacity: 1.0000),
                 tint: Color(red: 0.9412, green: 0.9608, blue: 0.9882, opacity: 1.0000))
     }
 }

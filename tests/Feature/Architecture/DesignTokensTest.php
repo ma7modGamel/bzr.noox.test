@@ -42,9 +42,23 @@ final class DesignTokensTest extends TestCase
         $this->assertSame('#6B21A8', $resolved['gradient']['splash']['from']);
         $this->assertSame('#6B21A8', $resolved['shadow']['brand']['color']);
         $this->assertSame('#14532D', $resolved['color']['verifiedText']);
-        $this->assertSame('#334155', $resolved['color']['secondaryButtonText']);
+        $this->assertSame('#334155', $resolved['color']['slate500']);
         $this->assertStringContainsString('stop-color="#6B21A8"', $symbol);
         $this->assertStringNotContainsString('stop-color="#00ACB6"', $symbol);
+
+        $tokens['theme']['accent'] = '#7B3F8D';
+        $accentVariant = resolveThemeTokens($tokens);
+        $this->assertSame('#7B3F8D', $accentVariant['color']['accent']);
+        $this->assertSame('#6B21A8', $accentVariant['color']['primary600']);
+        $this->assertSame($resolved['color']['brandPrimary'], $accentVariant['color']['brandPrimary']);
+        foreach (['accentText', 'accentTint', 'secondaryButtonText', 'secondaryButtonBg', 'infoBg', 'infoText', 'decorativeIcon'] as $role) {
+            $this->assertNotSame($resolved['color'][$role], $accentVariant['color'][$role], $role.' must follow theme.accent');
+        }
+        $this->assertSame($accentVariant['color']['accentText'], $accentVariant['gradient']['accent']['from']);
+        foreach ($accentVariant['categoryIcon']['palette'] as $palette) {
+            $this->assertSame($accentVariant['color']['decorativeIcon'], $palette['from']);
+            $this->assertSame($accentVariant['color']['accentTint'], $palette['tint']);
+        }
     }
 
     #[Test]

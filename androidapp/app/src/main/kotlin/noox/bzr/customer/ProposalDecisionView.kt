@@ -147,10 +147,10 @@ open class ProposalDecisionView(context: Context, private val screen: String) : 
                     setPadding(px(R.dimen.bremo_space_m), px(R.dimen.bremo_space_s), px(R.dimen.bremo_space_m), px(R.dimen.bremo_space_s))
                     addView(icon(R.drawable.ic_wrench, R.color.bremo_primary600, R.dimen.bremo_size_icon_small))
                     addView(text(type, R.style.TextAppearance_Bremo_Caption).apply { setPaddingRelative(px(R.dimen.bremo_space_s), 0, 0, 0) }, LinearLayout.LayoutParams(0, LayoutParams.WRAP_CONTENT, 1f))
-                    addView(text(amount(amount), R.style.TextAppearance_Bremo_StatValue).apply { setTextColor(context.getColor(R.color.bremo_primary600)) })
+                    addView(text(amount(amount), R.style.TextAppearance_Bremo_StatValue).apply { setTextColor(context.getColor(R.color.bremo_amount_text)) })
                 })
                 addView(View(context).apply { setBackgroundResource(R.drawable.bremo_bg_divider) }, LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, px(R.dimen.bremo_border_width)))
-                addView(line(string(R.string.proposal_new_total), amount(total), R.style.TextAppearance_Bremo_AmountDisplay, R.color.bremo_primary600))
+                addView(line(string(R.string.proposal_new_total), amount(total), R.style.TextAppearance_Bremo_AmountDisplay, R.color.bremo_amount_text))
             })
             if (state.proposalPhotoUrl.isNotEmpty()) binding.body.addView(card().apply {
                 addView(heading(string(R.string.proposal_photo), R.drawable.ic_image, null))

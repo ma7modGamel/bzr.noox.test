@@ -26,8 +26,8 @@ public struct C02AccountView: View {
                 InfoBanner(text: bzrString("account.unverified"))
             }
             HStack(alignment: .top, spacing: DesignSpace.m) {
-                stat(.check, tint: DesignColors.primary600, well: DesignColors.statusPillBg, value: value(2), label: bzrString("account.stats.completed"))
-                stat(.orders, tint: DesignColors.primary600, well: DesignColors.statusPillBg, value: value(4), label: bzrString("account.stats.active"))
+                stat(.check, tint: DesignColors.success, well: DesignColors.successTint, value: value(2), label: bzrString("account.stats.completed"))
+                stat(.orders, tint: DesignColors.decorativeIcon, well: DesignColors.accentTint, value: value(4), label: bzrString("account.stats.active"))
                 stat(.location, tint: DesignColors.slate400, well: DesignColors.surfaceContainer, value: value(3), label: bzrString("account.stats.addresses"))
             }
             if state.visibleActions.contains("open_provider_mode") { providerCard }
@@ -68,15 +68,15 @@ public struct C02AccountView: View {
         let name = value(0)
         return VStack(spacing: DesignSpace.s) {
             ProfileRemoteImage(url: state.accountAvatarURL, label: name, loadImage: loadImage) {
-                Circle().fill(DesignColors.statusPillBg)
-                    .overlay(BzrText(String(name.prefix(1)), style: DesignType.profileName.colored(DesignColors.primary600)))
+                Circle().fill(DesignColors.accentTint)
+                    .overlay(BzrText(String(name.prefix(1)), style: DesignType.profileName.colored(DesignColors.decorativeIcon)))
             }
             .frame(width: DesignSize.profileAvatar, height: DesignSize.profileAvatar)
             .clipShape(Circle())
             HStack(spacing: DesignSpace.xs) {
                 BzrText(name, style: DesignType.profileName)
                 if state.messageKey == "account.verified" {
-                    BzrIcon(.verified, label: bzrString("account.verified"), tint: DesignColors.primary600, size: DesignSize.iconSmall)
+                    BzrIcon(.verified, label: bzrString("account.verified"), tint: DesignColors.verifiedText, size: DesignSize.iconSmall)
                 }
             }
             if !value(1).isEmpty {
@@ -84,12 +84,12 @@ public struct C02AccountView: View {
             }
             Button(action: { onOpen("SCR-C33") }) {
                 HStack(spacing: DesignSpace.xs) {
-                    BzrIcon(.edit, tint: DesignColors.primary600, size: DesignSize.iconSmall)
+                    BzrIcon(.edit, tint: DesignColors.decorativeIcon, size: DesignSize.iconSmall)
                     BzrText(bzrString("account.edit_profile"), style: DesignType.caption.colored(DesignColors.navy900))
                 }
                 .padding(.horizontal, DesignSpace.l)
                 .frame(minHeight: DesignSize.chipHeight)
-                .background(Capsule().fill(DesignColors.surfaceAlt2))
+                .background(Capsule().fill(DesignColors.accentTint))
             }
             .buttonStyle(BzrPressStyle())
         }
@@ -118,7 +118,7 @@ public struct C02AccountView: View {
     private var providerCard: some View {
         VStack(alignment: .leading, spacing: DesignSpace.m) {
             HStack(spacing: DesignSpace.s) {
-                BzrIcon(.wrench, tint: DesignColors.primary600)
+                BzrIcon(.wrench, tint: DesignColors.decorativeIcon)
                 BzrText(bzrString("account.provider.title"), style: DesignType.homeSection)
                 Spacer(minLength: DesignSpace.s)
                 BzrText(bzrString("menu.provider_mode"), style: DesignType.hint.colored(DesignColors.onPrimary))
@@ -135,15 +135,15 @@ public struct C02AccountView: View {
     private func menuRow(_ icon: BzrIconKey, label: String, chip: String?, onClick: @escaping () -> Void) -> some View {
         Button(action: onClick) {
             HStack(spacing: DesignSpace.m) {
-                BzrIcon(icon, tint: DesignColors.primary600)
+                BzrIcon(icon, tint: DesignColors.decorativeIcon)
                     .frame(width: DesignSize.orderWell, height: DesignSize.orderWell)
-                    .background(RoundedRectangle(cornerRadius: DesignRadius.menuIconBox).fill(DesignColors.surfaceAlt2))
+                    .background(RoundedRectangle(cornerRadius: DesignRadius.menuIconBox).fill(DesignColors.accentTint))
                 BzrText(label, style: DesignType.tileTitle)
                 Spacer(minLength: DesignSpace.s)
                 if let chip {
                     BzrText(chip, style: DesignType.hint)
                         .padding(.horizontal, DesignSpace.s)
-                        .background(Capsule().fill(DesignColors.surfaceAlt2))
+                        .background(Capsule().fill(DesignColors.accentTint))
                 }
                 BzrIcon(.chevron, tint: DesignColors.slate400, size: DesignSize.iconSmall)
             }

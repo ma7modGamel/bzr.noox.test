@@ -56,7 +56,7 @@ public struct C32NotificationsView: View {
         let unread = state.itemStates[safe: index] == "unread"
         let time = age(state.orderAgeMinutes[safe: index] ?? -1) ?? state.fieldValues[safe: index] ?? ""
         return HStack(alignment: .top, spacing: DesignSpace.m) {
-            BzrIcon(Self.icon(state.optionCodes[safe: index] ?? ""), tint: DesignColors.primary600)
+            BzrIcon(Self.icon(state.optionCodes[safe: index] ?? ""), tint: unread ? DesignColors.primary600 : DesignColors.decorativeIcon)
                 .frame(width: DesignSize.homeTileWell, height: DesignSize.homeTileWell)
                 .background(Circle().fill(unread ? DesignColors.statusPillBg : DesignColors.surfaceContainer))
                 .overlay(alignment: .topTrailing) {

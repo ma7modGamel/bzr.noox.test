@@ -92,13 +92,14 @@ class PrimaryButtonView @JvmOverloads constructor(context: Context, attrs: Attri
             !loading && icon != 0 -> drawable(icon)
             else -> null
         }
-        button.iconTint = android.content.res.ColorStateList.valueOf(color(R.color.bremo_on_primary))
+        button.iconTint = android.content.res.ColorStateList.valueOf(color(if (state == ButtonVisualState.Disabled) R.color.bremo_disabled_text else R.color.bremo_on_primary))
         button.iconGravity = if (!loading && icon != 0) com.google.android.material.button.MaterialButton.ICON_GRAVITY_TEXT_END
         else com.google.android.material.button.MaterialButton.ICON_GRAVITY_TEXT_START
         binding.progress.isVisible = loading && !SnapshotMode.enabled
         // DEC-063: brand gradient (pressed: deeper gradient) with a soft brand-coloured shadow.
         button.backgroundTintList = null
-        button.setBackgroundResource(R.drawable.bremo_bg_button_primary)
+        button.setBackgroundResource(if (state == ButtonVisualState.Disabled) R.drawable.bremo_bg_button_disabled else R.drawable.bremo_bg_button_primary)
+        button.setTextColor(color(if (state == ButtonVisualState.Disabled) R.color.bremo_disabled_text else R.color.bremo_on_primary))
         button.isPressed = state == ButtonVisualState.Pressed
         brandShadow(button, enabled = state == ButtonVisualState.Normal || state == ButtonVisualState.Pressed)
         button.isEnabled = interactive()

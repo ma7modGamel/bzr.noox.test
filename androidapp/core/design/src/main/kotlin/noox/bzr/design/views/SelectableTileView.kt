@@ -111,14 +111,14 @@ class SelectableTileView @JvmOverloads constructor(context: Context, attrs: Attr
         val category = categoryIcon
         if (category == null) {
             binding.icon.setImageResource(icon)
-            ImageViewCompat.setImageTintList(binding.icon, android.content.res.ColorStateList.valueOf(color(R.color.bremo_primary600)))
+            ImageViewCompat.setImageTintList(binding.icon, android.content.res.ColorStateList.valueOf(color(if (isSelected) R.color.bremo_primary600 else R.color.bremo_decorative_icon)))
             binding.iconWell.background = GradientDrawable().apply {
                 cornerRadius = resources.getDimension(R.dimen.bremo_radius_menu_icon_box)
-                setColor(color(if (isSelected) R.color.bremo_primary_well_selected else R.color.bremo_surface_container))
+                setColor(color(if (isSelected) R.color.bremo_primary_well_selected else R.color.bremo_accent_tint))
             }
         } else {
             binding.icon.setImageResource(CategoryIcons.drawable(category))
-            ImageViewCompat.setImageTintList(binding.icon, null)
+            ImageViewCompat.setImageTintList(binding.icon, android.content.res.ColorStateList.valueOf(color(if (isSelected) R.color.bremo_primary600 else R.color.bremo_decorative_icon)))
             // DEC-070: one flat well for every category (Figma); deeper when the tile is chosen.
             val palette = CategoryIcons.palette(category)
             binding.iconWell.background = GradientDrawable().apply {

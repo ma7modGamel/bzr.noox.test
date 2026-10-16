@@ -188,7 +188,7 @@ public struct C09TrackingView: View {
     // ── IN_PROGRESS (3002:2540) ──
     @ViewBuilder private var inProgress: some View {
         HStack(spacing: DesignSpace.s) {
-            Circle().fill(DesignColors.primary400).frame(width: DesignSize.statusDot, height: DesignSize.statusDot)
+            Circle().fill(DesignColors.primary600).frame(width: DesignSize.statusDot, height: DesignSize.statusDot)
             BzrText(BzrFormatter.fill(bzrString("tracking.working.pill"), values: [("name", firstName)]), style: DesignType.statusPill)
             Spacer(minLength: 0)
         }
@@ -306,7 +306,7 @@ public struct C09TrackingView: View {
             VStack(alignment: .leading, spacing: 0) {
                 HStack(spacing: DesignSpace.xs) {
                     BzrText(value(Self.name), style: DesignType.offerName)
-                    if state.providerVerified { BzrIcon(.verified, tint: DesignColors.primary600, size: DesignSize.iconSmall) }
+                    if state.providerVerified { BzrIcon(.verified, tint: DesignColors.verifiedText, size: DesignSize.iconSmall) }
                 }
                 let meta = [
                     state.providerVerified && !value(Self.category).isEmpty
@@ -315,7 +315,7 @@ public struct C09TrackingView: View {
                         ? ""
                         : bzrPlural("confirm.completed", count: Int(value(Self.completed)) ?? 0),
                 ].filter { !$0.isEmpty }.joined(separator: " • ")
-                if !meta.isEmpty { BzrText(meta, style: DesignType.hint.colored(DesignColors.primary600)) }
+                if !meta.isEmpty { BzrText(meta, style: DesignType.hint.colored(DesignColors.accentText)) }
             }
             Spacer(minLength: DesignSpace.s)
             if !value(Self.rating).isEmpty {
@@ -385,7 +385,7 @@ public struct C09TrackingView: View {
         HStack(spacing: DesignSpace.s) {
             BzrText(bzrString("tracking.agreed"), style: DesignType.caption)
             Spacer(minLength: 0)
-            BzrText(amount(value(Self.price)), style: DesignType.amountSmall.colored(DesignColors.primary600))
+            BzrText(amount(value(Self.price)), style: DesignType.amountSmall.colored(DesignColors.amountText))
             if !value(Self.materials).isEmpty { BzrText(value(Self.materials), style: DesignType.hint) }
         }
         .padding(.horizontal, DesignSpace.m)
@@ -417,7 +417,7 @@ public struct C09TrackingView: View {
                 if !body.isEmpty { BzrText(body, style: DesignType.tileTitle) }
             }
             Spacer(minLength: 0)
-            if let icon { BzrIcon(icon, tint: DesignColors.primary600) }
+            if let icon { BzrIcon(icon, tint: DesignColors.decorativeIcon) }
         }
         .padding(DesignSpace.m)
         .background(RoundedRectangle(cornerRadius: DesignRadius.menuIconBox).fill(DesignColors.surfaceAlt2))
@@ -430,7 +430,7 @@ public struct C09TrackingView: View {
                 BzrText(text, style: DesignType.tileTitle)
             }
             Spacer(minLength: 0)
-            BzrIcon(icon, tint: DesignColors.primary600, size: DesignSize.iconSmall)
+            BzrIcon(icon, tint: DesignColors.decorativeIcon, size: DesignSize.iconSmall)
                 .frame(width: DesignSize.orderWell, height: DesignSize.orderWell)
                 .background(RoundedRectangle(cornerRadius: DesignRadius.menuIconBox).fill(DesignColors.surfaceContainer))
         }
@@ -440,7 +440,7 @@ public struct C09TrackingView: View {
         HStack {
             BzrText(text, style: DesignType.homeSection)
             Spacer(minLength: DesignSpace.s)
-            BzrIcon(icon, tint: DesignColors.primary600, size: DesignSize.iconSmall)
+            BzrIcon(icon, tint: DesignColors.decorativeIcon, size: DesignSize.iconSmall)
                 .frame(width: DesignSize.orderWell, height: DesignSize.orderWell)
                 .background(RoundedRectangle(cornerRadius: DesignRadius.menuIconBox).fill(DesignColors.surfaceContainer))
         }

@@ -35,7 +35,8 @@ internal class FinishServiceBlocks(private val context: Context) {
             }, FrameLayout.LayoutParams(px(R.dimen.bremo_size_success_core), px(R.dimen.bremo_size_success_core), Gravity.CENTER))
         }, LinearLayout.LayoutParams(px(R.dimen.bremo_size_success_ring), px(R.dimen.bremo_size_success_ring)))
         addView(text(context.getString(R.string.completion_done), R.style.TextAppearance_Bremo_StatusPill).apply {
-            setBackgroundResource(R.drawable.bremo_bg_status_pill)
+            setTextColor(context.getColor(R.color.bremo_success))
+            setBackgroundResource(R.drawable.bremo_bg_badge_success)
             setPaddingRelative(px(R.dimen.bremo_space_s), 0, px(R.dimen.bremo_space_s), 0)
             setCompoundDrawablesRelativeWithIntrinsicBounds(R.drawable.bremo_bg_online_dot, 0, 0, 0)
             compoundDrawablePadding = px(R.dimen.bremo_space_xs)
@@ -52,7 +53,8 @@ internal class FinishServiceBlocks(private val context: Context) {
                 addView(row().apply {
                     addView(text(name, R.style.TextAppearance_Bremo_OfferName), LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f))
                     if (verified) addView(text(context.getString(R.string.completion_certified), R.style.TextAppearance_Bremo_StatusPill).apply {
-                        setBackgroundResource(R.drawable.bremo_bg_status_pill)
+                        setTextColor(context.getColor(R.color.bremo_verified_text))
+                        setBackgroundResource(R.drawable.bremo_bg_verified_pill)
                         setPaddingRelative(px(R.dimen.bremo_space_s), 0, px(R.dimen.bremo_space_s), 0)
                     })
                 })
@@ -68,7 +70,7 @@ internal class FinishServiceBlocks(private val context: Context) {
 
     fun invoice(labor: String, materials: String, total: String): View = card().apply {
         addView(row().apply {
-            addView(icon(R.drawable.ic_receipt, R.color.bremo_primary600, R.dimen.bremo_size_icon_small))
+            addView(icon(R.drawable.ic_receipt, R.color.bremo_decorative_icon, R.dimen.bremo_size_icon_small))
             addView(text(context.getString(R.string.completion_invoice), R.style.TextAppearance_Bremo_HomeSection).apply {
                 setPaddingRelative(px(R.dimen.bremo_space_s), 0, 0, 0)
             }, LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f))
@@ -76,7 +78,7 @@ internal class FinishServiceBlocks(private val context: Context) {
         addView(line(context.getString(R.string.proposal_base), amount(labor), R.style.TextAppearance_Bremo_TileTitle))
         if (materials.isNotEmpty() && materials != "0") addView(line(context.getString(R.string.completion_extra), amount(materials), R.style.TextAppearance_Bremo_TileTitle))
         addView(View(context).apply { setBackgroundResource(R.drawable.bremo_bg_divider) }, LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, px(R.dimen.bremo_border_width)))
-        addView(line(context.getString(R.string.completion_total), amount(total), R.style.TextAppearance_Bremo_AmountDisplay, R.color.bremo_primary600))
+        addView(line(context.getString(R.string.completion_total), amount(total), R.style.TextAppearance_Bremo_AmountDisplay, R.color.bremo_amount_text))
     }
 
     fun heading(value: String): View = text(value, R.style.TextAppearance_Bremo_HomeSection)

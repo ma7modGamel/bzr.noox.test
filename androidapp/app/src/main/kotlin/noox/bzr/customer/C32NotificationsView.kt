@@ -79,11 +79,11 @@ class C32NotificationsView(context: Context) : CustomerScreenView(context) {
                     setBackgroundResource(if (unread) R.drawable.bremo_bg_round_tint else R.drawable.bremo_bg_well_round)
                     addView(ImageView(context).apply {
                         setImageResource(icon(state.optionCodes.getOrElse(index) { "" }))
-                        ImageViewCompat.setImageTintList(this, ColorStateList.valueOf(context.getColor(R.color.bremo_primary600)))
+                        ImageViewCompat.setImageTintList(this, ColorStateList.valueOf(context.getColor(if (unread) R.color.bremo_primary600 else R.color.bremo_decorative_icon)))
                         importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
                     }, FrameLayout.LayoutParams(px(R.dimen.bremo_size_icon), px(R.dimen.bremo_size_icon), Gravity.CENTER))
                 }, FrameLayout.LayoutParams(px(R.dimen.bremo_size_home_tile_well), px(R.dimen.bremo_size_home_tile_well)))
-                if (unread) addView(View(context).apply { setBackgroundResource(R.drawable.bremo_bg_online_dot) }, FrameLayout.LayoutParams(px(R.dimen.bremo_size_online_dot), px(R.dimen.bremo_size_online_dot), Gravity.TOP or Gravity.END))
+                if (unread) addView(View(context).apply { setBackgroundResource(R.drawable.bremo_bg_notification_dot) }, FrameLayout.LayoutParams(px(R.dimen.bremo_size_online_dot), px(R.dimen.bremo_size_online_dot), Gravity.TOP or Gravity.END))
             }, LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT))
             addView(BremoLinearLayout(context).apply {
                 orientation = LinearLayout.VERTICAL

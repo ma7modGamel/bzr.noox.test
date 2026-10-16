@@ -23,7 +23,7 @@
             android:background="@drawable/bremo_bg_avatar_ring"
             android:gravity="center"
             android:textAppearance="@style/TextAppearance.Bremo.HomeSection"
-            android:textColor="@color/bremo_primary600" />
+            android:textColor="@color/bremo_decorative_icon" />
 
         <LinearLayout
             android:id="@+id/location"

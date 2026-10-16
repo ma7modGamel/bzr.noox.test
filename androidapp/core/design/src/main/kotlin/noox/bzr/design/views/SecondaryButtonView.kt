@@ -31,7 +31,7 @@ class SecondaryButtonView @JvmOverloads constructor(context: Context, attrs: Att
         set(value) {
             field = value
             binding.button.icon = if (value == 0) null else androidx.core.content.ContextCompat.getDrawable(context, value)
-            binding.button.iconTint = android.content.res.ColorStateList.valueOf(androidx.core.content.ContextCompat.getColor(context, R.color.bremo_primary600))
+            binding.button.iconTint = androidx.core.content.ContextCompat.getColorStateList(context, R.color.bremo_button_secondary_fg)
             binding.button.iconSize = resources.getDimensionPixelSize(R.dimen.bremo_size_icon_small)
             binding.button.iconPadding = resources.getDimensionPixelSize(R.dimen.bremo_space_s)
             binding.button.iconGravity = com.google.android.material.button.MaterialButton.ICON_GRAVITY_TEXT_START

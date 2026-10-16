@@ -60,9 +60,9 @@ public struct C01HomeView: View {
     private var header: some View {
         HStack(spacing: DesignSpace.s) {
             // The app loads no remote images yet, so the avatar shows the name's initial (REPORT figma-b §ثابت).
-            BzrText(String(name.trimmingCharacters(in: .whitespaces).prefix(1)), style: DesignType.homeSection.colored(DesignColors.primary600))
+            BzrText(String(name.trimmingCharacters(in: .whitespaces).prefix(1)), style: DesignType.homeSection.colored(DesignColors.decorativeIcon))
                 .frame(width: DesignSize.avatarHeader, height: DesignSize.avatarHeader)
-                .background(Circle().fill(DesignColors.primary50))
+                .background(Circle().fill(DesignColors.accentTint))
                 .overlay(Circle().strokeBorder(DesignColors.avatarRing, lineWidth: DesignSize.controlStroke))
                 .accessibilityLabel(name)
             Button {
@@ -83,7 +83,7 @@ public struct C01HomeView: View {
                     .frame(width: DesignSize.touchTargetMin, height: DesignSize.touchTargetMin)
                     .overlay(alignment: .topLeading) {
                         if state.unreadNotifications > 0 {
-                            Circle().fill(DesignColors.amber500)
+                            Circle().fill(DesignColors.primary600)
                                 .overlay(Circle().strokeBorder(DesignColors.surfaceAlt, lineWidth: DesignSize.controlStroke))
                                 .frame(width: DesignSize.notificationDot, height: DesignSize.notificationDot)
                                 .padding(DesignSpace.m)
@@ -170,7 +170,7 @@ public struct C01HomeView: View {
                         }
                         .padding(DesignSpace.m)
                         .frame(maxWidth: .infinity)
-                        .background(RoundedRectangle(cornerRadius: DesignRadius.homeTile).fill(DesignColors.surfaceAlt2))
+                        .background(RoundedRectangle(cornerRadius: DesignRadius.homeTile).fill(DesignColors.accentTint))
                     }
                     .buttonStyle(BzrPressStyle())
                     .accessibilityLabel(label)

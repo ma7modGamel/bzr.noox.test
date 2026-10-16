@@ -30,7 +30,7 @@ public enum BadgeKind {
     var foreground: Color {
         switch self {
         case .highlight: return DesignColors.badgeText
-        case .status: return DesignColors.infoText
+        case .status: return DesignColors.primary600
         case .success: return DesignColors.success
         case .warning: return DesignColors.warningText
         case .neutral: return DesignColors.neutralText
@@ -41,7 +41,7 @@ public enum BadgeKind {
     var background: Color {
         switch self {
         case .highlight: return DesignColors.badgeBg
-        case .status: return DesignColors.infoBg
+        case .status: return DesignColors.statusPillBg
         case .success: return DesignColors.successTint
         case .warning: return DesignColors.warningBg
         case .neutral: return DesignColors.neutralBg
@@ -193,9 +193,11 @@ public struct PrimaryButton: View {
                     ProgressArc(color: DesignColors.onPrimary, label: bzrString("a11y.loading"))
                 } else {
                     HStack(spacing: DesignSpace.s) {
-                        BzrText(text, style: compact ? DesignType.buttonSmall : DesignType.button, alignment: .center)
+                        BzrText(
+                            text, style: (compact ? DesignType.buttonSmall : DesignType.button).colored(state == .disabled ? DesignColors.disabledText : DesignColors.onPrimary),
+                            alignment: .center)
                         if let icon {
-                            BzrIcon(icon, tint: DesignColors.onPrimary, size: compact ? DesignSize.iconSmall : DesignSize.icon)
+                            BzrIcon(icon, tint: state == .disabled ? DesignColors.disabledText : DesignColors.onPrimary, size: compact ? DesignSize.iconSmall : DesignSize.icon)
                         }
                     }
                 }
@@ -205,7 +207,7 @@ public struct PrimaryButton: View {
             .padding(.vertical, DesignSpace.m)
             .frame(minHeight: height)
             // DEC-063: brand gradient (deeper when pressed) with a soft brand-coloured shadow.
-            .background(state == .pressed ? DesignGradients.brandPressed : DesignGradients.brand)
+            .background(state == .disabled ? DesignGradients.disabled : (state == .pressed ? DesignGradients.brandPressed : DesignGradients.brand))
             .clipShape(RoundedRectangle(cornerRadius: DesignRadius.button))
             .bzrShadow(state == .normal || state == .pressed ? DesignShadows.brand : nil)
         }
@@ -234,13 +236,13 @@ public struct SecondaryButton: View {
         Button(action: onClick) {
             // DEC-070 (Figma «Primo App»): filled with the container tint, no outline; DEC-076: optional leading icon.
             HStack(spacing: DesignSpace.s) {
-                if let icon { BzrIcon(icon, tint: DesignColors.primary600, size: DesignSize.iconSmall) }
-                BzrText(text, style: DesignType.secondaryButton, alignment: .center)
+                if let icon { BzrIcon(icon, tint: enabled ? DesignColors.secondaryButtonText : DesignColors.disabledText, size: DesignSize.iconSmall) }
+                BzrText(text, style: DesignType.secondaryButton.colored(enabled ? DesignColors.secondaryButtonText : DesignColors.disabledText), alignment: .center)
             }
             .frame(maxWidth: .infinity)
             .padding(.vertical, DesignSpace.s)
             .frame(minHeight: DesignSize.secondaryButtonVisualHeight)
-            .background(RoundedRectangle(cornerRadius: DesignRadius.button).fill(DesignColors.secondaryButtonBg))
+            .background(RoundedRectangle(cornerRadius: DesignRadius.button).fill(enabled ? DesignColors.secondaryButtonBg : DesignColors.disabledBg))
             .frame(minHeight: DesignSize.touchTargetMin)
             .contentShape(Rectangle())
         }
@@ -497,11 +499,11 @@ public struct SelectableTile: View {
                     Image(asset, bundle: .module)
                         .renderingMode(.template)
                         .resizable()
-                        .foregroundStyle(DesignColors.primary600)
+                        .foregroundStyle(selected ? DesignColors.primary600 : DesignColors.decorativeIcon)
                         .frame(width: DesignSize.tileIcon, height: DesignSize.tileIcon)
                         .accessibilityHidden(true)
                 } else {
-                    BzrIcon(icon, tint: DesignColors.primary600, size: DesignSize.tileIcon)
+                    BzrIcon(icon, tint: selected ? DesignColors.primary600 : DesignColors.decorativeIcon, size: DesignSize.tileIcon)
                 }
             }
             .frame(width: DesignSize.tileIconWell, height: DesignSize.tileIconWell)
@@ -627,11 +629,11 @@ public struct CategoryGlyph: View {
             Image(asset, bundle: .module)
                 .renderingMode(.template)
                 .resizable()
-                .foregroundStyle(DesignColors.primary600)
+                .foregroundStyle(DesignColors.decorativeIcon)
                 .frame(width: size, height: size)
                 .accessibilityHidden(true)
         } else {
-            BzrIcon(.wrench, tint: DesignColors.primary600, size: size)
+            BzrIcon(.wrench, tint: DesignColors.decorativeIcon, size: size)
         }
     }
 }
@@ -1582,8 +1584,8 @@ public struct InfoBanner: View {
     public init(text: String) { self.text = text }
     public var body: some View {
         Banner(
-            text: text, icon: .shield, iconTint: DesignColors.primary600,
-            fill: DesignColors.primary50Info, foreground: DesignColors.primary700)
+            text: text, icon: .shield, iconTint: DesignColors.infoText,
+            fill: DesignColors.primary50Info, foreground: DesignColors.infoText)
     }
 }
 

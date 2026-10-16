@@ -50,7 +50,7 @@ class BadgeView @JvmOverloads constructor(context: Context, attrs: AttributeSet?
     private fun render() {
         val (background, foreground) = when (kind) {
             BadgeKind.Highlight -> R.drawable.bremo_bg_badge_highlight to R.color.bremo_badge_text
-            BadgeKind.Status -> R.drawable.bremo_bg_badge_status to R.color.bremo_info_text
+            BadgeKind.Status -> R.drawable.bremo_bg_badge_status to R.color.bremo_primary600
             BadgeKind.Success -> R.drawable.bremo_bg_badge_success to R.color.bremo_success
             BadgeKind.Warning -> R.drawable.bremo_bg_badge_warning to R.color.bremo_warning_text
             BadgeKind.Neutral -> R.drawable.bremo_bg_badge_neutral to R.color.bremo_neutral_text

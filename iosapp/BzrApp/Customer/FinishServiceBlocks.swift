@@ -19,11 +19,11 @@ enum FinishServiceBlocks {
             }
             .frame(width: DesignSize.successRing, height: DesignSize.successRing)
             HStack(spacing: DesignSpace.xs) {
-                Circle().fill(DesignColors.primary400).frame(width: DesignSize.statusDot, height: DesignSize.statusDot)
-                BzrText(bzrString("completion.done"), style: DesignType.statusPill)
+                Circle().fill(DesignColors.success).frame(width: DesignSize.statusDot, height: DesignSize.statusDot)
+                BzrText(bzrString("completion.done"), style: DesignType.statusPill.colored(DesignColors.success))
             }
             .padding(.horizontal, DesignSpace.s)
-            .background(Capsule().fill(DesignColors.statusPillBg))
+            .background(Capsule().fill(DesignColors.successTint))
             if !name.isEmpty {
                 BzrText(
                     BzrFormatter.fill(bzrString("completion.heading"), values: [("name", name.components(separatedBy: " ").first ?? name)]),
@@ -40,9 +40,9 @@ enum FinishServiceBlocks {
                 BzrText(name, style: DesignType.offerName)
                 Spacer(minLength: DesignSpace.s)
                 if verified {
-                    BzrText(bzrString("completion.certified"), style: DesignType.statusPill)
+                    BzrText(bzrString("completion.certified"), style: DesignType.statusPill.colored(DesignColors.verifiedText))
                         .padding(.horizontal, DesignSpace.s)
-                        .background(Capsule().fill(DesignColors.statusPillBg))
+                        .background(Capsule().fill(DesignColors.verifiedBg))
                 }
             }
             if !title.isEmpty { BzrText(title, style: DesignType.secondary) }
@@ -58,7 +58,7 @@ enum FinishServiceBlocks {
     static func invoice(labor: String, materials: String, total: String) -> some View {
         card {
             HStack(spacing: DesignSpace.s) {
-                BzrIcon(.receipt, tint: DesignColors.primary600, size: DesignSize.iconSmall)
+                BzrIcon(.receipt, tint: DesignColors.decorativeIcon, size: DesignSize.iconSmall)
                 BzrText(bzrString("completion.invoice"), style: DesignType.homeSection)
             }
             line(bzrString("proposal.base"), amount(labor), style: DesignType.tileTitle)
@@ -66,7 +66,7 @@ enum FinishServiceBlocks {
                 line(bzrString("completion.extra"), amount(materials), style: DesignType.tileTitle)
             }
             Rectangle().fill(DesignColors.border).frame(height: DesignBorder.width)
-            line(bzrString("completion.total"), amount(total), style: DesignType.amountDisplay.colored(DesignColors.primary600))
+            line(bzrString("completion.total"), amount(total), style: DesignType.amountDisplay.colored(DesignColors.amountText))
         }
     }
 

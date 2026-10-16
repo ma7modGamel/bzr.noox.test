@@ -48,7 +48,7 @@ class P08HomeView(context: Context) : ProviderScreenView(context) {
         available = state.availableNow
         canToggle = state.canContinue
         val onBrand = androidx.core.content.ContextCompat.getColor(context, R.color.bremo_on_primary)
-        binding.availability.setBackgroundResource(if (available) R.drawable.bremo_bg_hero else R.drawable.bremo_bg_menu_group)
+        binding.availability.setBackgroundResource(if (available) R.drawable.bremo_bg_accent else R.drawable.bremo_bg_menu_group)
         binding.availabilityWell.setBackgroundResource(if (available) R.drawable.bremo_bg_hero_well else R.drawable.bremo_bg_icon_well)
         if (available) {
             binding.availabilityIcon.setGradient(onBrand, onBrand)
@@ -63,7 +63,7 @@ class P08HomeView(context: Context) : ProviderScreenView(context) {
             androidx.core.content.ContextCompat.getColor(context, if (available) R.color.bremo_on_hero_body else R.color.bremo_slate500),
         )
         binding.availabilityState.text = string(if (available) R.string.provider_home_available_on_state else R.string.provider_home_available_off_state)
-        binding.availabilityState.setTextColor(if (available) androidx.core.content.ContextCompat.getColor(context, R.color.bremo_primary700) else onBrand)
+        binding.availabilityState.setTextColor(if (available) androidx.core.content.ContextCompat.getColor(context, R.color.bremo_accent_text) else onBrand)
         binding.availabilityState.setBackgroundResource(if (available) R.drawable.bremo_bg_nav_pill else R.drawable.bremo_bg_button_primary)
     }
 

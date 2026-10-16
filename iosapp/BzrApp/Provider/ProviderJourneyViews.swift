@@ -506,7 +506,7 @@ public struct P08HomeView: View {
                 BzrText(
                     bzrString(available ? "provider.home.available.on_state" : "provider.home.available.off_state"),
                     style: DesignType.body.weighted(DesignFont.bold)
-                        .colored(available ? DesignColors.primary700 : DesignColors.onPrimary), lineLimit: 1
+                        .colored(available ? DesignColors.accentText : DesignColors.onPrimary), lineLimit: 1
                 )
                 .padding(.horizontal, DesignSpace.l)
                 .frame(minHeight: DesignSize.touchTargetMin)
@@ -521,7 +521,7 @@ public struct P08HomeView: View {
             .padding(DesignSpace.l)
             .background {
                 if available {
-                    RoundedRectangle(cornerRadius: DesignRadius.heroCard).fill(DesignGradients.hero)
+                    RoundedRectangle(cornerRadius: DesignRadius.heroCard).fill(DesignGradients.accent)
                 } else {
                     RoundedRectangle(cornerRadius: DesignRadius.card).fill(DesignColors.surface)
                 }

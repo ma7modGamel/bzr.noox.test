@@ -26,20 +26,20 @@ object CategoryIcons {
 
     /** DEC-063: the category's gradient and tint; unknown keys use the brand gradient. */
     fun palette(key: String?): CategoryPalette = when (key) {
-        "air-conditioning" -> CategoryPalette(0xFF0054D5.toInt(), 0xFF0054D5.toInt(), 0xFFF1F5F9.toInt())
-        "aluminum-glass" -> CategoryPalette(0xFF0054D5.toInt(), 0xFF0054D5.toInt(), 0xFFF1F5F9.toInt())
-        "appliances" -> CategoryPalette(0xFF0054D5.toInt(), 0xFF0054D5.toInt(), 0xFFF1F5F9.toInt())
-        "carpentry" -> CategoryPalette(0xFF0054D5.toInt(), 0xFF0054D5.toInt(), 0xFFF1F5F9.toInt())
-        "electricity" -> CategoryPalette(0xFF0054D5.toInt(), 0xFF0054D5.toInt(), 0xFFF1F5F9.toInt())
-        "home-installations" -> CategoryPalette(0xFF0054D5.toInt(), 0xFF0054D5.toInt(), 0xFFF1F5F9.toInt())
-        "ironwork" -> CategoryPalette(0xFF0054D5.toInt(), 0xFF0054D5.toInt(), 0xFFF1F5F9.toInt())
-        "painting" -> CategoryPalette(0xFF0054D5.toInt(), 0xFF0054D5.toInt(), 0xFFF1F5F9.toInt())
-        "pest-control" -> CategoryPalette(0xFF0054D5.toInt(), 0xFF0054D5.toInt(), 0xFFF1F5F9.toInt())
-        "plumbing" -> CategoryPalette(0xFF0054D5.toInt(), 0xFF0054D5.toInt(), 0xFFF1F5F9.toInt())
-        "satellite" -> CategoryPalette(0xFF0054D5.toInt(), 0xFF0054D5.toInt(), 0xFFF1F5F9.toInt())
-        "tiles-flooring" -> CategoryPalette(0xFF0054D5.toInt(), 0xFF0054D5.toInt(), 0xFFF1F5F9.toInt())
-        "water-tanks" -> CategoryPalette(0xFF0054D5.toInt(), 0xFF0054D5.toInt(), 0xFFF1F5F9.toInt())
-        else -> CategoryPalette(0xFF0054D5.toInt(), 0xFF0054D5.toInt(), 0xFFF0F5FC.toInt())
+        "air-conditioning" -> CategoryPalette(0xFF147774.toInt(), 0xFF147774.toInt(), 0xFFEAF5F4.toInt())
+        "aluminum-glass" -> CategoryPalette(0xFF147774.toInt(), 0xFF147774.toInt(), 0xFFEAF5F4.toInt())
+        "appliances" -> CategoryPalette(0xFF147774.toInt(), 0xFF147774.toInt(), 0xFFEAF5F4.toInt())
+        "carpentry" -> CategoryPalette(0xFF147774.toInt(), 0xFF147774.toInt(), 0xFFEAF5F4.toInt())
+        "electricity" -> CategoryPalette(0xFF147774.toInt(), 0xFF147774.toInt(), 0xFFEAF5F4.toInt())
+        "home-installations" -> CategoryPalette(0xFF147774.toInt(), 0xFF147774.toInt(), 0xFFEAF5F4.toInt())
+        "ironwork" -> CategoryPalette(0xFF147774.toInt(), 0xFF147774.toInt(), 0xFFEAF5F4.toInt())
+        "painting" -> CategoryPalette(0xFF147774.toInt(), 0xFF147774.toInt(), 0xFFEAF5F4.toInt())
+        "pest-control" -> CategoryPalette(0xFF147774.toInt(), 0xFF147774.toInt(), 0xFFEAF5F4.toInt())
+        "plumbing" -> CategoryPalette(0xFF147774.toInt(), 0xFF147774.toInt(), 0xFFEAF5F4.toInt())
+        "satellite" -> CategoryPalette(0xFF147774.toInt(), 0xFF147774.toInt(), 0xFFEAF5F4.toInt())
+        "tiles-flooring" -> CategoryPalette(0xFF147774.toInt(), 0xFF147774.toInt(), 0xFFEAF5F4.toInt())
+        "water-tanks" -> CategoryPalette(0xFF147774.toInt(), 0xFF147774.toInt(), 0xFFEAF5F4.toInt())
+        else -> CategoryPalette(0xFF147774.toInt(), 0xFF147774.toInt(), 0xFFF0F5FC.toInt())
     }
 }
 

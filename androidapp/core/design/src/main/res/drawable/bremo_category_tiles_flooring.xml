@@ -3,7 +3,7 @@
 <vector xmlns:android="http://schemas.android.com/apk/res/android" xmlns:aapt="http://schemas.android.com/aapt" android:width="48dp" android:height="48dp" android:viewportWidth="48" android:viewportHeight="48">
     <path android:pathData="M 6,22 l 0,-16 l 16,0 l 0,16 L 6,22 Z m 0,20 l 0,-16 l 16,0 l 0,16 L 6,42 Z m 20,-20 l 0,-16 l 16,0 l 0,16 L 26,22 Z m 0,20 l 0,-16 l 16,0 l 0,16 L 26,42 Z M 10,18 l 8,0 l 0,-8 L 10,10 l 0,8 Z m 20,0 l 8,0 l 0,-8 L 30,10 l 0,8 Z m 0,20 l 8,0 l 0,-8 L 30,30 l 0,8 Z m -20,0 l 8,0 l 0,-8 L 10,30 l 0,8 Z m 20,-20 Z m 0,12 Z m -12,0 Z m 0,-12 Z">
         <aapt:attr name="android:fillColor">
-            <gradient android:type="linear" android:startX="0" android:startY="0" android:endX="48" android:endY="48" android:startColor="#0054D5" android:endColor="#0054D5"/>
+            <gradient android:type="linear" android:startX="0" android:startY="0" android:endX="48" android:endY="48" android:startColor="#147774" android:endColor="#147774"/>
         </aapt:attr>
     </path>
 </vector>

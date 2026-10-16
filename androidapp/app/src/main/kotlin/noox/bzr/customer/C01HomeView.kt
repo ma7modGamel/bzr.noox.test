@@ -67,7 +67,7 @@ class C01HomeView(context: Context) : CustomerScreenView(context) {
             tile.root.contentDescription = label
             val icon = state.optionIcons.getOrNull(index).orEmpty()
             tile.icon.setImageResource(if (icon.isEmpty()) R.drawable.ic_wrench else CategoryIcons.drawable(icon))
-            ImageViewCompat.setImageTintList(tile.icon, ColorStateList.valueOf(context.getColor(R.color.bremo_primary600)))
+            ImageViewCompat.setImageTintList(tile.icon, ColorStateList.valueOf(context.getColor(R.color.bremo_decorative_icon)))
             tile.well.cardShadow()
             tile.root.setOnClickListener { onCategorySelect(index) }
             binding.serviceTiles.addView(tile.root)
@@ -86,7 +86,7 @@ class C01HomeView(context: Context) : CustomerScreenView(context) {
         binding.orderStatus.isVisible = binding.orderStatus.text.isNotEmpty()
         val icon = state.orderIcons.firstOrNull().orEmpty()
         binding.orderIcon.setImageResource(if (icon.isEmpty()) R.drawable.ic_wrench else CategoryIcons.drawable(icon))
-        ImageViewCompat.setImageTintList(binding.orderIcon, ColorStateList.valueOf(context.getColor(R.color.bremo_primary600)))
+        ImageViewCompat.setImageTintList(binding.orderIcon, ColorStateList.valueOf(context.getColor(R.color.bremo_decorative_icon)))
         val open = state.optionCodes.firstOrNull() == "OPEN"
         val offers = state.orderOfferCounts.firstOrNull() ?: 0
         val lowest = state.orderLowestOffers.firstOrNull().orEmpty()

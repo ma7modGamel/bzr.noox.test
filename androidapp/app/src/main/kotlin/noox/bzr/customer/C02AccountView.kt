@@ -66,8 +66,8 @@ class C02AccountView(context: Context) : CustomerScreenView(context) {
             dividerDrawable = ContextCompat.getDrawable(context, R.drawable.bremo_gap_m)
             showDividers = LinearLayout.SHOW_DIVIDER_MIDDLE
             gravity = Gravity.TOP
-            addView(stat(R.drawable.ic_check, R.color.bremo_primary600, R.color.bremo_status_pill_bg, state.fieldValues.getOrElse(2) { "" }, string(R.string.account_stats_completed)), weight())
-            addView(stat(R.drawable.ic_orders, R.color.bremo_primary600, R.color.bremo_status_pill_bg, state.fieldValues.getOrElse(4) { "" }, string(R.string.account_stats_active)), weight())
+            addView(stat(R.drawable.ic_check, R.color.bremo_success, R.color.bremo_success_tint, state.fieldValues.getOrElse(2) { "" }, string(R.string.account_stats_completed)), weight())
+            addView(stat(R.drawable.ic_orders, R.color.bremo_decorative_icon, R.color.bremo_accent_tint, state.fieldValues.getOrElse(4) { "" }, string(R.string.account_stats_active)), weight())
             addView(stat(R.drawable.ic_location, R.color.bremo_slate400, R.color.bremo_surface_container, addresses, string(R.string.account_stats_addresses)), weight())
         })
         if ("open_provider_mode" in state.visibleActions) binding.body.addView(providerCard())
@@ -131,14 +131,14 @@ class C02AccountView(context: Context) : CustomerScreenView(context) {
         addView(text(name.trim().take(1), R.style.TextAppearance_Bremo_ProfileName).apply {
             gravity = Gravity.CENTER
             textAlignment = View.TEXT_ALIGNMENT_CENTER
-            setTextColor(context.getColor(R.color.bremo_primary600))
+            setTextColor(context.getColor(R.color.bremo_decorative_icon))
             setBackgroundResource(R.drawable.bremo_bg_avatar_ring)
         }, LinearLayout.LayoutParams(px(R.dimen.bremo_size_profile_avatar), px(R.dimen.bremo_size_profile_avatar)))
         }
         addView(text(name, R.style.TextAppearance_Bremo_ProfileName).apply {
             if (verified) {
                 setCompoundDrawablesRelativeWithIntrinsicBounds(0, 0, R.drawable.ic_verified, 0)
-                TextViewCompat.setCompoundDrawableTintList(this, ColorStateList.valueOf(context.getColor(R.color.bremo_primary600)))
+                TextViewCompat.setCompoundDrawableTintList(this, ColorStateList.valueOf(context.getColor(R.color.bremo_verified_text)))
                 compoundDrawablePadding = px(R.dimen.bremo_space_xs)
                 sizeCompoundIcons(R.dimen.bremo_size_icon_small)
                 contentDescription = listOf(name, string(R.string.account_verified)).joinToString(string(R.string.format_list_separator))
@@ -152,7 +152,7 @@ class C02AccountView(context: Context) : CustomerScreenView(context) {
             minHeight = px(R.dimen.bremo_size_chip_height)
             setPaddingRelative(px(R.dimen.bremo_space_l), 0, px(R.dimen.bremo_space_l), 0)
             setCompoundDrawablesRelativeWithIntrinsicBounds(R.drawable.ic_edit, 0, 0, 0)
-            TextViewCompat.setCompoundDrawableTintList(this, ColorStateList.valueOf(context.getColor(R.color.bremo_primary600)))
+            TextViewCompat.setCompoundDrawableTintList(this, ColorStateList.valueOf(context.getColor(R.color.bremo_decorative_icon)))
             compoundDrawablePadding = px(R.dimen.bremo_space_xs)
             sizeCompoundIcons(R.dimen.bremo_size_icon_small)
             isClickable = true
@@ -184,7 +184,7 @@ class C02AccountView(context: Context) : CustomerScreenView(context) {
         addView(row().apply {
             addView(text(string(R.string.account_provider_title), R.style.TextAppearance_Bremo_HomeSection).apply {
                 setCompoundDrawablesRelativeWithIntrinsicBounds(R.drawable.ic_wrench, 0, 0, 0)
-                TextViewCompat.setCompoundDrawableTintList(this, ColorStateList.valueOf(context.getColor(R.color.bremo_primary600)))
+                TextViewCompat.setCompoundDrawableTintList(this, ColorStateList.valueOf(context.getColor(R.color.bremo_decorative_icon)))
                 compoundDrawablePadding = px(R.dimen.bremo_space_s)
                 sizeCompoundIcons(R.dimen.bremo_size_icon)
             }, LinearLayout.LayoutParams(0, LayoutParams.WRAP_CONTENT, 1f))
@@ -211,7 +211,7 @@ class C02AccountView(context: Context) : CustomerScreenView(context) {
         setOnClickListener { onClick() }
         addView(FrameLayout(context).apply {
             setBackgroundResource(R.drawable.bremo_bg_menu_icon_box)
-            addView(icon(icon, R.color.bremo_primary600, R.dimen.bremo_size_icon), FrameLayout.LayoutParams(px(R.dimen.bremo_size_icon), px(R.dimen.bremo_size_icon), Gravity.CENTER))
+            addView(icon(icon, R.color.bremo_decorative_icon, R.dimen.bremo_size_icon), FrameLayout.LayoutParams(px(R.dimen.bremo_size_icon), px(R.dimen.bremo_size_icon), Gravity.CENTER))
         }, LinearLayout.LayoutParams(px(R.dimen.bremo_size_order_well), px(R.dimen.bremo_size_order_well)))
         addView(text(label, R.style.TextAppearance_Bremo_TileTitle).apply { setPaddingRelative(px(R.dimen.bremo_space_m), 0, 0, 0) }, LinearLayout.LayoutParams(0, LayoutParams.WRAP_CONTENT, 1f))
         if (chip != null) addView(text(chip, R.style.TextAppearance_Bremo_Hint).apply {

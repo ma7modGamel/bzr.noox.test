@@ -10,7 +10,7 @@
         android:importantForAccessibility="no"
         android:scaleType="fitCenter"
         app:srcCompat="@drawable/ic_shield"
-        app:tint="@color/bremo_primary600" />
+        app:tint="@color/bremo_info_text" />
 
     <TextView
         android:id="@+id/text"
@@ -18,5 +18,5 @@
         android:layout_height="wrap_content"
         android:layout_weight="1"
         android:textAppearance="@style/TextAppearance.Bremo.Body"
-        android:textColor="@color/bremo_primary700" />
+        android:textColor="@color/bremo_info_text" />
 </merge>

@@ -93,6 +93,8 @@ $fontFor = static fn (string $weightKey): string => '@font/'.androidName($tokens
 // ── Color state lists (res/color) ───────────────────────────────────────
 $stateLists = [
     // [states => color] in priority order; the last entry is the default.
+    'bremo_button_secondary_bg' => [['android:state_enabled="false"', 'disabledBg'], ['', 'secondaryButtonBg']],
+    'bremo_button_secondary_fg' => [['android:state_enabled="false"', 'disabledText'], ['', 'secondaryButtonText']],
     'bremo_button_primary_bg' => [['android:state_pressed="true"', 'primary700'], ['', 'primary600']],
     'bremo_selectable_fill' => [['android:state_checked="true"', $tokens['border']['selectedFill']], ['android:state_selected="true"', $tokens['border']['selectedFill']], ['', 'surface']],
     'bremo_selectable_stroke' => [['android:state_checked="true"', $tokens['border']['selectedColor']], ['android:state_selected="true"', $tokens['border']['selectedColor']], ['', 'border']],
@@ -156,7 +158,9 @@ $shapes = [
     'bremo_bg_field_error' => ['fill' => 'surface', 'stroke' => 'danger', 'strokeWidth' => $selectedBorder, 'radius' => $dimen('radius', 'field')],
     'bremo_bg_currency_box' => ['fill' => 'surfaceAlt2', 'radius' => $dimen('radius', 'badge')],
     'bremo_bg_badge_highlight' => ['fill' => 'badgeBg', 'radius' => $dimen('radius', 'badge')],
-    'bremo_bg_badge_status' => ['fill' => 'infoBg', 'radius' => $dimen('radius', 'badge')],
+    'bremo_bg_badge_status' => ['fill' => 'statusPillBg', 'radius' => $dimen('radius', 'badge')],
+    'bremo_bg_button_disabled' => ['fill' => 'disabledBg', 'radius' => $dimen('radius', 'button')],
+    'bremo_bg_accent' => ['gradient' => 'accent', 'radius' => $dimen('radius', 'hero_card')],
     'bremo_bg_badge_success' => ['fill' => 'successTint', 'radius' => $dimen('radius', 'badge')],
     'bremo_bg_badge_warning' => ['fill' => 'warningBg', 'radius' => $dimen('radius', 'badge')],
     'bremo_bg_badge_neutral' => ['fill' => 'neutralBg', 'radius' => $dimen('radius', 'badge')],
@@ -167,7 +171,7 @@ $shapes = [
     'bremo_bg_badge_edit' => ['fill' => 'primary50', 'radius' => $dimen('radius', 'badge')],
     'bremo_bg_tag' => ['fill' => 'surfaceAlt', 'radius' => $dimen('radius', 'badge')],
     'bremo_bg_skeleton_line' => ['fill' => 'surfaceAlt', 'radius' => $dimen('radius', 'badge')],
-    'bremo_bg_menu_icon_box' => ['fill' => 'surfaceAlt', 'radius' => $dimen('radius', 'menu_icon_box')],
+    'bremo_bg_menu_icon_box' => ['fill' => 'accentTint', 'radius' => $dimen('radius', 'menu_icon_box')],
     'bremo_bg_banner_info' => ['fill' => 'primary50Info', 'radius' => $dimen('radius', 'card')],
     'bremo_bg_banner_warning' => ['fill' => 'warningBg', 'radius' => $dimen('radius', 'card')],
     'bremo_bg_banner_offline' => ['fill' => 'surfaceAlt', 'radius' => $dimen('radius', 'card')],
@@ -188,6 +192,7 @@ $shapes = [
     'bremo_bg_radio_checked' => ['shape' => 'oval', 'stroke' => 'primary600', 'strokeWidth' => $control],
     'bremo_bg_avatar' => ['shape' => 'oval', 'fill' => 'surfaceAlt'],
     'bremo_bg_verified_shield' => ['shape' => 'oval', 'fill' => 'verifiedText', 'stroke' => 'surface', 'strokeWidth' => $control],
+    'bremo_bg_activity_dot' => ['shape' => 'oval', 'fill' => 'primary600', 'stroke' => 'surface', 'strokeWidth' => $control],
     'bremo_bg_status_dot' => ['shape' => 'oval', 'fill' => 'primary500'],
     'bremo_bg_eta_icon' => ['shape' => 'oval', 'fill' => 'primary50Info'],
     'bremo_bg_feedback_empty' => ['shape' => 'oval', 'gradient' => 'iconWell'],
@@ -219,7 +224,7 @@ $shapes = [
     'bremo_bg_radio_check' => ['shape' => 'oval', 'fill' => 'primary600'],
     // DEC-073 — Figma home (3002:270).
     'bremo_bg_home_search' => ['fill' => 'surfaceAlt2', 'radius' => $dimen('radius', 'home_search')],
-    'bremo_bg_home_tile' => ['fill' => 'surfaceAlt2', 'radius' => $dimen('radius', 'home_tile')],
+    'bremo_bg_home_tile' => ['fill' => 'accentTint', 'radius' => $dimen('radius', 'home_tile')],
     'bremo_bg_home_well' => ['fill' => 'surface', 'radius' => $dimen('radius', 'card')],
     'bremo_bg_current_card' => ['fill' => 'surface', 'radius' => $dimen('radius', 'current_card')],
     'bremo_bg_offers_row' => ['fill' => 'surfaceAlt2', 'radius' => $dimen('radius', 'menu_icon_box')],
@@ -228,8 +233,8 @@ $shapes = [
     'bremo_bg_emergency' => ['fill' => 'surfaceAlt2', 'radius' => $dimen('radius', 'card')],
     'bremo_bg_emergency_icon' => ['shape' => 'oval', 'fill' => 'amber50'],
     'bremo_bg_hero_badge' => ['fill' => 'heroBadgeBg', 'radius' => $dimen('radius', 'full')],
-    'bremo_bg_avatar_ring' => ['shape' => 'oval', 'fill' => 'primary50', 'stroke' => 'avatarRing', 'strokeWidth' => $control],
-    'bremo_bg_notification_dot' => ['shape' => 'oval', 'fill' => 'amber500', 'stroke' => 'surfaceAlt', 'strokeWidth' => $control],
+    'bremo_bg_avatar_ring' => ['shape' => 'oval', 'fill' => 'accentTint', 'stroke' => 'avatarRing', 'strokeWidth' => $control],
+    'bremo_bg_notification_dot' => ['shape' => 'oval', 'fill' => 'primary600', 'stroke' => 'surfaceAlt', 'strokeWidth' => $control],
     'bremo_bg_hero_image' => ['fill' => 'navy800', 'radius' => $dimen('radius', 'hero_card')],
     'bremo_bg_hero_scrim' => ['scrim' => ['heroScrim', 'heroScrimMid']],
     // DEC-073 — Figma offers / provider (3002:446, 3002:873).
@@ -238,7 +243,7 @@ $shapes = [
     'bremo_bg_inset' => ['fill' => 'surfaceAlt2', 'radius' => $dimen('radius', 'menu_icon_box')],
     'bremo_bg_success_ring' => ['shape' => 'oval', 'fill' => 'successTint'],
     'bremo_bg_success_core' => ['shape' => 'oval', 'fill' => 'success'],
-    'bremo_bg_info_pill' => ['fill' => 'surfaceAlt2', 'radius' => $dimen('radius', 'full')],
+    'bremo_bg_info_pill' => ['fill' => 'accentTint', 'radius' => $dimen('radius', 'full')],
     'bremo_bg_progress_track' => ['fill' => 'surfaceAlt2', 'radius' => $dimen('radius', 'full')],
     'bremo_bg_progress_fill' => ['fill' => 'primary400', 'radius' => $dimen('radius', 'full')],
     'bremo_bg_waiting_dot' => ['shape' => 'oval', 'fill' => 'amber500'],
@@ -381,13 +386,13 @@ $style('Widget.Bremo.Button.Primary', 'Widget.MaterialComponents.Button.Unelevat
 ]);
 // Secondary actions use neutral surfaces and a smaller label.
 $style('Widget.Bremo.Button.Secondary', 'Widget.MaterialComponents.Button.OutlinedButton', $buttonBase + [
-    'backgroundTint' => $color('secondaryButtonBg'),
+    'backgroundTint' => '@color/bremo_button_secondary_bg',
     'strokeColor' => $color('secondaryButtonBg'),
     'strokeWidth' => '0dp',
     'android:textAppearance' => '@style/'.$typeStyleName('secondaryButton'),
-    'android:textColor' => $color('secondaryButtonText'),
-    'iconTint' => $color('primary600'),
-    'rippleColor' => $color('primary50'),
+    'android:textColor' => '@color/bremo_button_secondary_fg',
+    'iconTint' => '@color/bremo_button_secondary_fg',
+    'rippleColor' => $color('accentBorder'),
 ]);
 $style('Widget.Bremo.Button.IconSquare', 'Widget.Bremo.Button.Secondary', [
     'android:paddingStart' => '0dp',
@@ -488,7 +493,7 @@ $style('Theme.Bremo', 'Theme.MaterialComponents.Light.NoActionBar', [
     'colorPrimary' => $color('primary600'),
     'colorPrimaryVariant' => $color('primary700'),
     'colorOnPrimary' => $color('onPrimary'),
-    'colorSecondary' => $color('primary600'),
+    'colorSecondary' => $color('accentText'),
     'colorOnSecondary' => $color('onPrimary'),
     'colorSurface' => $color('surface'),
     'colorOnSurface' => $color('navy800'),
