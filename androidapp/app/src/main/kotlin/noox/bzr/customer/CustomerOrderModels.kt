@@ -78,7 +78,12 @@ data class CustomerAddress(
     val lat: String? = null,
     val lng: String? = null,
     @SerialName("is_default") val isDefault: Boolean = false,
+    val actions: List<CustomerOption> = emptyList(),
+    @SerialName("display_address") val displayAddress: String? = null,
 )
+
+@Serializable
+data class AddressBookUpdate(val data: CustomerAddress, val addresses: List<CustomerAddress>)
 
 @Serializable
 data class AddressDeletion(
@@ -375,6 +380,9 @@ interface CustomerService {
 
     @DELETE("me")
     fun deleteAccount(@Header("Authorization") bearer: String): Call<Unit>
+
+    @POST("addresses/{address}/default")
+    fun makeAddressDefault(@Header("Authorization") bearer: String, @Path("address") addressId: Int, @Body body: EmptyBody = EmptyBody()): Call<AddressBookUpdate>
 
     @DELETE("addresses/{address}")
     fun deleteAddress(@Header("Authorization") bearer: String, @Path("address") addressId: Int): Call<DataItem<AddressDeletion>>

@@ -178,7 +178,9 @@ public struct APIClient: Sendable {
         }
 
         var request = URLRequest(url: url)
-        request.httpMethod = method
+        let usesMethodOverride = url.path.hasPrefix("/api/v1/") && ["PUT", "PATCH", "DELETE"].contains(method)
+        request.httpMethod = usesMethodOverride ? "POST" : method
+        if usesMethodOverride { request.setValue(method, forHTTPHeaderField: "X-HTTP-Method-Override") }
         request.setValue("application/json", forHTTPHeaderField: "Accept")
         request.setValue(language ?? AppLanguage.current, forHTTPHeaderField: "Accept-Language")
         request.setValue("iOS", forHTTPHeaderField: "X-App-Platform")

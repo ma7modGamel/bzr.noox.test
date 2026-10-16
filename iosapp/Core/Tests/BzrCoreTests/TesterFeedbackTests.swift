@@ -30,7 +30,7 @@ final class TesterFeedbackTests: XCTestCase {
                     """
             case "/api/v1/addresses" where request.httpMethod == "GET":
                 json = "{\"data\":[\(Self.address(9)),\(Self.address(10))]}"
-            case "/api/v1/addresses/9" where request.httpMethod == "DELETE":
+            case "/api/v1/addresses/9" where request.httpMethod == "POST" && request.value(forHTTPHeaderField: "X-HTTP-Method-Override") == "DELETE":
                 deletionRequests += 1
                 if deletionFails {
                     return HTTPResult(data: Data(#"{"error":{"code":"INTERNAL_ERROR","message":"Try again"}}"#.utf8), statusCode: 500)

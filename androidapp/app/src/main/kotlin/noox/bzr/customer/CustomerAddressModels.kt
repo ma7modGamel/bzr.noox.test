@@ -27,4 +27,4 @@ data class AddressBody(
 )
 
 /** "Area · address text" — the address row on C14. */
-internal fun CustomerAddress.detail(): String = "${area.name.orEmpty()} · $addressText"
+internal fun CustomerAddress.detail(): String = displayAddress?.takeIf(String::isNotBlank) ?: "${area.name.orEmpty()} · $addressText"

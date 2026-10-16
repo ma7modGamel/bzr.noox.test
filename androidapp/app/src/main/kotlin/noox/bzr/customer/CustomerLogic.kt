@@ -67,6 +67,8 @@ data class CustomerUiState(
     val isDefault: Boolean = false,
     val showConfirmation: Boolean = false,
     val showLogoutConfirmation: Boolean = false,
+    val primaryAddressIndex: Int = -1,
+    val addressActions: List<List<CustomerOption>> = emptyList(),
     val pendingIndex: Int = -1,
     val countdownSeconds: Int = 0,
     val proposalDeadline: String = "",
@@ -460,7 +462,7 @@ object CustomerLogic {
     private fun addresses(input: Map<String, Any?>): CustomerUiState {
         val labels = input.strings("address_labels")
         val event = input.text("event")
-        val busy = event == "deleting"
+        val busy = event == "deleting" || event == "setting_default"
         val selected = input.integer("selected_index", -1)
         return CustomerUiState(
             screen = "SCR-C14",
@@ -471,8 +473,17 @@ object CustomerLogic {
             selectedIndex = selected,
             isBusy = busy,
             selectionMode = input.boolean("selection_mode"),
-            messageKey = if (event == "delete_failed") "address.delete.failed" else null,
-            showConfirmation = event == "confirm_delete" || busy,
+            primaryAddressIndex = input.integer("primary_address_index", -1),
+            optionCodes = input.strings("address_ids"),
+            addressActions = (input["address_actions"] as? List<*>)?.map { group -> (group as? List<*>)?.filterIsInstance<CustomerOption>().orEmpty() }.orEmpty(),
+            messageKey = when (event) {
+                "delete_failed" -> "address.delete.failed"
+                "default_failed" -> "address.default.failed"
+                "deleted" -> "address.deleted"
+                "default_saved" -> "address.default.saved"
+                else -> null
+            },
+            showConfirmation = event == "confirm_delete" || event == "deleting",
             pendingIndex = input.integer("pending_delete_index", -1),
         )
     }

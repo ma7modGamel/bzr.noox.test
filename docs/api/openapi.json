@@ -329,6 +329,51 @@
                 }
             }
         },
+        "/addresses/{address}/default": {
+            "post": {
+                "operationId": "addressMakeDefault",
+                "tags": [
+                    "العناوين"
+                ],
+                "summary": "addressMakeDefault",
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AppMode"
+                    },
+                    {
+                        "$ref": "#/components/parameters/IdempotencyKey"
+                    },
+                    {
+                        "name": "address",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "نجاح"
+                    },
+                    "400": {
+                        "description": "خطأ",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/auth/email/resend": {
             "post": {
                 "operationId": "authResendVerification",

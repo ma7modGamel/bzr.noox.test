@@ -428,8 +428,8 @@
     <string name="common_character_count">{n} / 1000</string>
     <string name="common_save">حفظ</string>
     <string name="address_list_title">العناوين المحفوظة</string>
-    <string name="address_list_heading">عناوين الخدمة</string>
-    <string name="address_list_body">اختيار عنوان محفوظ أو إضافة عنوان جديد.</string>
+    <string name="address_list_heading">عناوينك</string>
+    <string name="address_list_body">العنوان الأساسي يُختار تلقائيًا عند إنشاء طلب جديد.</string>
     <string name="address_empty_title">لا توجد عناوين محفوظة</string>
     <string name="address_empty_body">أضف عنوان الخدمة للمتابعة.</string>
     <string name="address_add">إضافة عنوان جديد</string>
@@ -440,7 +440,7 @@
     <string name="address_delete_confirm_action">تأكيد الحذف</string>
     <string name="request_address_required">أضف عنوان خدمة قبل المتابعة.</string>
     <string name="request_category_unavailable">الخدمة المختارة غير متاحة في منطقة هذا العنوان. اختر عنوانًا آخر أو خدمة أخرى.</string>
-    <string name="address_default_badge">الافتراضي</string>
+    <string name="address_default_badge">العنوان الأساسي</string>
     <string name="address_form_add_title">إضافة عنوان</string>
     <string name="address_form_edit_title">تعديل العنوان</string>
     <string name="address_map_title">تحديد الموقع على الخريطة</string>
@@ -456,7 +456,7 @@
     <string name="address_field_floor">الدور (اختياري)</string>
     <string name="address_field_apartment">الشقة (اختياري)</string>
     <string name="address_field_landmark">علامة مميزة (اختياري)</string>
-    <string name="address_default">تعيين كعنوان افتراضي</string>
+    <string name="address_default">تعيين كعنوان أساسي</string>
     <string name="address_validation_label_required">تسمية العنوان مطلوبة.</string>
     <string name="address_validation_area_required">اختيار المنطقة مطلوب.</string>
     <string name="address_validation_details_required">تفاصيل العنوان مطلوبة.</string>
@@ -1144,4 +1144,17 @@
     <string name="account_logout_confirm_title">تأكيد تسجيل الخروج</string>
     <string name="account_logout_confirm_body">هل تريد تسجيل الخروج من حسابك؟</string>
     <string name="address_delete_failed">تعذّر حذف العنوان. تحقق من الاتصال وحاول مجددًا، أو حدّث قائمة العناوين.</string>
+    <string name="address_actions_for">إجراءات عنوان {label}</string>
+    <string name="address_use_for">استخدام عنوان {label} لهذا الطلب</string>
+    <string name="address_delete_named">حذف «{label}»؟</string>
+    <string name="address_delete_primary_body">سيُحذف من عناوينك، ويصبح عنوان آخر أساسيًا تلقائيًا. الطلبات السابقة لن تتغير.</string>
+    <string name="address_default_missing">لم تحدد عنوانًا أساسيًا بعد. يمكنك تعيينه من قائمة إجراءات العنوان.</string>
+    <string name="address_default_failed">تعذّر تغيير العنوان الأساسي. حاول مجددًا أو حدّث القائمة.</string>
+    <string name="address_default_saved">تم تغيير العنوان الأساسي.</string>
+    <string name="address_deleted">تم حذف العنوان.</string>
+    <string name="address_details">عرض التفاصيل</string>
+    <string name="address_list_selection_body">اضغط على العنوان الذي تريد استخدامه لهذا الطلب.</string>
+    <string name="address_detail_building">مبنى {value}</string>
+    <string name="address_detail_floor">الدور {value}</string>
+    <string name="address_detail_apartment">شقة {value}</string>
 </resources>

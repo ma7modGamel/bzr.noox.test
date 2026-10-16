@@ -145,6 +145,7 @@ struct CustomerJourneyRoot: View {
                     onSelect: { index in Task { await viewModel.confirmAddress(index: index) } },
                     onEdit: { index in Task { await viewModel.openEditAddress(index: index) } },
                     onDelete: viewModel.requestDeleteAddress,
+                    onMakeDefault: { index in Task { await viewModel.makeAddressDefault(index: index) } },
                     onCancelDelete: viewModel.cancelDeleteAddress,
                     onConfirmDelete: { Task { await viewModel.confirmDeleteAddress() } },
                     onAdd: { Task { await viewModel.openNewAddress() } },

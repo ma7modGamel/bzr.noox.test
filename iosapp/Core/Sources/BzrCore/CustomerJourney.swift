@@ -44,6 +44,8 @@ public struct CustomerUIState: Equatable, Sendable {
     public var selectionMode: Bool
     public var isEditing: Bool
     public var isDefault: Bool
+    public var primaryAddressIndex: Int = -1
+    public var addressActions: [[CustomerOption]] = []
     public var showLogoutConfirmation: Bool = false
     public var showConfirmation: Bool
     public var pendingIndex: Int
@@ -153,6 +155,7 @@ public enum CustomerInputValue: Equatable, Sendable {
     case bool(Bool)
     case integer(Int)
     case strings([String])
+    case optionGroups([[CustomerOption]])
 }
 
 public enum CustomerLogic {
@@ -535,16 +538,22 @@ public enum CustomerLogic {
     private static func addresses(_ input: [String: CustomerInputValue]) -> CustomerUIState {
         let labels = input.strings("address_labels")
         let event = input.text("event")
-        let busy = event == "deleting"
+        let busy = event == "deleting" || event == "setting_default"
         let selected = input.integer("selected_index", default: -1)
-        return CustomerUIState(
+        var state = CustomerUIState(
             screen: "SCR-C14", phase: labels.isEmpty ? .empty : .content,
             canContinue: !busy && (!input.bool("selection_mode") || selected >= 0),
-            messageKey: event == "delete_failed" ? "address.delete.failed" : nil,
+            messageKey: [
+                "delete_failed": "address.delete.failed", "default_failed": "address.default.failed", "deleted": "address.deleted", "default_saved": "address.default.saved",
+            ][event],
             items: labels, itemDetails: input.strings("address_details"), selectedIndex: selected,
             isBusy: busy, selectionMode: input.bool("selection_mode"),
-            showConfirmation: event == "confirm_delete" || busy,
+            showConfirmation: event == "confirm_delete" || event == "deleting",
             pendingIndex: input.integer("pending_delete_index", default: -1))
+        state.primaryAddressIndex = input.integer("primary_address_index", default: -1)
+        state.optionCodes = input.strings("address_ids")
+        if case let .optionGroups(actions) = input["address_actions"] { state.addressActions = actions }
+        return state
     }
 
     private static func addressForm(_ input: [String: CustomerInputValue]) -> CustomerUIState {
@@ -1480,12 +1489,20 @@ public struct CustomerAddress: Codable, Equatable, Sendable {
     public let lat: String
     public let lng: String
     public let isDefault: Bool
+    public let actions: [CustomerOption]?
+    public let displayAddress: String?
 
     enum CodingKeys: String, CodingKey {
-        case id, label, city, area, building, floor, apartment, landmark, lat, lng
+        case id, label, city, area, building, floor, apartment, landmark, lat, lng, actions
+        case displayAddress = "display_address"
         case addressText = "address_text"
         case isDefault = "is_default"
     }
+}
+
+public struct CustomerAddressBookUpdate: Decodable, Sendable {
+    public let data: CustomerAddress
+    public let addresses: [CustomerAddress]
 }
 
 public struct CustomerAddressDeletion: Decodable, Sendable {
@@ -1883,6 +1900,7 @@ public protocol CustomerAPI: Sendable {
     func cities() async throws -> [CustomerNamedReference]
     func areas(cityId: Int) async throws -> [CustomerNamedReference]
     func saveAddress(id: Int?, body: CustomerAddressBody) async throws -> CustomerAddress
+    func makeAddressDefault(id: Int) async throws -> CustomerAddressBookUpdate
     func deleteAddress(id: Int) async throws -> CustomerAddressDeletion
     func slots(cityId: Int, date: String) async throws -> [CustomerSlot]
     func uploadMedia(_ upload: CustomerMediaUpload) async throws -> CustomerMedia
@@ -2162,6 +2180,10 @@ public struct LiveCustomerAPI: CustomerAPI {
             response = try await client.post("addresses", body: body)
         }
         return response.data
+    }
+
+    public func makeAddressDefault(id: Int) async throws -> CustomerAddressBookUpdate {
+        try await client.post("addresses/\(id)/default", body: [String: String]())
     }
 
     public func deleteAddress(id: Int) async throws -> CustomerAddressDeletion {
@@ -2550,6 +2572,10 @@ public final class CustomerViewModel {
     /// Back: the recorded screen as it was shown, home when nothing is recorded; false on home.
     @discardableResult
     public func goBack() async -> Bool {
+        if state.screen == "SCR-C14" {
+            if state.isBusy { return true }
+            if state.showConfirmation { cancelDeleteAddress(); return true }
+        }
         guard let target = history.back(rootEntry: { CustomerUIState(screen: "SCR-C01", phase: .loading) })
         else { return false }
         switch target.screen {
@@ -3056,14 +3082,9 @@ public final class CustomerViewModel {
                 addressId = preferred.id
                 cityId = preferred.city.id
             }
-            state = reduce(
-                screen: "SCR-C14",
-                input: [
-                    "event": .text("loaded"), "selection_mode": .bool(selectionMode),
-                    "address_labels": .strings(addresses.map(\.label)),
-                    "address_details": .strings(addresses.map { "\($0.area.name) · \($0.addressText)" }),
-                    "selected_index": .integer(selected),
-                ])
+            var input = addressStateInput(event: "loaded")
+            input["selected_index"] = .integer(selected)
+            state = reduce(screen: "SCR-C14", input: input)
         } catch {
             state = reduce(screen: "SCR-C14", input: ["event": .text("error")])
         }
@@ -3323,13 +3344,29 @@ public final class CustomerViewModel {
         }
     }
 
+    public func makeAddressDefault(index: Int) async {
+        guard !state.isBusy, addressPayloads.indices.contains(index),
+            addressPayloads[index].actions?.contains(where: { $0.code == "set_default" }) == true
+        else { return }
+        state = reduce(screen: "SCR-C14", input: addressStateInput(event: "setting_default", pendingIndex: index))
+        do {
+            let update = try await api.makeAddressDefault(id: addressIDs[index])
+            let addresses = update.addresses
+            addressPayloads = addresses
+            addressIDs = addresses.map(\.id)
+            if let preferred = addresses.first(where: \.isDefault) { addressId = preferred.id; cityId = preferred.city.id }
+            state = reduce(screen: "SCR-C14", input: addressStateInput(event: "default_saved"))
+        } catch { state = reduce(screen: "SCR-C14", input: addressStateInput(event: "default_failed")) }
+    }
+
     public func requestDeleteAddress(index: Int) {
-        guard addressIDs.indices.contains(index) else { return }
+        guard !state.isBusy, addressIDs.indices.contains(index) else { return }
         state = reduce(
             screen: "SCR-C14", input: addressStateInput(event: "confirm_delete", pendingIndex: index))
     }
 
     public func cancelDeleteAddress() {
+        guard !state.isBusy else { return }
         state = reduce(screen: "SCR-C14", input: addressStateInput(event: "loaded"))
     }
 
@@ -3349,7 +3386,7 @@ public final class CustomerViewModel {
                 addressId = deletion.defaultAddress?.id
                 cityId = deletion.defaultAddress?.city.id
             }
-            var input = addressStateInput(event: "loaded")
+            var input = addressStateInput(event: "deleted")
             input["selected_index"] = .integer(addressIDs.firstIndex(of: deletion.defaultAddress?.id ?? -1) ?? -1)
             state = reduce(screen: "SCR-C14", input: input)
         } catch {
@@ -3363,9 +3400,12 @@ public final class CustomerViewModel {
         [
             "event": .text(event), "selection_mode": .bool(addressSelectionMode),
             "address_labels": .strings(addressPayloads.map(\.label)),
-            "address_details": .strings(addressPayloads.map { "\($0.area.name) · \($0.addressText)" }),
-            "selected_index": .integer(state.selectedIndex),
+            "address_details": .strings(addressPayloads.map { $0.displayAddress ?? "\($0.area.name) · \($0.addressText)" }),
+            "selected_index": .integer(addressIDs.firstIndex(of: addressId ?? -1) ?? -1),
             "pending_delete_index": .integer(pendingIndex),
+            "primary_address_index": .integer(addressPayloads.firstIndex(where: \.isDefault) ?? -1),
+            "address_ids": .strings(addressIDs.map(String.init)),
+            "address_actions": .optionGroups(addressPayloads.map { $0.actions ?? [] }),
         ]
     }
 

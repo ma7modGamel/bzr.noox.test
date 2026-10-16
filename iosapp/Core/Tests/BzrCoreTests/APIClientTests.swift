@@ -132,7 +132,8 @@ final class APIClientTests: XCTestCase {
 
         XCTAssertTrue(response.ok)
         let request = try XCTUnwrap(transport.request)
-        XCTAssertEqual(request.httpMethod, "PUT")
+        XCTAssertEqual(request.httpMethod, "POST")
+        XCTAssertEqual(request.value(forHTTPHeaderField: "X-HTTP-Method-Override"), "PUT")
         XCTAssertEqual(request.value(forHTTPHeaderField: "X-App-Mode"), "PROVIDER")
         XCTAssertEqual(
             try JSONSerialization.jsonObject(with: try XCTUnwrap(request.httpBody)) as? [String: Bool],

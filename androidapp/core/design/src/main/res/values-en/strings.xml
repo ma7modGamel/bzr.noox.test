@@ -429,8 +429,8 @@
     <string name="common_character_count">{n} / 1000</string>
     <string name="common_save">Save</string>
     <string name="address_list_title">Saved addresses</string>
-    <string name="address_list_heading">Service addresses</string>
-    <string name="address_list_body">Choose a saved address or add a new one.</string>
+    <string name="address_list_heading">Your addresses</string>
+    <string name="address_list_body">Your primary address is preselected for new requests.</string>
     <string name="address_empty_title">No saved addresses</string>
     <string name="address_empty_body">Add a service address to continue.</string>
     <string name="address_add">Add a new address</string>
@@ -441,7 +441,7 @@
     <string name="address_delete_confirm_action">Confirm deletion</string>
     <string name="request_address_required">Add a service address to continue.</string>
     <string name="request_category_unavailable">This service is unavailable in this area. Choose another address or service.</string>
-    <string name="address_default_badge">Default</string>
+    <string name="address_default_badge">Primary address</string>
     <string name="address_form_add_title">Add an address</string>
     <string name="address_form_edit_title">Edit address</string>
     <string name="address_map_title">Choose a location on the map</string>
@@ -457,7 +457,7 @@
     <string name="address_field_floor">Floor (optional)</string>
     <string name="address_field_apartment">Apartment (optional)</string>
     <string name="address_field_landmark">Landmark (optional)</string>
-    <string name="address_default">Set as default address</string>
+    <string name="address_default">Set as primary address</string>
     <string name="address_validation_label_required">Enter an address name.</string>
     <string name="address_validation_area_required">Choose an area.</string>
     <string name="address_validation_details_required">Enter the address details.</string>
@@ -1145,4 +1145,17 @@ One place.</string>
     <string name="account_logout_confirm_title">Confirm sign out</string>
     <string name="account_logout_confirm_body">Do you want to sign out of your account?</string>
     <string name="address_delete_failed">Could not delete the address. Check your connection and try again, or refresh your addresses.</string>
+    <string name="address_actions_for">Actions for {label}</string>
+    <string name="address_use_for">Use {label} for this request</string>
+    <string name="address_delete_named">Delete “{label}”?</string>
+    <string name="address_delete_primary_body">Another saved address will become primary. Previous requests remain unchanged.</string>
+    <string name="address_default_missing">No primary address yet. Choose one from an address’s actions menu.</string>
+    <string name="address_default_failed">Could not change the primary address. Try again or refresh the list.</string>
+    <string name="address_default_saved">Primary address updated.</string>
+    <string name="address_deleted">Address deleted.</string>
+    <string name="address_details">View details</string>
+    <string name="address_list_selection_body">Tap the address to use for this request.</string>
+    <string name="address_detail_building">Building {value}</string>
+    <string name="address_detail_floor">Floor {value}</string>
+    <string name="address_detail_apartment">Apartment {value}</string>
 </resources>

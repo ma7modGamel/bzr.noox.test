@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_selected="true">
+        <shape android:shape="rectangle">
+            <solid android:color="@color/bremo_primary_well_selected" />
+            <corners android:radius="@dimen/bremo_radius_card" />
+            <stroke android:width="@dimen/bremo_border_width" android:color="@color/bremo_primary600" />
+        </shape>
+    </item>
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="@color/bremo_surface" />
+            <corners android:radius="@dimen/bremo_radius_card" />
+            <stroke android:width="@dimen/bremo_border_width" android:color="@color/bremo_border" />
+        </shape>
+    </item>
+</selector>

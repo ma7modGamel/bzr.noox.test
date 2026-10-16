@@ -357,6 +357,7 @@ class C09TrackingFragment : CustomerFragment<C09TrackingView>(R.id.scr_c09) {
 class C14AddressesFragment : CustomerFragment<C14AddressesView>(R.id.scr_c14) {
     override fun create() = C14AddressesView(requireContext())
     override fun C14AddressesView.bind() {
+        onMakeDefault = viewModel::makeAddressDefault
         onSelect = viewModel::confirmAddress
         onEdit = viewModel::openEditAddress
         onDelete = viewModel::requestDeleteAddress

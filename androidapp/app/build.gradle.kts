@@ -33,8 +33,8 @@ android {
         applicationId = "com.bremo.app" // DEC-048
         minSdk = 26
         targetSdk = 35
-        versionCode = 3
-        versionName = "1.0.2"
+        versionCode = 4
+        versionName = "1.0.3"
         buildConfigField("String", "API_BASE_URL", "\"${mobileApiBaseUrl.get()}\"")
         manifestPlaceholders["MAPS_ANDROID_API_KEY"] = mapsAndroidApiKey.get()
         manifestPlaceholders["APP_LINK_HOST"] = appLinkHost.get()

@@ -13,6 +13,7 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import noox.bzr.gallery.BuildConfig
 import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import okhttp3.logging.LoggingEventListener
@@ -57,6 +58,15 @@ object BremoHttp {
                     throw IOException("The application language changed during this request")
                 }
                 response
+            }
+            .addInterceptor { chain ->
+                val request = chain.request()
+                if (request.url.encodedPath.startsWith("/api/v1/") && request.method in setOf("PUT", "PATCH", "DELETE")) {
+                    chain.proceed(request.newBuilder()
+                        .header("X-HTTP-Method-Override", request.method)
+                        .method("POST", request.body ?: ByteArray(0).toRequestBody())
+                        .build())
+                } else chain.proceed(request)
             }
             .addInterceptor(SessionExpiry.interceptor)
             .apply {

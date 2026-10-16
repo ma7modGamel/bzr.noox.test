@@ -32,6 +32,9 @@ interface ProbeService {
     @POST("auth/logout")
     fun logout(@Header("Authorization") bearer: String): Call<Unit>
 
+    @HTTP(method = "PUT", path = "provider/availability", hasBody = true)
+    fun putWithBody(@Header("Authorization") bearer: String, @Body body: ProbeBody): Call<Unit>
+
     @HTTP(method = "DELETE", path = "me/devices", hasBody = true)
     fun deleteWithBody(@Header("Authorization") bearer: String, @Body body: ProbeBody): Call<Unit>
 }
@@ -86,8 +89,30 @@ class BremoTypedCallsTest {
         bremoExecute(service().deleteWithBody("Bearer T", ProbeBody("push")))
 
         val request = server.takeRequest()
-        assertEquals("DELETE", request.method)
+        assertEquals("POST", request.method)
+        assertEquals("DELETE", request.getHeader("X-HTTP-Method-Override"))
         assertEquals("push", JSONObject(request.body.readUtf8()).getString("token"))
+    }
+
+    @Test
+    fun putUsesAllowedPostAndPreservesBodyAndAuthorization() {
+        server.enqueue(MockResponse().setResponseCode(204))
+        bremoExecute(service().putWithBody("Bearer T", ProbeBody("payload")))
+        val request = server.takeRequest()
+        assertEquals("POST", request.method)
+        assertEquals("PUT", request.getHeader("X-HTTP-Method-Override"))
+        assertEquals("Bearer T", request.getHeader("Authorization"))
+        assertEquals("payload", JSONObject(request.body.readUtf8()).getString("token"))
+    }
+
+    @Test
+    fun methodsOutsideTheVersionedApiAreNotChanged() {
+        server.enqueue(MockResponse().setResponseCode(204))
+        val outside = BremoHttp.typed(server.url("/other/").toString(), ProbeService::class.java)
+        bremoExecute(outside.deleteWithBody("Bearer T", ProbeBody("payload")))
+        val request = server.takeRequest()
+        assertEquals("DELETE", request.method)
+        assertEquals(null, request.getHeader("X-HTTP-Method-Override"))
     }
 
     @Test

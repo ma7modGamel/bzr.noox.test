@@ -74,6 +74,7 @@ Route::middleware('auth:sanctum')->group(function (): void {
     Route::get('addresses', [AddressController::class, 'index']);
     Route::post('addresses', [AddressController::class, 'store']);
     Route::patch('addresses/{address}', [AddressController::class, 'update']);
+    Route::post('addresses/{address}/default', [AddressController::class, 'makeDefault']);
     Route::delete('addresses/{address}', [AddressController::class, 'destroy']);
 
     // الوسائط والمحادثات المشتركة

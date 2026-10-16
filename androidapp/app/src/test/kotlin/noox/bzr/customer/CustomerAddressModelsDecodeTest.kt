@@ -53,7 +53,7 @@ class CustomerAddressModelsDecodeTest {
             val create = server.takeRequest()
             val update = server.takeRequest()
             assertEquals("POST" to "addresses", create.method to create.path!!.substringAfter("/api/v1/"))
-            assertEquals("PATCH" to "addresses/9", update.method to update.path!!.substringAfter("/api/v1/"))
+            assertEquals("PATCH" to "addresses/9", update.getHeader("X-HTTP-Method-Override") to update.path!!.substringAfter("/api/v1/"))
             val sent = JSONObject(create.body.readUtf8())
             assertEquals(
                 setOf("label", "city_id", "area_id", "address_text", "building", "floor", "apartment", "landmark", "lat", "lng", "is_default"),
@@ -69,15 +69,41 @@ class CustomerAddressModelsDecodeTest {
     @Test
     fun deleteAcceptsBackendJsonSuccess() {
         val server = MockWebServer()
-        server.enqueue(MockResponse().setResponseCode(200).setBody("""{"data":{"deleted_id":9,"default_address":null}}"""))
+        server.dispatcher = object : Dispatcher() {
+            override fun dispatch(request: RecordedRequest): MockResponse =
+                if (request.method == "POST" && request.getHeader("X-HTTP-Method-Override") == "DELETE") {
+                    MockResponse().setResponseCode(200).setBody("""{"data":{"deleted_id":9,"default_address":null}}""")
+                } else MockResponse().setResponseCode(403).setBody("<html>Forbidden by hosting method policy</html>")
+        }
         server.start()
         try {
             val deleted = UrlConnectionCustomerApi(server.url("/api/v1/").toString()).deleteAddress("T", 9)
             assertEquals(9, deleted.deletedId)
             assertNull(deleted.defaultAddress)
             val request = server.takeRequest()
-            assertEquals("DELETE", request.method)
+            assertEquals("POST", request.method)
+            assertEquals("DELETE", request.getHeader("X-HTTP-Method-Override"))
             assertEquals("/api/v1/addresses/9", request.path)
+        } finally { server.shutdown() }
+    }
+
+    @Test
+    fun settingPrimaryDecodesAllAddressFlagsActionsAndFullDisplayFromBackend() {
+        val server = MockWebServer()
+        val preferred = JSONObject(recorded("address_saved")).getJSONObject("data")
+        preferred.put("display_address", "Full address supplied by server")
+        preferred.put("actions", org.json.JSONArray("""[{"code":"edit","label":"Server edit"},{"code":"delete","label":"Server delete"}]"""))
+        server.enqueue(MockResponse().setBody(JSONObject().put("data", preferred).put("addresses", org.json.JSONArray().put(preferred)).toString()))
+        server.start()
+        try {
+            val update = UrlConnectionCustomerApi(server.url("/api/v1/").toString()).makeAddressDefault("T", 9)
+            assertTrue(update.data.isDefault)
+            assertEquals("Server delete", update.addresses.single().actions[1].label)
+            assertEquals("Full address supplied by server", update.addresses.single().detail())
+            val request = server.takeRequest()
+            assertEquals("POST", request.method)
+            assertEquals("/api/v1/addresses/9/default", request.path)
+            assertNull(request.getHeader("X-HTTP-Method-Override"))
         } finally { server.shutdown() }
     }
 

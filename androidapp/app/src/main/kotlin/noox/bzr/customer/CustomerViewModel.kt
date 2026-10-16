@@ -39,6 +39,10 @@ class CustomerViewModel(
 
     /** Back: the recorded screen as it was shown, home when nothing is recorded; false on home (the system may leave). */
     fun goBack(): Boolean {
+        if (state.screen == "SCR-C14") {
+            if (state.isBusy) return true
+            if (state.showConfirmation) { cancelDeleteAddress(); return true }
+        }
         val target = history.back { CustomerUiState("SCR-C01", CustomerPhase.Loading) } ?: return false
         when (target.screen) {
             "SCR-C04" -> openTiming()
@@ -760,12 +764,7 @@ class CustomerViewModel(
             cityId = it.city.id
             addressId = it.id
         }
-        mapOf(
-            "event" to "loaded", "selection_mode" to selectionMode,
-            "address_labels" to addressPayloads.map(CustomerAddress::label),
-            "address_details" to addressPayloads.map { it.detail() },
-            "selected_index" to selectedAddressIndex,
-        )
+        addressStateInput("loaded")
     }
 
     fun selectAddress(index: Int) {
@@ -993,12 +992,35 @@ class CustomerViewModel(
         }.start()
     }
 
+    fun makeAddressDefault(index: Int) {
+        if (state.isBusy) return
+        val id = addressIds.getOrNull(index) ?: return
+        if (addressPayloads.getOrNull(index)?.actions?.none { it.code == "set_default" } != false) return
+        state = reduce("SCR-C14", addressStateInput("setting_default", index))
+        Thread {
+            val result = runCatching { api.makeAddressDefault(token(), id) }
+            result.exceptionOrNull()?.let { logFailure("SCR-C14/default", it) }
+            mainHandler.post {
+                result.onSuccess { update ->
+                    val preferred = update.data
+                    addressPayloads = update.addresses
+                    addressIds = addressPayloads.map(CustomerAddress::id)
+                    selectedAddressIndex = addressPayloads.indexOfFirst(CustomerAddress::isDefault)
+                    addressId = preferred.id
+                    cityId = preferred.city.id
+                    state = reduce("SCR-C14", addressStateInput("default_saved"))
+                }.onFailure { state = reduce("SCR-C14", addressStateInput("default_failed")) }
+            }
+        }.start()
+    }
+
     fun requestDeleteAddress(index: Int) {
-        if (addressIds.getOrNull(index) == null) return
+        if (state.isBusy || addressIds.getOrNull(index) == null) return
         state = reduce("SCR-C14", addressStateInput("confirm_delete", index))
     }
 
     fun cancelDeleteAddress() {
+        if (state.isBusy) return
         state = reduce("SCR-C14", addressStateInput("loaded"))
     }
 
@@ -1013,7 +1035,7 @@ class CustomerViewModel(
             mainHandler.post {
                 result.onSuccess { deletion ->
                     addressPayloads = addressPayloads.filter { it.id != deletion.deletedId }.map {
-                        it.copy(isDefault = it.id == deletion.defaultAddress?.id)
+                        deletion.defaultAddress?.takeIf { preferred -> preferred.id == it.id } ?: it.copy(isDefault = false)
                     }
                     addressIds = addressPayloads.map(CustomerAddress::id)
                     selectedAddressIndex = addressPayloads.indexOfFirst(CustomerAddress::isDefault)
@@ -1021,7 +1043,7 @@ class CustomerViewModel(
                         addressId = deletion.defaultAddress?.id
                         cityId = deletion.defaultAddress?.city?.id
                     }
-                    state = reduce("SCR-C14", addressStateInput("loaded"))
+                    state = reduce("SCR-C14", addressStateInput("deleted"))
                 }.onFailure {
                     state = reduce("SCR-C14", addressStateInput("delete_failed"))
                 }
@@ -1034,6 +1056,8 @@ class CustomerViewModel(
         "address_labels" to addressPayloads.map(CustomerAddress::label),
         "address_details" to addressPayloads.map { it.detail() },
         "selected_index" to selectedAddressIndex, "pending_delete_index" to pendingIndex,
+        "primary_address_index" to addressPayloads.indexOfFirst(CustomerAddress::isDefault),
+        "address_ids" to addressIds.map(Int::toString), "address_actions" to addressPayloads.map(CustomerAddress::actions),
     )
 
     fun loadSlots(dayLabels: List<String>, morning: String, evening: String) {

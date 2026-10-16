@@ -183,7 +183,8 @@ class CustomerApiTypedCallsTest {
             assertEquals(true, JSONObject(it.body.readUtf8()).getBoolean("approve"))
         }
         server.takeRequest().let {
-            assertEquals("PATCH", it.method)
+            assertEquals("POST", it.method)
+            assertEquals("PATCH", it.getHeader("X-HTTP-Method-Override"))
             assertEquals("/api/v1/orders/7/payment-method", it.path)
             assertEquals("CASH", JSONObject(it.body.readUtf8()).getString("payment_method"))
         }

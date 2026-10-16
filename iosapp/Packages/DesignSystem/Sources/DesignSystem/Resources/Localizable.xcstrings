@@ -8262,13 +8262,13 @@
                 "ar": {
                     "stringUnit": {
                         "state": "translated",
-                        "value": "عناوين الخدمة"
+                        "value": "عناوينك"
                     }
                 },
                 "en": {
                     "stringUnit": {
                         "state": "translated",
-                        "value": "Service addresses"
+                        "value": "Your addresses"
                     }
                 }
             }
@@ -8278,13 +8278,13 @@
                 "ar": {
                     "stringUnit": {
                         "state": "translated",
-                        "value": "اختيار عنوان محفوظ أو إضافة عنوان جديد."
+                        "value": "العنوان الأساسي يُختار تلقائيًا عند إنشاء طلب جديد."
                     }
                 },
                 "en": {
                     "stringUnit": {
                         "state": "translated",
-                        "value": "Choose a saved address or add a new one."
+                        "value": "Your primary address is preselected for new requests."
                     }
                 }
             }
@@ -8454,13 +8454,13 @@
                 "ar": {
                     "stringUnit": {
                         "state": "translated",
-                        "value": "الافتراضي"
+                        "value": "العنوان الأساسي"
                     }
                 },
                 "en": {
                     "stringUnit": {
                         "state": "translated",
-                        "value": "Default"
+                        "value": "Primary address"
                     }
                 }
             }
@@ -8710,13 +8710,13 @@
                 "ar": {
                     "stringUnit": {
                         "state": "translated",
-                        "value": "تعيين كعنوان افتراضي"
+                        "value": "تعيين كعنوان أساسي"
                     }
                 },
                 "en": {
                     "stringUnit": {
                         "state": "translated",
-                        "value": "Set as default address"
+                        "value": "Set as primary address"
                     }
                 }
             }
@@ -19693,6 +19693,214 @@
                     "stringUnit": {
                         "state": "translated",
                         "value": "Could not delete the address. Check your connection and try again, or refresh your addresses."
+                    }
+                }
+            }
+        },
+        "address.actions.for": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "إجراءات عنوان {label}"
+                    }
+                },
+                "en": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "Actions for {label}"
+                    }
+                }
+            }
+        },
+        "address.use.for": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "استخدام عنوان {label} لهذا الطلب"
+                    }
+                },
+                "en": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "Use {label} for this request"
+                    }
+                }
+            }
+        },
+        "address.delete.named": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "حذف «{label}»؟"
+                    }
+                },
+                "en": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "Delete “{label}”?"
+                    }
+                }
+            }
+        },
+        "address.delete.primary.body": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "سيُحذف من عناوينك، ويصبح عنوان آخر أساسيًا تلقائيًا. الطلبات السابقة لن تتغير."
+                    }
+                },
+                "en": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "Another saved address will become primary. Previous requests remain unchanged."
+                    }
+                }
+            }
+        },
+        "address.default.missing": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "لم تحدد عنوانًا أساسيًا بعد. يمكنك تعيينه من قائمة إجراءات العنوان."
+                    }
+                },
+                "en": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "No primary address yet. Choose one from an address’s actions menu."
+                    }
+                }
+            }
+        },
+        "address.default.failed": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "تعذّر تغيير العنوان الأساسي. حاول مجددًا أو حدّث القائمة."
+                    }
+                },
+                "en": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "Could not change the primary address. Try again or refresh the list."
+                    }
+                }
+            }
+        },
+        "address.default.saved": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "تم تغيير العنوان الأساسي."
+                    }
+                },
+                "en": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "Primary address updated."
+                    }
+                }
+            }
+        },
+        "address.deleted": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "تم حذف العنوان."
+                    }
+                },
+                "en": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "Address deleted."
+                    }
+                }
+            }
+        },
+        "address.details": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "عرض التفاصيل"
+                    }
+                },
+                "en": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "View details"
+                    }
+                }
+            }
+        },
+        "address.list.selection.body": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "اضغط على العنوان الذي تريد استخدامه لهذا الطلب."
+                    }
+                },
+                "en": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "Tap the address to use for this request."
+                    }
+                }
+            }
+        },
+        "address.detail.building": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "مبنى {value}"
+                    }
+                },
+                "en": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "Building {value}"
+                    }
+                }
+            }
+        },
+        "address.detail.floor": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "الدور {value}"
+                    }
+                },
+                "en": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "Floor {value}"
+                    }
+                }
+            }
+        },
+        "address.detail.apartment": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "شقة {value}"
+                    }
+                },
+                "en": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "Apartment {value}"
                     }
                 }
             }

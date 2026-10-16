@@ -46,7 +46,7 @@ class CustomerSupportModelsDecodeTest {
                 val path = request.path!!.substringAfter("/api/v1/")
                 return when {
                     path.endsWith("/payments") -> MockResponse().setResponseCode(201).setBody(recorded("payment_created"))
-                    path == "me" && request.method == "PATCH" -> MockResponse().setBody(recorded("me_updated"))
+                    path == "me" && request.getHeader("X-HTTP-Method-Override") == "PATCH" -> MockResponse().setBody(recorded("me_updated"))
                     else -> MockResponse().setResponseCode(204)
                 }
             }
@@ -64,7 +64,7 @@ class CustomerSupportModelsDecodeTest {
             val requests = List(6) { server.takeRequest() }
             assertEquals(
                 listOf("POST orders/7/payments", "POST orders/7/review", "POST providers/2/reports", "DELETE me/devices", "POST auth/logout", "PATCH me"),
-                requests.map { "${it.method} ${it.path!!.substringAfter("/api/v1/")}" },
+                requests.map { "${it.getHeader("X-HTTP-Method-Override") ?: it.method} ${it.path!!.substringAfter("/api/v1/")}" },
             )
             val bodies = requests.map { JSONObject(it.body.readUtf8().ifBlank { "{}" }) }
             assertEquals(3, bodies[0].getInt("expected_version"))

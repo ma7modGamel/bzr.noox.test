@@ -28,6 +28,7 @@ data class CustomerHomePayload(
     val instapay: InstapayDetails? = null,
 )
 
+@kotlinx.serialization.Serializable
 data class CustomerOption(val code: String, val label: String)
 
 data class CustomerProblemType(val id: Int, val name: String, val isOther: Boolean, val customerPriceGuide: CustomerPriceGuide? = null)
@@ -88,6 +89,7 @@ interface CustomerApi {
     fun cities(): List<IdName>
     fun areas(cityId: Int): List<IdName>
     fun saveAddress(token: String, addressId: Int?, body: AddressBody): CustomerAddress
+    fun makeAddressDefault(token: String, addressId: Int): AddressBookUpdate
     fun deleteAddress(token: String, addressId: Int): AddressDeletion
     fun slots(cityId: Int, date: String): List<SlotRange>
     fun uploadMedia(token: String, upload: CustomerMediaUpload): UploadedMedia
@@ -250,6 +252,9 @@ class UrlConnectionCustomerApi(private val baseUrl: String) : CustomerApi {
     override fun saveAddress(token: String, addressId: Int?, body: AddressBody): CustomerAddress = typed {
         if (addressId == null) service.createAddress(bearer(token), body) else service.updateAddress(bearer(token), addressId, body)
     }.data
+
+    override fun makeAddressDefault(token: String, addressId: Int): AddressBookUpdate =
+        typed { service.makeAddressDefault(bearer(token), addressId) }
 
     override fun deleteAddress(token: String, addressId: Int): AddressDeletion =
         typed { service.deleteAddress(bearer(token), addressId) }.data

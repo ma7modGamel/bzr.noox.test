@@ -6,6 +6,7 @@ namespace App\Http\Api\V1\Controllers;
 
 use App\Modules\Customers\Models\CustomerAddress;
 use App\Modules\Geography\Models\Area;
+use App\Modules\Identity\Models\User;
 use App\Support\Exceptions\BusinessRuleViolationException;
 use App\Support\Localization;
 use Illuminate\Http\JsonResponse;
@@ -19,8 +20,7 @@ final class AddressController
     public function index(Request $request): JsonResponse
     {
         return new JsonResponse([
-            'data' => $request->user()->addresses()->with(['city', 'area'])->get()
-                ->map(fn (CustomerAddress $a): array => $this->payload($a)),
+            'data' => $this->addressesPayload($request->user()),
         ]);
     }
 
@@ -30,6 +30,10 @@ final class AddressController
         $this->assertAreaIsServed((int) $data['area_id']);
 
         $address = DB::transaction(function () use ($request, $data): CustomerAddress {
+            User::query()->whereKey($request->user()->getKey())->lockForUpdate()->firstOrFail();
+            if (! $request->user()->addresses()->exists()) {
+                $data['is_default'] = true;
+            }
             if ($data['is_default'] ?? false) {
                 $request->user()->addresses()->update(['is_default' => false]);
             }
@@ -48,6 +52,7 @@ final class AddressController
         $this->assertAreaIsServed((int) $data['area_id']);
 
         DB::transaction(function () use ($request, $address, $data): void {
+            User::query()->whereKey($request->user()->getKey())->lockForUpdate()->firstOrFail();
             if ($data['is_default'] ?? false) {
                 $request->user()->addresses()->whereKeyNot($address->getKey())->update(['is_default' => false]);
             }
@@ -58,11 +63,33 @@ final class AddressController
         return new JsonResponse(['data' => $this->payload($address->fresh(['city', 'area']))]);
     }
 
+    public function makeDefault(Request $request, CustomerAddress $address): JsonResponse
+    {
+        Gate::authorize('update', $address);
+        $payload = DB::transaction(function () use ($request, $address): array {
+            User::query()->whereKey($request->user()->getKey())->lockForUpdate()->firstOrFail();
+            $address->refresh();
+            abort_if($address->trashed(), 404);
+            $request->user()->addresses()->whereKeyNot($address->getKey())->update(['is_default' => false]);
+            $address->update(['is_default' => true]);
+
+            return [
+                'data' => $this->payload($address->fresh(['city', 'area'])),
+                'addresses' => $this->addressesPayload($request->user()),
+            ];
+        });
+
+        return new JsonResponse($payload);
+    }
+
     public function destroy(Request $request, CustomerAddress $address): JsonResponse
     {
         Gate::authorize('delete', $address);
 
         $defaultAddress = DB::transaction(function () use ($request, $address): ?CustomerAddress {
+            User::query()->whereKey($request->user()->getKey())->lockForUpdate()->firstOrFail();
+            $address->refresh();
+            abort_if($address->trashed(), 404);
             $wasDefault = $address->is_default;
             $address->delete();
 
@@ -93,6 +120,13 @@ final class AddressController
                 'default_address' => $defaultAddress === null ? null : $this->payload($defaultAddress),
             ],
         ]);
+    }
+
+    /** @return list<array<string, mixed>> */
+    private function addressesPayload(User $user): array
+    {
+        return $user->addresses()->with(['city', 'area'])->orderByDesc('is_default')->orderByDesc('id')->get()
+            ->map(fn (CustomerAddress $address): array => $this->payload($address))->all();
     }
 
     /** @return array<string, mixed> */
@@ -127,6 +161,20 @@ final class AddressController
         }
     }
 
+    private function displayAddress(CustomerAddress $address): string
+    {
+        $parts = [Localization::field($address->city), Localization::field($address->area), $address->address_text];
+        foreach (['building', 'floor', 'apartment'] as $field) {
+            $value = $address->{$field};
+            if ($value !== null && trim($value) !== '') {
+                $parts[] = str_replace('{value}', $value, Localization::design('address.detail.'.$field));
+            }
+        }
+        $parts[] = $address->landmark;
+
+        return implode(' · ', array_filter($parts, fn (?string $part): bool => $part !== null && trim($part) !== ''));
+    }
+
     /** @return array<string, mixed> */
     private function payload(CustomerAddress $address): array
     {
@@ -136,6 +184,7 @@ final class AddressController
             'city' => ['id' => $address->city_id, 'name' => Localization::field($address->city)],
             'area' => ['id' => $address->area_id, 'name' => Localization::field($address->area)],
             'address_text' => $address->address_text,
+            'display_address' => $this->displayAddress($address),
             'building' => $address->building,
             'floor' => $address->floor,
             'apartment' => $address->apartment,
@@ -143,6 +192,11 @@ final class AddressController
             'lat' => $address->lat,
             'lng' => $address->lng,
             'is_default' => $address->is_default,
+            'actions' => array_values(array_filter([
+                ['code' => 'edit', 'label' => Localization::design('common.edit')],
+                $address->is_default ? null : ['code' => 'set_default', 'label' => Localization::design('address.default')],
+                ['code' => 'delete', 'label' => Localization::design('address.delete')],
+            ])),
         ];
     }
 }
