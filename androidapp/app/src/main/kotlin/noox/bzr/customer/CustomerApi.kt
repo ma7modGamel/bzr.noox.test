@@ -99,6 +99,9 @@ interface CustomerApi {
     fun reportProvider(token: String, providerId: Int, orderId: Int, reasonCode: String, description: String?)
     fun faqs(): List<FaqItem>
     fun sendSupportMessage(token: String, subject: String, message: String)
+    fun unreadNotificationCount(token: String): Int = notifications(token).count { it.readAt == null }
+    fun updateAccountDetails(token: String, name: String, email: String, phone: String, currentPassword: String?): AccountUser = throw UnsupportedOperationException()
+    fun updateAvatar(token: String, mediaId: Int): AccountUser = throw UnsupportedOperationException()
     fun notifications(token: String): List<NotificationItem>
     fun markNotificationsRead(token: String, ids: List<String>)
     fun registerDevice(token: String, deviceToken: String)
@@ -284,6 +287,12 @@ class UrlConnectionCustomerApi(private val baseUrl: String) : CustomerApi {
     override fun sendSupportMessage(token: String, subject: String, message: String) {
         typed { service.sendSupportMessage(bearer(token), SupportMessageBody(subject, message)) }
     }
+
+    override fun unreadNotificationCount(token: String): Int = typed { service.notifications(bearer(token)) }.let { response -> response.meta?.unreadCount ?: response.data.count { it.readAt == null } }
+    override fun updateAccountDetails(token: String, name: String, email: String, phone: String, currentPassword: String?): AccountUser =
+        typed { service.updateAccount(bearer(token), AccountUpdateBody(name, phone, email, currentPassword)) }.user
+    override fun updateAvatar(token: String, mediaId: Int): AccountUser =
+        typed { service.updateAccount(bearer(token), AccountUpdateBody(avatarMediaId = mediaId)) }.user
 
     override fun notifications(token: String): List<NotificationItem> = typed { service.notifications(bearer(token)) }.data
 

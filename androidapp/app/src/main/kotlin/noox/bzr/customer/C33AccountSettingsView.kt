@@ -11,19 +11,24 @@ import noox.bzr.gallery.databinding.ScreenC33AccountSettingsBinding
 class C33AccountSettingsView(context: Context) : CustomerScreenView(context) {
     private val binding = ScreenC33AccountSettingsBinding.inflate(inflater, content)
     private val sheet = AppBottomSheetView(context)
+    var loadImage: (String, (android.graphics.Bitmap?) -> Unit) -> Unit = { _, ready -> ready(null) }
+    var onPickPhoto: () -> Unit = {}
     var onAction: (String) -> Unit = {}
     var onFieldChange: (Int, String) -> Unit = { _, _ -> }
     var onRatingRemindersChange: (Boolean) -> Unit = {}
 
     init {
         binding.editName.onValueChange = { onFieldChange(0, it) }
+        binding.editEmail.onValueChange = { onFieldChange(1, it) }
+        binding.emailPassword.onValueChange = { onFieldChange(3, it) }
+        binding.changePhoto.onClick = { onPickPhoto() }
         binding.editPhone.onValueChange = { onFieldChange(2, it) }
         binding.save.onClick = { onAction("update_account") }
         listOf(binding.currentPassword, binding.newPassword, binding.confirmPassword).forEachIndexed { index, field ->
             field.onValueChange = { onFieldChange(index, it) }
         }
         binding.changePassword.onClick = { onAction("change_password") }
-        binding.name.onClick = { onAction("update_account") }
+        listOf(binding.name, binding.email, binding.phone).forEach { row -> row.onClick = { onAction("update_account") } }
         binding.passwordRow.onClick = { onAction("change_password") }
         binding.terms.onClick = { onAction("open_terms") }
         binding.ratingReminders.setOnClickListener { onRatingRemindersChange(!binding.ratingReminders.checked) }
@@ -44,7 +49,7 @@ class C33AccountSettingsView(context: Context) : CustomerScreenView(context) {
         val mode = state.items.firstOrNull() ?: "overview"
         binding.message.isVisible = state.messageKey != null
         state.messageKey?.let {
-            binding.message.text = string(if (it == "account.delete.active_order") R.string.account_delete_active_order else R.string.account_settings_success)
+            binding.message.text = string(when (it) { "account.delete.active_order" -> R.string.account_delete_active_order; "account.settings.failed" -> R.string.account_settings_failed; "account.settings.email_saved" -> R.string.account_settings_email_saved; else -> R.string.account_settings_success })
         }
         binding.edit.isVisible = mode == "edit"
         binding.password.isVisible = mode == "password"
@@ -56,6 +61,14 @@ class C33AccountSettingsView(context: Context) : CustomerScreenView(context) {
                 binding.editName.state = fieldState(state, "account.validation.name")
                 binding.editName.error = if ("account.validation.name" in state.fieldErrors) string(R.string.account_validation_name) else null
                 binding.editEmail.value = value(1)
+                binding.editEmail.state = fieldState(state, "account.validation.email")
+                binding.editEmail.error = if ("account.validation.email" in state.fieldErrors) string(R.string.account_validation_email) else null
+                binding.editPhone.state = fieldState(state, "account.validation.phone")
+                binding.editPhone.error = if ("account.validation.phone" in state.fieldErrors) string(R.string.account_validation_phone) else null
+                binding.emailHint.isVisible = state.emailChanged
+                binding.emailPassword.isVisible = state.emailChanged
+                binding.emailPassword.value = value(3)
+                binding.emailPassword.state = fieldState(state, "account.validation.current_password")
                 binding.editPhone.value = value(2)
                 binding.save.state = customerButtonState(state)
             }
@@ -75,9 +88,13 @@ class C33AccountSettingsView(context: Context) : CustomerScreenView(context) {
                 binding.changePassword.state = customerButtonState(state)
             }
             else -> {
-                binding.name.text = state.fieldValues.getOrElse(0) { string(R.string.account_settings_name) }
-                binding.email.text = state.fieldValues.getOrElse(1) { string(R.string.account_settings_email) }
-                binding.phone.text = state.fieldValues.getOrElse(2) { string(R.string.account_settings_phone) }
+                binding.avatar.loadImage = loadImage
+                binding.avatar.isVisible = state.accountAvatarUrl.isNotBlank()
+                if (state.accountAvatarUrl.isNotBlank()) binding.avatar.bind(state.accountAvatarUrl)
+                binding.changePhoto.enabled = !state.isBusy
+                binding.name.text = string(R.string.account_settings_name) + ": " + value(0)
+                binding.email.text = string(R.string.account_settings_email) + ": " + value(1)
+                binding.phone.text = string(R.string.account_settings_phone) + ": " + value(2)
                 binding.passwordRow.isVisible = "change_password" in state.visibleActions
                 binding.ratingReminders.checked = state.ratingRemindersEnabled
                 binding.ratingReminders.contentDescription = string(R.string.account_rating_reminders)

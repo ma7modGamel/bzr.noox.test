@@ -1154,5 +1154,16 @@
   "address.list.selection.body": "Tap the address to use for this request.",
   "address.detail.building": "Building {value}",
   "address.detail.floor": "Floor {value}",
-  "address.detail.apartment": "Apartment {value}"
+  "address.detail.apartment": "Apartment {value}",
+  "refresh.updated": "Data updated",
+  "refresh.failed": "Could not refresh. Showing the last successful update. Pull to try again.",
+  "refresh.pull": "Pull to refresh",
+  "refresh.loading": "Refreshing data…",
+  "notifications.read_failed": "Could not mark the notification as read. Please try again.",
+  "account.settings.photo": "Add or change profile photo",
+  "account.settings.email_hint": "To change your email, enter your current password. We will send a verification email to the new address.",
+  "account.settings.email_saved": "Details saved. Check your new email to verify it.",
+  "account.settings.failed": "Could not save. Check your details and try again.",
+  "account.validation.email": "Enter a valid email address",
+  "account.validation.phone": "Enter a valid 11-digit Egyptian phone number starting with 01"
 }

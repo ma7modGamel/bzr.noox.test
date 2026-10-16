@@ -268,7 +268,7 @@ public struct C07ProviderView: View {
     }
 }
 
-private struct ProfileRemoteImage<Placeholder: View>: View {
+struct ProfileRemoteImage<Placeholder: View>: View {
     let url: String
     let label: String
     let loadImage: (String) async -> Data?

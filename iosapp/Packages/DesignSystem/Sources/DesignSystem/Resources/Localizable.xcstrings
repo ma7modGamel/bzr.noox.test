@@ -19904,6 +19904,182 @@
                     }
                 }
             }
+        },
+        "refresh.updated": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "تم تحديث البيانات"
+                    }
+                },
+                "en": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "Data updated"
+                    }
+                }
+            }
+        },
+        "refresh.failed": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "تعذر التحديث. البيانات المعروضة من آخر تحديث ناجح؛ اسحب للمحاولة مرة أخرى."
+                    }
+                },
+                "en": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "Could not refresh. Showing the last successful update. Pull to try again."
+                    }
+                }
+            }
+        },
+        "refresh.pull": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "اسحب لتحديث البيانات"
+                    }
+                },
+                "en": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "Pull to refresh"
+                    }
+                }
+            }
+        },
+        "refresh.loading": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "جارٍ تحديث البيانات…"
+                    }
+                },
+                "en": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "Refreshing data…"
+                    }
+                }
+            }
+        },
+        "notifications.read_failed": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "تعذر تسجيل قراءة الإشعار. حاول مرة أخرى."
+                    }
+                },
+                "en": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "Could not mark the notification as read. Please try again."
+                    }
+                }
+            }
+        },
+        "account.settings.photo": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "إضافة أو تغيير الصورة الشخصية"
+                    }
+                },
+                "en": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "Add or change profile photo"
+                    }
+                }
+            }
+        },
+        "account.settings.email_hint": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "لتغيير البريد، أدخل كلمة المرور الحالية. سنرسل رسالة لتأكيد البريد الجديد."
+                    }
+                },
+                "en": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "To change your email, enter your current password. We will send a verification email to the new address."
+                    }
+                }
+            }
+        },
+        "account.settings.email_saved": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "تم حفظ البيانات. راجع بريدك الجديد لتأكيده."
+                    }
+                },
+                "en": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "Details saved. Check your new email to verify it."
+                    }
+                }
+            }
+        },
+        "account.settings.failed": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "تعذر الحفظ. راجع البيانات وحاول مرة أخرى."
+                    }
+                },
+                "en": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "Could not save. Check your details and try again."
+                    }
+                }
+            }
+        },
+        "account.validation.email": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "أدخل بريدًا إلكترونيًا صحيحًا"
+                    }
+                },
+                "en": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "Enter a valid email address"
+                    }
+                }
+            }
+        },
+        "account.validation.phone": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "أدخل رقم هاتف مصريًا صحيحًا من ١١ رقمًا يبدأ بـ01"
+                    }
+                },
+                "en": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "Enter a valid 11-digit Egyptian phone number starting with 01"
+                    }
+                }
+            }
         }
     },
     "version": "1.0"

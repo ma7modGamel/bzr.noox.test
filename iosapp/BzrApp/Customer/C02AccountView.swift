@@ -8,9 +8,11 @@ import UIKit
 /// orders, saved addresses, active orders. «طرق الدفع» is left out (ASM-05: no saved cards) and «تقييماتي» too (B-10: no endpoint).
 public struct C02AccountView: View {
     let state: CustomerUIState
+    let loadImage: (String) async -> Data?
     let onOpen: (String) -> Void
 
-    public init(state: CustomerUIState, onOpen: @escaping (String) -> Void = { _ in }) {
+    public init(state: CustomerUIState, onOpen: @escaping (String) -> Void = { _ in }, loadImage: @escaping (String) async -> Data? = { _ in nil }) {
+        self.loadImage = loadImage
         self.state = state
         self.onOpen = onOpen
     }
@@ -65,11 +67,12 @@ public struct C02AccountView: View {
     private var profileCard: some View {
         let name = value(0)
         return VStack(spacing: DesignSpace.s) {
-            // BACKEND-NOTES B-16: the app loads no remote photos, so the avatar shows the first letter.
-            Circle().fill(DesignColors.statusPillBg)
-                .frame(width: DesignSize.profileAvatar, height: DesignSize.profileAvatar)
-                .overlay(BzrText(String(name.prefix(1)), style: DesignType.profileName.colored(DesignColors.primary600)))
-                .overlay(Circle().stroke(DesignColors.surfaceContainer, lineWidth: DesignSize.controlStroke))
+            ProfileRemoteImage(url: state.accountAvatarURL, label: name, loadImage: loadImage) {
+                Circle().fill(DesignColors.statusPillBg)
+                    .overlay(BzrText(String(name.prefix(1)), style: DesignType.profileName.colored(DesignColors.primary600)))
+            }
+            .frame(width: DesignSize.profileAvatar, height: DesignSize.profileAvatar)
+            .clipShape(Circle())
             HStack(spacing: DesignSpace.xs) {
                 BzrText(name, style: DesignType.profileName)
                 if state.messageKey == "account.verified" {

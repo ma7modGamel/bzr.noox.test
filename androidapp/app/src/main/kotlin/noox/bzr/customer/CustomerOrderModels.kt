@@ -59,7 +59,10 @@ data class CatalogCategory(
 )
 
 @Serializable
-data class DataList<T>(val data: List<T>)
+data class DataList<T>(val data: List<T>, val meta: NotificationMeta? = null)
+
+@Serializable
+data class NotificationMeta(@SerialName("unread_count") val unreadCount: Int = 0)
 
 @Serializable
 data class DataItem<T>(val data: T)

@@ -30,6 +30,10 @@ object CustomerCatalogSelection {
 data class CustomerUiState(
     val screen: String,
     val phase: CustomerPhase,
+    val isRefreshing: Boolean = false,
+    val refreshMessageKey: String? = null,
+    val accountAvatarUrl: String = "",
+    val emailChanged: Boolean = false,
     val reviewTagSummary: List<String> = emptyList(),
     val imageGroups: List<List<String>> = emptyList(),
     val beforePhotoUrls: List<String> = emptyList(),
@@ -134,7 +138,7 @@ object CustomerLogic {
             .copy(reviewTagSummary = input.strings("review_tag_summary"), imageGroups = input.strings("image_groups").map { it.split("\n").filter(String::isNotBlank) }, beforePhotoUrls = input.strings("work_before_urls"), afterPhotoUrls = input.strings("work_after_urls"), proposalPhotoUrl = input.text("proposal_photo_url"), arrivalCode = input.text("arrival_code"), arrivalCodeUntil = input.text("arrival_code_until"), arrivalCodeRequired = input.boolean("arrival_code_required"), arrivalExceptionPending = input.boolean("arrival_exception_pending"), arrivalCodeFailed = input.boolean("arrival_code_failed"))
             .copy(warrantyCoverage = input.text("warranty_coverage"), warrantyVisitId = input.integer("warranty_visit_id").takeIf { it > 0 }, warrantyVisitFinal = input.boolean("warranty_visit_final"))
             .copy(requestSteps = if (input.text("operating_mode") == "staff") 4 else 5, waitingInfo = input.text("waiting_info"))
-            .copy(providerAvatarUrl = input.text("provider_avatar_url"), portfolioUrls = input.strings("portfolio_urls"), unreadCounts = input.strings("unread_counts").map { it.toIntOrNull() ?: 0 }, providersAvailable = input.strings("providers_available").map { it == "true" }, providerAvailable = input.boolean("provider_available"))
+            .copy(accountAvatarUrl = input.text("account_avatar_url"), emailChanged = input.boolean("email_changed"), providerAvatarUrl = input.text("provider_avatar_url"), portfolioUrls = input.strings("portfolio_urls"), unreadCounts = input.strings("unread_counts").map { it.toIntOrNull() ?: 0 }, providersAvailable = input.strings("providers_available").map { it == "true" }, providerAvailable = input.boolean("provider_available"))
 
     private fun reduceScreen(screen: String, input: Map<String, Any?>): CustomerUiState {
         val event = input.text("event")
@@ -676,6 +680,9 @@ object CustomerLogic {
         val mode = input.text("mode").ifBlank { "overview" }
         val values = input.strings("field_values")
         val errors = buildList {
+            if (mode == "edit" && !values.getOrNull(1).orEmpty().matches(Regex("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$"))) add("account.validation.email")
+            if (mode == "edit" && !values.getOrNull(2).orEmpty().matches(Regex("^01[0-9]{9}$"))) add("account.validation.phone")
+            if (mode == "edit" && input.boolean("email_changed") && values.getOrNull(3).orEmpty().isBlank()) add("account.validation.current_password")
             if (mode == "edit" && values.getOrNull(0).orEmpty().trim().length < 2) add("account.validation.name")
             if (mode == "password" && values.getOrNull(0).orEmpty().isBlank()) add("account.validation.current_password")
             if (mode == "password" && values.getOrNull(1).orEmpty().length < 8) add("account.validation.new_password")
@@ -689,6 +696,8 @@ object CustomerLogic {
             messageKey = when (input.text("event")) {
                 "success" -> "account.settings.success"
                 "active_order" -> "account.delete.active_order"
+                "email_saved" -> "account.settings.email_saved"
+                "save_error" -> "account.settings.failed"
                 else -> null
             },
             visibleActions = input.strings("available_actions"),

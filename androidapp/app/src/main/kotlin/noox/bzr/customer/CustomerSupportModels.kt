@@ -94,7 +94,7 @@ data class DeviceTokenBody(val token: String)
 data class RatingRemindersBody(@SerialName("rating_reminders_enabled") val ratingRemindersEnabled: Boolean)
 
 @Serializable
-data class AccountUpdateBody(val name: String, val phone: String)
+data class AccountUpdateBody(val name: String? = null, val phone: String? = null, val email: String? = null, @SerialName("current_password") val currentPassword: String? = null, @SerialName("avatar_media_id") val avatarMediaId: Int? = null)
 
 @Serializable
 data class LocaleUpdateBody(val locale: String)

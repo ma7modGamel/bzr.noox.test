@@ -1154,5 +1154,16 @@
   "address.list.selection.body": "اضغط على العنوان الذي تريد استخدامه لهذا الطلب.",
   "address.detail.building": "مبنى {value}",
   "address.detail.floor": "الدور {value}",
-  "address.detail.apartment": "شقة {value}"
+  "address.detail.apartment": "شقة {value}",
+  "refresh.updated": "تم تحديث البيانات",
+  "refresh.failed": "تعذر التحديث. البيانات المعروضة من آخر تحديث ناجح؛ اسحب للمحاولة مرة أخرى.",
+  "refresh.pull": "اسحب لتحديث البيانات",
+  "refresh.loading": "جارٍ تحديث البيانات…",
+  "notifications.read_failed": "تعذر تسجيل قراءة الإشعار. حاول مرة أخرى.",
+  "account.settings.photo": "إضافة أو تغيير الصورة الشخصية",
+  "account.settings.email_hint": "لتغيير البريد، أدخل كلمة المرور الحالية. سنرسل رسالة لتأكيد البريد الجديد.",
+  "account.settings.email_saved": "تم حفظ البيانات. راجع بريدك الجديد لتأكيده.",
+  "account.settings.failed": "تعذر الحفظ. راجع البيانات وحاول مرة أخرى.",
+  "account.validation.email": "أدخل بريدًا إلكترونيًا صحيحًا",
+  "account.validation.phone": "أدخل رقم هاتف مصريًا صحيحًا من ١١ رقمًا يبدأ بـ01"
 }

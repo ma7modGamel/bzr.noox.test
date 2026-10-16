@@ -30,7 +30,12 @@ final class AccountController
 
     public function update(Request $request): JsonResponse
     {
+        /** @var User $user */
+        $user = $request->user();
+        $emailChanged = $request->has('email') && $request->input('email') !== $user->email;
         $data = $request->validate([
+            'email' => ['sometimes', 'required', 'email', 'max:255', Rule::unique('users')->ignore($user)],
+            'current_password' => [Rule::requiredIf($emailChanged), 'nullable', 'string'],
             'name' => ['sometimes', 'string', 'min:2', 'max:100'],
             'phone' => ['sometimes', 'regex:/^01[0-9]{9}$/'],
             'avatar_media_id' => ['sometimes', 'nullable', 'integer'],
@@ -38,14 +43,17 @@ final class AccountController
             'rating_reminders_enabled' => ['sometimes', 'boolean'], // NTF-18 فقط (17، DEC-058)
         ]);
 
-        /** @var User $user */
-        $user = $request->user();
+        if ($emailChanged && ! Hash::check($data['current_password'], $user->password)) {
+            throw ValidationException::withMessages(['current_password' => Localization::text('copy.the_current_password_is_incorrect')]);
+        }
+        unset($data['current_password']);
         if (array_key_exists('avatar_media_id', $data) && $data['avatar_media_id'] !== null) {
             $media = OrderMedia::query()
                 ->whereKey($data['avatar_media_id'])
                 ->where('uploaded_by', $user->getKey())
                 ->whereNull('order_id')
                 ->where('type', 'IMAGE')
+                ->where(fn ($query) => $query->whereNull('expires_at')->orWhere('expires_at', '>', now()))
                 ->first();
             if ($media === null) {
                 throw ValidationException::withMessages(['avatar_media_id' => Localization::text('copy.the_photo_is_invalid_or_does_not_belong_to')]);
@@ -59,7 +67,14 @@ final class AccountController
             $media->delete();
         }
 
-        $user->fill($data)->save();
+        $user->fill($data);
+        if ($emailChanged) {
+            $user->email_verified_at = null;
+        }
+        $user->save();
+        if ($emailChanged) {
+            $user->sendEmailVerificationNotification();
+        }
 
         return new JsonResponse(['user' => $this->payload($user->refresh())]);
     }
@@ -126,7 +141,7 @@ final class AccountController
             'locale' => $user->locale,
             'email' => $user->email,
             'phone' => $user->phone,
-            'avatar_url' => $user->avatar_path === null ? null : route('api.account.avatar'),
+            'avatar_url' => $user->avatar_path === null ? null : route('api.account.avatar', ['v' => substr(hash('sha256', $user->avatar_path), 0, 16)]),
             'is_verified' => $user->isVerified(),
             'rating_reminders_enabled' => (bool) ($user->rating_reminders_enabled ?? true),
             'order_statistics' => ['completed' => $user->completed_orders_count, 'active' => $user->active_orders_count],

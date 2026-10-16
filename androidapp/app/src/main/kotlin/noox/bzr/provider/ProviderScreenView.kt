@@ -15,6 +15,8 @@ abstract class ProviderScreenView(context: Context) : FrameLayout(context) {
     protected val content: LinearLayout get() = scaffold.content
     protected val overlay: FrameLayout get() = scaffold.overlay
     var onBack: () -> Unit = {}
+    var onRefresh: (() -> Unit)? = null
+    var refreshEnabled = false
 
     init {
         layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
@@ -25,6 +27,13 @@ abstract class ProviderScreenView(context: Context) : FrameLayout(context) {
     }
 
     fun render(state: ProviderUiState) {
+        scaffold.scroll.onRefresh = { onRefresh?.invoke() }
+        scaffold.scroll.refreshEnabled = refreshEnabled && !state.isBusy && !state.isRefreshing
+        scaffold.scroll.contentDescription = if (refreshEnabled) string(noox.bzr.design.R.string.refresh_pull) else null
+        scaffold.scroll.refreshing = state.isRefreshing
+        scaffold.refreshProgress.isVisible = state.isRefreshing
+        scaffold.refreshFeedback.isVisible = state.refreshMessageKey != null
+        state.refreshMessageKey?.let { scaffold.refreshFeedback.text = string(if (it == "refresh.failed") noox.bzr.design.R.string.refresh_failed else noox.bzr.design.R.string.refresh_updated) }
         scaffold.topBar.title = title()
         scaffold.loading.isVisible = state.phase == ProviderPhase.Loading
         scaffold.error.isVisible = state.phase == ProviderPhase.Error

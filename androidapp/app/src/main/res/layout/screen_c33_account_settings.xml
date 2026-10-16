@@ -30,14 +30,16 @@
             android:id="@+id/editEmail"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:bremoLabel="@string/account_settings_email"
-            app:fieldState="disabled" />
+            app:bremoLabel="@string/account_settings_email" />
 
         <noox.bzr.design.views.AppTextFieldView
             android:id="@+id/editPhone"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:bremoLabel="@string/account_settings_phone" />
+
+        <TextView android:id="@+id/emailHint" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/account_settings_email_hint" android:textAppearance="@style/TextAppearance.Bremo.Secondary" />
+        <noox.bzr.design.views.SecureTextFieldView android:id="@+id/emailPassword" android:layout_width="match_parent" android:layout_height="wrap_content" app:bremoLabel="@string/account_settings_current_password" />
 
         <noox.bzr.design.views.PrimaryButtonView
             android:id="@+id/save"
@@ -96,6 +98,9 @@
             android:layout_height="wrap_content"
             android:textAppearance="@style/TextAppearance.Bremo.SectionTitle"
             android:text="@string/account_settings_profile" />
+
+        <noox.bzr.customer.AccountAvatarView android:id="@+id/avatar" android:layout_width="@dimen/bremo_size_profile_avatar" android:layout_height="@dimen/bremo_size_profile_avatar" android:contentDescription="@string/account_settings_photo" />
+        <noox.bzr.design.views.SecondaryButtonView android:id="@+id/changePhoto" android:layout_width="match_parent" android:layout_height="wrap_content" app:bremoText="@string/account_settings_photo" />
 
         <noox.bzr.design.views.MenuRowView
             android:id="@+id/name"

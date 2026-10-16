@@ -7,6 +7,8 @@ enum class ProviderPhase { Empty, Loading, Content, Error }
 data class ProviderUiState(
     val screen: String,
     val phase: ProviderPhase,
+    val isRefreshing: Boolean = false,
+    val refreshMessageKey: String? = null,
     val imageGroups: List<List<String>> = emptyList(),
     val arrivalError: String = "",
     val arrivalCodeRequired: Boolean = false,

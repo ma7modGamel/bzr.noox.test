@@ -28,23 +28,81 @@ class CustomerViewModel(
     var state: CustomerUiState
         get() = mutableState.value
         private set(value) {
+            val snapshot = refreshSnapshot
+            val resolved = if (snapshot != null) {
+                when (value.phase) {
+                    CustomerPhase.Loading -> snapshot.copy(isRefreshing = true, isBusy = true, refreshMessageKey = null)
+                    CustomerPhase.Error -> snapshot.copy(refreshMessageKey = "refresh.failed").also { refreshSnapshot = null }
+                    else -> value.copy(isRefreshing = false, refreshMessageKey = "refresh.updated").also { refreshSnapshot = null }
+                }
+            } else value
             hasStarted = true
             // Loading is transient; an error screen is shown but not returned to.
-            if (value.phase != CustomerPhase.Loading) history.show(value, restorable = value.phase != CustomerPhase.Error)
-            mutableState.value = value
+            if (resolved.phase != CustomerPhase.Loading) history.show(resolved, restorable = resolved.phase != CustomerPhase.Error)
+            mutableState.value = resolved
         }
+
+    private var refreshSnapshot: CustomerUiState? = null
+    private var requestGeneration = 0
+    val canRefresh: Boolean get() = !state.isBusy && !state.showConfirmation && !state.showLogoutConfirmation && when (state.screen) {
+        "SCR-C01", "SCR-C02", "SCR-C06", "SCR-C07", "SCR-C09", "SCR-C14", "SCR-C18", "SCR-C19", "SCR-C21", "SCR-C22", "SCR-C23", "SCR-C25", "SCR-C26", "SCR-C29", "SCR-C30", "SCR-C31", "SCR-C32", "SCR-C34", "SCR-C35", "SCR-C36" -> true
+        "SCR-C33" -> accountMode == "overview"
+        "SCR-C27" -> state.items.isNotEmpty()
+        else -> false
+    }
+
+    fun refreshCurrent() {
+        if (!canRefresh || refreshSnapshot != null) return
+        refreshSnapshot = state.copy(isRefreshing = false)
+        when (state.screen) {
+            "SCR-C01" -> loadHome()
+            "SCR-C02" -> loadAccountSummary()
+            "SCR-C06" -> currentOrderId?.let(::loadOffers)
+            "SCR-C07" -> currentProviderId?.let { provider -> currentOrderId?.let { loadProvider(provider, it) } }
+            "SCR-C09", "SCR-C35", "SCR-C36" -> openOrder()
+            "SCR-C14" -> loadAddresses(state.selectionMode)
+            "SCR-C18" -> loadConversations()
+            "SCR-C19" -> currentConversationId?.let { loadConversation(it, showLoading = true) }
+            "SCR-C25" -> loadOrders(state.selectedOptionIndex)
+            "SCR-C21" -> loadPaymentSummary()
+            "SCR-C22" -> refreshPayment()
+            "SCR-C23" -> loadCompletionSummary()
+            "SCR-C29" -> loadHelp()
+            "SCR-C30", "SCR-C31" -> loadPendingProposal()
+            "SCR-C26" -> currentOrderId?.let(::loadOrderHistory)
+            "SCR-C27" -> if (state.isWarranty) openWarranty() else openDispute()
+            "SCR-C32" -> loadNotifications()
+            "SCR-C33" -> loadAccount()
+            "SCR-C34" -> loadTerms()
+        }
+        if (!state.isRefreshing) refreshSnapshot = null
+    }
 
     /** The back stack for the top-bar and system back (6ب, `design/fixtures/navigation/history.json`). */
     private val history = ScreenHistory<CustomerUiState>("SCR-C01") { it.screen }
 
     /** Back: the recorded screen as it was shown, home when nothing is recorded; false on home (the system may leave). */
     fun goBack(): Boolean {
+        if (state.screen == "SCR-C33") {
+            if (state.isBusy && !state.isRefreshing) return true
+            if (state.showLogoutConfirmation) { dismissLogoutConfirmation(); return true }
+            if (state.showConfirmation || accountMode != "overview") {
+                accountMode = "overview"
+                accountValues = savedAccountValues.toMutableList()
+                state = reduce("SCR-C33", accountInput("loaded"))
+                return true
+            }
+        }
         if (state.screen == "SCR-C14") {
-            if (state.isBusy) return true
+            if (state.isBusy && !state.isRefreshing) return true
             if (state.showConfirmation) { cancelDeleteAddress(); return true }
         }
+        refreshSnapshot = null
+        requestGeneration += 1
         val target = history.back { CustomerUiState("SCR-C01", CustomerPhase.Loading) } ?: return false
         when (target.screen) {
+            "SCR-C33" -> loadAccount()
+            "SCR-C02" -> loadAccountSummary()
             "SCR-C04" -> openTiming()
             "SCR-C01" -> loadHome()
             "SCR-C18" -> loadConversations()
@@ -141,6 +199,8 @@ class CustomerViewModel(
     private var notificationLinks: List<String> = emptyList()
     private var accountValues: MutableList<String> = mutableListOf("", "", "")
     private var accountActions: List<String> = emptyList()
+    private var savedAccountValues = listOf("", "", "", "")
+    private var accountAvatarUrl = ""
     private var accountMode = "overview"
     private var ratingRemindersEnabled = true
     /** From `GET /config` through home: marketplace or staff (39). Never assumed. */
@@ -228,7 +288,7 @@ class CustomerViewModel(
             val offers = runCatching { api.offers(token(), order.id) }.getOrDefault(emptyList())
             offers.size to (offers.mapNotNull { it.price.toBigDecimalOrNull() }.minOrNull()?.stripTrailingZeros()?.toPlainString().orEmpty())
         }
-        val unread = runCatching { api.notifications(token()).count { it.readAt == null } }.getOrDefault(0)
+        val unread = runCatching { api.unreadNotificationCount(token()) }.getOrDefault(0)
         currentOrderId = home.firstOrderId
         orderIds = home.orders.map(CustomerOrder::id)
         orderStatuses = home.orders.map(CustomerOrder::status)
@@ -380,13 +440,15 @@ class CustomerViewModel(
         val user = api.account(token())
         mapOf(
             "event" to "loaded", "is_verified" to user.isVerified, "available_actions" to user.availableActions,
-            "name" to user.name, "phone" to user.phone.orEmpty(),
+            "account_avatar_url" to user.avatarUrl.orEmpty(), "name" to user.name, "phone" to user.phone.orEmpty(),
             "completed_orders" to user.orderStatistics?.completed?.toString().orEmpty(), "active_orders" to user.orderStatistics?.active?.toString().orEmpty(), "address_count" to user.addressesCount?.toString().orEmpty(),
         )
     }
 
     fun show(screen: String, input: Map<String, Any?>) {
         if (screen != "SCR-C19") stopChatPolling()
+        refreshSnapshot = null
+        requestGeneration += 1
         state = reduce(screen, input)
     }
 
@@ -523,17 +585,45 @@ class CustomerViewModel(
 
     fun openNotification(index: Int) {
         val id = notificationIds.getOrNull(index) ?: return
-        state = state.copy(isBusy = true)
+        if (state.isBusy) return
+        val previous = state
+        val link = notificationLinks.getOrNull(index).orEmpty()
+        state = state.copy(isBusy = true, itemStates = state.itemStates.mapIndexed { row, value -> if (row == index) "read" else value })
         Thread {
-            runCatching { api.markNotificationsRead(token(), listOf(id)) }
-            val link = notificationLinks.getOrNull(index).orEmpty()
-            mainHandler.post { if (link.isBlank()) loadNotifications() else onDeepLink(link) }
+            val result = runCatching { api.markNotificationsRead(token(), listOf(id)) }
+            mainHandler.post {
+                if (state.screen != "SCR-C32") return@post
+                if (result.isFailure) {
+                    state = previous.copy(refreshMessageKey = "notifications.read_failed")
+                } else {
+                    state = state.copy(isBusy = false)
+                    if (link.isNotBlank()) onDeepLink(link)
+                }
+            }
+        }.start()
+    }
+
+    fun uploadAccountPhoto(upload: CustomerMediaUpload) {
+        if (state.isBusy || state.screen != "SCR-C33" || accountMode != "overview") return
+        state = reduce("SCR-C33", accountInput("submitting"))
+        Thread {
+            val result = runCatching {
+                val media = api.uploadMedia(token(), upload)
+                api.updateAvatar(token(), media.id)
+            }
+            mainHandler.post {
+                if (state.screen != "SCR-C33") return@post
+                result.getOrNull()?.let { accountAvatarUrl = it.avatarUrl.orEmpty() }
+                state = reduce("SCR-C33", accountInput(if (result.isSuccess) "success" else "save_error"))
+            }
         }.start()
     }
 
     fun loadAccount() = request("SCR-C33") {
         val user = api.account(token())
-        accountValues = mutableListOf(user.name, user.email, user.phone.orEmpty())
+        savedAccountValues = listOf(user.name, user.email, user.phone.orEmpty(), "")
+        accountValues = savedAccountValues.toMutableList()
+        accountAvatarUrl = user.avatarUrl.orEmpty()
         accountActions = user.availableActions
         ratingRemindersEnabled = user.ratingRemindersEnabled
         accountMode = "overview"
@@ -555,6 +645,7 @@ class CustomerViewModel(
     }
 
     fun accountAction(action: String) {
+        if (state.isBusy) return
         when (action) {
             "update_account" -> if (accountMode == "edit") submitAccountUpdate() else {
                 accountMode = "edit"
@@ -576,6 +667,7 @@ class CustomerViewModel(
     }
 
     fun updateAccountField(index: Int, value: String) {
+        if (state.isBusy) return
         if (index !in accountValues.indices) return
         accountValues[index] = value
         state = reduce("SCR-C33", accountInput("loaded"))
@@ -595,7 +687,7 @@ class CustomerViewModel(
 
     fun noOffersAction(action: String) {
         when (action) {
-            "follow" -> openOrder()
+            "follow" -> refreshCurrent()
             "edit_request" -> {
                 val order = currentOrderPayload ?: return
                 editingOrderId = currentOrderId
@@ -1410,18 +1502,20 @@ class CustomerViewModel(
 
     fun loadPendingProposal() {
         val orderId = currentOrderId ?: return
-        state = reduce("SCR-C30", mapOf("event" to "loading"))
-        Thread {
-            val result = runCatching {
-                val order = api.order(token(), orderId)
-                currentOrderVersion = order.version
-                val proposal = api.proposals(token(), orderId).last { it.status == "PENDING" }
+        requestRouted("SCR-C30") {
+            val order = api.order(token(), orderId)
+            currentOrderPayload = order
+            currentOrderVersion = order.version
+            val proposal = api.proposals(token(), orderId).lastOrNull { it.status == "PENDING" }
+            if (proposal == null) {
+                currentProposalId = null
+                "SCR-C09" to trackingInput(order)
+            } else {
                 currentProposalId = proposal.id
                 val screen = if (proposal.type == "EXECUTION_QUOTE") "SCR-C30" else "SCR-C31"
                 screen to proposalInput(order, proposal, "loaded")
-            }.getOrElse { "SCR-C30" to mapOf("event" to "error") }
-            Handler(Looper.getMainLooper()).post { state = reduce(result.first, result.second) }
-        }.start()
+            }
+        }
     }
 
     fun decideProposal(action: String) {
@@ -2142,7 +2236,8 @@ class CustomerViewModel(
     }.getOrDefault(false)
 
     private fun accountInput(event: String, mode: String = accountMode): Map<String, Any?> = mapOf(
-        "event" to event, "mode" to mode, "field_values" to accountValues, "available_actions" to accountActions,
+        "event" to event, "mode" to mode, "field_values" to accountValues.toList(), "available_actions" to accountActions,
+        "account_avatar_url" to accountAvatarUrl, "email_changed" to (accountMode == "edit" && accountValues.getOrNull(1) != savedAccountValues.getOrNull(1)),
         "rating_reminders_enabled" to ratingRemindersEnabled,
     )
 
@@ -2150,13 +2245,17 @@ class CustomerViewModel(
         if (!state.canContinue) return
         state = reduce("SCR-C33", accountInput("submitting"))
         Thread {
-            val user = runCatching { api.updateAccount(token(), accountValues[0].trim(), accountValues[2].trim()) }.getOrNull()
+            val user = runCatching { api.updateAccountDetails(token(), accountValues[0].trim(), accountValues[1].trim(), accountValues[2].trim(), accountValues.getOrNull(3)?.takeIf(String::isNotBlank)) }.getOrNull()
             mainHandler.post {
-                if (user == null) state = reduce("SCR-C33", mapOf("event" to "error"))
+                if (user == null) state = reduce("SCR-C33", accountInput("save_error"))
                 else {
-                    accountValues = mutableListOf(user.name, user.email, user.phone.orEmpty())
+                    val emailChanged = user.email != savedAccountValues[1]
+                    session.email = user.email
+                    savedAccountValues = listOf(user.name, user.email, user.phone.orEmpty(), "")
+                    accountValues = savedAccountValues.toMutableList()
+                    accountAvatarUrl = user.avatarUrl.orEmpty()
                     accountMode = "overview"
-                    state = reduce("SCR-C33", accountInput("success"))
+                    state = reduce("SCR-C33", accountInput(if (emailChanged) "email_saved" else "success"))
                 }
             }
         }.start()
@@ -2168,9 +2267,8 @@ class CustomerViewModel(
         Thread {
             val success = runCatching { api.changePassword(token(), accountValues[0], accountValues[1], accountValues[2]) }.isSuccess
             mainHandler.post {
-                accountMode = "overview"
-                accountValues = mutableListOf("", session.email.orEmpty(), "")
-                state = reduce("SCR-C33", if (success) accountInput("success") else mapOf("event" to "error"))
+                if (success) { accountMode = "overview"; accountValues = savedAccountValues.toMutableList() }
+                state = reduce("SCR-C33", accountInput(if (success) "success" else "save_error"))
             }
         }.start()
     }
@@ -2218,18 +2316,20 @@ class CustomerViewModel(
 
     /** Like [request], but the loaded data decides which screen shows it. */
     private fun requestRouted(loadingScreen: String, block: () -> Pair<String, Map<String, Any?>>) {
+        val generation = ++requestGeneration
         val requestLanguage = noox.bzr.network.BremoHttp.language()
         stopChatPolling()
         state = reduce(loadingScreen, mapOf("event" to "loading"))
         Thread {
             val (screen, next) = runCatching(block).getOrElse { loadingScreen to mapOf("event" to "error") }
             Handler(Looper.getMainLooper()).post {
-                if (screen.isNotEmpty() && requestLanguage == noox.bzr.network.BremoHttp.language()) state = reduce(screen, next)
+                if (generation == requestGeneration && screen.isNotEmpty() && requestLanguage == noox.bzr.network.BremoHttp.language()) state = reduce(screen, next)
             }
         }.start()
     }
 
     private fun request(screen: String, loadingEvent: String = "loading", block: () -> Map<String, Any?>) {
+        val generation = ++requestGeneration
         val requestLanguage = noox.bzr.network.BremoHttp.language()
         if (screen != "SCR-C19") stopChatPolling()
         state = reduce(screen, mapOf("event" to loadingEvent))
@@ -2239,7 +2339,7 @@ class CustomerViewModel(
                 mapOf("event" to "error")
             }
             Handler(Looper.getMainLooper()).post {
-                if (requestLanguage == noox.bzr.network.BremoHttp.language()) state = reduce(screen, next)
+                if (generation == requestGeneration && requestLanguage == noox.bzr.network.BremoHttp.language()) state = reduce(screen, next)
             }
         }.start()
     }

@@ -7,11 +7,19 @@ private struct CustomerBackKey: EnvironmentKey {
     static let defaultValue: () -> Void = {}
 }
 
+private struct CustomerRefreshKey: EnvironmentKey {
+    static let defaultValue: (() async -> Void)? = nil
+}
+
 private struct CustomerRetryKey: EnvironmentKey {
     static let defaultValue: (() -> Void)? = nil
 }
 
 extension EnvironmentValues {
+    var customerRefresh: (() async -> Void)? {
+        get { self[CustomerRefreshKey.self] }
+        set { self[CustomerRefreshKey.self] = newValue }
+    }
     var customerBack: () -> Void {
         get { self[CustomerBackKey.self] }
         set { self[CustomerBackKey.self] = newValue }
@@ -35,6 +43,7 @@ struct CustomerScreen<Content: View>: View {
     let showsTopBar: Bool
     /// DEC-076: an optional top-bar action (Figma's bell on «الرسائل»).
     let topAction: (icon: BzrIconKey, label: String, action: () -> Void)?
+    @Environment(\.customerRefresh) private var customerRefresh
     @Environment(\.customerBack) private var customerBack
     @Environment(\.customerRetry) private var customerRetry
 
@@ -62,8 +71,10 @@ struct CustomerScreen<Content: View>: View {
                     onBack: onBack ?? customerBack, onAction: topAction?.action ?? {})
             }
             if let header { header }
+            if state.isRefreshing { ProgressView(bzrString("refresh.loading")) }
             ScrollView {
                 VStack(alignment: .leading, spacing: DesignSpace.l) {
+                    if let key = state.refreshMessageKey { InfoBanner(text: bzrString(key)) }
                     switch state.phase {
                     case .loading:
                         BremoBrandLoader()
@@ -83,6 +94,7 @@ struct CustomerScreen<Content: View>: View {
                 .padding(.top, DesignSpace.screenVertical)
                 .padding(.bottom, DesignSpace.contentBottom)
             }
+            .modifier(OptionalPullRefresh(action: customerRefresh))
             .scrollDismissesKeyboard(.interactively)
         }
         .background(DesignGradients.screen.ignoresSafeArea())
@@ -168,5 +180,13 @@ struct ActionButtons: View {
                 "pay_electronic": "action.pay_electronic",
                 "confirm_completion": "action.confirm_completion", "rate": "action.rate",
             ][action] ?? "common.close")
+    }
+}
+
+/// Applying refreshable conditionally keeps pull gestures out of editable forms.
+struct OptionalPullRefresh: ViewModifier {
+    let action: (() async -> Void)?
+    @ViewBuilder func body(content: Content) -> some View {
+        if let action { content.refreshable { await action() }.accessibilityHint(bzrString("refresh.pull")) } else { content }
     }
 }

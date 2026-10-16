@@ -66,6 +66,8 @@ public struct ProviderUIState: Equatable, Sendable {
     public let itemDetails: [String]
     public let itemStates: [String]
     public let areaOptions: [String]
+    public var isRefreshing = false
+    public var refreshMessageKey: String? = nil
     public let unreadCount: Int
 
     public init(
@@ -1148,7 +1150,41 @@ private struct ProviderOptionLists: Decodable, Sendable {
 @Observable
 // swiftlint:disable:next type_body_length
 public final class ProviderViewModel {
-    public private(set) var state = ProviderUIState(screen: "SCR-P01", phase: .loading)
+    private var stateValue = ProviderUIState(screen: "SCR-P01", phase: .loading)
+    public private(set) var state: ProviderUIState {
+        get { stateValue }
+        set {
+            var resolved = newValue
+            if let snapshot = refreshSnapshot {
+                if resolved.phase == .loading {
+                    resolved = snapshot; resolved.isRefreshing = true
+                } else {
+                    if resolved.phase == .error { resolved = snapshot; resolved.refreshMessageKey = "refresh.failed" } else { resolved.refreshMessageKey = "refresh.updated" }
+                    resolved.isRefreshing = false
+                    refreshSnapshot = nil
+                }
+            }
+            stateValue = resolved
+        }
+    }
+    private var refreshSnapshot: ProviderUIState?
+    public var canRefresh: Bool {
+        !state.isBusy && ["SCR-P01", "SCR-P07", "SCR-P08", "SCR-P11", "SCR-P12", "SCR-P14", "SCR-P18", "SCR-C19", "SCR-C32"].contains(state.screen)
+    }
+    public func refreshCurrent() async {
+        guard canRefresh, refreshSnapshot == nil else { return }
+        refreshSnapshot = state
+        switch state.screen {
+        case "SCR-P01", "SCR-P07": await loadApplication()
+        case "SCR-P08": await loadHome()
+        case "SCR-P11": await loadMarketOffers()
+        case "SCR-P12", "SCR-P14": await loadActiveOrder()
+        case "SCR-P18": await loadEarnings()
+        case "SCR-C19": await openChat()
+        case "SCR-C32": await loadNotifications()
+        default: refreshSnapshot = nil
+        }
+    }
     private let api: any ProviderAPI
     private var applicationValue: ProviderApplication?
     private var experience = ""
@@ -1265,7 +1301,12 @@ public final class ProviderViewModel {
     }
 
     public func loadNotifications(notificationsDenied: Bool = false) async {
-        notificationsState = CustomerLogic.reduce(screen: "SCR-C32", input: ["event": .text("loading")])
+        let snapshot = state.screen == "SCR-C32" && notificationsState.phase != .error ? notificationsState : nil
+        if let snapshot {
+            notificationsState = snapshot; notificationsState.isRefreshing = true
+        } else {
+            notificationsState = CustomerLogic.reduce(screen: "SCR-C32", input: ["event": .text("loading")])
+        }
         state = ProviderUIState(screen: "SCR-C32", phase: .loading)
         do {
             let values = try await api.notifications()
@@ -1282,16 +1323,30 @@ public final class ProviderViewModel {
                     "notifications_denied": .bool(notificationsDenied),
                 ])
         } catch {
-            notificationsState = CustomerLogic.reduce(screen: "SCR-C32", input: ["event": .text("error")])
+            if let snapshot {
+                notificationsState = snapshot; notificationsState.refreshMessageKey = "refresh.failed"
+            } else {
+                notificationsState = CustomerLogic.reduce(screen: "SCR-C32", input: ["event": .text("error")])
+            }
         }
+        if snapshot != nil && notificationsState.refreshMessageKey == nil { notificationsState.refreshMessageKey = "refresh.updated" }
         state = ProviderUIState(screen: "SCR-C32", phase: .content, canContinue: notificationsState.canContinue)
     }
 
     public func openNotification(index: Int) async {
-        guard notificationIDs.indices.contains(index) else { return }
-        try? await api.markNotificationsRead(ids: [notificationIDs[index]])
+        guard notificationIDs.indices.contains(index), !notificationsState.isBusy else { return }
+        let previous = notificationsState
         let link = notificationLinks[index]
-        if link.isEmpty { await loadNotifications() } else { onDeepLink(link) }
+        notificationsState.isBusy = true
+        if notificationsState.itemStates.indices.contains(index) { notificationsState.itemStates[index] = "read" }
+        do {
+            try await api.markNotificationsRead(ids: [notificationIDs[index]])
+            notificationsState.isBusy = false
+            if !link.isEmpty { onDeepLink(link) }
+        } catch {
+            notificationsState = previous
+            notificationsState.refreshMessageKey = "notifications.read_failed"
+        }
     }
 
     /// 17 §الروابط العميقة — provider targets; the router has already checked the provider status.
@@ -1524,7 +1579,8 @@ public final class ProviderViewModel {
     public func loadActiveOrder() async {
         state = ProviderLogic.reduce(screen: "SCR-P12", input: ["event": .text("loading")])
         do {
-            guard let value = try await api.currentOrders().first else {
+            let orders = try await api.currentOrders()
+            guard let value = orders.first(where: { $0.id == activeOrderValue?.id }) ?? orders.first else {
                 await loadHome()
                 return
             }
@@ -1858,7 +1914,7 @@ public final class ProviderViewModel {
             guard let conversationID else { throw ProviderWorkspaceError.conversationUnavailable }
             activeConversationID = conversationID
             chatValue = try await api.conversationMessages(id: conversationID)
-            chatDraft = ""
+            if refreshSnapshot == nil { chatDraft = "" }
             state = chatState(event: "loaded")
         } catch {
             state = ProviderLogic.reduce(screen: "SCR-C19", input: ["event": .text("error")])

@@ -8,6 +8,10 @@ public enum CustomerPhase: String, Codable, Sendable {
 
 public struct CustomerUIState: Equatable, Sendable {
     public var imageGroups: [[String]] = []
+    public var isRefreshing = false
+    public var refreshMessageKey: String? = nil
+    public var accountAvatarURL = ""
+    public var emailChanged = false
     public var reviewTagSummary: [String] = []
     public var beforePhotoURLs: [String] = []
     public var afterPhotoURLs: [String] = []
@@ -195,6 +199,8 @@ public enum CustomerLogic {
         state.requestSteps = input.text("operating_mode") == "staff" ? 4 : 5
         state.warrantyCoverage = input.text("warranty_coverage")
         state.waitingInfo = input.text("waiting_info")
+        state.accountAvatarURL = input.text("account_avatar_url")
+        state.emailChanged = input.bool("email_changed")
         state.providerAvatarURL = input.text("provider_avatar_url")
         state.portfolioURLs = input.strings("portfolio_urls")
         state.unreadCounts = input.strings("unread_counts").map { Int($0) ?? 0 }
@@ -718,6 +724,11 @@ public enum CustomerLogic {
         {
             errors.append("account.validation.name")
         }
+        if mode == "edit" {
+            if (values[safe: 1] ?? "").range(of: #"^[^\s@]+@[^\s@]+\.[^\s@]+$"#, options: .regularExpression) == nil { errors.append("account.validation.email") }
+            if (values[safe: 2] ?? "").range(of: "^01[0-9]{9}$", options: .regularExpression) == nil { errors.append("account.validation.phone") }
+            if input.bool("email_changed") && (values[safe: 3] ?? "").isEmpty { errors.append("account.validation.current_password") }
+        }
         if mode == "password" && (values.first ?? "").isEmpty {
             errors.append("account.validation.current_password")
         }
@@ -732,6 +743,8 @@ public enum CustomerLogic {
             switch input.text("event") {
             case "success": "account.settings.success"
             case "active_order": "account.delete.active_order"
+            case "email_saved": "account.settings.email_saved"
+            case "save_error": "account.settings.failed"
             default: nil
             }
         return CustomerUIState(
@@ -1914,6 +1927,9 @@ public protocol CustomerAPI: Sendable {
         async throws
     func faqs() async throws -> [CustomerFAQ]
     func sendSupportMessage(subject: String, message: String) async throws
+    func unreadNotificationCount() async throws -> Int
+    func updateAccountDetails(name: String, email: String, phone: String, currentPassword: String?) async throws -> CustomerAccount
+    func updateAvatar(mediaID: Int) async throws -> CustomerAccount
     func notifications() async throws -> [CustomerNotification]
     func markNotificationsRead(ids: [String]) async throws
     func registerDevice(token: String) async throws
@@ -1930,6 +1946,9 @@ public protocol CustomerAPI: Sendable {
 }
 
 extension CustomerAPI {
+    public func unreadNotificationCount() async throws -> Int { try await notifications().filter { $0.readAt == nil }.count }
+    public func updateAccountDetails(name: String, email: String, phone: String, currentPassword: String?) async throws -> CustomerAccount { throw URLError(.unsupportedURL) }
+    public func updateAvatar(mediaID: Int) async throws -> CustomerAccount { throw URLError(.unsupportedURL) }
     public func arrivalCode(orderId: Int, refresh: Bool) async throws -> CustomerArrivalCode { throw URLError(.unsupportedURL) }
     public func submitStructuredReview(orderId: Int, quality: Int, punctuality: Int, conduct: Int, comment: String?, mediaIDs: [Int], tags: [String]) async throws {
         guard tags.isEmpty else { throw URLError(.unsupportedURL) }
@@ -2250,6 +2269,18 @@ public struct LiveCustomerAPI: CustomerAPI {
             "support/messages", body: SupportMessageBody(subject: subject, message: message))
     }
 
+    public func unreadNotificationCount() async throws -> Int {
+        let response: CustomerNotificationEnvelope = try await client.get("notifications")
+        return response.meta.unreadCount
+    }
+    public func updateAccountDetails(name: String, email: String, phone: String, currentPassword: String?) async throws -> CustomerAccount {
+        let response: CustomerAccountEnvelope = try await client.patch("me", body: AccountDetailsBody(name: name, email: email, phone: phone, currentPassword: currentPassword))
+        return response.user
+    }
+    public func updateAvatar(mediaID: Int) async throws -> CustomerAccount {
+        let response: CustomerAccountEnvelope = try await client.patch("me", body: AccountAvatarBody(avatarMediaID: mediaID))
+        return response.user
+    }
     public func notifications() async throws -> [CustomerNotification] {
         let response: CustomerListEnvelope<CustomerNotification> = try await client.get("notifications")
         return response.data
@@ -2343,6 +2374,7 @@ public struct CustomerOrderStatistics: Codable, Equatable, Sendable {
 }
 
 public struct CustomerAccount: Codable, Sendable {
+    public var avatarURL: String? = nil
     public var orderStatistics: CustomerOrderStatistics? = nil
     public var addressesCount: Int? = nil
     public let name: String
@@ -2354,6 +2386,7 @@ public struct CustomerAccount: Codable, Sendable {
 
     enum CodingKeys: String, CodingKey {
         case name, email, phone
+        case avatarURL = "avatar_url"
         case orderStatistics = "order_statistics"
         case addressesCount = "addresses_count"
         case availableActions = "available_actions"
@@ -2411,6 +2444,25 @@ private struct SupportMessageBody: Encodable, Sendable {
 private struct NotificationReadBody: Encodable, Sendable {
     let notificationIds: [String]
     enum CodingKeys: String, CodingKey { case notificationIds = "notification_ids" }
+}
+private struct CustomerNotificationEnvelope: Decodable, Sendable {
+    let data: [CustomerNotification]
+    let meta: Meta
+    struct Meta: Decodable, Sendable {
+        let unreadCount: Int
+        enum CodingKeys: String, CodingKey { case unreadCount = "unread_count" }
+    }
+}
+private struct AccountDetailsBody: Encodable, Sendable {
+    let name: String
+    let email: String
+    let phone: String
+    let currentPassword: String?
+    enum CodingKeys: String, CodingKey { case name, email, phone; case currentPassword = "current_password" }
+}
+private struct AccountAvatarBody: Encodable, Sendable {
+    let avatarMediaID: Int
+    enum CodingKeys: String, CodingKey { case avatarMediaID = "avatar_media_id" }
 }
 private struct AccountUpdateBody: Encodable, Sendable {
     let name: String
@@ -2561,10 +2613,83 @@ public final class CustomerViewModel {
         return CustomerLogic.reduce(screen: screen, input: resolved)
     }
 
-    public private(set) var state = CustomerUIState(screen: "SCR-C01", phase: .loading) {
-        // Loading is transient; an error screen is shown but not returned to.
-        didSet { if state.phase != .loading { history.show(state, restorable: state.phase != .error) } }
+    private var stateValue = CustomerUIState(screen: "SCR-C01", phase: .loading)
+    public private(set) var state: CustomerUIState {
+        get { stateValue }
+        set {
+            guard !Task.isCancelled else { return }
+            var resolved = newValue
+            if let snapshot = refreshSnapshot, resolved.phase == .loading,
+                ![
+                    snapshot.screen, snapshot.screen == "SCR-C36" || snapshot.screen == "SCR-C35" ? "SCR-C09" : snapshot.screen,
+                    snapshot.screen == "SCR-C31" ? "SCR-C30" : snapshot.screen,
+                ].contains(resolved.screen)
+            {
+                refreshTask?.cancel()
+                refreshTask = nil
+                refreshSnapshot = nil
+            }
+            if let snapshot = refreshSnapshot {
+                if resolved.phase == .loading {
+                    resolved = snapshot
+                    resolved.isRefreshing = true
+                    resolved.isBusy = true
+                    resolved.refreshMessageKey = nil
+                } else {
+                    if resolved.phase == .error { resolved = snapshot; resolved.refreshMessageKey = "refresh.failed" } else { resolved.refreshMessageKey = "refresh.updated" }
+                    resolved.isRefreshing = false
+                    refreshSnapshot = nil
+                }
+            }
+            stateValue = resolved
+            if resolved.phase != .loading { history.show(resolved, restorable: resolved.phase != .error) }
+        }
     }
+    @ObservationIgnored private var refreshTask: Task<Void, Never>?
+    private var refreshSnapshot: CustomerUIState?
+    public var canRefresh: Bool {
+        guard !state.isBusy, !state.showConfirmation, !state.showLogoutConfirmation else { return false }
+        if state.screen == "SCR-C33" { return accountMode == "overview" }
+        if state.screen == "SCR-C27" { return !state.items.isEmpty }
+        return [
+            "SCR-C01", "SCR-C02", "SCR-C06", "SCR-C07", "SCR-C09", "SCR-C14", "SCR-C18", "SCR-C19", "SCR-C21", "SCR-C22", "SCR-C23", "SCR-C25", "SCR-C26", "SCR-C29", "SCR-C30",
+            "SCR-C31", "SCR-C32", "SCR-C34", "SCR-C35", "SCR-C36",
+        ].contains(state.screen)
+    }
+    public func refreshCurrent() async {
+        guard canRefresh, refreshSnapshot == nil else { return }
+        refreshSnapshot = state
+        let task = Task { await performRefresh() }
+        refreshTask = task
+        await task.value
+        if !task.isCancelled { refreshTask = nil }
+    }
+
+    private func performRefresh() async {
+        switch state.screen {
+        case "SCR-C01": await loadHome()
+        case "SCR-C02": await loadAccountSummary()
+        case "SCR-C06": if let id = currentOrderId { await loadOffers(orderId: id) }
+        case "SCR-C07": if let provider = currentProviderId, let order = currentOrderId { await loadProvider(id: provider, orderId: order) }
+        case "SCR-C09", "SCR-C35", "SCR-C36": await openCurrentOrder()
+        case "SCR-C14": await loadAddresses(selectionMode: state.selectionMode)
+        case "SCR-C18": await loadConversations()
+        case "SCR-C19": if let id = currentConversationId { await loadConversation(id: id, showLoading: true) }
+        case "SCR-C25": await loadOrders(tabIndex: state.selectedOptionIndex)
+        case "SCR-C21": await loadPaymentSummary()
+        case "SCR-C22": await refreshPayment()
+        case "SCR-C23": await loadCompletionSummary()
+        case "SCR-C27": if state.isWarranty { await openWarranty() } else { await openDispute() }
+        case "SCR-C29": await loadHelp()
+        case "SCR-C30", "SCR-C31": await loadPendingProposal()
+        case "SCR-C26": if let id = currentOrderId { await loadOrderHistory(id: id) }
+        case "SCR-C32": await loadNotifications()
+        case "SCR-C33": await loadAccount()
+        case "SCR-C34": await loadTerms()
+        default: refreshSnapshot = nil
+        }
+    }
+
     /// The back stack for every customer screen's back (6ب, `design/fixtures/navigation/history.json`).
     @ObservationIgnored private var history = ScreenHistory<CustomerUIState>(root: "SCR-C01") { $0.screen }
     @ObservationIgnored private var categoryAvailable = true
@@ -2572,13 +2697,28 @@ public final class CustomerViewModel {
     /// Back: the recorded screen as it was shown, home when nothing is recorded; false on home.
     @discardableResult
     public func goBack() async -> Bool {
+        if state.screen == "SCR-C33" {
+            if state.isBusy && !state.isRefreshing { return true }
+            if state.showLogoutConfirmation { dismissLogoutConfirmation(); return true }
+            if state.showConfirmation || accountMode != "overview" {
+                accountMode = "overview"
+                accountValues = savedAccountValues
+                state = reduce(screen: "SCR-C33", input: accountInput(event: "loaded"))
+                return true
+            }
+        }
         if state.screen == "SCR-C14" {
-            if state.isBusy { return true }
+            if state.isBusy && !state.isRefreshing { return true }
             if state.showConfirmation { cancelDeleteAddress(); return true }
         }
+        refreshTask?.cancel()
+        refreshTask = nil
+        refreshSnapshot = nil
         guard let target = history.back(rootEntry: { CustomerUIState(screen: "SCR-C01", phase: .loading) })
         else { return false }
         switch target.screen {
+        case "SCR-C33": await loadAccount()
+        case "SCR-C02": await loadAccountSummary()
         case "SCR-C04": openTiming()
         case "SCR-C01": await loadHome()
         case "SCR-C18": await loadConversations()
@@ -2656,6 +2796,8 @@ public final class CustomerViewModel {
     private var notificationLinks: [String] = []
     private var accountValues = ["", "", ""]
     private var accountActions: [String] = []
+    private var savedAccountValues = ["", "", "", ""]
+    private var accountAvatarURL = ""
     private var accountMode = "overview"
     private var editingOrderId: Int?
     private var ratingRemindersEnabled = true
@@ -2687,6 +2829,9 @@ public final class CustomerViewModel {
     }
 
     public func show(screen: String, input: [String: CustomerInputValue]) {
+        refreshTask?.cancel()
+        refreshTask = nil
+        refreshSnapshot = nil
         if screen != "SCR-C19" { stopChatPolling() }
         state = reduce(screen: screen, input: input)
     }
@@ -2738,11 +2883,30 @@ public final class CustomerViewModel {
     }
 
     public func openNotification(index: Int) async {
-        guard notificationIDs.indices.contains(index) else { return }
-        state.isBusy = true
-        try? await api.markNotificationsRead(ids: [notificationIDs[index]])
+        guard notificationIDs.indices.contains(index), !state.isBusy else { return }
+        let previous = state
         let link = notificationLinks[safe: index] ?? ""
-        if link.isEmpty { await loadNotifications() } else { onDeepLink(link) }
+        state.isBusy = true
+        if state.itemStates.indices.contains(index) { state.itemStates[index] = "read" }
+        do {
+            try await api.markNotificationsRead(ids: [notificationIDs[index]])
+            state.isBusy = false
+            if !link.isEmpty { onDeepLink(link) }
+        } catch {
+            state = previous
+            state.refreshMessageKey = "notifications.read_failed"
+        }
+    }
+
+    public func uploadAccountPhoto(_ upload: CustomerMediaUpload) async {
+        guard state.screen == "SCR-C33", accountMode == "overview", !state.isBusy else { return }
+        state = reduce(screen: "SCR-C33", input: accountInput(event: "submitting"))
+        do {
+            let media = try await api.uploadMedia(upload)
+            let account = try await api.updateAvatar(mediaID: media.id)
+            accountAvatarURL = account.avatarURL ?? ""
+            state = reduce(screen: "SCR-C33", input: accountInput(event: "success"))
+        } catch { state = reduce(screen: "SCR-C33", input: accountInput(event: "save_error")) }
     }
 
     /// DEC-058 — after sign-in and whenever Firebase rotates the token. Failures retry on the next launch.
@@ -2812,7 +2976,9 @@ public final class CustomerViewModel {
         state = reduce(screen: "SCR-C33", input: ["event": .text("loading")])
         do {
             let account = try await api.account()
-            accountValues = [account.name, account.email, account.phone]
+            savedAccountValues = [account.name, account.email, account.phone, ""]
+            accountValues = savedAccountValues
+            accountAvatarURL = account.avatarURL ?? ""
             accountActions = account.availableActions
             ratingRemindersEnabled = account.ratingRemindersEnabled ?? true
             accountMode = "overview"
@@ -2831,6 +2997,7 @@ public final class CustomerViewModel {
     }
 
     public func accountAction(_ action: String) async {
+        guard !state.isBusy else { return }
         switch action {
         case "update_account" where accountMode == "edit": await submitAccountUpdate()
         case "update_account":
@@ -2855,6 +3022,7 @@ public final class CustomerViewModel {
     }
 
     public func updateAccountField(index: Int, value: String) {
+        guard !state.isBusy else { return }
         guard accountValues.indices.contains(index) else { return }
         accountValues[index] = value
         state = reduce(screen: "SCR-C33", input: accountInput(event: "loaded"))
@@ -2876,7 +3044,7 @@ public final class CustomerViewModel {
 
     public func noOffersAction(_ action: String) async {
         if action == "follow" {
-            await openCurrentOrder()
+            await refreshCurrent()
         } else if action == "edit_request" {
             guard let order = currentOrder else { return }
             editingOrderId = order.id
@@ -3558,7 +3726,7 @@ public final class CustomerViewModel {
                 offerCount = offers.count
                 lowestOffer = offers.compactMap { Decimal(string: $0.price) }.min().map { "\($0)" } ?? ""
             }
-            let unread = (try? await api.notifications())?.filter { $0.readAt == nil }.count ?? 0
+            let unread = (try? await api.unreadNotificationCount()) ?? 0
             let catalogIcons = Dictionary(catalog.map { ($0.id, $0.iconKey ?? "") }, uniquingKeysWith: { first, _ in first })
             state = reduce(
                 screen: "SCR-C01",
@@ -3728,7 +3896,8 @@ public final class CustomerViewModel {
                 screen: "SCR-C02",
                 input: [
                     "event": .text("loaded"), "is_verified": .bool(account.isVerified ?? false),
-                    "name": .text(account.name), "phone": .text(account.phone), "available_actions": .strings(account.availableActions),
+                    "account_avatar_url": .text(account.avatarURL ?? ""), "name": .text(account.name), "phone": .text(account.phone),
+                    "available_actions": .strings(account.availableActions),
                     "completed_orders": .text(account.orderStatistics.map { String($0.completed) } ?? ""),
                     "active_orders": .text(account.orderStatistics.map { String($0.active) } ?? ""),
                     "address_count": .text(account.addressesCount.map(String.init) ?? ""),
@@ -4370,8 +4539,12 @@ public final class CustomerViewModel {
                     $0.status == "PENDING"
                 })
             else {
-                throw APIClientError.invalidResponse
+                currentProposalId = nil
+                currentOrder = order
+                state = reduce(screen: "SCR-C09", input: trackingInput(order))
+                return
             }
+            currentOrder = order
             currentProposalId = proposal.id
             let screen = proposal.type == "EXECUTION_QUOTE" ? "SCR-C30" : "SCR-C31"
             state = reduce(
@@ -4738,6 +4911,8 @@ public final class CustomerViewModel {
         [
             "event": .text(event), "mode": .text(mode ?? accountMode),
             "field_values": .strings(accountValues),
+            "account_avatar_url": .text(accountAvatarURL),
+            "email_changed": .bool(accountMode == "edit" && accountValues[safe: 1] != savedAccountValues[safe: 1]),
             "available_actions": .strings(accountActions),
             "rating_reminders_enabled": .bool(ratingRemindersEnabled),
         ]
@@ -4747,11 +4922,14 @@ public final class CustomerViewModel {
         guard state.canContinue else { return }
         state = reduce(screen: "SCR-C33", input: accountInput(event: "submitting"))
         do {
-            let account = try await api.updateAccount(name: accountValues[0], phone: accountValues[2])
-            accountValues = [account.name, account.email, account.phone]
+            let account = try await api.updateAccountDetails(name: accountValues[0], email: accountValues[1], phone: accountValues[2], currentPassword: accountValues[safe: 3])
+            let changedEmail = account.email != savedAccountValues[1]
+            savedAccountValues = [account.name, account.email, account.phone, ""]
+            accountValues = savedAccountValues
+            accountAvatarURL = account.avatarURL ?? ""
             accountMode = "overview"
-            state = reduce(screen: "SCR-C33", input: accountInput(event: "success"))
-        } catch { state = reduce(screen: "SCR-C33", input: ["event": .text("error")]) }
+            state = reduce(screen: "SCR-C33", input: accountInput(event: changedEmail ? "email_saved" : "success"))
+        } catch { state = reduce(screen: "SCR-C33", input: accountInput(event: "save_error")) }
     }
 
     private func submitPasswordChange() async {
@@ -4761,9 +4939,9 @@ public final class CustomerViewModel {
             try await api.changePassword(
                 current: accountValues[0], password: accountValues[1], confirmation: accountValues[2])
             accountMode = "overview"
-            accountValues = ["", "", ""]
+            accountValues = savedAccountValues
             state = reduce(screen: "SCR-C33", input: accountInput(event: "success"))
-        } catch { state = reduce(screen: "SCR-C33", input: ["event": .text("error")]) }
+        } catch { state = reduce(screen: "SCR-C33", input: accountInput(event: "save_error")) }
     }
 
     private func submitDeleteAccount() async {

@@ -1158,4 +1158,15 @@ One place.</string>
     <string name="address_detail_building">Building {value}</string>
     <string name="address_detail_floor">Floor {value}</string>
     <string name="address_detail_apartment">Apartment {value}</string>
+    <string name="refresh_updated">Data updated</string>
+    <string name="refresh_failed">Could not refresh. Showing the last successful update. Pull to try again.</string>
+    <string name="refresh_pull">Pull to refresh</string>
+    <string name="refresh_loading">Refreshing data…</string>
+    <string name="notifications_read_failed">Could not mark the notification as read. Please try again.</string>
+    <string name="account_settings_photo">Add or change profile photo</string>
+    <string name="account_settings_email_hint">To change your email, enter your current password. We will send a verification email to the new address.</string>
+    <string name="account_settings_email_saved">Details saved. Check your new email to verify it.</string>
+    <string name="account_settings_failed">Could not save. Check your details and try again.</string>
+    <string name="account_validation_email">Enter a valid email address</string>
+    <string name="account_validation_phone">Enter a valid 11-digit Egyptian phone number starting with 01</string>
 </resources>

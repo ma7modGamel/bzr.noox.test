@@ -1,18 +1,28 @@
 import BzrCore
 import DesignSystem
 import SwiftUI
+import PhotosUI
+import UIKit
 
 public struct C33AccountSettingsView: View {
     let state: CustomerUIState
     let onAction: (String) -> Void
     let onFieldChange: (Int, String) -> Void
+    let onPhotoSelected: (CustomerMediaUpload) -> Void
+    let loadImage: (String) async -> Data?
+    @State private var pickingPhoto = false
+    @State private var selectedPhoto: PhotosPickerItem?
     let onRatingRemindersChange: (Bool) -> Void
 
     public init(
         state: CustomerUIState, onAction: @escaping (String) -> Void = { _ in },
         onFieldChange: @escaping (Int, String) -> Void = { _, _ in },
+        onPhotoSelected: @escaping (CustomerMediaUpload) -> Void = { _ in },
+        loadImage: @escaping (String) async -> Data? = { _ in nil },
         onRatingRemindersChange: @escaping (Bool) -> Void = { _ in }
     ) {
+        self.onPhotoSelected = onPhotoSelected
+        self.loadImage = loadImage
         self.state = state
         self.onAction = onAction
         self.onFieldChange = onFieldChange
@@ -43,11 +53,27 @@ public struct C33AccountSettingsView: View {
     private var overview: some View {
         Group {
             ScreenHeading(bzrString("account.settings.profile"))
+            ProfileRemoteImage(url: state.accountAvatarURL, label: bzrString("account.settings.photo"), loadImage: loadImage) {
+                BzrIcon(.account, tint: DesignColors.primary600)
+            }
+            .frame(width: DesignSize.profileAvatar, height: DesignSize.profileAvatar)
+            .clipShape(Circle())
+            SecondaryButton(text: bzrString("account.settings.photo"), enabled: !state.isBusy, onClick: { pickingPhoto = true })
+                .photosPicker(isPresented: $pickingPhoto, selection: $selectedPhoto, matching: .images)
+                .onChange(of: selectedPhoto) { _, item in
+                    Task {
+                        defer { selectedPhoto = nil }
+                        guard let data = try? await item?.loadTransferable(type: Data.self),
+                            let image = UIImage(data: data), let jpeg = image.jpegData(compressionQuality: 0.85), jpeg.count <= 10 * 1024 * 1024
+                        else { return }
+                        onPhotoSelected(CustomerMediaUpload(fileName: "profile-photo.jpg", mimeType: "image/jpeg", data: jpeg))
+                    }
+                }
             MenuRow(
-                icon: .account, text: value(0, fallback: "account.settings.name"),
+                icon: .account, text: bzrString("account.settings.name") + ": " + rawValue(0),
                 onClick: { onAction("update_account") })
-            MenuRow(icon: .info, text: value(1, fallback: "account.settings.email"))
-            MenuRow(icon: .phone, text: value(2, fallback: "account.settings.phone"))
+            MenuRow(icon: .info, text: bzrString("account.settings.email") + ": " + rawValue(1), onClick: { onAction("update_account") })
+            MenuRow(icon: .phone, text: bzrString("account.settings.phone") + ": " + rawValue(2), onClick: { onAction("update_account") })
             if state.visibleActions.contains("change_password") {
                 MenuRow(
                     icon: .shield, text: bzrString("account.settings.password"),
@@ -76,14 +102,20 @@ public struct C33AccountSettingsView: View {
         Group {
             AppTextField(
                 label: bzrString("account.settings.name"), placeholder: "", value: rawValue(0),
-                state: fieldState("account.validation.name"),
+                state: fieldState("account.validation.name"), error: fieldError("account.validation.name"),
                 onValueChange: { onFieldChange(0, $0) })
             AppTextField(
                 label: bzrString("account.settings.email"), placeholder: "", value: rawValue(1),
-                state: .disabled)
+                state: fieldState("account.validation.email"), error: fieldError("account.validation.email"), onValueChange: { onFieldChange(1, $0) })
             AppTextField(
                 label: bzrString("account.settings.phone"), placeholder: "", value: rawValue(2),
-                state: .empty, onValueChange: { onFieldChange(2, $0) })
+                state: fieldState("account.validation.phone"), error: fieldError("account.validation.phone"), onValueChange: { onFieldChange(2, $0) })
+            if state.emailChanged {
+                InfoBanner(text: bzrString("account.settings.email_hint"))
+                SecureTextField(
+                    label: bzrString("account.settings.current_password"), placeholder: "", value: rawValue(3), state: fieldState("account.validation.current_password"),
+                    error: fieldError("account.validation.current_password"), onValueChange: { onFieldChange(3, $0) })
+            }
             PrimaryButton(
                 text: bzrString("account.settings.save"), state: buttonState,
                 onClick: { onAction("update_account") })
@@ -120,6 +152,7 @@ public struct C33AccountSettingsView: View {
     private func value(_ index: Int, fallback: String) -> String {
         rawValue(index).isEmpty ? bzrString(fallback) : rawValue(index)
     }
+    private func fieldError(_ key: String) -> String? { state.fieldErrors.contains(key) ? bzrString(key) : nil }
     private func fieldState(_ key: String) -> FieldVisualState {
         state.isBusy ? .disabled : (state.fieldErrors.contains(key) ? .error : .empty)
     }

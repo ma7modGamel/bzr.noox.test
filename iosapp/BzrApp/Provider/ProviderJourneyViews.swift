@@ -24,6 +24,7 @@ private let providerStatusKeys = [
 ]
 
 private struct ProviderScreen<Content: View>: View {
+    @Environment(\.customerRefresh) private var refreshAction
     let title: String
     let state: ProviderUIState
     let onBack: () -> Void
@@ -42,8 +43,10 @@ private struct ProviderScreen<Content: View>: View {
     var body: some View {
         VStack(spacing: 0) {
             AppTopBar(title: title, onBack: onBack)
+            if state.isRefreshing { ProgressView(bzrString("refresh.loading")) }
             ScrollView {
                 VStack(alignment: .leading, spacing: DesignSpace.l) {
+                    if let key = state.refreshMessageKey { InfoBanner(text: bzrString(key)) }
                     switch state.phase {
                     case .loading:
                         BremoBrandLoader()
@@ -61,6 +64,7 @@ private struct ProviderScreen<Content: View>: View {
                 .padding(.top, DesignSpace.screenVertical)
                 .padding(.bottom, DesignSpace.contentBottom)
             }
+            .modifier(OptionalPullRefresh(action: refreshAction))
         }
         .background(DesignColors.surfaceAlt)
         .scrollDismissesKeyboard(.interactively)
@@ -1595,6 +1599,10 @@ struct ProviderJourneyRoot: View {
     @State private var locationSource = ProviderLocationSource()
 
     var body: some View {
+        screen.environment(\.customerRefresh, viewModel.canRefresh ? { await viewModel.refreshCurrent() } : nil)
+    }
+
+    @ViewBuilder private var screen: some View {
         switch viewModel.state.screen {
         case "SCR-P02":
             P02ProfileView(
@@ -1779,6 +1787,8 @@ private func customerChatState(_ state: ProviderUIState) -> CustomerUIState {
         canContinue: state.canContinue, messageKey: state.messageKey,
         items: state.items, itemDetails: state.itemDetails, itemStates: state.itemStates,
         options: state.options, fieldValues: state.fieldValues, isBusy: state.isBusy)
+    result.isRefreshing = state.isRefreshing
+    result.refreshMessageKey = state.refreshMessageKey
     result.imageGroups = state.imageGroups
     return result
 }

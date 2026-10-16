@@ -34,6 +34,8 @@ abstract class CustomerScreenView(context: Context) : FrameLayout(context) {
 
     var onBack: () -> Unit = {}
     var onReload: (() -> Unit)? = null
+    var onPullRefresh: (() -> Unit)? = null
+    var refreshEnabled = false
 
     init {
         layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
@@ -53,6 +55,19 @@ abstract class CustomerScreenView(context: Context) : FrameLayout(context) {
             label = noox.bzr.design.BzrFormat.fill(string(R.string.format_step),
                 "current" to noox.bzr.design.BzrFormat.number(current), "total" to noox.bzr.design.BzrFormat.number(total))
             contentDescription = listOf(label, hint).filter(String::isNotEmpty).joinToString(string(R.string.format_list_separator))
+        }
+        scaffold.scroll.onRefresh = { onPullRefresh?.invoke() }
+        scaffold.scroll.refreshEnabled = refreshEnabled && !state.isBusy && !state.isRefreshing && !state.showConfirmation && !state.showLogoutConfirmation && !state.isEditing
+        scaffold.scroll.contentDescription = if (refreshEnabled) string(noox.bzr.design.R.string.refresh_pull) else null
+        scaffold.scroll.refreshing = state.isRefreshing
+        scaffold.refreshProgress.isVisible = state.isRefreshing
+        scaffold.refreshFeedback.isVisible = state.refreshMessageKey != null
+        state.refreshMessageKey?.let { key ->
+            scaffold.refreshFeedback.text = string(when (key) {
+                "refresh.failed" -> R.string.refresh_failed
+                "notifications.read_failed" -> R.string.notifications_read_failed
+                else -> R.string.refresh_updated
+            })
         }
         scaffold.topBar.isVisible = showsTopBar
         scaffold.topBar.title = title(state)

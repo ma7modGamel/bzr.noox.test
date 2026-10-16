@@ -1157,4 +1157,15 @@
     <string name="address_detail_building">مبنى {value}</string>
     <string name="address_detail_floor">الدور {value}</string>
     <string name="address_detail_apartment">شقة {value}</string>
+    <string name="refresh_updated">تم تحديث البيانات</string>
+    <string name="refresh_failed">تعذر التحديث. البيانات المعروضة من آخر تحديث ناجح؛ اسحب للمحاولة مرة أخرى.</string>
+    <string name="refresh_pull">اسحب لتحديث البيانات</string>
+    <string name="refresh_loading">جارٍ تحديث البيانات…</string>
+    <string name="notifications_read_failed">تعذر تسجيل قراءة الإشعار. حاول مرة أخرى.</string>
+    <string name="account_settings_photo">إضافة أو تغيير الصورة الشخصية</string>
+    <string name="account_settings_email_hint">لتغيير البريد، أدخل كلمة المرور الحالية. سنرسل رسالة لتأكيد البريد الجديد.</string>
+    <string name="account_settings_email_saved">تم حفظ البيانات. راجع بريدك الجديد لتأكيده.</string>
+    <string name="account_settings_failed">تعذر الحفظ. راجع البيانات وحاول مرة أخرى.</string>
+    <string name="account_validation_email">أدخل بريدًا إلكترونيًا صحيحًا</string>
+    <string name="account_validation_phone">أدخل رقم هاتف مصريًا صحيحًا من ١١ رقمًا يبدأ بـ01</string>
 </resources>

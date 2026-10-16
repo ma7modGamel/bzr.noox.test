@@ -52,7 +52,7 @@ final class NotificationController
             'notification_ids.*' => ['required', 'uuid', 'distinct'],
         ]);
 
-        $request->user()->unreadNotifications()
+        $this->forMode($request->user()->unreadNotifications(), $request)
             ->whereIn('id', $data['notification_ids'])
             ->update(['read_at' => now()]);
 

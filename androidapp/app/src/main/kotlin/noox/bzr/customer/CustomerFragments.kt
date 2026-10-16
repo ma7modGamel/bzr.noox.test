@@ -40,12 +40,13 @@ abstract class CustomerFragment<V : CustomerScreenView>(private val destination:
     protected val viewModel: CustomerViewModel by activityViewModels()
     override val states get() = viewModel.stateFlow
     override fun accepts(state: CustomerUiState) = CustomerRoutes.destination(state) == destination
-    override fun V.render(state: CustomerUiState) = render(state)
+    override fun V.render(state: CustomerUiState) { refreshEnabled = viewModel.canRefresh; render(state) }
 
     /** Every customer screen's top-bar back goes through the shared history (6ب). */
     override fun onViewCreated(view: android.view.View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         screenView.onBack = { viewModel.goBack() }
+        screenView.onPullRefresh = { viewModel.refreshCurrent() }
         screenView.onReload = when (viewModel.state.screen) {
             "SCR-C01" -> { { viewModel.loadHome(); Unit } }
             "SCR-C02" -> { { viewModel.loadAccountSummary(); Unit } }
@@ -130,6 +131,7 @@ class C02AccountFragment : CustomerFragment<C02AccountView>(R.id.scr_c02) {
     private val providerViewModel: noox.bzr.provider.ProviderViewModel by activityViewModels()
     override fun create() = C02AccountView(requireContext())
     override fun C02AccountView.bind() {
+        loadImage = viewModel::loadProfileImage
         onConfirmLogout = viewModel::confirmLogout
         onDismissLogout = viewModel::dismissLogoutConfirmation
         onOpen = { route ->
@@ -704,8 +706,11 @@ class C32NotificationsFragment : CustomerFragment<C32NotificationsView>(R.id.scr
 }
 
 class C33AccountSettingsFragment : CustomerFragment<C33AccountSettingsView>(R.id.scr_c33) {
+    private val photo = photoPicker("profile-photo.jpg") { viewModel.uploadAccountPhoto(it) }
     override fun create() = C33AccountSettingsView(requireContext())
     override fun C33AccountSettingsView.bind() {
+        onPickPhoto = { photo.launch("image/*") }
+        loadImage = viewModel::loadProfileImage
         onAction = viewModel::accountAction
         onFieldChange = viewModel::updateAccountField
         onRatingRemindersChange = viewModel::setRatingReminders

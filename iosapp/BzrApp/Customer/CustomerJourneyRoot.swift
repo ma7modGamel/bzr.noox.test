@@ -43,6 +43,7 @@ struct CustomerJourneyRoot: View {
             Text(bzrString("account.logout.confirm.body"))
         }
         .environment(\.customerRetry, retryAction)
+        .environment(\.customerRefresh, viewModel.canRefresh ? { await viewModel.refreshCurrent() } : nil)
         .task { await viewModel.loadHome() }
         .sheet(item: $sharedVisit) { link in
             if let url = URL(string: link.url) { VisitActivitySheet(url: url) }
@@ -64,7 +65,7 @@ struct CustomerJourneyRoot: View {
     @ViewBuilder private var screen: some View {
         Group {
             switch viewModel.state.screen {
-            case "SCR-C02": C02AccountView(state: viewModel.state, onOpen: open)
+            case "SCR-C02": C02AccountView(state: viewModel.state, onOpen: open, loadImage: { await viewModel.loadProfileImage(url: $0) })
             case "SCR-C03":
                 C03ServiceView(
                     state: viewModel.state,
@@ -282,6 +283,8 @@ struct CustomerJourneyRoot: View {
                             }
                         }
                     }, onFieldChange: viewModel.updateAccountField,
+                    onPhotoSelected: { upload in Task { await viewModel.uploadAccountPhoto(upload) } },
+                    loadImage: { await viewModel.loadProfileImage(url: $0) },
                     onRatingRemindersChange: { enabled in
                         Task { await viewModel.setRatingReminders(enabled) }
                     })

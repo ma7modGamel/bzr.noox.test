@@ -28,6 +28,22 @@ class ProviderViewModel(
     private val mutableFlowActive = MutableStateFlow(false)
     val flowActive: StateFlow<Boolean> = mutableFlowActive.asStateFlow()
 
+    private var refreshingScreen: String? = null
+    val canRefresh: Boolean get() = !mutableState.value.isBusy && mutableState.value.screen in setOf("SCR-P01", "SCR-P07", "SCR-P08", "SCR-P11", "SCR-P12", "SCR-P14", "SCR-P18", "SCR-C19", "SCR-C32")
+    fun refreshCurrent() {
+        if (!canRefresh || refreshingScreen != null) return
+        refreshingScreen = mutableState.value.screen
+        when (refreshingScreen) {
+            "SCR-P01", "SCR-P07" -> loadApplication()
+            "SCR-P08" -> loadHome()
+            "SCR-P11" -> loadMarketOffers()
+            "SCR-P12", "SCR-P14" -> loadActiveOrder()
+            "SCR-P18" -> loadEarnings()
+            "SCR-C19" -> openChat()
+            "SCR-C32" -> { refreshingScreen = null; loadNotifications() }
+        }
+    }
+
     private var language = noox.bzr.network.BremoHttp.language()
 
     fun refreshLanguage(currency: String) {
@@ -206,9 +222,10 @@ class ProviderViewModel(
     }
 
     fun loadNotifications(showDenied: Boolean = false) {
-        notificationsState = CustomerLogic.reduce("SCR-C32", mapOf("event" to "loading"))
+        val snapshot = notificationsState.takeIf { mutableState.value.screen == "SCR-C32" && it.phase != noox.bzr.customer.CustomerPhase.Error }
+        notificationsState = snapshot?.copy(isRefreshing = true) ?: CustomerLogic.reduce("SCR-C32", mapOf("event" to "loading"))
         mutableFlowActive.value = true
-        mutableState.value = ProviderUiState("SCR-C32", ProviderPhase.Loading)
+        mutableState.value = if (snapshot == null) ProviderUiState("SCR-C32", ProviderPhase.Loading) else mutableState.value.copy(isRefreshing = true)
         viewModelScope.launch(Dispatchers.IO) {
             runCatching {
                 val values = api.notifications(token())
@@ -226,8 +243,8 @@ class ProviderViewModel(
                         "notifications_denied" to showDenied,
                     ),
                 )
-            }.onSuccess { notificationsState = it }
-                .onFailure { notificationsState = CustomerLogic.reduce("SCR-C32", mapOf("event" to "error")) }
+            }.onSuccess { notificationsState = it.copy(refreshMessageKey = if (snapshot != null) "refresh.updated" else null) }
+                .onFailure { notificationsState = snapshot?.copy(refreshMessageKey = "refresh.failed") ?: CustomerLogic.reduce("SCR-C32", mapOf("event" to "error")) }
             // A fresh state object so the fragment re-renders even when the phase did not change.
             mutableState.value = ProviderUiState("SCR-C32", ProviderPhase.Content, canContinue = notificationsState.canContinue)
         }
@@ -235,10 +252,18 @@ class ProviderViewModel(
 
     fun openNotification(index: Int) {
         val id = notificationIds.getOrNull(index) ?: return
+        if (notificationsState.isBusy) return
+        val previous = notificationsState
         val link = notificationLinks.getOrNull(index).orEmpty()
+        notificationsState = previous.copy(isBusy = true, itemStates = previous.itemStates.mapIndexed { row, value -> if (row == index) "read" else value })
+        mutableState.value = mutableState.value.copy(isBusy = true)
         viewModelScope.launch(Dispatchers.IO) {
-            runCatching { api.markNotificationsRead(token(), listOf(id)) }
-            viewModelScope.launch(Dispatchers.Main) { if (link.isBlank()) loadNotifications() else onDeepLink(link) }
+            val result = runCatching { api.markNotificationsRead(token(), listOf(id)) }
+            viewModelScope.launch(Dispatchers.Main) {
+                notificationsState = if (result.isSuccess) notificationsState.copy(isBusy = false) else previous.copy(refreshMessageKey = "notifications.read_failed")
+                mutableState.value = mutableState.value.copy(isBusy = false)
+                if (result.isSuccess && link.isNotBlank()) onDeepLink(link)
+            }
         }
     }
 
@@ -422,7 +447,8 @@ class ProviderViewModel(
     }
 
     fun loadActiveOrder() = launch("SCR-P12") {
-        val loaded = api.currentOrders(token()).firstOrNull()
+        val orders = api.currentOrders(token())
+        val loaded = orders.firstOrNull { it.id == activeOrder?.id } ?: orders.firstOrNull()
         if (loaded == null) {
             loadHome()
         } else {
@@ -664,7 +690,7 @@ class ProviderViewModel(
                 ?: error("Conversation is unavailable")
             activeConversationId = conversationId
             chatPayload = api.conversation(token(), conversationId)
-            chatDraft = ""
+            if (refreshingScreen == null) chatDraft = ""
             mutableState.value = chatState("loaded")
         }
     }
@@ -1404,14 +1430,20 @@ class ProviderViewModel(
     }
 
     private fun launch(screen: String, loadingEvent: String = "loading", block: () -> Unit) {
-        mutableState.value = when (screen) {
+        val snapshot = mutableState.value.takeIf { refreshingScreen != null }
+        mutableState.value = snapshot?.copy(isRefreshing = true, refreshMessageKey = null) ?: when (screen) {
             "SCR-P02" -> profileState(loadingEvent)
             "SCR-P03" -> identityState(loadingEvent)
             "SCR-P06" -> payoutState(loadingEvent)
             else -> ProviderLogic.reduce(screen, mapOf("event" to "loading"))
         }
         viewModelScope.launch(Dispatchers.IO) {
-            runCatching(block).onFailure { error ->
+            val result = runCatching(block)
+            if (snapshot != null) {
+                refreshingScreen = null
+                if (result.isFailure) mutableState.value = snapshot.copy(refreshMessageKey = "refresh.failed")
+                else mutableState.value = mutableState.value.copy(isRefreshing = false, refreshMessageKey = "refresh.updated")
+            } else result.onFailure { error ->
                 logFailure(screen, error)
                 val event = if (error is ProviderApiException && error.code == "APPLICATION_NOT_EDITABLE") "not_editable" else "error"
                 mutableState.value = ProviderLogic.reduce(screen, mapOf("event" to event))

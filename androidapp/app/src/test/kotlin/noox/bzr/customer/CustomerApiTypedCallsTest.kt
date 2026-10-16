@@ -19,6 +19,26 @@ class CustomerApiTypedCallsTest {
     private lateinit var server: MockWebServer
     private lateinit var api: UrlConnectionCustomerApi
 
+    @Test fun personalDetailsAndAvatarUseOwnedMediaAndMethodOverride() {
+        val response = """{"user":{"id":1,"name":"Customer","email":"new@example.test","phone":"01012345678","is_verified":false,"avatar_url":"https://example.test/api/v1/me/avatar?v=2"}}"""
+        server.enqueue(MockResponse().setBody(response))
+        api.updateAccountDetails("T", "Customer", "new@example.test", "01012345678", "current-password")
+        val request = server.takeRequest()
+        assertEquals("POST", request.method)
+        assertEquals("PATCH", request.getHeader("X-HTTP-Method-Override"))
+        val body = JSONObject(request.body.readUtf8())
+        assertEquals("new@example.test", body.getString("email"))
+        assertEquals("current-password", body.getString("current_password"))
+        server.enqueue(MockResponse().setBody(response))
+        assertEquals("https://example.test/api/v1/me/avatar?v=2", api.updateAvatar("T", 42).avatarUrl)
+        assertEquals(42, JSONObject(server.takeRequest().body.readUtf8()).getInt("avatar_media_id"))
+    }
+
+    @Test fun notificationBadgeUsesTotalUnreadRatherThanTheFirstPage() {
+        server.enqueue(MockResponse().setBody("""{"data":[],"meta":{"unread_count":25}}"""))
+        assertEquals(25, api.unreadNotificationCount("T"))
+    }
+
     @Test
     fun availabilityUsesTheAuthenticatedAddressAndCategory() {
         server.enqueue(MockResponse().setBody("{\"now_available\":false}"))

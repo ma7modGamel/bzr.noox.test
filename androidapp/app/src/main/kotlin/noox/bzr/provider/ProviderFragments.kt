@@ -24,7 +24,7 @@ abstract class ProviderFragment<V : ProviderScreenView>(private val destination:
     protected val viewModel: ProviderViewModel by activityViewModels()
     override val states get() = viewModel.stateFlow
     override fun accepts(state: ProviderUiState) = ProviderRoutes.destination(state) == destination
-    override fun V.render(state: ProviderUiState) = render(state)
+    override fun V.render(state: ProviderUiState) { refreshEnabled = viewModel.canRefresh; render(state) }
 
     protected fun imagePicker(fallbackName: String, upload: (CustomerMediaUpload) -> Unit) =
         registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
@@ -35,7 +35,7 @@ abstract class ProviderFragment<V : ProviderScreenView>(private val destination:
             upload(CustomerMediaUpload(uri.lastPathSegment ?: fallbackName, resolver.getType(uri) ?: "image/jpeg", bytes))
         }
 
-    protected fun V.bindBack() { onBack = viewModel::goBack }
+    protected fun V.bindBack() { onBack = viewModel::goBack; onRefresh = viewModel::refreshCurrent }
 
     private companion object { const val MAX_IMAGE_BYTES = 10 * 1024 * 1024 }
 }
@@ -302,6 +302,9 @@ class ProviderNotificationsFragment : ScreenFragment<ProviderUiState, C32Notific
     override fun create() = C32NotificationsView(requireContext())
     override fun C32NotificationsView.bind() {
         onBack = viewModel::goBack
+        refreshEnabled = true
+        onPullRefresh = { viewModel.loadNotifications() }
+        onReload = { viewModel.loadNotifications() }
         onOpen = viewModel::openNotification
         onOpenSettings = { openNotificationSettings(requireContext()) }
     }
@@ -322,6 +325,8 @@ class ProviderChatFragment : ScreenFragment<ProviderUiState, C19ChatView>() {
     override val states get() = viewModel.stateFlow
     override fun create() = C19ChatView(requireContext())
     override fun C19ChatView.bind() {
+        refreshEnabled = true
+        onPullRefresh = viewModel::refreshCurrent
         loadImage = viewModel::loadChatImage
         onBack = viewModel::goBack
         onDraftChange = viewModel::updateChatDraft
@@ -333,6 +338,8 @@ class ProviderChatFragment : ScreenFragment<ProviderUiState, C19ChatView>() {
 }
 
 private fun ProviderUiState.asCustomerChatState() = CustomerUiState(
+    isRefreshing = isRefreshing,
+    refreshMessageKey = refreshMessageKey,
     imageGroups = imageGroups,
     screen = screen,
     phase = when (phase) {

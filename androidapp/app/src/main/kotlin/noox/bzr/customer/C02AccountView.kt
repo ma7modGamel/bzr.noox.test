@@ -35,6 +35,7 @@ import noox.bzr.gallery.databinding.ScreenC02AccountBinding
  */
 class C02AccountView(context: Context) : CustomerScreenView(context) {
     private val binding = ScreenC02AccountBinding.inflate(inflater, content)
+    var loadImage: (String, (android.graphics.Bitmap?) -> Unit) -> Unit = { _, ready -> ready(null) }
     var onOpen: (String) -> Unit = {}
     var onConfirmLogout: () -> Unit = {}
     var onDismissLogout: () -> Unit = {}
@@ -59,7 +60,7 @@ class C02AccountView(context: Context) : CustomerScreenView(context) {
         val name = state.fieldValues.getOrElse(0) { "" }
         val addresses = state.fieldValues.getOrElse(3) { "" }
         binding.body.removeAllViews()
-        binding.body.addView(profileCard(name, state.fieldValues.getOrElse(1) { "" }, state.messageKey == "account.verified"))
+        binding.body.addView(profileCard(name, state.fieldValues.getOrElse(1) { "" }, state.accountAvatarUrl, state.messageKey == "account.verified"))
         if (state.messageKey == "account.unverified") binding.body.addView(InfoBannerView(context).apply { text = string(R.string.account_unverified) })
         binding.body.addView(row().apply {
             dividerDrawable = ContextCompat.getDrawable(context, R.drawable.bremo_gap_m)
@@ -114,18 +115,26 @@ class C02AccountView(context: Context) : CustomerScreenView(context) {
         })
     }
 
-    private fun profileCard(name: String, phone: String, verified: Boolean) = column(R.drawable.bremo_gap_s).apply {
+    private fun profileCard(name: String, phone: String, avatarUrl: String, verified: Boolean) = column(R.drawable.bremo_gap_s).apply {
         gravity = Gravity.CENTER_HORIZONTAL
         setBackgroundResource(R.drawable.bremo_bg_card)
         cardShadow()
         setPadding(px(R.dimen.bremo_space_l), px(R.dimen.bremo_space_l), px(R.dimen.bremo_space_l), px(R.dimen.bremo_space_l))
-        // BACKEND-NOTES B-16: the app loads no remote photos, so the avatar shows the first letter.
+        if (avatarUrl.isNotBlank()) {
+            addView(AccountAvatarView(context).apply {
+                loadImage = this@C02AccountView.loadImage
+                contentDescription = name
+                bind(avatarUrl)
+                setOnClickListener { onOpen("SCR-C33") }
+            }, LinearLayout.LayoutParams(px(R.dimen.bremo_size_profile_avatar), px(R.dimen.bremo_size_profile_avatar)))
+        } else {
         addView(text(name.trim().take(1), R.style.TextAppearance_Bremo_ProfileName).apply {
             gravity = Gravity.CENTER
             textAlignment = View.TEXT_ALIGNMENT_CENTER
             setTextColor(context.getColor(R.color.bremo_primary600))
             setBackgroundResource(R.drawable.bremo_bg_avatar_ring)
         }, LinearLayout.LayoutParams(px(R.dimen.bremo_size_profile_avatar), px(R.dimen.bremo_size_profile_avatar)))
+        }
         addView(text(name, R.style.TextAppearance_Bremo_ProfileName).apply {
             if (verified) {
                 setCompoundDrawablesRelativeWithIntrinsicBounds(0, 0, R.drawable.ic_verified, 0)
