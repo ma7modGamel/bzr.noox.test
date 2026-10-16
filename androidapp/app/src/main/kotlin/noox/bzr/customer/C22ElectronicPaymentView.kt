@@ -64,6 +64,7 @@ class C22ElectronicPaymentView(context: Context) : CustomerScreenView(context) {
         binding.openCheckout.isVisible = status == "PENDING" && !kiosk
         binding.success.isVisible = status == "SUCCEEDED"
         binding.failed.isVisible = status == "FAILED" || state.messageKey == "media.upload_error"
+        binding.failed.isError = true
         binding.failed.text = string(if (state.messageKey == "media.upload_error") R.string.media_upload_error else if (state.isInstapay) R.string.payment_instapay_retry else R.string.payment_failed)
         if (status == "FAILED" && state.fieldValues.getOrElse(4) { "" }.isNotBlank()) binding.failed.text = state.fieldValues[4] + "\n" + binding.failed.text
         binding.expired.isVisible = status == "EXPIRED"

@@ -77,7 +77,7 @@ public struct C17MediaView: View {
                 .onTapGesture { if mediaState == .failed { onRetry(index) } }
                 .accessibilityHint(mediaState == .failed ? bzrString("common.retry") : "")
             }
-            if let error = state.fieldErrors.first { InfoBanner(text: bzrString(error)) }
+            if let error = state.fieldErrors.first { InfoBanner(text: bzrString(error), isError: true) }
             PrimaryButton(
                 text: bzrString("media.done"), state: state.canContinue ? .normal : .disabled,
                 onClick: onDone)

@@ -32,7 +32,7 @@ public struct C33AccountSettingsView: View {
     public var body: some View {
         ZStack(alignment: .bottom) {
             CustomerScreen(title: bzrString("account.settings.title"), state: state) {
-                if let key = state.messageKey { InfoBanner(text: bzrString(key)) }
+                if let key = state.messageKey { InfoBanner(text: bzrString(key), isError: key == "account.settings.failed") }
                 switch mode {
                 case "edit": editForm
                 case "password": passwordForm

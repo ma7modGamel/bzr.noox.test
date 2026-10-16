@@ -72,6 +72,7 @@ class C17MediaView(context: Context) : CustomerScreenView(context) {
         adapter.submitList(state.items.mapIndexed { index, kind -> Row(index, kind, state.itemStates.getOrElse(index) { "uploaded" }) })
         val error = state.fieldErrors.firstOrNull()
         binding.validation.isVisible = error != null
+        binding.validation.isError = true
         error?.let {
             binding.validation.text = string(
                 when (it) {

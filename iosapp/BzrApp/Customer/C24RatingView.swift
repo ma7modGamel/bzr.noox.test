@@ -128,7 +128,7 @@ public struct C24RatingView: View {
                 if message == "rating.success" {
                     InfoBanner(text: bzrString(message))
                 } else {
-                    WarningBox(text: bzrString(message))
+                    WarningBox(text: bzrString(message), isError: ["media.upload_error", "error.body"].contains(message))
                 }
             }
         }

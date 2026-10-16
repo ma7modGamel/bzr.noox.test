@@ -62,6 +62,7 @@ abstract class CustomerScreenView(context: Context) : FrameLayout(context) {
         scaffold.scroll.refreshing = state.isRefreshing
         scaffold.refreshProgress.isVisible = state.isRefreshing
         scaffold.refreshFeedback.isVisible = state.refreshMessageKey != null
+        scaffold.refreshFeedback.isError = state.refreshMessageKey in setOf("refresh.failed", "notifications.read_failed")
         state.refreshMessageKey?.let { key ->
             scaffold.refreshFeedback.text = string(when (key) {
                 "refresh.failed" -> R.string.refresh_failed

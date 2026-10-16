@@ -80,6 +80,14 @@
   --color-avatarring: #168B8333;
   --color-secondarybuttonbg: #EAF5F4;
   --color-secondarybuttontext: #147774;
+  --color-secondarybuttonpressedbg: #136A6A;
+  --color-secondarybuttonpressedtext: #FFFFFF;
+  --color-feedbackerrorbg: #FEF2F2;
+  --color-feedbackerrortext: #BA1A1A;
+  --color-notificationunreadbg: #F0F5FC;
+  --color-notificationunreadtitle: #0D1C2E;
+  --color-notificationreadtitle: #475569;
+  --color-notificationreadbody: #5D6D84;
   --color-chipbg: #FFFFFF;
   --color-chiptext: #475569;
   --color-chipselectedbg: #F0F5FC;

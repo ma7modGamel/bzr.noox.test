@@ -121,6 +121,7 @@ open class ProviderActiveOrderView(context: Context, private val screen: String)
             )
         }
         binding.warning.isVisible = state.messageKey != null || state.arrivalError.isNotEmpty()
+        binding.warning.isError = state.arrivalError.isNotEmpty() || state.messageKey in setOf("media.upload_error", "arrival.code.failed", "error.body")
         binding.warning.text = if (state.arrivalError.isNotEmpty()) state.arrivalError else if (state.messageKey == "provider.no_show.pending") string(DesignR.string.provider_no_show_pending) else warning(state.messageKey)
         binding.payment.isVisible = screen == "SCR-P16" && state.secondaryOptions.isNotEmpty()
         binding.payment.editText = null

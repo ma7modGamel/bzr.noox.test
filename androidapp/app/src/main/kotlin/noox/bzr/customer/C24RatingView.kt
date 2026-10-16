@@ -117,6 +117,7 @@ class C24RatingView(context: Context) : CustomerScreenView(context) {
         val key = state.messageKey
         binding.success.isVisible = key == "rating.success"
         binding.warning.isVisible = key != null && key != "rating.success"
+        binding.warning.isError = key in setOf("media.upload_error", "error.body")
         if (key != null && key != "rating.success") {
             binding.warning.text = string(if (key == "media.upload_error") R.string.media_upload_error else if (key == "rating.already_exists") R.string.rating_already_exists else if (key == "error.body") R.string.error_body else R.string.rating_window_closed)
         }

@@ -75,6 +75,7 @@ class C09TrackingView(context: Context) : CustomerScreenView(context) {
 
     override fun renderContent(state: CustomerUiState) {
         shareBanner.isVisible = state.isBusy || state.messageKey == "share.error"
+        shareBanner.isError = !state.isBusy && state.messageKey == "share.error"
         shareBanner.text = string(if (state.isBusy) R.string.share_loading else R.string.share_error)
         warrantyBanner.isVisible = state.warrantyCoverage.isNotBlank()
         warrantyBanner.text = state.warrantyCoverage

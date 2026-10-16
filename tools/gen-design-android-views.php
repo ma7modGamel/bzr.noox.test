@@ -93,8 +93,8 @@ $fontFor = static fn (string $weightKey): string => '@font/'.androidName($tokens
 // ── Color state lists (res/color) ───────────────────────────────────────
 $stateLists = [
     // [states => color] in priority order; the last entry is the default.
-    'bremo_button_secondary_bg' => [['android:state_enabled="false"', 'disabledBg'], ['', 'secondaryButtonBg']],
-    'bremo_button_secondary_fg' => [['android:state_enabled="false"', 'disabledText'], ['', 'secondaryButtonText']],
+    'bremo_button_secondary_bg' => [['android:state_enabled="false"', 'disabledBg'], ['android:state_pressed="true"', 'secondaryButtonPressedBg'], ['', 'secondaryButtonBg']],
+    'bremo_button_secondary_fg' => [['android:state_enabled="false"', 'disabledText'], ['android:state_pressed="true"', 'secondaryButtonPressedText'], ['', 'secondaryButtonText']],
     'bremo_button_primary_bg' => [['android:state_pressed="true"', 'primary700'], ['', 'primary600']],
     'bremo_selectable_fill' => [['android:state_checked="true"', $tokens['border']['selectedFill']], ['android:state_selected="true"', $tokens['border']['selectedFill']], ['', 'surface']],
     'bremo_selectable_stroke' => [['android:state_checked="true"', $tokens['border']['selectedColor']], ['android:state_selected="true"', $tokens['border']['selectedColor']], ['', 'border']],
@@ -150,6 +150,7 @@ $control = '@dimen/bremo_size_control_stroke';
 $shapes = [
     // DEC-070: Figma cards are white on the tinted screen with a soft shadow and no outline.
     'bremo_bg_card' => ['fill' => 'surface', 'radius' => $dimen('radius', 'card')],
+    'bremo_bg_notification_unread' => ['fill' => 'notificationUnreadBg', 'radius' => $dimen('radius', 'card')],
     'bremo_bg_surface' => ['fill' => 'surface'],
     'bremo_bg_divider' => ['fill' => 'border'],
     'bremo_bg_scrim' => ['fill' => 'scrim'],
@@ -173,6 +174,7 @@ $shapes = [
     'bremo_bg_skeleton_line' => ['fill' => 'surfaceAlt', 'radius' => $dimen('radius', 'badge')],
     'bremo_bg_menu_icon_box' => ['fill' => 'accentTint', 'radius' => $dimen('radius', 'menu_icon_box')],
     'bremo_bg_banner_info' => ['fill' => 'primary50Info', 'radius' => $dimen('radius', 'card')],
+    'bremo_bg_banner_error' => ['fill' => 'feedbackErrorBg', 'radius' => $dimen('radius', 'card')],
     'bremo_bg_banner_warning' => ['fill' => 'warningBg', 'radius' => $dimen('radius', 'card')],
     'bremo_bg_banner_offline' => ['fill' => 'surfaceAlt', 'radius' => $dimen('radius', 'card')],
     'bremo_bg_map_card' => ['fill' => 'surfaceAlt2', 'stroke' => 'border', 'strokeWidth' => $border, 'radius' => $dimen('radius', 'card')],

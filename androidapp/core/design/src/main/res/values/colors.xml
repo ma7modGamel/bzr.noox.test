@@ -50,6 +50,14 @@
     <color name="bremo_avatar_ring">#33168B83</color>
     <color name="bremo_secondary_button_bg">#EAF5F4</color>
     <color name="bremo_secondary_button_text">#147774</color>
+    <color name="bremo_secondary_button_pressed_bg">#136A6A</color>
+    <color name="bremo_secondary_button_pressed_text">#FFFFFF</color>
+    <color name="bremo_feedback_error_bg">#FEF2F2</color>
+    <color name="bremo_feedback_error_text">#BA1A1A</color>
+    <color name="bremo_notification_unread_bg">#F0F5FC</color>
+    <color name="bremo_notification_unread_title">#0D1C2E</color>
+    <color name="bremo_notification_read_title">#475569</color>
+    <color name="bremo_notification_read_body">#5D6D84</color>
     <color name="bremo_chip_bg">#FFFFFF</color>
     <color name="bremo_chip_text">#475569</color>
     <color name="bremo_chip_selected_bg">#F0F5FC</color>

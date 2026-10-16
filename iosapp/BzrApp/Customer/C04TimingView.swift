@@ -47,7 +47,7 @@ public struct C04TimingView: View {
                 Spacer(minLength: 0)
             }
             LinkButton(text: bzrString("request.address.current_location"), onClick: { onOpen("SCR-C15") })
-            if let message = state.messageKey { InfoBanner(text: bzrString(message)) }
+            if let message = state.messageKey { InfoBanner(text: bzrString(message), isError: message == "request.timing.check_failed") }
             heading(.clock, bzrString("request.timing.question"))
             ForEach(Array(state.options.enumerated()), id: \.offset) { index, label in
                 let code = state.optionCodes.indices.contains(index) ? state.optionCodes[index] : (index == 0 ? "NOW" : "SCHEDULED")

@@ -48,6 +48,7 @@ class P18EarningsView(context: Context) : ProviderScreenView(context) {
         binding.loadMore.isVisible = state.earningsHasMore
         binding.loadMore.enabled = !state.isBusy && !state.earningsFiltersDirty
         binding.filterError.isVisible = state.messageKey in listOf("provider.earnings.filter_error", "provider.earnings.export_error")
+        binding.filterError.isError = true
         binding.filterError.text = string(if (state.messageKey == "provider.earnings.export_error") R.string.provider_earnings_export_error else R.string.provider_earnings_filter_error)
         binding.summary.items = listOf(
             StatItem(R.drawable.ic_orders, state.secondaryOptions.getOrElse(0) { "" }, string(R.string.provider_earnings_balance)),

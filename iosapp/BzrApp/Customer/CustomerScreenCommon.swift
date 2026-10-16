@@ -74,7 +74,7 @@ struct CustomerScreen<Content: View>: View {
             if state.isRefreshing { ProgressView(bzrString("refresh.loading")) }
             ScrollView {
                 VStack(alignment: .leading, spacing: DesignSpace.l) {
-                    if let key = state.refreshMessageKey { InfoBanner(text: bzrString(key)) }
+                    if let key = state.refreshMessageKey { InfoBanner(text: bzrString(key), isError: ["refresh.failed", "notifications.read_failed"].contains(key)) }
                     switch state.phase {
                     case .loading:
                         BremoBrandLoader()

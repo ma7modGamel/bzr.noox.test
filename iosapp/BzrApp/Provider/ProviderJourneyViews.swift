@@ -46,7 +46,7 @@ private struct ProviderScreen<Content: View>: View {
             if state.isRefreshing { ProgressView(bzrString("refresh.loading")) }
             ScrollView {
                 VStack(alignment: .leading, spacing: DesignSpace.l) {
-                    if let key = state.refreshMessageKey { InfoBanner(text: bzrString(key)) }
+                    if let key = state.refreshMessageKey { InfoBanner(text: bzrString(key), isError: key == "refresh.failed") }
                     switch state.phase {
                     case .loading:
                         BremoBrandLoader()
@@ -841,7 +841,9 @@ private struct ProviderActiveOrderContent: View {
                     }
                 ).keyboardType(.numberPad)
                 if !arrivalCode.isEmpty && arrivalCode.count != 6 { WarningBox(text: bzrString("arrival.code.invalid")) }
-                if !state.arrivalError.isEmpty { WarningBox(text: state.arrivalError == "arrival.verification.failed" ? bzrString(state.arrivalError) : state.arrivalError) }
+                if !state.arrivalError.isEmpty {
+                    WarningBox(text: state.arrivalError == "arrival.verification.failed" ? bzrString(state.arrivalError) : state.arrivalError, isError: true)
+                }
                 SecondaryButton(text: bzrString("tracking.follow"), onClick: { onAction("refresh_order") })
                 if state.arrivalExceptionPending {
                     InfoBanner(text: bzrString("arrival.exception.pending"))
@@ -888,7 +890,9 @@ private struct ProviderActiveOrderContent: View {
                         format: bzrString("provider.price_guide.range"),
                         state.priceGuideMinimum, state.priceGuideMaximum))
             }
-            if let message = state.messageKey { WarningBox(text: bzrString(providerWarningKey(message))) }
+            if let message = state.messageKey {
+                WarningBox(text: bzrString(providerWarningKey(message)), isError: ["media.upload_error", "arrival.code.failed", "error.body"].contains(message))
+            }
             if screen == "SCR-P16", state.secondaryOptions.count >= 4 {
                 SummaryCard(
                     title: bzrString("provider.payment.summary"),
@@ -1176,8 +1180,8 @@ public struct P18EarningsView: View {
                     if let data = await onExport() { document = EarningsCSVDocument(data: data); showExporter = true }
                 }
             }
-            if state.messageKey == "provider.earnings.filter_error" { WarningBox(text: bzrString("provider.earnings.filter_error")) }
-            if exportFailed || state.messageKey == "provider.earnings.export_error" { WarningBox(text: bzrString("provider.earnings.export_error")) }
+            if state.messageKey == "provider.earnings.filter_error" { WarningBox(text: bzrString("provider.earnings.filter_error"), isError: true) }
+            if exportFailed || state.messageKey == "provider.earnings.export_error" { WarningBox(text: bzrString("provider.earnings.export_error"), isError: true) }
             ForEach(state.items.indices, id: \.self) { index in
                 SummaryCard(
                     title: state.items[index],

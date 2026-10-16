@@ -7,7 +7,7 @@ import androidx.core.content.withStyledAttributes
 import noox.bzr.design.R
 import noox.bzr.design.databinding.ViewSecondaryButtonBinding
 
-/** Secondary actions use a compact neutral surface inside the full touch target. */
+/** Secondary actions use a compact teal surface inside the full touch target. */
 class SecondaryButtonView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) : FrameLayout(context, attrs) {
     private val binding = ViewSecondaryButtonBinding.inflate(inflater, this)
 
@@ -23,7 +23,7 @@ class SecondaryButtonView @JvmOverloads constructor(context: Context, attrs: Att
         set(value) {
             field = value
             binding.button.isEnabled = value
-            applyEnabledAlpha(value)
+            alpha = 1f
         }
     /** DEC-076: an optional leading icon (Figma «رسالة» / «اتصال»). */
     @androidx.annotation.DrawableRes

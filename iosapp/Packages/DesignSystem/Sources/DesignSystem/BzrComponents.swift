@@ -213,7 +213,6 @@ public struct PrimaryButton: View {
         }
         .buttonStyle(BzrPressStyle())
         .disabled(!(state == .normal || state == .pressed))
-        .opacity(state == .disabled ? DesignOpacity.disabled : 1)
         .accessibilityLabel(text)
         .accessibilityValue(state == .loading ? bzrString("a11y.loading") : "")
     }
@@ -234,21 +233,63 @@ public struct SecondaryButton: View {
 
     public var body: some View {
         Button(action: onClick) {
-            // DEC-070 (Figma «Primo App»): filled with the container tint, no outline; DEC-076: optional leading icon.
-            HStack(spacing: DesignSpace.s) {
-                if let icon { BzrIcon(icon, tint: enabled ? DesignColors.secondaryButtonText : DesignColors.disabledText, size: DesignSize.iconSmall) }
-                BzrText(text, style: DesignType.secondaryButton.colored(enabled ? DesignColors.secondaryButtonText : DesignColors.disabledText), alignment: .center)
-            }
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, DesignSpace.s)
-            .frame(minHeight: DesignSize.secondaryButtonVisualHeight)
-            .background(RoundedRectangle(cornerRadius: DesignRadius.button).fill(enabled ? DesignColors.secondaryButtonBg : DesignColors.disabledBg))
-            .frame(minHeight: DesignSize.touchTargetMin)
-            .contentShape(Rectangle())
+            SecondaryButtonLabel(text: text, enabled: enabled, icon: icon)
         }
-        .buttonStyle(BzrPressStyle())
+        .buttonStyle(SecondaryButtonPressStyle())
         .disabled(!enabled)
-        .opacity(enabled ? 1 : DesignOpacity.disabled)
+    }
+}
+
+private struct SecondaryButtonPressedKey: EnvironmentKey {
+    static let defaultValue = false
+}
+
+extension EnvironmentValues {
+    fileprivate var secondaryButtonPressed: Bool {
+        get { self[SecondaryButtonPressedKey.self] }
+        set { self[SecondaryButtonPressedKey.self] = newValue }
+    }
+}
+
+private struct SecondaryButtonPressStyle: ButtonStyle {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .environment(\.secondaryButtonPressed, configuration.isPressed)
+            .contentShape(Rectangle())
+            .opacity(configuration.isPressed ? DesignRatio.pressFeedback : 1)
+            .animation(
+                reduceMotion ? nil : .easeOut(duration: Double(DesignMotion.navBarMs) / 1000),
+                value: configuration.isPressed)
+    }
+}
+
+private struct SecondaryButtonLabel: View {
+    let text: String
+    let enabled: Bool
+    let icon: BzrIconKey?
+    @Environment(\.secondaryButtonPressed) private var pressed
+
+    private var foreground: Color {
+        !enabled ? DesignColors.disabledText : (pressed ? DesignColors.secondaryButtonPressedText : DesignColors.secondaryButtonText)
+    }
+
+    private var fill: Color {
+        !enabled ? DesignColors.disabledBg : (pressed ? DesignColors.secondaryButtonPressedBg : DesignColors.secondaryButtonBg)
+    }
+
+    var body: some View {
+        HStack(spacing: DesignSpace.s) {
+            if let icon { BzrIcon(icon, tint: foreground, size: DesignSize.iconSmall) }
+            BzrText(text, style: DesignType.secondaryButton.colored(foreground), alignment: .center)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, DesignSpace.s)
+        .frame(minHeight: DesignSize.secondaryButtonVisualHeight)
+        .background(RoundedRectangle(cornerRadius: DesignRadius.button).fill(fill))
+        .frame(minHeight: DesignSize.touchTargetMin)
+        .contentShape(Rectangle())
     }
 }
 
@@ -1581,21 +1622,31 @@ private struct Banner: View {
 
 public struct InfoBanner: View {
     private let text: String
-    public init(text: String) { self.text = text }
+    private let isError: Bool
+    public init(text: String, isError: Bool = false) {
+        self.text = text
+        self.isError = isError
+    }
     public var body: some View {
         Banner(
-            text: text, icon: .shield, iconTint: DesignColors.infoText,
-            fill: DesignColors.primary50Info, foreground: DesignColors.infoText)
+            text: text, icon: .shield, iconTint: isError ? DesignColors.feedbackErrorText : DesignColors.infoText,
+            fill: isError ? DesignColors.feedbackErrorBg : DesignColors.primary50Info,
+            foreground: isError ? DesignColors.feedbackErrorText : DesignColors.infoText)
     }
 }
 
 public struct WarningBox: View {
     private let text: String
-    public init(text: String) { self.text = text }
+    private let isError: Bool
+    public init(text: String, isError: Bool = false) {
+        self.text = text
+        self.isError = isError
+    }
     public var body: some View {
         Banner(
-            text: text, icon: .warningFilled, iconTint: DesignColors.star, fill: DesignColors.warningBg,
-            foreground: DesignColors.warningText)
+            text: text, icon: .warningFilled, iconTint: isError ? DesignColors.feedbackErrorText : DesignColors.star,
+            fill: isError ? DesignColors.feedbackErrorBg : DesignColors.warningBg,
+            foreground: isError ? DesignColors.feedbackErrorText : DesignColors.warningText)
     }
 }
 

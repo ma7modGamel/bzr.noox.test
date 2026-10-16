@@ -33,6 +33,7 @@ abstract class ProviderScreenView(context: Context) : FrameLayout(context) {
         scaffold.scroll.refreshing = state.isRefreshing
         scaffold.refreshProgress.isVisible = state.isRefreshing
         scaffold.refreshFeedback.isVisible = state.refreshMessageKey != null
+        scaffold.refreshFeedback.isError = state.refreshMessageKey == "refresh.failed"
         state.refreshMessageKey?.let { scaffold.refreshFeedback.text = string(if (it == "refresh.failed") noox.bzr.design.R.string.refresh_failed else noox.bzr.design.R.string.refresh_updated) }
         scaffold.topBar.title = title()
         scaffold.loading.isVisible = state.phase == ProviderPhase.Loading

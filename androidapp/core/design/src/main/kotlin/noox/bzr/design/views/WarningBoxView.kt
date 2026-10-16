@@ -18,6 +18,14 @@ class WarningBoxView @JvmOverloads constructor(context: Context, attrs: Attribut
             binding.text.text = value
         }
 
+    var isError: Boolean = false
+        set(value) {
+            field = value
+            setBackgroundResource(if (value) R.drawable.bremo_bg_banner_error else R.drawable.bremo_bg_banner_warning)
+            binding.text.setTextColor(context.getColor(if (value) R.color.bremo_feedback_error_text else R.color.bremo_warning_text))
+            binding.icon.imageTintList = android.content.res.ColorStateList.valueOf(context.getColor(if (value) R.color.bremo_feedback_error_text else R.color.bremo_star))
+        }
+
     init {
         orientation = HORIZONTAL
         gravity = Gravity.CENTER_VERTICAL

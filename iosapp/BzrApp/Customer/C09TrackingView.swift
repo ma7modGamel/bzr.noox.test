@@ -83,7 +83,7 @@ public struct C09TrackingView: View {
             }
 
             if state.isBusy { InfoBanner(text: bzrString("share.loading")) }
-            if state.messageKey == "share.error" { InfoBanner(text: bzrString("share.error")) }
+            if state.messageKey == "share.error" { InfoBanner(text: bzrString("share.error"), isError: true) }
             if !state.warrantyCoverage.isEmpty { InfoBanner(text: state.warrantyCoverage) }
             if state.phase == .offline { OfflineBanner(text: bzrString("offline.message")) }
             switch status {

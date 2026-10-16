@@ -41,6 +41,7 @@ class C04TimingView(context: Context) : CustomerScreenView(context) {
         binding.map.title = address.ifBlank { string(R.string.request_address_required) }
         renderAddressPills(address)
         binding.message.isVisible = state.messageKey != null
+        binding.message.isError = state.messageKey == "request.timing.check_failed"
         state.messageKey?.let {
             binding.message.text = string(
                 when (it) {

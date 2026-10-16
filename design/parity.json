@@ -977,7 +977,8 @@
         "layout": "androidapp/core/design/src/main/res/layout/view_info_banner.xml",
         "symbol": "InfoBannerView",
         "parameters": [
-          "text"
+          "text",
+          "isError"
         ],
         "text_keys": [],
         "fixtures": [
@@ -988,7 +989,8 @@
         "file": "iosapp/Packages/DesignSystem/Sources/DesignSystem/BzrComponents.swift",
         "symbol": "InfoBanner",
         "parameters": [
-          "text"
+          "text",
+          "isError"
         ],
         "text_keys": [],
         "fixtures": [
@@ -1004,7 +1006,8 @@
         "layout": "androidapp/core/design/src/main/res/layout/view_warning_box.xml",
         "symbol": "WarningBoxView",
         "parameters": [
-          "text"
+          "text",
+          "isError"
         ],
         "text_keys": [],
         "fixtures": [
@@ -1015,7 +1018,8 @@
         "file": "iosapp/Packages/DesignSystem/Sources/DesignSystem/BzrComponents.swift",
         "symbol": "WarningBox",
         "parameters": [
-          "text"
+          "text",
+          "isError"
         ],
         "text_keys": [],
         "fixtures": [

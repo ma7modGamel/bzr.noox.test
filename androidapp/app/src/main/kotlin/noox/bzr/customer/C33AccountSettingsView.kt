@@ -48,6 +48,7 @@ class C33AccountSettingsView(context: Context) : CustomerScreenView(context) {
     override fun renderContent(state: CustomerUiState) {
         val mode = state.items.firstOrNull() ?: "overview"
         binding.message.isVisible = state.messageKey != null
+        binding.message.isError = state.messageKey == "account.settings.failed"
         state.messageKey?.let {
             binding.message.text = string(when (it) { "account.delete.active_order" -> R.string.account_delete_active_order; "account.settings.failed" -> R.string.account_settings_failed; "account.settings.email_saved" -> R.string.account_settings_email_saved; else -> R.string.account_settings_success })
         }

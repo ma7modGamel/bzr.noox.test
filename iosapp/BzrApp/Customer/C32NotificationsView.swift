@@ -3,7 +3,7 @@ import DesignSystem
 import SwiftUI
 
 /// SCR-C32 — Figma «الإشعارات» 3002:3608 (DEC-076): «اليوم» and «سابق» groups; each card has the type icon (from the
-/// NTF code) with an unread dot, the title, body and relative time. Unread cards are white, read ones tinted.
+/// NTF code) with an unread dot, the title, body and relative time. Unread cards are blue-tinted, read ones neutral.
 public struct C32NotificationsView: View {
     let state: CustomerUIState
     let onOpen: (Int) -> Void
@@ -68,14 +68,14 @@ public struct C32NotificationsView: View {
                 }
             VStack(alignment: .leading, spacing: DesignSpace.xs) {
                 HStack(alignment: .top, spacing: DesignSpace.s) {
-                    BzrText(state.items[index], style: DesignType.tileTitle)
+                    BzrText(state.items[index], style: DesignType.tileTitle.colored(unread ? DesignColors.notificationUnreadTitle : DesignColors.notificationReadTitle))
                     Spacer(minLength: 0)
                     if !time.isEmpty {
-                        BzrText(time, style: unread ? DesignType.hint.colored(DesignColors.primary600) : DesignType.hint)
+                        BzrText(time, style: DesignType.hint.colored(unread ? DesignColors.primary600 : DesignColors.notificationReadBody))
                     }
                 }
                 if let body = state.itemDetails[safe: index], !body.isEmpty {
-                    BzrText(body, style: DesignType.secondary)
+                    BzrText(body, style: unread ? DesignType.secondary : DesignType.secondary.colored(DesignColors.notificationReadBody))
                 }
             }
         }
@@ -83,7 +83,7 @@ public struct C32NotificationsView: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(
             RoundedRectangle(cornerRadius: unread ? DesignRadius.card : DesignRadius.menuIconBox)
-                .fill(unread ? DesignColors.surface : DesignColors.surfaceAlt2)
+                .fill(unread ? DesignColors.notificationUnreadBg : DesignColors.surfaceAlt2)
         )
         .bzrShadow(unread ? DesignShadows.card : nil)
         .accessibilityElement(children: .combine)

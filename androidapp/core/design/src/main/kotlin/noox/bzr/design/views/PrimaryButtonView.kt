@@ -10,7 +10,7 @@ import noox.bzr.design.R
 import noox.bzr.design.databinding.ViewPrimaryButtonBinding
 
 /**
- * 43 §3 PrimaryButton: normal, pressed, disabled (40%), loading (native progress; static arc in snapshots).
+ * 43 §3 PrimaryButton: normal, pressed, disabled (neutral palette), loading (native progress; static arc in snapshots).
  * DEC-070 (Figma «Primo App»): an optional [icon] after the label — the forward arrow on flow buttons, mirrored in
  * RTL — and a [compact] size (smaller label) for buttons inside cards.
  */
@@ -104,6 +104,6 @@ class PrimaryButtonView @JvmOverloads constructor(context: Context, attrs: Attri
         brandShadow(button, enabled = state == ButtonVisualState.Normal || state == ButtonVisualState.Pressed)
         button.isEnabled = interactive()
         button.contentDescription = if (state == ButtonVisualState.Loading) "$text, ${context.getString(R.string.a11y_loading)}" else text
-        applyEnabledAlpha(state != ButtonVisualState.Disabled)
+        alpha = 1f
     }
 }

@@ -63,6 +63,14 @@ public enum DesignColors {
     public static let avatarRing = Color(red: 0.0863, green: 0.5451, blue: 0.5137, opacity: 0.2000)
     public static let secondaryButtonBg = Color(red: 0.9176, green: 0.9608, blue: 0.9569, opacity: 1.0000)
     public static let secondaryButtonText = Color(red: 0.0784, green: 0.4667, blue: 0.4549, opacity: 1.0000)
+    public static let secondaryButtonPressedBg = Color(red: 0.0745, green: 0.4157, blue: 0.4157, opacity: 1.0000)
+    public static let secondaryButtonPressedText = Color(red: 1.0000, green: 1.0000, blue: 1.0000, opacity: 1.0000)
+    public static let feedbackErrorBg = Color(red: 0.9961, green: 0.9490, blue: 0.9490, opacity: 1.0000)
+    public static let feedbackErrorText = Color(red: 0.7294, green: 0.1020, blue: 0.1020, opacity: 1.0000)
+    public static let notificationUnreadBg = Color(red: 0.9412, green: 0.9608, blue: 0.9882, opacity: 1.0000)
+    public static let notificationUnreadTitle = Color(red: 0.0510, green: 0.1098, blue: 0.1804, opacity: 1.0000)
+    public static let notificationReadTitle = Color(red: 0.2784, green: 0.3333, blue: 0.4118, opacity: 1.0000)
+    public static let notificationReadBody = Color(red: 0.3647, green: 0.4275, blue: 0.5176, opacity: 1.0000)
     public static let chipBg = Color(red: 1.0000, green: 1.0000, blue: 1.0000, opacity: 1.0000)
     public static let chipText = Color(red: 0.2784, green: 0.3333, blue: 0.4118, opacity: 1.0000)
     public static let chipSelectedBg = Color(red: 0.9412, green: 0.9608, blue: 0.9882, opacity: 1.0000)
@@ -313,4 +321,4 @@ public enum DesignFont {
     public static let bold = "IBMPlexSansArabic-Bold"
     public static let files = ["IBMPlexSansArabic-Regular", "IBMPlexSansArabic-Medium", "IBMPlexSansArabic-SemiBold", "IBMPlexSansArabic-Bold"]
 }
-public enum DesignMeta { public static let tokensSha256 = "22c93588e08491e683ef3757a08a5c6c25c30af71e91cf4d0eeabeb17f4b59ff" }
+public enum DesignMeta { public static let tokensSha256 = "cadc3acbcb228032ee8b77dfd4895eae453af787c7c2e1ef7371ad2574ae5429" }

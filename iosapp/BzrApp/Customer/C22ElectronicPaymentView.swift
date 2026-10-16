@@ -70,7 +70,7 @@ public struct C22ElectronicPaymentView: View {
                     }
                 }
             }
-            if state.messageKey == "media.upload_error" { WarningBox(text: bzrString("media.upload_error")) }
+            if state.messageKey == "media.upload_error" { WarningBox(text: bzrString("media.upload_error"), isError: true) }
             resultContent
             SecondaryButton(text: bzrString("payment.refresh"), enabled: !state.isBusy, onClick: onRefresh)
 
@@ -121,7 +121,7 @@ public struct C22ElectronicPaymentView: View {
         case "FAILED":
             let message = state.isInstapay ? bzrString("payment.instapay.retry") : bzrString("payment.failed")
             let reason = state.fieldValues[safe: 4] ?? ""
-            WarningBox(text: [reason, message].filter { !$0.isEmpty }.joined(separator: "\n"))
+            WarningBox(text: [reason, message].filter { !$0.isEmpty }.joined(separator: "\n"), isError: true)
         case "EXPIRED": WarningBox(text: bzrString("payment.expired"))
         default: EmptyView()
         }

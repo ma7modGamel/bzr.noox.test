@@ -21,7 +21,7 @@ import noox.bzr.gallery.databinding.ScreenC32NotificationsBinding
 
 /**
  * SCR-C32 — Figma «الإشعارات» 3002:3608 (DEC-076): «اليوم» and «سابق» groups; each card has the type icon (from the
- * NTF code) with an unread dot, the title, body and relative time. Unread cards are white, read ones tinted. A settings
+ * NTF code) with an unread dot, the title, body and relative time. Unread cards are blue-tinted, read ones neutral. A settings
  * link shows when the device blocks notifications (DEC-058).
  */
 class C32NotificationsView(context: Context) : CustomerScreenView(context) {
@@ -65,7 +65,7 @@ class C32NotificationsView(context: Context) : CustomerScreenView(context) {
         return BremoLinearLayout(context).apply {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.TOP
-            setBackgroundResource(if (unread) R.drawable.bremo_bg_card else R.drawable.bremo_bg_inset)
+            setBackgroundResource(if (unread) R.drawable.bremo_bg_notification_unread else R.drawable.bremo_bg_inset)
             if (unread) cardShadow()
             setPadding(px(R.dimen.bremo_space_l), px(R.dimen.bremo_space_l), px(R.dimen.bremo_space_l), px(R.dimen.bremo_space_l))
             contentDescription = listOfNotNull(title, body, time, string(R.string.notifications_unread).takeIf { unread })
@@ -91,12 +91,16 @@ class C32NotificationsView(context: Context) : CustomerScreenView(context) {
                 addView(BremoLinearLayout(context).apply {
                     orientation = LinearLayout.HORIZONTAL
                     gravity = Gravity.CENTER_VERTICAL
-                    addView(text(title, R.style.TextAppearance_Bremo_TileTitle), LinearLayout.LayoutParams(0, LayoutParams.WRAP_CONTENT, 1f))
+                    addView(text(title, R.style.TextAppearance_Bremo_TileTitle).apply {
+                        setTextColor(context.getColor(if (unread) R.color.bremo_notification_unread_title else R.color.bremo_notification_read_title))
+                    }, LinearLayout.LayoutParams(0, LayoutParams.WRAP_CONTENT, 1f))
                     if (time.isNotBlank()) addView(text(time, R.style.TextAppearance_Bremo_Hint).apply {
-                        if (unread) setTextColor(context.getColor(R.color.bremo_primary600))
+                        setTextColor(context.getColor(if (unread) R.color.bremo_primary600 else R.color.bremo_notification_read_body))
                     }, LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT).apply { marginStart = px(R.dimen.bremo_space_s) })
                 })
-                if (body.isNotBlank()) addView(text(body, R.style.TextAppearance_Bremo_Secondary))
+                if (body.isNotBlank()) addView(text(body, R.style.TextAppearance_Bremo_Secondary).apply {
+                    if (!unread) setTextColor(context.getColor(R.color.bremo_notification_read_body))
+                })
             }, LinearLayout.LayoutParams(0, LayoutParams.WRAP_CONTENT, 1f))
         }
     }
