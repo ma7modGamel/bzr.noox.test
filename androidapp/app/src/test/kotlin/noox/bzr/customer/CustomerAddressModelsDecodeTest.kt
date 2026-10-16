@@ -66,5 +66,20 @@ class CustomerAddressModelsDecodeTest {
         }
     }
 
+    @Test
+    fun deleteAcceptsBackendJsonSuccess() {
+        val server = MockWebServer()
+        server.enqueue(MockResponse().setResponseCode(200).setBody("""{"data":{"deleted_id":9,"default_address":null}}"""))
+        server.start()
+        try {
+            val deleted = UrlConnectionCustomerApi(server.url("/api/v1/").toString()).deleteAddress("T", 9)
+            assertEquals(9, deleted.deletedId)
+            assertNull(deleted.defaultAddress)
+            val request = server.takeRequest()
+            assertEquals("DELETE", request.method)
+            assertEquals("/api/v1/addresses/9", request.path)
+        } finally { server.shutdown() }
+    }
+
     private fun <T> decode(name: String, serializer: KSerializer<T>): T = BremoHttp.json.decodeFromString(serializer, recorded(name))
 }

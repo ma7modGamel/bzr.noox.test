@@ -31,8 +31,8 @@ final class ProviderApplicationResource extends JsonResource
 
         return [
             'id' => $profile->getKey(),
-            'status' => $profile->status->value,
-            'display_status' => 'provider.application.status.'.$profile->status->value,
+            'status' => $profile->awaitingEmployeeCompletion() ? 'NOT_STARTED' : $profile->status->value,
+            'display_status' => 'provider.application.status.'.($profile->awaitingEmployeeCompletion() ? 'NOT_STARTED' : $profile->status->value),
             'rejection_reason' => $profile->rejection_reason,
             'suspension_reason' => $profile->suspension_reason,
             'experience_years' => $profile->experience_years,
@@ -48,7 +48,9 @@ final class ProviderApplicationResource extends JsonResource
                 'id_back' => $profile->documents->contains('type', 'ID_BACK'),
             ],
             'submitted_at' => $profile->submitted_at?->toIso8601String(),
-            'available_actions' => $this->availableActions($profile->status),
+            'available_actions' => $profile->awaitingEmployeeCompletion()
+                ? ['start_provider_application', 'submit_provider_application']
+                : $this->availableActions($profile->status),
         ];
     }
 

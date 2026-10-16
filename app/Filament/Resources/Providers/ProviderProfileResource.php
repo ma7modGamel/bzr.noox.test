@@ -52,13 +52,13 @@ final class ProviderProfileResource extends Resource
 
     public static function canCreate(): bool
     {
-        return false; // التسجيل من التطبيق؛ الإدارة تراجع فقط (15)
+        return false;
     }
 
     public static function getNavigationBadge(): ?string
     {
         $pending = ProviderProfile::query()
-            ->where('status', ProviderStatus::PendingReview->value)
+            ->where('status', ProviderStatus::PendingReview->value)->whereNotNull('submitted_at')
             ->count();
 
         return $pending > 0 ? (string) $pending : null;

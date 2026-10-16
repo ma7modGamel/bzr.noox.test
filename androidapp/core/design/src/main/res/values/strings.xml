@@ -452,10 +452,10 @@
     <string name="address_field_label_placeholder">مثال: المنزل</string>
     <string name="address_field_details">الشارع وتفاصيل العنوان</string>
     <string name="address_field_details_placeholder">اسم الشارع ورقم العقار</string>
-    <string name="address_field_building">المبنى</string>
-    <string name="address_field_floor">الدور</string>
-    <string name="address_field_apartment">الشقة</string>
-    <string name="address_field_landmark">علامة مميزة</string>
+    <string name="address_field_building">المبنى (اختياري)</string>
+    <string name="address_field_floor">الدور (اختياري)</string>
+    <string name="address_field_apartment">الشقة (اختياري)</string>
+    <string name="address_field_landmark">علامة مميزة (اختياري)</string>
     <string name="address_default">تعيين كعنوان افتراضي</string>
     <string name="address_validation_label_required">تسمية العنوان مطلوبة.</string>
     <string name="address_validation_area_required">اختيار المنطقة مطلوب.</string>
@@ -935,14 +935,14 @@
     <string name="tracking_step_arrived_body">عند العنوان المحدد</string>
     <string name="tracking_step_in_progress">جاري تنفيذ الخدمة</string>
     <string name="tracking_step_in_progress_body">الفحص والمعاينة</string>
-    <string name="tracking_follow">متابعة الفني</string>
+    <string name="tracking_follow">تحديث الحالة</string>
     <string name="tracking_eta_title">الوقت المتوقع للوصول</string>
     <string name="tracking_distance">{km} كم متبقٍ</string>
     <string name="tracking_moving_title">{name} تحرك لموقعك</string>
     <string name="tracking_moving_body">تابع بيانات وصول الفني من حالة الطلب والخريطة.</string>
     <string name="tracking_visit_location">موقع الزيارة</string>
     <string name="tracking_requested_service">الخدمة المطلوبة</string>
-    <string name="tracking_follow_trip">متابعة الرحلة لحظة بلحظة</string>
+    <string name="tracking_follow_trip">تحديث موقع الفني</string>
     <string name="tracking_help">مساعدة</string>
     <string name="tracking_arrived_pill">وصل الآن إلى موقعك</string>
     <string name="tracking_arrived_heading">{name} وصل</string>
@@ -970,7 +970,7 @@
     <string name="tracking_current_details">تفاصيل الخدمة الحالية</string>
     <string name="tracking_total">الإجمالي المعتمد</string>
     <string name="tracking_total_note">يشمل المصنعية وقطع الغيار</string>
-    <string name="tracking_follow_service">متابعة حالة الخدمة</string>
+    <string name="tracking_follow_service">تحديث الحالة</string>
     <string name="tracking_report">الإبلاغ عن مشكلة</string>
     <string name="tracking_title_confirmed">تم تأكيد الحجز</string>
     <string name="tracking_title_arrived">الفني وصل</string>
@@ -1141,4 +1141,7 @@
     <string name="provider_review_tags">ما يذكره العملاء</string>
     <string name="provider_review_tag_count">{label} · {count} تقييم</string>
     <string name="arrival_verification_failed">تعذّر تأكيد الوصول؛ أعد المحاولة أو أبلغ الإدارة.</string>
+    <string name="account_logout_confirm_title">تأكيد تسجيل الخروج</string>
+    <string name="account_logout_confirm_body">هل تريد تسجيل الخروج من حسابك؟</string>
+    <string name="address_delete_failed">تعذّر حذف العنوان. تحقق من الاتصال وحاول مجددًا، أو حدّث قائمة العناوين.</string>
 </resources>

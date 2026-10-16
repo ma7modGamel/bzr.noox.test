@@ -6,6 +6,7 @@ namespace App\Filament\Resources\Providers\Tables;
 
 use App\Modules\Providers\Enums\EmploymentType;
 use App\Modules\Providers\Enums\ProviderStatus;
+use App\Modules\Providers\Models\ProviderProfile;
 use App\Modules\Settings\Services\FeatureGate;
 use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\IconColumn;
@@ -24,7 +25,8 @@ final class ProviderProfilesTable
                 TextColumn::make('user.name')->label('الاسم')->searchable()->sortable(),
                 TextColumn::make('user.phone')->label('الهاتف')->searchable()->toggleable(),
 
-                TextColumn::make('status')->label('الحالة')->badge(),
+                TextColumn::make('status')->label('الحالة')->badge()
+                    ->formatStateUsing(fn ($state, ProviderProfile $record): string => $record->awaitingEmployeeCompletion() ? 'بانتظار استكمال البيانات' : $state->getLabel()),
 
                 TextColumn::make('employment_type')
                     ->label('الصفة')

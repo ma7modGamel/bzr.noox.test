@@ -50,7 +50,7 @@ final class ViewProviderProfile extends ViewRecord
                 ->icon(Heroicon::OutlinedCheckCircle)
                 ->color('success')
                 ->visible(fn (): bool => $this->profile()->status === ProviderStatus::PendingReview)
-                ->disabled(fn (): bool => $this->profile()->phone_verified_at === null)
+                ->disabled(fn (): bool => $this->profile()->phone_verified_at === null || $this->profile()->awaitingEmployeeCompletion())
                 ->tooltip(fn (): ?string => $this->profile()->phone_verified_at === null ? 'سجّل توثيق الهاتف أولًا.' : null)
                 ->schema([
                     Select::make('employment_type')

@@ -110,6 +110,10 @@ public struct APIClient: Sendable {
         try await request(path, method: "PUT", body: try BzrJSON.encoder().encode(body), as: type)
     }
 
+    public func delete<Value: Decodable & Sendable>(_ path: String, as type: Value.Type) async throws -> Value {
+        try await request(path, method: "DELETE", body: nil, as: type)
+    }
+
     public func delete(_ path: String) async throws {
         _ = try await request(path, method: "DELETE")
     }

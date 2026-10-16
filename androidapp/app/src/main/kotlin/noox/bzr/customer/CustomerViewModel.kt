@@ -375,7 +375,7 @@ class CustomerViewModel(
     fun loadAccountSummary() = request("SCR-C02") {
         val user = api.account(token())
         mapOf(
-            "event" to "loaded", "is_verified" to user.isVerified,
+            "event" to "loaded", "is_verified" to user.isVerified, "available_actions" to user.availableActions,
             "name" to user.name, "phone" to user.phone.orEmpty(),
             "completed_orders" to user.orderStatistics?.completed?.toString().orEmpty(), "active_orders" to user.orderStatistics?.active?.toString().orEmpty(), "address_count" to user.addressesCount?.toString().orEmpty(),
         )
@@ -396,6 +396,20 @@ class CustomerViewModel(
         stopChatPolling()
         session.clear()
         requiresAuthentication = true
+    }
+
+    fun requestLogoutConfirmation() {
+        state = state.copy(showLogoutConfirmation = true)
+    }
+
+    fun dismissLogoutConfirmation() {
+        state = state.copy(showLogoutConfirmation = false)
+    }
+
+    fun confirmLogout() {
+        if (!state.showLogoutConfirmation) return
+        dismissLogoutConfirmation()
+        logout()
     }
 
     /** AC-NTF-07: the device token goes first, then the Sanctum token; the session clears at once either way. */
@@ -551,7 +565,9 @@ class CustomerViewModel(
             "dismiss_delete" -> state = reduce("SCR-C33", accountInput("loaded", "overview"))
             "confirm_delete_account" -> submitDeleteAccount()
             "open_terms" -> loadTerms()
-            "logout" -> logout()
+            "logout" -> requestLogoutConfirmation()
+            "confirm_logout" -> confirmLogout()
+            "dismiss_logout" -> dismissLogoutConfirmation()
         }
     }
 
@@ -575,6 +591,7 @@ class CustomerViewModel(
 
     fun noOffersAction(action: String) {
         when (action) {
+            "follow" -> openOrder()
             "edit_request" -> {
                 val order = currentOrderPayload ?: return
                 editingOrderId = currentOrderId
@@ -986,22 +1003,29 @@ class CustomerViewModel(
     }
 
     fun confirmDeleteAddress() {
+        if (state.isBusy || !state.showConfirmation) return
         val index = state.pendingIndex
         val id = addressIds.getOrNull(index) ?: return
         state = reduce("SCR-C14", addressStateInput("deleting", index))
         Thread {
-            val next = runCatching {
-                api.deleteAddress(token(), id)
-                addressPayloads = api.addresses(token())
-                addressIds = addressPayloads.map(CustomerAddress::id)
-                mapOf(
-                    "event" to "loaded", "selection_mode" to addressSelectionMode,
-                    "address_labels" to addressPayloads.map(CustomerAddress::label),
-                    "address_details" to addressPayloads.map { it.detail() },
-                    "selected_index" to addressPayloads.indexOfFirst(CustomerAddress::isDefault),
-                )
-            }.getOrElse { mapOf("event" to "error") }
-            Handler(Looper.getMainLooper()).post { state = reduce("SCR-C14", next) }
+            val result = runCatching { api.deleteAddress(token(), id) }
+            result.exceptionOrNull()?.let { logFailure("SCR-C14/delete", it) }
+            mainHandler.post {
+                result.onSuccess { deletion ->
+                    addressPayloads = addressPayloads.filter { it.id != deletion.deletedId }.map {
+                        it.copy(isDefault = it.id == deletion.defaultAddress?.id)
+                    }
+                    addressIds = addressPayloads.map(CustomerAddress::id)
+                    selectedAddressIndex = addressPayloads.indexOfFirst(CustomerAddress::isDefault)
+                    if (addressId == deletion.deletedId) {
+                        addressId = deletion.defaultAddress?.id
+                        cityId = deletion.defaultAddress?.city?.id
+                    }
+                    state = reduce("SCR-C14", addressStateInput("loaded"))
+                }.onFailure {
+                    state = reduce("SCR-C14", addressStateInput("delete_failed"))
+                }
+            }
         }.start()
     }
 

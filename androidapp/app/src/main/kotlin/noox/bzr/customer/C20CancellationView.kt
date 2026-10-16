@@ -26,7 +26,8 @@ class C20CancellationView(context: Context) : CustomerScreenView(context) {
         sheet.secondaryAction = string(R.string.common_cancel)
         sheet.onAction = { onConfirm() }
         sheet.onSecondary = { onBackAction() }
-        overlay.addView(sheet)
+        bottomBar.setPadding(0, 0, 0, 0)
+        bottomBar.addView(sheet)
     }
 
     override fun title(state: CustomerUiState) = string(R.string.cancel_title)

@@ -171,7 +171,23 @@ final class OrderNotifications
 
     private function newRequest(Order $order): void
     {
-        if ($order->operating_mode !== OperatingMode::Marketplace || $order->status !== OrderStatus::Open) {
+        if ($order->status !== OrderStatus::Open) {
+            return;
+        }
+        if ($order->operating_mode === OperatingMode::Employee) {
+            Notification::make()->warning()
+                ->title('طلب جديد بانتظار التعيين — #'.$order->number)
+                ->body('عيّن موظفًا مؤهلًا من صفحة الطلب.')
+                ->actions([
+                    Action::make('assign')->label('فتح الطلب والتعيين')
+                        ->url(OrderResource::getUrl('view', ['record' => $order->getKey()], panel: 'admin'))
+                        ->markAsRead(),
+                ])
+                ->sendToDatabase(Admin::query()->where('is_active', true)->get());
+
+            return;
+        }
+        if ($order->operating_mode !== OperatingMode::Marketplace) {
             return;
         }
 

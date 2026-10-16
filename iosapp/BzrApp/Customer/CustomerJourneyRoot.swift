@@ -27,6 +27,21 @@ struct CustomerJourneyRoot: View {
                     })
             }
         }
+        .alert(
+            bzrString("account.logout.confirm.title"),
+            isPresented: Binding(
+                get: { viewModel.state.showLogoutConfirmation },
+                set: { if !$0 { viewModel.dismissLogoutConfirmation() } }
+            )
+        ) {
+            Button(bzrString("customer.account.logout"), role: .destructive) {
+                _ = viewModel.confirmLogout()
+                onLogout()
+            }
+            Button(bzrString("common.cancel"), role: .cancel) { viewModel.dismissLogoutConfirmation() }
+        } message: {
+            Text(bzrString("account.logout.confirm.body"))
+        }
         .environment(\.customerRetry, retryAction)
         .task { await viewModel.loadHome() }
         .sheet(item: $sharedVisit) { link in
@@ -38,6 +53,8 @@ struct CustomerJourneyRoot: View {
         switch viewModel.state.screen {
         case "SCR-C01", "SCR-C02", "SCR-C09", "SCR-C18", "SCR-C29", "SCR-C32", "SCR-C33", "SCR-C34":
             return { open(viewModel.state.screen) }
+        case "SCR-C14":
+            return { Task { await viewModel.loadAddresses(selectionMode: viewModel.state.selectionMode) } }
         case "SCR-C25":
             return { Task { await viewModel.loadOrders(tabIndex: viewModel.state.selectedOptionIndex) } }
         default: return nil
@@ -130,7 +147,8 @@ struct CustomerJourneyRoot: View {
                     onDelete: viewModel.requestDeleteAddress,
                     onCancelDelete: viewModel.cancelDeleteAddress,
                     onConfirmDelete: { Task { await viewModel.confirmDeleteAddress() } },
-                    onAdd: { Task { await viewModel.openNewAddress() } })
+                    onAdd: { Task { await viewModel.openNewAddress() } },
+                    onRefresh: { Task { await viewModel.loadAddresses(selectionMode: viewModel.state.selectionMode) } })
             case "SCR-C15":
                 C15AddressFormView(
                     state: viewModel.state, onAreaSelect: viewModel.selectArea,
@@ -255,7 +273,7 @@ struct CustomerJourneyRoot: View {
                     state: viewModel.state,
                     onAction: { action in
                         if action == "logout" {
-                            onLogout()
+                            viewModel.requestLogoutConfirmation()
                         } else {
                             Task {
                                 await viewModel.accountAction(action)
@@ -368,9 +386,9 @@ struct CustomerJourneyRoot: View {
 
     private func open(_ screen: String) {
         switch screen {
-        case "SCR-P01": onOpenProvider()
+        case "SCR-P01": if viewModel.state.visibleActions.contains("open_provider_mode") { onOpenProvider() }
         case "SCR-C09": Task { await viewModel.openCurrentOrder() }
-        case "SCR-C10": onLogout()
+        case "SCR-C10": viewModel.requestLogoutConfirmation()
         case "SCR-C14":
             Task { await viewModel.loadAddresses(selectionMode: viewModel.state.screen == "SCR-C04") }
         case "SCR-C15": Task { await viewModel.openNewAddress() }

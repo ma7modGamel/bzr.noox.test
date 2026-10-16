@@ -50,6 +50,7 @@ abstract class CustomerFragment<V : CustomerScreenView>(private val destination:
             "SCR-C01" -> { { viewModel.loadHome(); Unit } }
             "SCR-C02" -> { { viewModel.loadAccountSummary(); Unit } }
             "SCR-C09" -> { { viewModel.openOrder(); Unit } }
+            "SCR-C14" -> { { viewModel.loadAddresses(viewModel.state.selectionMode); Unit } }
             "SCR-C18" -> { { viewModel.loadConversations(); Unit } }
             "SCR-C25" -> { { viewModel.loadOrders(viewModel.state.selectedOptionIndex); Unit } }
             "SCR-C29" -> { { viewModel.loadHelp(); Unit } }
@@ -129,14 +130,16 @@ class C02AccountFragment : CustomerFragment<C02AccountView>(R.id.scr_c02) {
     private val providerViewModel: noox.bzr.provider.ProviderViewModel by activityViewModels()
     override fun create() = C02AccountView(requireContext())
     override fun C02AccountView.bind() {
+        onConfirmLogout = viewModel::confirmLogout
+        onDismissLogout = viewModel::dismissLogoutConfirmation
         onOpen = { route ->
             when (route) {
                 "SCR-C14" -> viewModel.loadAddresses(selectionMode = false)
                 "SCR-C29" -> viewModel.loadHelp()
                 "SCR-C32" -> viewModel.loadNotifications()
                 "SCR-C33" -> viewModel.loadAccount()
-                "SCR-C10" -> viewModel.logout()
-                "SCR-P01" -> providerViewModel.openApplication()
+                "SCR-C10" -> viewModel.requestLogoutConfirmation()
+                "SCR-P01" -> if ("open_provider_mode" in viewModel.state.visibleActions) providerViewModel.openApplication()
                 else -> viewModel.loadAccountSummary()
             }
         }

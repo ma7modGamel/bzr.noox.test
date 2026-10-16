@@ -28,7 +28,7 @@ public struct C02AccountView: View {
                 stat(.orders, tint: DesignColors.primary600, well: DesignColors.statusPillBg, value: value(4), label: bzrString("account.stats.active"))
                 stat(.location, tint: DesignColors.slate400, well: DesignColors.surfaceContainer, value: value(3), label: bzrString("account.stats.addresses"))
             }
-            providerCard
+            if state.visibleActions.contains("open_provider_mode") { providerCard }
             menuRow(.info, label: bzrString("account.language"), chip: bzrString(AppLanguage.current == "ar" ? "language.ar" : "language.en")) {
                 guard let url = URL(string: UIApplication.openSettingsURLString) else { return }
                 UIApplication.shared.open(url)

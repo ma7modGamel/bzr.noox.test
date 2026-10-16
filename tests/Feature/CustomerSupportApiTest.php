@@ -118,7 +118,7 @@ final class CustomerSupportApiTest extends TestCase
         ]);
         $order = Order::factory()->create([
             'customer_id' => $customer->id, 'city_id' => $city->id, 'area_id' => $area->id,
-            'address_text' => $address->address_text,
+            'address_text' => $address->address_text, 'customer_address_id' => $address->id,
         ]);
 
         $this->actingAs($customer, 'sanctum')->deleteJson("/api/v1/addresses/{$address->id}")

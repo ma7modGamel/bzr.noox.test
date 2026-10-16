@@ -34,6 +34,9 @@ final class ReviewProviderAction
     public function approve(ProviderProfile $profile, Admin $admin, EmploymentType $employmentType): ProviderProfile
     {
         $this->assertStatus($profile, ProviderStatus::PendingReview, Localization::text('copy.this_application_is_not_awaiting_review'));
+        if ($profile->awaitingEmployeeCompletion()) {
+            throw BusinessRuleViolationException::rule('BR-131', Localization::text('copy.employee_application_incomplete'));
+        }
         if ($profile->phone_verified_at === null) {
             throw BusinessRuleViolationException::rule('BR-022', Localization::text('copy.record_phone_verification_after_calling_before_approving_the_application'));
         }

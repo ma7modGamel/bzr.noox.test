@@ -8646,13 +8646,13 @@
                 "ar": {
                     "stringUnit": {
                         "state": "translated",
-                        "value": "المبنى"
+                        "value": "المبنى (اختياري)"
                     }
                 },
                 "en": {
                     "stringUnit": {
                         "state": "translated",
-                        "value": "Building"
+                        "value": "Building (optional)"
                     }
                 }
             }
@@ -8662,13 +8662,13 @@
                 "ar": {
                     "stringUnit": {
                         "state": "translated",
-                        "value": "الدور"
+                        "value": "الدور (اختياري)"
                     }
                 },
                 "en": {
                     "stringUnit": {
                         "state": "translated",
-                        "value": "Floor"
+                        "value": "Floor (optional)"
                     }
                 }
             }
@@ -8678,13 +8678,13 @@
                 "ar": {
                     "stringUnit": {
                         "state": "translated",
-                        "value": "الشقة"
+                        "value": "الشقة (اختياري)"
                     }
                 },
                 "en": {
                     "stringUnit": {
                         "state": "translated",
-                        "value": "Apartment"
+                        "value": "Apartment (optional)"
                     }
                 }
             }
@@ -8694,13 +8694,13 @@
                 "ar": {
                     "stringUnit": {
                         "state": "translated",
-                        "value": "علامة مميزة"
+                        "value": "علامة مميزة (اختياري)"
                     }
                 },
                 "en": {
                     "stringUnit": {
                         "state": "translated",
-                        "value": "Landmark"
+                        "value": "Landmark (optional)"
                     }
                 }
             }
@@ -16358,13 +16358,13 @@
                 "ar": {
                     "stringUnit": {
                         "state": "translated",
-                        "value": "متابعة الفني"
+                        "value": "تحديث الحالة"
                     }
                 },
                 "en": {
                     "stringUnit": {
                         "state": "translated",
-                        "value": "Follow technician"
+                        "value": "Refresh status"
                     }
                 }
             }
@@ -16470,13 +16470,13 @@
                 "ar": {
                     "stringUnit": {
                         "state": "translated",
-                        "value": "متابعة الرحلة لحظة بلحظة"
+                        "value": "تحديث موقع الفني"
                     }
                 },
                 "en": {
                     "stringUnit": {
                         "state": "translated",
-                        "value": "Follow the trip live"
+                        "value": "Refresh technician location"
                     }
                 }
             }
@@ -16918,13 +16918,13 @@
                 "ar": {
                     "stringUnit": {
                         "state": "translated",
-                        "value": "متابعة حالة الخدمة"
+                        "value": "تحديث الحالة"
                     }
                 },
                 "en": {
                     "stringUnit": {
                         "state": "translated",
-                        "value": "Follow service status"
+                        "value": "Refresh status"
                     }
                 }
             }
@@ -19645,6 +19645,54 @@
                     "stringUnit": {
                         "state": "translated",
                         "value": "Could not confirm arrival. Retry or notify administration."
+                    }
+                }
+            }
+        },
+        "account.logout.confirm.title": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "تأكيد تسجيل الخروج"
+                    }
+                },
+                "en": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "Confirm sign out"
+                    }
+                }
+            }
+        },
+        "account.logout.confirm.body": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "هل تريد تسجيل الخروج من حسابك؟"
+                    }
+                },
+                "en": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "Do you want to sign out of your account?"
+                    }
+                }
+            }
+        },
+        "address.delete.failed": {
+            "localizations": {
+                "ar": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "تعذّر حذف العنوان. تحقق من الاتصال وحاول مجددًا، أو حدّث قائمة العناوين."
+                    }
+                },
+                "en": {
+                    "stringUnit": {
+                        "state": "translated",
+                        "value": "Could not delete the address. Check your connection and try again, or refresh your addresses."
                     }
                 }
             }

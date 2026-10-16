@@ -9,6 +9,8 @@ use App\Modules\Identity\Actions\DeleteAccountAction;
 use App\Modules\Identity\Models\User;
 use App\Modules\Orders\Enums\OrderStatus;
 use App\Modules\Orders\Models\OrderMedia;
+use App\Modules\Providers\Enums\EmploymentType;
+use App\Modules\Settings\Services\FeatureGate;
 use App\Support\Localization;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -106,6 +108,12 @@ final class AccountController
     /** @return array<string, mixed> */
     private function payload(User $user): array
     {
+        $user->loadMissing('providerProfile');
+        $actions = ['update_account', 'change_password', 'delete_account', 'logout'];
+        if (app(FeatureGate::class)->offersEnabled() || $user->providerProfile?->employment_type === EmploymentType::Employee) {
+            $actions[] = 'open_provider_mode';
+        }
+
         $user->loadCount([
             'orders as completed_orders_count' => fn ($query) => $query->where('status', OrderStatus::Closed),
             'orders as active_orders_count' => fn ($query) => $query->whereNotIn('status', [OrderStatus::Closed, OrderStatus::Cancelled, OrderStatus::Expired]),
@@ -129,7 +137,7 @@ final class AccountController
                 'accepted_version' => $user->accepted_terms_version,
                 'acceptance_required' => app(TermsService::class)->acceptanceRequired($user),
             ],
-            'available_actions' => ['update_account', 'change_password', 'delete_account', 'logout'],
+            'available_actions' => $actions,
         ];
     }
 }

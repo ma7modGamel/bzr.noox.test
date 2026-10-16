@@ -10,13 +10,14 @@ public struct C14AddressesView: View {
     let onCancelDelete: () -> Void
     let onConfirmDelete: () -> Void
     let onAdd: () -> Void
+    let onRefresh: () -> Void
 
     public init(
         state: CustomerUIState, onSelect: @escaping (Int) -> Void = { _ in },
         onEdit: @escaping (Int) -> Void = { _ in },
         onDelete: @escaping (Int) -> Void = { _ in },
         onCancelDelete: @escaping () -> Void = {}, onConfirmDelete: @escaping () -> Void = {},
-        onAdd: @escaping () -> Void = {}
+        onAdd: @escaping () -> Void = {}, onRefresh: @escaping () -> Void = {}
     ) {
         self.state = state
         self.onSelect = onSelect
@@ -25,12 +26,17 @@ public struct C14AddressesView: View {
         self.onCancelDelete = onCancelDelete
         self.onConfirmDelete = onConfirmDelete
         self.onAdd = onAdd
+        self.onRefresh = onRefresh
     }
 
     public var body: some View {
         ZStack(alignment: .bottom) {
             CustomerScreen(title: bzrString("address.list.title"), state: state) {
                 ScreenHeading(bzrString("address.list.heading"), detail: bzrString("address.list.body"))
+                if state.messageKey == "address.delete.failed" {
+                    InfoBanner(text: bzrString("address.delete.failed"))
+                    SecondaryButton(text: bzrString("common.retry"), onClick: onRefresh)
+                }
                 if state.items.isEmpty {
                     EmptyState(title: bzrString("address.empty.title"), body: bzrString("address.empty.body"))
                 } else {
@@ -69,8 +75,9 @@ public struct C14AddressesView: View {
                     title: bzrString("address.delete.confirm.title"),
                     body: bzrString("address.delete.confirm.body"),
                     action: bzrString("address.delete.confirm.action"),
+                    actionState: state.isBusy ? .loading : .normal,
                     secondaryAction: bzrString("common.cancel"),
-                    onAction: onConfirmDelete, onSecondary: onCancelDelete)
+                    onAction: onConfirmDelete, onSecondary: { if !state.isBusy { onCancelDelete() } })
             }
         }
     }

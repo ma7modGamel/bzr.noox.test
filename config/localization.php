@@ -552,6 +552,9 @@ return [
             'offers_other' => 'عدد العروض الجديدة لطلب :order: :count.',
         ],
         'copy' => [
+            'employee_profile_already_exists' => 'هذا الحساب لديه ملف فني بالفعل. راجعه من صفحة مقدمي الخدمة.',
+            'employee_onboarding_requires_admin' => 'وضع الفني متاح لموظفي الشركة الذين تحددهم الإدارة فقط.',
+            'employee_application_incomplete' => 'يجب أن يستكمل الموظف بياناته ويرسلها للمراجعة قبل القبول.',
             'invalid_service_review_tags' => 'اختر حتى عشرة وسوم متاحة دون تكرار.',
             'execution_step_arrived' => 'وصل الفني',
             'execution_step_inspected' => 'تم فحص المشكلة',
@@ -1386,6 +1389,9 @@ return [
             'offers_other' => ':count new offers were received for request :order.',
         ],
         'copy' => [
+            'employee_profile_already_exists' => 'This account already has a technician profile. Review it from the providers page.',
+            'employee_onboarding_requires_admin' => 'Technician mode is available only to company employees enabled by administration.',
+            'employee_application_incomplete' => 'The employee must complete and submit their application before approval.',
             'invalid_service_review_tags' => 'Choose up to ten available tags without duplicates.',
             'execution_step_arrived' => 'Technician arrived',
             'execution_step_inspected' => 'Inspection completed',

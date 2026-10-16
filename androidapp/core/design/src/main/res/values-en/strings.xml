@@ -453,10 +453,10 @@
     <string name="address_field_label_placeholder">For example: Home</string>
     <string name="address_field_details">Street and address details</string>
     <string name="address_field_details_placeholder">Street name and building number</string>
-    <string name="address_field_building">Building</string>
-    <string name="address_field_floor">Floor</string>
-    <string name="address_field_apartment">Apartment</string>
-    <string name="address_field_landmark">Landmark</string>
+    <string name="address_field_building">Building (optional)</string>
+    <string name="address_field_floor">Floor (optional)</string>
+    <string name="address_field_apartment">Apartment (optional)</string>
+    <string name="address_field_landmark">Landmark (optional)</string>
     <string name="address_default">Set as default address</string>
     <string name="address_validation_label_required">Enter an address name.</string>
     <string name="address_validation_area_required">Choose an area.</string>
@@ -936,14 +936,14 @@ One place.</string>
     <string name="tracking_step_arrived_body">At the chosen address</string>
     <string name="tracking_step_in_progress">Service in progress</string>
     <string name="tracking_step_in_progress_body">Inspection</string>
-    <string name="tracking_follow">Follow technician</string>
+    <string name="tracking_follow">Refresh status</string>
     <string name="tracking_eta_title">Expected arrival time</string>
     <string name="tracking_distance">{km} km left</string>
     <string name="tracking_moving_title">{name} is heading to you</string>
     <string name="tracking_moving_body">Follow the technician’s trip in the order status and map.</string>
     <string name="tracking_visit_location">Visit location</string>
     <string name="tracking_requested_service">Requested service</string>
-    <string name="tracking_follow_trip">Follow the trip live</string>
+    <string name="tracking_follow_trip">Refresh technician location</string>
     <string name="tracking_help">Help</string>
     <string name="tracking_arrived_pill">Arrived at your location</string>
     <string name="tracking_arrived_heading">{name} has arrived</string>
@@ -971,7 +971,7 @@ One place.</string>
     <string name="tracking_current_details">Current service details</string>
     <string name="tracking_total">Approved total</string>
     <string name="tracking_total_note">Labour and parts included</string>
-    <string name="tracking_follow_service">Follow service status</string>
+    <string name="tracking_follow_service">Refresh status</string>
     <string name="tracking_report">Report a problem</string>
     <string name="tracking_title_confirmed">Booking confirmed</string>
     <string name="tracking_title_arrived">Technician arrived</string>
@@ -1142,4 +1142,7 @@ One place.</string>
     <string name="provider_review_tags">Customer feedback</string>
     <string name="provider_review_tag_count">{label} · {count} reviews</string>
     <string name="arrival_verification_failed">Could not confirm arrival. Retry or notify administration.</string>
+    <string name="account_logout_confirm_title">Confirm sign out</string>
+    <string name="account_logout_confirm_body">Do you want to sign out of your account?</string>
+    <string name="address_delete_failed">Could not delete the address. Check your connection and try again, or refresh your addresses.</string>
 </resources>

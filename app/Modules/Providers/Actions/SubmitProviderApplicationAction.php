@@ -10,6 +10,8 @@ use App\Modules\Providers\Data\ProviderApplicationData;
 use App\Modules\Providers\Enums\EmploymentType;
 use App\Modules\Providers\Enums\ProviderStatus;
 use App\Modules\Providers\Models\ProviderProfile;
+use App\Modules\Settings\Services\FeatureGate;
+use App\Support\Exceptions\BusinessRuleViolationException;
 use App\Support\Exceptions\EmailNotVerifiedException;
 use App\Support\Exceptions\ProviderApplicationNotEditableException;
 use App\Support\Localization;
@@ -19,6 +21,14 @@ use Illuminate\Validation\ValidationException;
 
 final class SubmitProviderApplicationAction
 {
+    public function assertMayEnter(User $user): void
+    {
+        if (! app(FeatureGate::class)->offersEnabled()
+            && $user->providerProfile?->employment_type !== EmploymentType::Employee) {
+            throw BusinessRuleViolationException::rule('BR-131', Localization::text('copy.employee_onboarding_requires_admin'));
+        }
+    }
+
     public function execute(User $user, ProviderApplicationData $data): ProviderProfile
     {
         if (! $user->hasVerifiedEmail()) {
@@ -33,7 +43,10 @@ final class SubmitProviderApplicationAction
                 ->lockForUpdate()
                 ->first();
 
-            if ($profile !== null && $profile->status !== ProviderStatus::Rejected) {
+            $lockedUser->setRelation('providerProfile', $profile);
+            $this->assertMayEnter($lockedUser);
+
+            if ($profile !== null && $profile->status !== ProviderStatus::Rejected && ! $profile->awaitingEmployeeCompletion()) {
                 throw ProviderApplicationNotEditableException::make();
             }
 

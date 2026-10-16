@@ -88,7 +88,7 @@ interface CustomerApi {
     fun cities(): List<IdName>
     fun areas(cityId: Int): List<IdName>
     fun saveAddress(token: String, addressId: Int?, body: AddressBody): CustomerAddress
-    fun deleteAddress(token: String, addressId: Int)
+    fun deleteAddress(token: String, addressId: Int): AddressDeletion
     fun slots(cityId: Int, date: String): List<SlotRange>
     fun uploadMedia(token: String, upload: CustomerMediaUpload): UploadedMedia
     fun deleteMedia(token: String, mediaId: Int)
@@ -251,9 +251,8 @@ class UrlConnectionCustomerApi(private val baseUrl: String) : CustomerApi {
         if (addressId == null) service.createAddress(bearer(token), body) else service.updateAddress(bearer(token), addressId, body)
     }.data
 
-    override fun deleteAddress(token: String, addressId: Int) {
-        typed { service.deleteAddress(bearer(token), addressId) }
-    }
+    override fun deleteAddress(token: String, addressId: Int): AddressDeletion =
+        typed { service.deleteAddress(bearer(token), addressId) }.data
 
     override fun slots(cityId: Int, date: String): List<SlotRange> = typed { service.slots(cityId, date) }.data
 

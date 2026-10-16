@@ -57,6 +57,13 @@ final class ProviderProfile extends Model
         ];
     }
 
+    public function awaitingEmployeeCompletion(): bool
+    {
+        return $this->employment_type === EmploymentType::Employee
+            && $this->status === ProviderStatus::PendingReview
+            && $this->submitted_at === null;
+    }
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);

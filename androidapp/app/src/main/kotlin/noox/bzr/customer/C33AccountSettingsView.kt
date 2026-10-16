@@ -88,7 +88,13 @@ class C33AccountSettingsView(context: Context) : CustomerScreenView(context) {
     }
 
     override fun renderOverlay(state: CustomerUiState) {
-        sheet.isVisible = state.showConfirmation
+        val logout = state.showLogoutConfirmation
+        sheet.title = string(if (logout) R.string.account_logout_confirm_title else R.string.account_delete_title)
+        sheet.body = string(if (logout) R.string.account_logout_confirm_body else R.string.account_delete_body)
+        sheet.action = string(if (logout) R.string.customer_account_logout else R.string.account_delete_confirm)
+        sheet.onAction = { onAction(if (logout) "confirm_logout" else "confirm_delete_account") }
+        sheet.onSecondary = { onAction(if (logout) "dismiss_logout" else "dismiss_delete") }
+        sheet.isVisible = state.showConfirmation || logout
         sheet.actionState = customerButtonState(state)
     }
 

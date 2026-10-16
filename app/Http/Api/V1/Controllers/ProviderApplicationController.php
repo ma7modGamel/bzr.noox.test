@@ -22,6 +22,8 @@ final class ProviderApplicationController
             throw EmailNotVerifiedException::make();
         }
 
+        app(SubmitProviderApplicationAction::class)->assertMayEnter($user);
+
         $profile = $user->providerProfile()
             ->with(['user', 'categories:id,name,name_en', 'specialties:id,name,name_en', 'areas:id,name', 'documents'])
             ->first();

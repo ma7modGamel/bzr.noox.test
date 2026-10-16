@@ -257,9 +257,9 @@ public struct C09TrackingView: View {
         VStack(spacing: DesignSpace.xs) {
             switch status {
             case "CONFIRMED":
-                PrimaryButton(text: bzrString("tracking.follow"), state: .normal, icon: .arrowForward, onClick: { onAction("refresh") })
+                PrimaryButton(text: bzrString("tracking.follow"), state: .normal, onClick: { onAction("refresh") })
             case "ON_THE_WAY":
-                PrimaryButton(text: bzrString("tracking.follow_trip"), state: .normal, icon: .navigation, onClick: { onAction("refresh") })
+                PrimaryButton(text: bzrString("tracking.follow_trip"), state: .normal, onClick: { onAction("refresh") })
                 HStack(spacing: DesignSpace.m) {
                     if state.visibleActions.contains("share_visit") { link(.share, bzrString("action.share_visit"), "share_visit") }
                     link(.info, bzrString("tracking.help"), "help")
@@ -267,7 +267,7 @@ public struct C09TrackingView: View {
             case "ARRIVED":
                 reportLink(bzrString("tracking.report_mismatch"))
             case "IN_PROGRESS":
-                PrimaryButton(text: bzrString("tracking.follow_service"), state: .normal, icon: .arrowForward, onClick: { onAction("refresh") })
+                PrimaryButton(text: bzrString("tracking.follow_service"), state: .normal, onClick: { onAction("refresh") })
                 reportLink(bzrString("tracking.report"))
             default:
                 EmptyView()

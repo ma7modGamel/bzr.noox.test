@@ -81,6 +81,12 @@ data class CustomerAddress(
 )
 
 @Serializable
+data class AddressDeletion(
+    @SerialName("deleted_id") val deletedId: Int,
+    @SerialName("default_address") val defaultAddress: CustomerAddress? = null,
+)
+
+@Serializable
 data class OrderTiming(
     val type: String,
     @SerialName("slot_start") val slotStart: String? = null,
@@ -371,7 +377,7 @@ interface CustomerService {
     fun deleteAccount(@Header("Authorization") bearer: String): Call<Unit>
 
     @DELETE("addresses/{address}")
-    fun deleteAddress(@Header("Authorization") bearer: String, @Path("address") addressId: Int): Call<Unit>
+    fun deleteAddress(@Header("Authorization") bearer: String, @Path("address") addressId: Int): Call<DataItem<AddressDeletion>>
 
     @DELETE("media/{media}")
     fun deleteMedia(@Header("Authorization") bearer: String, @Path("media") mediaId: Int): Call<Unit>

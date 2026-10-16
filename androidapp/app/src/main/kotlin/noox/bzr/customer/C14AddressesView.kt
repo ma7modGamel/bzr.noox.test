@@ -8,6 +8,8 @@ import noox.bzr.design.ButtonVisualState
 import noox.bzr.design.R
 import noox.bzr.design.SelectionState
 import noox.bzr.design.views.AppBottomSheetView
+import noox.bzr.design.views.InfoBannerView
+import noox.bzr.design.views.SecondaryButtonView
 import noox.bzr.gallery.databinding.ItemAddressBinding
 import noox.bzr.gallery.databinding.ScreenC14AddressesBinding
 
@@ -15,6 +17,11 @@ import noox.bzr.gallery.databinding.ScreenC14AddressesBinding
 class C14AddressesView(context: Context) : CustomerScreenView(context) {
     private val binding = ScreenC14AddressesBinding.inflate(inflater, content)
     private val sheet = AppBottomSheetView(context)
+    private val deletionError = InfoBannerView(context).apply { text = string(R.string.address_delete_failed) }
+    private val refreshAfterFailure = SecondaryButtonView(context).apply {
+        text = string(R.string.common_retry)
+        onClick = { onReload?.invoke() }
+    }
     var onSelect: (Int) -> Unit = {}
     var onEdit: (Int) -> Unit = {}
     var onDelete: (Int) -> Unit = {}
@@ -56,11 +63,15 @@ class C14AddressesView(context: Context) : CustomerScreenView(context) {
         sheet.onAction = { onConfirmDelete() }
         sheet.onSecondary = { onCancelDelete() }
         overlay.addView(sheet)
+        content.addView(deletionError, 0)
+        content.addView(refreshAfterFailure, 1)
     }
 
     override fun title(state: CustomerUiState) = string(R.string.address_list_title)
 
     override fun renderContent(state: CustomerUiState) {
+        deletionError.isVisible = state.messageKey == "address.delete.failed"
+        refreshAfterFailure.isVisible = deletionError.isVisible
         binding.empty.isVisible = state.items.isEmpty()
         binding.list.isVisible = state.items.isNotEmpty()
         adapter.submitList(
@@ -73,5 +84,7 @@ class C14AddressesView(context: Context) : CustomerScreenView(context) {
 
     override fun renderOverlay(state: CustomerUiState) {
         sheet.isVisible = state.showConfirmation
+        sheet.actionState = if (state.isBusy) ButtonVisualState.Loading else ButtonVisualState.Normal
+        sheet.onSecondary = { if (!state.isBusy) onCancelDelete() }
     }
 }

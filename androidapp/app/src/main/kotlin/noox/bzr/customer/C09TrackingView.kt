@@ -125,7 +125,7 @@ class C09TrackingView(context: Context) : CustomerScreenView(context) {
             listOf(R.string.tracking_step_confirmed_body, R.string.tracking_step_next, R.string.tracking_step_arrived_body, R.string.tracking_step_in_progress_body).map(::string),
             listOf(StepState.Done, StepState.Pending, StepState.Pending, StepState.Pending),
         )
-        primary(string(R.string.tracking_follow), R.drawable.ic_arrow_forward, "refresh")
+        primary(string(R.string.tracking_follow), 0, "refresh")
     }
 
     // ── ON_THE_WAY (3002:1903) ─────────────────────────────────────────────────────────────────────────────────────
@@ -135,7 +135,7 @@ class C09TrackingView(context: Context) : CustomerScreenView(context) {
         card.addView(inset(R.drawable.ic_navigation, BzrFormat.fill(string(R.string.tracking_moving_title), "name" to firstName(state)), string(R.string.tracking_moving_body)))
         card.addView(labeledRow(R.drawable.ic_location, R.string.tracking_visit_location, value(state, ADDRESS)))
         card.addView(labeledRow(R.drawable.ic_wrench, R.string.tracking_requested_service, value(state, TITLE)))
-        primary(string(R.string.tracking_follow_trip), R.drawable.ic_navigation, "refresh")
+        primary(string(R.string.tracking_follow_trip), 0, "refresh")
         if ("share_visit" in state.visibleActions) link(R.drawable.ic_share, string(R.string.action_share_visit), "share_visit")
         link(R.drawable.ic_info, string(R.string.tracking_help), "help")
     }
@@ -199,7 +199,7 @@ class C09TrackingView(context: Context) : CustomerScreenView(context) {
             details.addView(line)
         }
         binding.sections.addView(details)
-        primary(string(R.string.tracking_follow_service), R.drawable.ic_arrow_forward, "refresh")
+        primary(string(R.string.tracking_follow_service), 0, "refresh")
         reportLinkInDock(state)
     }
 

@@ -20,6 +20,12 @@ final class ProviderApplicationApiTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->setOperatingFlags(true);
+    }
+
     #[Test]
     public function config_exposes_provider_payout_methods_with_dynamic_field_labels(): void
     {

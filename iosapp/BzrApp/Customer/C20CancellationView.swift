@@ -22,25 +22,25 @@ public struct C20CancellationView: View {
     }
 
     public var body: some View {
-        ZStack(alignment: .bottom) {
-            CustomerScreen(title: bzrString("cancel.title"), state: state) {
-                InfoBanner(text: bzrString("cancel.free"))
-                ForEach(state.options.indices, id: \.self) { index in
-                    Button(
-                        action: { onReasonSelect(index) },
-                        label: {
-                            RadioCard(
-                                title: state.options[index], body: bzrString("cancel.body"),
-                                selected: state.selectedOptionIndex == index)
-                        }
-                    )
-                    .buttonStyle(BzrPressStyle())
-                }
-                TextAreaField(
-                    label: bzrString("cancel.note.label"), placeholder: bzrString("cancel.note.placeholder"),
-                    value: state.fieldValues.first ?? "", state: state.isBusy ? .disabled : .empty,
-                    optionalLabel: bzrString("common.optional"), onValueChange: onNoteChange)
+        CustomerScreen(title: bzrString("cancel.title"), state: state) {
+            InfoBanner(text: bzrString("cancel.free"))
+            ForEach(state.options.indices, id: \.self) { index in
+                Button(
+                    action: { onReasonSelect(index) },
+                    label: {
+                        RadioCard(
+                            title: state.options[index], body: bzrString("cancel.body"),
+                            selected: state.selectedOptionIndex == index)
+                    }
+                )
+                .buttonStyle(BzrPressStyle())
             }
+            TextAreaField(
+                label: bzrString("cancel.note.label"), placeholder: bzrString("cancel.note.placeholder"),
+                value: state.fieldValues.first ?? "", state: state.isBusy ? .disabled : .empty,
+                optionalLabel: bzrString("common.optional"), onValueChange: onNoteChange)
+        }
+        .safeAreaInset(edge: .bottom, spacing: 0) {
             if state.phase == .content {
                 AppBottomSheet(
                     title: bzrString("cancel.title"), body: bzrString("cancel.free"),

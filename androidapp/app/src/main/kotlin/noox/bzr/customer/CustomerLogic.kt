@@ -66,6 +66,7 @@ data class CustomerUiState(
     val isEditing: Boolean = false,
     val isDefault: Boolean = false,
     val showConfirmation: Boolean = false,
+    val showLogoutConfirmation: Boolean = false,
     val pendingIndex: Int = -1,
     val countdownSeconds: Int = 0,
     val proposalDeadline: String = "",
@@ -207,6 +208,7 @@ object CustomerLogic {
         phase = CustomerPhase.Content,
         canContinue = true,
         messageKey = if (input.boolean("is_verified")) "account.verified" else "account.unverified",
+        visibleActions = input.strings("available_actions"),
         // DEC-076 (Figma 3002:4654): name, phone, completed orders, saved addresses ("" when not loaded).
         fieldValues = listOf(input.text("name"), input.text("phone"), input.text("completed_orders"), input.text("address_count"), input.text("active_orders")),
     )
@@ -469,6 +471,7 @@ object CustomerLogic {
             selectedIndex = selected,
             isBusy = busy,
             selectionMode = input.boolean("selection_mode"),
+            messageKey = if (event == "delete_failed") "address.delete.failed" else null,
             showConfirmation = event == "confirm_delete" || busy,
             pendingIndex = input.integer("pending_delete_index", -1),
         )

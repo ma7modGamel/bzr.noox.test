@@ -28,7 +28,8 @@ final class ProviderProfileInfolist
                     TextEntry::make('user.name')->label('الاسم'),
                     TextEntry::make('user.phone')->label('الهاتف'),
                     TextEntry::make('user.email')->label('البريد'),
-                    TextEntry::make('status')->label('الحالة')->badge(),
+                    TextEntry::make('status')->label('الحالة')->badge()
+                        ->formatStateUsing(fn ($state, ProviderProfile $record): string => $record->awaitingEmployeeCompletion() ? 'بانتظار استكمال البيانات' : $state->getLabel()),
                     TextEntry::make('employment_type')->label('الصفة')->badge()->placeholder('—'),
                     TextEntry::make('phone_verified_at')
                         ->label('الهاتف موثّق')

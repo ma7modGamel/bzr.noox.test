@@ -1,6 +1,8 @@
 package noox.bzr.customer
 
 import android.content.Context
+import androidx.core.view.isVisible
+import noox.bzr.design.views.AppBottomSheetView
 import android.content.res.ColorStateList
 import android.graphics.drawable.GradientDrawable
 import android.view.Gravity
@@ -34,6 +36,22 @@ import noox.bzr.gallery.databinding.ScreenC02AccountBinding
 class C02AccountView(context: Context) : CustomerScreenView(context) {
     private val binding = ScreenC02AccountBinding.inflate(inflater, content)
     var onOpen: (String) -> Unit = {}
+    var onConfirmLogout: () -> Unit = {}
+    var onDismissLogout: () -> Unit = {}
+    private val logoutSheet = AppBottomSheetView(context).apply {
+        title = string(R.string.account_logout_confirm_title)
+        body = string(R.string.account_logout_confirm_body)
+        action = string(R.string.customer_account_logout)
+        secondaryAction = string(R.string.common_cancel)
+        onAction = { onConfirmLogout() }
+        onSecondary = { onDismissLogout() }
+    }
+
+    init { overlay.addView(logoutSheet) }
+
+    override fun renderOverlay(state: CustomerUiState) {
+        logoutSheet.isVisible = state.showLogoutConfirmation
+    }
 
     override fun title(state: CustomerUiState) = string(R.string.customer_account_title)
 
@@ -51,7 +69,7 @@ class C02AccountView(context: Context) : CustomerScreenView(context) {
             addView(stat(R.drawable.ic_orders, R.color.bremo_primary600, R.color.bremo_status_pill_bg, state.fieldValues.getOrElse(4) { "" }, string(R.string.account_stats_active)), weight())
             addView(stat(R.drawable.ic_location, R.color.bremo_slate400, R.color.bremo_surface_container, addresses, string(R.string.account_stats_addresses)), weight())
         })
-        binding.body.addView(providerCard())
+        if ("open_provider_mode" in state.visibleActions) binding.body.addView(providerCard())
         binding.body.addView(menuRow(R.drawable.ic_info, string(R.string.account_language), null) {
             val language = noox.bzr.network.BremoHttp.language()
             AlertDialog.Builder(context)

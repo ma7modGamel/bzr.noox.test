@@ -44,6 +44,7 @@ public struct CustomerUIState: Equatable, Sendable {
     public var selectionMode: Bool
     public var isEditing: Bool
     public var isDefault: Bool
+    public var showLogoutConfirmation: Bool = false
     public var showConfirmation: Bool
     public var pendingIndex: Int
     public var proposalDeadline = ""
@@ -295,6 +296,7 @@ public enum CustomerLogic {
         CustomerUIState(
             screen: "SCR-C02", phase: .content, canContinue: true,
             messageKey: input.bool("is_verified") ? "account.verified" : "account.unverified",
+            visibleActions: input.strings("available_actions"),
             // DEC-076 (Figma 3002:4654): name, phone, completed orders, saved addresses, active orders ("" when not loaded).
             fieldValues: [input.text("name"), input.text("phone"), input.text("completed_orders"), input.text("address_count"), input.text("active_orders")]
         )
@@ -538,6 +540,7 @@ public enum CustomerLogic {
         return CustomerUIState(
             screen: "SCR-C14", phase: labels.isEmpty ? .empty : .content,
             canContinue: !busy && (!input.bool("selection_mode") || selected >= 0),
+            messageKey: event == "delete_failed" ? "address.delete.failed" : nil,
             items: labels, itemDetails: input.strings("address_details"), selectedIndex: selected,
             isBusy: busy, selectionMode: input.bool("selection_mode"),
             showConfirmation: event == "confirm_delete" || busy,
@@ -1485,6 +1488,15 @@ public struct CustomerAddress: Codable, Equatable, Sendable {
     }
 }
 
+public struct CustomerAddressDeletion: Decodable, Sendable {
+    public let deletedId: Int
+    public let defaultAddress: CustomerAddress?
+    enum CodingKeys: String, CodingKey {
+        case deletedId = "deleted_id"
+        case defaultAddress = "default_address"
+    }
+}
+
 public struct CustomerAddressBody: Encodable, Equatable, Sendable {
     public let label: String
     public let cityId: Int
@@ -1540,6 +1552,8 @@ public struct CustomerMediaUpload: Equatable, Sendable {
 private struct CustomerListEnvelope<Value: Decodable & Sendable>: Decodable, Sendable {
     let data: [Value]
 }
+
+private struct CustomerAddressDeletionEnvelope: Decodable, Sendable { let data: CustomerAddressDeletion }
 
 private struct CustomerAddressEnvelope: Decodable, Sendable {
     let data: CustomerAddress
@@ -1869,7 +1883,7 @@ public protocol CustomerAPI: Sendable {
     func cities() async throws -> [CustomerNamedReference]
     func areas(cityId: Int) async throws -> [CustomerNamedReference]
     func saveAddress(id: Int?, body: CustomerAddressBody) async throws -> CustomerAddress
-    func deleteAddress(id: Int) async throws
+    func deleteAddress(id: Int) async throws -> CustomerAddressDeletion
     func slots(cityId: Int, date: String) async throws -> [CustomerSlot]
     func uploadMedia(_ upload: CustomerMediaUpload) async throws -> CustomerMedia
     func deleteMedia(id: Int) async throws
@@ -2150,8 +2164,9 @@ public struct LiveCustomerAPI: CustomerAPI {
         return response.data
     }
 
-    public func deleteAddress(id: Int) async throws {
-        try await client.delete("addresses/\(id)")
+    public func deleteAddress(id: Int) async throws -> CustomerAddressDeletion {
+        let response = try await client.delete("addresses/\(id)", as: CustomerAddressDeletionEnvelope.self)
+        return response.data
     }
 
     public func slots(cityId: Int, date: String) async throws -> [CustomerSlot] {
@@ -2779,6 +2794,16 @@ public final class CustomerViewModel {
         } catch { state = reduce(screen: "SCR-C33", input: ["event": .text("error")]) }
     }
 
+    public func requestLogoutConfirmation() { state.showLogoutConfirmation = true }
+
+    public func dismissLogoutConfirmation() { state.showLogoutConfirmation = false }
+
+    public func confirmLogout() -> Bool {
+        guard state.showLogoutConfirmation else { return false }
+        dismissLogoutConfirmation()
+        return true
+    }
+
     public func accountAction(_ action: String) async {
         switch action {
         case "update_account" where accountMode == "edit": await submitAccountUpdate()
@@ -2796,6 +2821,7 @@ public final class CustomerViewModel {
         case "dismiss_delete":
             accountMode = "overview"
             state = reduce(screen: "SCR-C33", input: accountInput(event: "loaded"))
+        case "logout": requestLogoutConfirmation()
         case "confirm_delete_account": await submitDeleteAccount()
         case "open_terms": await loadTerms()
         default: break
@@ -2823,7 +2849,9 @@ public final class CustomerViewModel {
     }
 
     public func noOffersAction(_ action: String) async {
-        if action == "edit_request" {
+        if action == "follow" {
+            await openCurrentOrder()
+        } else if action == "edit_request" {
             guard let order = currentOrder else { return }
             editingOrderId = order.id
             addressId = order.customerAddressId
@@ -3306,15 +3334,26 @@ public final class CustomerViewModel {
     }
 
     public func confirmDeleteAddress() async {
+        guard !state.isBusy, state.showConfirmation else { return }
         let index = state.pendingIndex
         guard addressIDs.indices.contains(index) else { return }
-        state = reduce(
-            screen: "SCR-C14", input: addressStateInput(event: "deleting", pendingIndex: index))
+        state = reduce(screen: "SCR-C14", input: addressStateInput(event: "deleting", pendingIndex: index))
         do {
-            try await api.deleteAddress(id: addressIDs[index])
-            await loadAddresses(selectionMode: addressSelectionMode)
+            let deletion = try await api.deleteAddress(id: addressIDs[index])
+            addressPayloads = addressPayloads.filter { $0.id != deletion.deletedId }.map { address in
+                if let preferred = deletion.defaultAddress, address.id == preferred.id { return preferred }
+                return address
+            }
+            addressIDs = addressPayloads.map(\.id)
+            if addressId == deletion.deletedId {
+                addressId = deletion.defaultAddress?.id
+                cityId = deletion.defaultAddress?.city.id
+            }
+            var input = addressStateInput(event: "loaded")
+            input["selected_index"] = .integer(addressIDs.firstIndex(of: deletion.defaultAddress?.id ?? -1) ?? -1)
+            state = reduce(screen: "SCR-C14", input: input)
         } catch {
-            state = reduce(screen: "SCR-C14", input: ["event": .text("error")])
+            state = reduce(screen: "SCR-C14", input: addressStateInput(event: "delete_failed"))
         }
     }
 
@@ -3649,7 +3688,7 @@ public final class CustomerViewModel {
                 screen: "SCR-C02",
                 input: [
                     "event": .text("loaded"), "is_verified": .bool(account.isVerified ?? false),
-                    "name": .text(account.name), "phone": .text(account.phone),
+                    "name": .text(account.name), "phone": .text(account.phone), "available_actions": .strings(account.availableActions),
                     "completed_orders": .text(account.orderStatistics.map { String($0.completed) } ?? ""),
                     "active_orders": .text(account.orderStatistics.map { String($0.active) } ?? ""),
                     "address_count": .text(account.addressesCount.map(String.init) ?? ""),
