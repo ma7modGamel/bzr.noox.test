@@ -564,7 +564,7 @@ class C21PaymentSummaryFragment : CustomerFragment<C21PaymentSummaryView>(R.id.s
 }
 
 class C22ElectronicPaymentFragment : CustomerFragment<C22ElectronicPaymentView>(R.id.scr_c22) {
-    private val receipt = photoPicker("transfer-receipt.jpg", viewModel::uploadPaymentReceipt)
+    private val receipt = photoPicker("transfer-receipt.jpg") { viewModel.uploadPaymentReceipt(it) }
     override fun create() = C22ElectronicPaymentView(requireContext())
     override fun C22ElectronicPaymentView.bind() {
         onChannelSelect = viewModel::selectPaymentChannel
@@ -594,7 +594,7 @@ class C23CompletionFragment : CustomerFragment<C23CompletionView>(R.id.scr_c23) 
 }
 
 class C24RatingFragment : CustomerFragment<C24RatingView>(R.id.scr_c24) {
-    private val photos = photoPicker("review-photo.jpg", viewModel::uploadRatingPhoto)
+    private val photos = photoPicker("review-photo.jpg") { viewModel.uploadRatingPhoto(it) }
     override fun create() = C24RatingView(requireContext())
     override fun C24RatingView.bind() {
         onRate = viewModel::updateRating

@@ -46,7 +46,7 @@ class P01IntroFragment : ProviderFragment<P01IntroView>(R.id.scr_p01) {
 }
 
 class P02ProfileFragment : ProviderFragment<P02ProfileView>(R.id.scr_p02) {
-    private val photo = imagePicker("provider-profile.jpg", viewModel::uploadProfilePhoto)
+    private val photo = imagePicker("provider-profile.jpg") { viewModel.uploadProfilePhoto(it) }
     override fun create() = P02ProfileView(requireContext())
     override fun P02ProfileView.bind() {
         bindBack()
@@ -274,8 +274,8 @@ class P18EarningsFragment : ProviderFragment<P18EarningsView>(R.id.scr_p18) {
 
 class P19ProfileFragment : ProviderFragment<P19ProfileView>(R.id.scr_p19) {
     private val customerViewModel: noox.bzr.customer.CustomerViewModel by activityViewModels()
-    private val avatar = imagePicker("provider-avatar.jpg", viewModel::uploadWorkspaceAvatar)
-    private val portfolio = imagePicker("provider-portfolio.jpg", viewModel::addWorkspacePortfolio)
+    private val avatar = imagePicker("provider-avatar.jpg") { viewModel.uploadWorkspaceAvatar(it) }
+    private val portfolio = imagePicker("provider-portfolio.jpg") { viewModel.addWorkspacePortfolio(it) }
     override fun create() = P19ProfileView(requireContext())
     override fun P19ProfileView.bind() {
         bindBack()
@@ -352,7 +352,7 @@ private fun ProviderUiState.asCustomerChatState() = CustomerUiState(
 )
 
 class P20ProposalFragment : ProviderFragment<P20ProposalView>(R.id.scr_p20) {
-    private val photo = imagePicker("proposal.jpg", viewModel::uploadProposalPhoto)
+    private val photo = imagePicker("proposal.jpg") { viewModel.uploadProposalPhoto(it) }
     override fun create() = P20ProposalView(requireContext())
     override fun P20ProposalView.bind() {
         bindBack()
